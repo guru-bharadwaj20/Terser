@@ -1,6 +1,6 @@
 # Hardware Profile and Compute Allocation
 
-Plan row: **0.1.6**. Source of truth: [CONTRIBUTING.md § Compute Allocation](../CONTRIBUTING.md#compute-allocation-cpu-api-and-the-rtx-4500-ada).
+Plan row: **0.1.6**. Source of truth: [CONTRIBUTING.md § Compute Allocation](../CONTRIBUTING.md#compute-allocation-cpu-local-open-models-and-the-rtx-4500-ada).
 If this document and CONTRIBUTING.md disagree, CONTRIBUTING.md wins and this file is corrected.
 
 ---
@@ -10,8 +10,8 @@ If this document and CONTRIBUTING.md disagree, CONTRIBUTING.md wins and this fil
 | Resource | Details | Used for | Status |
 | :--- | :--- | :--- | :---: |
 | Dev laptop (Windows 11) | CPU only, no CUDA device | Classical ML (Phases 3–6), tokenization, DVC pipelines, CI, CPU smoke tests, fast-path serving | Available |
-| NVIDIA RTX 4500 Ada Generation | 24 GB GDDR6 ECC · Ada Lovelace · compute capability 8.9 · bf16 supported · ~210 W board power · attached later via remote access (row 7.1) | vLLM serving of open targets and local judge, rewriter SFT/RL, neural HPO, quality-path serving | ❌ not connected |
-| Hosted LLM APIs (Claude, GPT) | Rate-limited, budget-capped per phase in `configs/budget.yaml`; responses disk-cached | Casualisation, candidate generation, judging, API-only targets, Claude token counting | Available (budget-capped) |
+| NVIDIA RTX 4500 Ada Generation | 24 GB GDDR6 ECC · Ada Lovelace · compute capability 8.9 · bf16 supported · ~210 W board power · attached later via remote access (row 7.1) | vLLM serving of all real LLM work (casualisation, candidate generation, judges, open targets), rewriter SFT/RL, neural HPO, quality-path serving | ❌ not connected |
+| Local open-model serving | OpenAI-compatible servers only, reached through `terser.llm` provider `local`: Ollama / llama.cpp on the laptop for tiny models (Qwen2.5-0.5B/1.5B, smoke tests), vLLM on the RTX 4500 Ada for all real generation and judging. Per-phase token caps in `configs/budget.yaml` bound compute; responses disk-cached. **No hosted API keys are available or assumed** | CPU smoke tests (laptop); every output that feeds labels, metrics or reports (GPU) | CPU: available · GPU: ❌ |
 
 Consequences of the profile:
 
@@ -19,6 +19,10 @@ Consequences of the profile:
 - ECC memory means VRAM available to CUDA is slightly below 24 GB. Row 7.10 uses **22 GB** as the
   usable ceiling for any single job.
 - Until Phase 7 is ✅, nothing in the repository may *require* a GPU to pass CI.
+- **The GPU is on the critical path.** With no hosted APIs, every labelled example (target outputs,
+  candidates, judge verdicts) is produced on the RTX 4500 Ada, so Phase 2 cannot finish before Phase 7.
+  Before the card is connected, Phase 2 stages are only smoke-tested end to end with the CPU stand-in
+  model (row 2.2.4).
 
 ---
 
@@ -50,7 +54,7 @@ Every task row in CONTRIBUTING.md carries one or more tags.
 | Tag | Meaning | What a contributor does now |
 | :--- | :--- | :--- |
 | `CPU` | Runs on the dev laptop | Start immediately |
-| `API` | Needs a hosted LLM API | Start immediately; stay within the phase cap in `configs/budget.yaml` |
+| `LLM` | Needs text generation from a local open-source model behind an OpenAI-compatible server (`terser.llm` provider `local`). No paid APIs | Build the code now and smoke-test it on CPU with a tiny model (Qwen2.5-0.5B/1.5B via Ollama or llama.cpp), within the phase token cap in `configs/budget.yaml`. Results that feed labels, metrics or reports come only from GPU-served models (vLLM on the RTX 4500 Ada) |
 | `GPU` | Needs the RTX 4500 Ada | Write the code, smoke-test on CPU with `configs/model/tiny.yaml`, add a `gpu_queue/` job. The row stays ❌ until the job has run on the card |
 | `CPU→GPU` | Reduced scale on CPU now, full scale once the GPU is connected | Run the CPU version, record it as reduced-scale, and queue the full-scale job |
 
@@ -96,8 +100,8 @@ outputs: [models/rewriter/sft-qwen0.5b-full/, mlruns/]
 2. `exclusive` jobs never share the card.
 3. **vLLM serving and training never run at the same time on the 24 GB card.** vLLM pre-allocates
    `gpu_memory_utilization` (0.90) of VRAM, which leaves no room for a training process. When a
-   workload needs both (e.g. GRPO in 9.3 needs target outputs), target calls go to a hosted API or to a
-   vLLM server in a separate, time-shared slot.
+   workload needs both (e.g. GRPO in 9.3 needs target outputs), target and judge calls go to a vLLM
+   server in a separate, time-shared slot.
 4. The queue drains by `priority` first, then by `depends_on` order. A job whose dependencies are not
    complete is skipped, not failed.
 5. After Phase 7, every job must satisfy `est_vram_gb ≤ 22` using measured values (row 7.10).
@@ -114,10 +118,11 @@ outputs: [models/rewriter/sft-qwen0.5b-full/, mlruns/]
 | Workload | Phase | Compute | Precision / method | Est. VRAM | Notes |
 | :--- | :---: | :--- | :--- | :--- | :--- |
 | Token counting (tiktoken, HF tokenizers) | 0+ | `CPU` | — | 0 | Ground truth, never approximated |
-| Claude token counts | 0+ | `API` | token-counting endpoint | 0 | Disk-cached |
-| Candidate rewrite generation, judging | 2+ | `API` | — | 0 | Strong LLM, position-swapped judge |
-| Open target LLM outputs (Llama-3.1-8B-Instruct, Qwen2.5-7B-Instruct) | 2, 8+ | `CPU→GPU` | vLLM bf16, `gpu_memory_utilization=0.90` | ~16 GB weights + KV cache | Before GPU: hosted API for the same models, or a labelled 1.5B stand-in |
-| Local judge (8B) | 8 | `GPU` | vLLM AWQ int4 | ~6 GB + KV | Only after agreeing with the API judge (C8.7) |
+| Claude token counts (optional) | 0+ | `CPU` | token-counting endpoint, only if an Anthropic key is ever added | 0 | Never required for any reported number |
+| CPU smoke-test LLM (Qwen2.5-0.5B / 1.5B, GGUF Q4 via Ollama or llama.cpp) | 1+ | `CPU` | 4-bit | ~1–2 GB RAM | Pipeline tests only (a few tokens/s on the i3 laptop); outputs tagged `stand_in: true`, never used for labels |
+| Candidate generation + pairwise judge (Qwen2.5-32B-Instruct-AWQ; fallback Qwen2.5-14B-Instruct-AWQ) | 2+ | `GPU` | vLLM AWQ int4 | ~19 GB weights (32B) / ~9 GB (14B) + KV cache | Exclusive slot, never colocated with target serving; 32B fit at max len 4096 is an estimate verified in 7.6 |
+| Target LLM outputs (Llama-3.1-8B-Instruct, Qwen2.5-7B-Instruct) | 2, 8+ | `GPU` | vLLM bf16, `gpu_memory_utilization=0.90` | ~16 GB weights + KV cache | Before GPU: only the CPU smoke-test stand-in above |
+| Small judge (Llama-3.1-8B-Instruct AWQ) | 2, 8+ | `GPU` | vLLM AWQ int4 | ~6 GB + KV | Self-preference control (2.2.5) and fast audits (8.4); replaces the 32B judge only after C8.7 |
 | Sentence embeddings (bge-small / e5-base) | 3+ | `CPU→GPU` | fp32 / fp16 | < 2 GB | CPU fine up to ~50k texts |
 | All classical models (ID3, LR, KNN, SVM, NB, GMM, HMM, RF, GBM, k-means) | 3–6 | `CPU` | — | 0 | Never on GPU |
 | Perceptron / MLP / optimizer study | 4 | `CPU` | fp32 | 0 | Small models |
@@ -125,7 +130,7 @@ outputs: [models/rewriter/sft-qwen0.5b-full/, mlruns/]
 | Rewriter SFT: Qwen2.5-0.5B full fine-tune | 8 | `GPU` | bf16 + AdamW, grad checkpointing | ~12–16 GB | ~16 bytes/param for weights + grads + Adam (~8 GB) + activations |
 | Rewriter SFT: Qwen2.5-1.5B / 3B LoRA | 8 | `GPU` | bf16 base, LoRA r=16 | ~8–16 GB | Main candidates |
 | Rewriter SFT: 7B QLoRA | 8 | `GPU` | NF4 base + LoRA | ~10–18 GB at seq ≤ 1024 | Only if smaller rungs fail C8.3 |
-| GRPO rewriter policy | 9 | `GPU` | 0.5B–1.5B LoRA | ~12–20 GB | Target calls via API or time-shared vLLM, never colocated |
+| GRPO rewriter policy | 9 | `GPU` | 0.5B–1.5B LoRA | ~12–20 GB | Target and judge calls go to a time-shared vLLM slot, never colocated with training |
 | Tabular Q-learning | 9 | `CPU` | — | 0 | |
 | Bayesian HPO of rewriter / TextCNN | 10 | `GPU` | Optuna, 1 trial at a time | per trial | Median pruner |
 | Production serving | 11 | `GPU` (+ `CPU` fast path) | vLLM / ONNX Runtime | 2–6 GB | Fast path must also run on CPU |
@@ -156,15 +161,19 @@ Slots are separated in time so that rule 4.2.3 (no colocated serving and trainin
 
 ---
 
-## 7. Fallback: GPU still not connected by week 13
+## 7. Fallback: GPU still not connected by week 6
 
-The target for Phase 7 is week 13 at the latest. If the card is not connected by then:
+The target for Phase 7 is week 13 at the latest, but all labelled data waits for the GPU, so the
+fallback starts earlier. Until the card is connected, complete the CPU rows of Phase 1, build and
+smoke-test every Phase 2 stage with the CPU stand-in model (2.2.4), and write Phases 3–6 code against
+the smoke-test data. If the card is still not connected by week 6:
 
 1. Pull forward the CPU halves of:
    - Phase 9: tabular Q-learning (9.1, 9.2).
    - Phase 10: classical HPO studies (10.1–10.5, 10.8).
    - Phase 11: fast-path serving, CI/CD, monitoring, orchestration (11.1, 11.2, 11.3.1–11.3.2, 11.3.4–11.3.6, 11.4, 11.5, 11.6).
-2. Phases 8 and 9's neural parts shift right by the length of the delay.
+2. Phase 2 labelling and everything that depends on its labels (see the dependency map in
+   CONTRIBUTING.md), including the neural parts of Phases 8 and 9, shift right by the length of the delay.
 3. Continue writing GPU code with CPU smoke tests and queued jobs, so the queue is ready to drain on day one.
 4. **The schedule slips. Checkpoint targets are not lowered.** Changing a target requires an ADR
    (see Gate rule in CONTRIBUTING.md).
