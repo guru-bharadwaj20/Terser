@@ -21,8 +21,10 @@ rather than leaving a section empty. A dataset without a completed card is not u
 
 <!--
 Where the data comes from. For each upstream source: name, URL, version or commit/revision,
-download date, and the entry in data/SOURCES.md. For generated data, name the generating model,
-its exact version string, the prompt template path, and the sampling parameters.
+download date, and the entry in data/SOURCES.md. For generated data, name the generating model
+(local open-source model, e.g. the Hugging Face id and revision), its quantisation, the serving stack
+(vLLM or Ollama / llama.cpp) and version, the prompt template path, and the sampling parameters.
+Outputs from the CPU smoke-test stand-in (`stand_in: true`, row 2.2.4) never enter a carded dataset.
 -->
 
 | Upstream | Version / revision | URL | Retrieved | `SOURCES.md` entry |
@@ -34,8 +36,9 @@ its exact version string, the prompt template path, and the sampling parameters.
 <!--
 Licence of each upstream source (SPDX id where possible), whether research use is permitted, and
 whether redistribution is permitted (needed for the benchmark release, row 12.11). Unknown terms
-are treated as non-redistributable (row 2.1.2). For LLM-generated text, record the provider terms
-that apply and link ADR-0003 (training on model outputs).
+are treated as non-redistributable (row 2.1.2). For LLM-generated text, record the licence of the
+generating open model (e.g. Llama 3.1 Community Licence, Qwen2.5 licence) and what it allows for
+training on its outputs, and link ADR-0003.
 -->
 
 | Source | Licence | Research use | Redistribution | Notes / audit link |
@@ -66,10 +69,11 @@ sampling procedure and seed. Link the DVC stage that produces it (e.g. `collect`
 ## 5. Casualisation process
 
 <!--
-Only for casualised data (row 2.1.4); otherwise "Not applicable". Record: model and version, prompt
-template path, the styles used (rambling, hedging, texting, over-polite, repetitive) and their share,
+Only for casualised data (row 2.1.4); otherwise "Not applicable". Record: model (Hugging Face id, revision,
+quantisation) and serving stack, prompt template path, the styles used (rambling, hedging, texting, over-polite, repetitive) and their share,
 temperature/seed, how the clean reference is kept, validation checks applied to outputs (e.g. meaning
-preserved, no added requirements), rejection rate, and API cost.
+preserved, no added requirements), rejection rate, and compute used (generated tokens and
+GPU-hours).
 -->
 
 | Style | Rows | Share | Rejected by checks |
