@@ -20,6 +20,7 @@ dependencies = [
     "matplotlib",
     "hydra-core>=1.3",
     "omegaconf>=2.3",
+    "anthropic",
 ]
 
 [project.optional-dependencies]
@@ -33,6 +34,7 @@ dev = [
     "nbstripout",
     "types-PyYAML",
 ]
+openai = ["openai"]
 # Installed only on the RTX 4500 Ada machine (Phase 7).
 gpu = ["torch", "transformers", "peft", "trl", "vllm", "bitsandbytes", "accelerate"]
 
