@@ -17,7 +17,7 @@
 | ✅ | Done: implemented, tested, and committed |
 | ❌ | Not done: pending or in progress |
 | `CPU` | Runs on the dev laptop. Start immediately |
-| `API` | Needs a hosted LLM API (Claude / GPT). Start immediately, budget-capped |
+| `LLM` | Needs text generation from a **local open-source model** behind an OpenAI-compatible server (`terser.llm` provider `local`). No paid APIs. Results that feed labels, metrics or reports come only from GPU-served models (vLLM on the RTX 4500 Ada); on the CPU laptop these rows may only be smoke-tested with tiny models |
 | `GPU` | Needs the **NVIDIA RTX 4500 Ada (24 GB)**. Not connected yet: write the code, smoke-test on CPU with a tiny config, and queue the job |
 | `CPU→GPU` | Runs at reduced scale on CPU now, re-run at full scale once the GPU is connected |
 | 🚧 | **Hard gate**: failing it blocks every dependent phase, with no conditional pass |
@@ -36,28 +36,28 @@ the original target was wrong. "We did not reach it" is not a valid reason.
 | # | Phase | Theme | Syllabus Unit | Weeks | Compute |
 | :---: | :--- | :--- | :--- | :---: | :--- |
 | 0 | Foundations and Repository Scaffolding | Infra | Unit 4 (MLOps basics) | 1 | `CPU` |
-| 1 | Problem Framing and Concept Learning | Framing | Unit 1 | 2–3 | `CPU` `API` |
-| 2 | Data Generation Pipeline and Judge Validation | Data | — | 3–6 | `API` `CPU→GPU` |
+| 1 | Problem Framing and Concept Learning | Framing | Unit 1 | 2–3 | `CPU` `LLM` |
+| 2 | Data Generation Pipeline and Judge Validation | Data | — | 3–6 | `LLM` `CPU→GPU` |
 | 3 | Metrics, Cross-Validation, Decision Trees, Logistic Regression, KNN | Modeling | Unit 1 | 6–8 | `CPU` |
 | 4 | Artificial Neural Networks and SVMs | Modeling | Unit 2 | 8–10 | `CPU` |
-| 5 | Boosting, Bayesian Learning, GMM+EM, HMM | Modeling | Unit 3 | 10–12 | `CPU` `API` |
+| 5 | Boosting, Bayesian Learning, GMM+EM, HMM | Modeling | Unit 3 | 10–12 | `CPU` `LLM` |
 | 6 | Unsupervised Structure of Prompts | Modeling | Unit 4 | 12–13 | `CPU` |
-| 7 | GPU Onboarding (RTX 4500 Ada) | Infra | — | when connected (target ≤ 13) | `GPU` |
-| 8 | Deep Learning: CNN Span Scorer and Generative Rewriter | Deep Learning | Unit 4 | 14–17 | `GPU` `API` |
-| 9 | Reinforcement Learning with a Quality Gate | RL | Unit 4 | 17–19 | `CPU` `GPU` `API` |
+| 7 | GPU Onboarding (RTX 4500 Ada) | Infra | — | as soon as connected (critical path) | `GPU` |
+| 8 | Deep Learning: CNN Span Scorer and Generative Rewriter | Deep Learning | Unit 4 | 14–17 | `GPU` `LLM` |
+| 9 | Reinforcement Learning with a Quality Gate | RL | Unit 4 | 17–19 | `CPU` `GPU` `LLM` |
 | 10 | Hyperparameter Optimisation | Tuning | Unit 4 | 19–20 | `CPU` `GPU` |
 | 11 | MLOps: Pipelines, Serving, CI/CD/CT, Monitoring | MLOps | Unit 4 | 20–23 | `CPU` `GPU` |
 | 12 | Final Evaluation, Ablations and Benchmark Release | Science | All | 24 | all |
 | 13 | Documentation, Report and Viva Preparation | Delivery | All | 23–24 | `CPU` |
 
-Supporting sections: [Compute Allocation](#compute-allocation-cpu-api-and-the-rtx-4500-ada) ·
+Supporting sections: [Compute Allocation](#compute-allocation-cpu-local-open-models-and-the-rtx-4500-ada) ·
 [Timeline](#timeline) · [Cross-Phase Dependency Map](#cross-phase-dependency-map) ·
 [Syllabus Coverage Matrix](#syllabus-coverage-matrix) · [Headline Success Criteria](#headline-success-criteria) ·
 [Overall Progress](#overall-progress) · [How to Contribute](#how-to-contribute)
 
 ---
 
-## Compute Allocation: CPU, API, and the RTX 4500 Ada
+## Compute Allocation: CPU, Local Open Models, and the RTX 4500 Ada
 
 ### Hardware profile
 
@@ -65,7 +65,7 @@ Supporting sections: [Compute Allocation](#compute-allocation-cpu-api-and-the-rt
 | :--- | :--- | :---: |
 | Dev laptop (Windows 11) | CPU only; all classical ML, tokenization, pipelines, CI | Available |
 | **NVIDIA RTX 4500 Ada Generation** | 24 GB GDDR6 ECC, Ada Lovelace (compute capability 8.9), bf16 supported, ~210 W. Attached later via remote access | ❌ not connected |
-| Hosted LLM APIs | Candidate generation, judging, API-only targets, Claude token counting | Available (budget-capped) |
+| Local open-model serving | OpenAI-compatible servers only: Ollama / llama.cpp on the laptop for tiny models (Qwen2.5-0.5B/1.5B, smoke tests), vLLM on the RTX 4500 Ada for all real generation and judging. **No hosted API keys are available or assumed** | CPU: available · GPU: ❌ |
 
 ### GPU job queue (until the card is connected)
 
@@ -95,10 +95,11 @@ the card · **vLLM serving and training never run at the same time on 24 GB** ·
 | Workload | Phase | Compute | Precision / method | Est. VRAM | Notes |
 | :--- | :---: | :--- | :--- | :--- | :--- |
 | Token counting (tiktoken, HF tokenizers) | 0+ | `CPU` | — | 0 | Ground truth, never approximated |
-| Claude token counts | 0+ | `API` | token-counting endpoint | 0 | Disk-cached |
-| Candidate rewrite generation, judging | 2+ | `API` | — | 0 | Strong LLM, position-swapped judge |
-| Open target LLM outputs (Llama-3.1-8B-Instruct, Qwen2.5-7B-Instruct) | 2, 8+ | `CPU→GPU` | vLLM bf16, `gpu_memory_utilization=0.90` | ~16 GB weights + KV cache | Before GPU: hosted API for the same models, or a labelled 1.5B stand-in |
-| Local judge (8B) | 8 | `GPU` | vLLM AWQ int4 | ~6 GB + KV | Only after agreeing with the API judge |
+| Claude token counts (optional) | 0+ | `CPU` | token-counting endpoint, only if an Anthropic key is ever added | 0 | Never required for any reported number |
+| CPU smoke-test LLM (Qwen2.5-0.5B / 1.5B, GGUF Q4 via Ollama or llama.cpp) | 1+ | `CPU` | 4-bit | ~1–2 GB RAM | Pipeline tests only (a few tokens/s on the i3 laptop); outputs tagged `stand_in: true`, never used for labels |
+| Candidate generation + pairwise judge (Qwen2.5-32B-Instruct-AWQ; fallback Qwen2.5-14B-Instruct-AWQ) | 2+ | `GPU` | vLLM AWQ int4 | ~19 GB weights (32B) / ~9 GB (14B) + KV cache | Exclusive slot, never colocated with target serving; 32B fit at max len 4096 is an estimate verified in 7.6 |
+| Target LLM outputs (Llama-3.1-8B-Instruct, Qwen2.5-7B-Instruct) | 2, 8+ | `GPU` | vLLM bf16, `gpu_memory_utilization=0.90` | ~16 GB weights + KV cache | Before GPU: only the CPU smoke-test stand-in above |
+| Small judge (Llama-3.1-8B-Instruct AWQ) | 2, 8+ | `GPU` | vLLM AWQ int4 | ~6 GB + KV | Self-preference control (2.2.5) and fast audits (8.4); replaces the 32B judge only after C8.7 |
 | Sentence embeddings (bge-small / e5-base) | 3+ | `CPU→GPU` | fp32 / fp16 | < 2 GB | CPU fine up to ~50k texts |
 | All classical models (ID3, LR, KNN, SVM, NB, GMM, HMM, RF, GBM, k-means) | 3–6 | `CPU` | — | 0 | Never on GPU |
 | Perceptron / MLP / optimizer study | 4 | `CPU` | fp32 | 0 | Small models |
@@ -106,7 +107,7 @@ the card · **vLLM serving and training never run at the same time on 24 GB** ·
 | Rewriter SFT: Qwen2.5-0.5B full fine-tune | 8 | `GPU` | bf16 + AdamW, grad checkpointing | ~12–16 GB | ~16 bytes/param for weights+grads+Adam (~8 GB) + activations |
 | Rewriter SFT: Qwen2.5-1.5B / 3B LoRA | 8 | `GPU` | bf16 base, LoRA r=16 | ~8–16 GB | Main candidates |
 | Rewriter SFT: 7B QLoRA | 8 | `GPU` | NF4 base + LoRA | ~10–18 GB at seq ≤ 1024 | Only if smaller rungs fail C8.3 |
-| GRPO rewriter policy | 9 | `GPU` | 0.5B–1.5B LoRA | ~12–20 GB | Target calls via API or time-shared vLLM, never colocated |
+| GRPO rewriter policy | 9 | `GPU` | 0.5B–1.5B LoRA | ~12–20 GB | Target and judge calls go to a time-shared vLLM slot, never colocated with training |
 | Tabular Q-learning | 9 | `CPU` | — | 0 | |
 | Bayesian HPO of rewriter / TextCNN | 10 | `GPU` | Optuna, 1 trial at a time | per trial | Median pruner |
 | Production serving | 11 | `GPU` (+ `CPU` fast path) | vLLM / ONNX Runtime | 2–6 GB | Fast path must also run on CPU |
@@ -120,9 +121,14 @@ the card · **vLLM serving and training never run at the same time on 24 GB** ·
 | Day block B | Short sweeps (TextCNN, HPO trials), latency benchmarks |
 | Weekend | Full evaluation re-runs, checkpoint reports |
 
-> **If the GPU is still not connected by week 13:** pull forward the CPU halves of Phase 9 (tabular
-> Q-learning), Phase 10 (classical HPO) and Phase 11 (fast-path serving, CI/CD, monitoring). Phases
-> 8 and 9's neural parts shift right. The schedule slips. The checkpoints are not lowered.
+> **The GPU is on the critical path.** Without hosted APIs, every labelled example (target outputs,
+> candidates, judge verdicts) is produced on the RTX 4500 Ada, so Phase 2 cannot finish before
+> Phase 7. Until the card is connected: complete the CPU rows of Phase 1 (operators, concept-learning
+> code, tokenizer economics on hand-written prompts), build and smoke-test every Phase 2 stage end to
+> end with the CPU stand-in model, and write Phases 3–6 code against the smoke-test data. **If the GPU
+> is still not connected by week 6**, also pull forward the CPU halves of Phase 9 (tabular
+> Q-learning), Phase 10 (classical HPO on synthetic data) and Phase 11 (fast-path serving, CI/CD,
+> monitoring). The schedule slips. The checkpoints are not lowered.
 
 ---
 
@@ -137,7 +143,7 @@ Phase 3                       ███████████
 Phase 4                               ███████████
 Phase 5                                       ███████████
 Phase 6                                               ███████
-Phase 7                                          (whenever the GPU is connected, target ≤ week 13)
+Phase 7                                          (as soon as the GPU is connected: critical path for Phase 2)
 Phase 8                                                       ███████████████
 Phase 9                                                                   ███████████
 Phase 10                                                                          ███████
@@ -160,7 +166,7 @@ and comparable, and runs on CPU today and on the RTX 4500 Ada later without code
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 0.1.1 | Python environment | Python ≥ 3.11 venv, `pyproject.toml` with extras `dev` (CPU) and `gpu` (torch CUDA, vllm, peft, trl, bitsandbytes) | `CPU` | `pip install -e ".[dev]"` reproduces from scratch | ✅ |
 | 0.1.2 | Core stack | numpy, pandas, scipy, scikit-learn, lightgbm, cvxopt, matplotlib | `CPU` | Import smoke test passes | ✅ |
-| 0.1.3 | Tokenizer stack | `tiktoken` (`o200k_base`), HF `tokenizers` (Qwen2.5, Llama-3.1 via ungated mirror), Anthropic token counting | `CPU` `API` | All four targets count a fixture string | ✅ |
+| 0.1.3 | Tokenizer stack | `tiktoken` (`o200k_base`), HF `tokenizers` (Qwen2.5, Llama-3.1 via ungated mirror), optional Anthropic token counting | `CPU` | All four targets count a fixture string | ✅ |
 | 0.1.4 | Determinism harness | `set_seed()` for random / numpy / torch / CUDA, `PYTHONHASHSEED` | `CPU` | Two runs of a dummy experiment give identical metrics | ✅ |
 | 0.1.5 | Device abstraction | `terser.hardware.get_device(cfg)` with `device: auto`, no hard-coded `"cuda"` | `CPU` | `hardware=rtx4500ada` on CPU fails with a clear message; `auto` falls back to CPU | ✅ |
 | 0.1.6 | Hardware profile doc | VRAM budget table above, GPU queue rules | `CPU` | `docs/hardware.md` written | ✅ |
@@ -189,7 +195,7 @@ and comparable, and runs on CPU today and on the RTX 4500 Ada later without code
 | 0.3.3 | Naming convention | Runs `<phase>-<task>-<model>-<variant>-<seed>`; branches `phase<N>/<topic>` | `CPU` | `docs/conventions.md` | ✅ |
 | 0.3.4 | ML lifecycle ADR | data → label → train → evaluate → register → deploy → monitor → retrain | `CPU` | `docs/decisions/ADR-0001-ml-lifecycle.md` | ✅ |
 | 0.3.5 | Risk register | See [Risk Register](#risk-register) | `CPU` | `docs/risks.md` with mitigations | ✅ |
-| 0.3.6 | API budget guard | `configs/budget.yaml` per phase; client refuses calls past cap; disk cache keyed by model+params+prompt hash | `CPU` `API` | Test: cap reached ⇒ call refused; cached call costs 0 | ✅ |
+| 0.3.6 | LLM budget guard | `configs/budget.yaml` per phase; client refuses calls past cap (token caps bound local compute; USD caps only for priced providers); local OpenAI-compatible provider; disk cache keyed by model+params+prompt hash | `CPU` `LLM` | Test: cap reached ⇒ call refused; cached call costs 0 | ✅ |
 
 ### Checkpoint C0 — Foundations Ready
 
@@ -239,7 +245,7 @@ statistical model.
 | 1.3.3 | Find-S | Most specific hypothesis covering all positives | `CPU` | Reproduces Mitchell's EnjoySport result `<Sunny, Warm, ?, Strong, ?, ?>` | ❌ |
 | 1.3.4 | Candidate-Elimination | S and G boundaries; collapse detection that reports the offending example and the examples it conflicts with | `CPU` | Reproduces EnjoySport S/G; version space of size 6 | ❌ |
 | 1.3.5 | Version space enumeration | All hypotheses between S and G | `CPU` | Enumerator matches brute force on a 5-attribute toy space | ❌ |
-| 1.3.6 | Pilot labels | **150 prompts (25/category)** × operator subsets (7 singletons + `FHC`, `FHCI`, `FHCID`, `FHCIDS`, all) → target output → position-swapped pilot judge → human review of every label | `API` | `data/pilot/labels.jsonl` + human-reviewed CSV | ❌ |
+| 1.3.6 | Pilot labels | **150 prompts (25/category)** × operator subsets (7 singletons + `FHC`, `FHCI`, `FHCID`, `FHCIDS`, all) → target output → position-swapped pilot judge → human review of every label | `LLM` | `data/pilot/labels.jsonl` + human-reviewed CSV | ❌ |
 | 1.3.7 | Version space per category | Run Candidate-Elimination for each of the 6 categories on 1.3.6 | `CPU` | `reports/p1_version_spaces.md` with S, G, size or collapse diagnosis | ❌ |
 | 1.3.8 | Inductive bias write-up | What the conjunctive language cannot express (e.g. "drop hedging *unless* tone matters in creative prompts") and why this motivates Phases 3–5 | `CPU` | Section in `reports/p1_version_spaces.md` | ❌ |
 
@@ -247,8 +253,8 @@ statistical model.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 1.4.1 | Pilot prompt set | **500 casual prompts** (hand-written seeds + LLM casualisation of clean instructions), balanced across categories | `API` | `data/pilot/prompts.jsonl` + data card | ❌ |
-| 1.4.2 | Per-operator savings | Δtokens % for each operator and operator stack on gpt-4o, qwen2.5, llama-3.1, claude | `CPU` `API` | `reports/p1_tokenizer_study.{csv,md}` | ❌ |
+| 1.4.1 | Pilot prompt set | **500 casual prompts**: hand-written seeds plus casualisation of clean instructions (Qwen2.5 on vLLM; before the GPU, hand-written seeds only), balanced across categories | `CPU` `LLM` | `data/pilot/prompts.jsonl` + data card | ❌ |
+| 1.4.2 | Per-operator savings | Δtokens % for each operator and operator stack on gpt-4o (tokenizer only), qwen2.5, llama-3.1 | `CPU` | `reports/p1_tokenizer_study.{csv,md}` | ❌ |
 | 1.4.3 | Operator applicability | Share of prompts each operator changes, per category | `CPU` | Table in report | ❌ |
 | 1.4.4 | Cross-tokenizer agreement | Spearman ρ of per-(prompt, operator) savings for every tokenizer pair | `CPU` | Table in report | ❌ |
 
@@ -278,7 +284,7 @@ downstream can be measured without it.
 | 2.1.1 | Source datasets | Permissively licensed instruction sets (e.g. Dolly, OpenAssistant), HumanEval/MBPP prompts, GSM8K problems | `CPU` | `data/SOURCES.md` + one data card per source | ❌ |
 | 2.1.2 | Licence audit | Research use and redistribution terms; unknown ⇒ non-redistributable | `CPU` | `reports/license_audit.md` | ❌ |
 | 2.1.3 | PII scrubbing | PII detector over all text before `data/interim/` | `CPU` | Scrub report; 0 detected PII in a 500-row manual sample | ❌ |
-| 2.1.4 | Casualisation | LLM rewrites clean instructions in 5 styles: rambling, hedging, texting, over-polite, repetitive; clean version kept as reference | `API` | ≥ 6,000 casual prompts | ❌ |
+| 2.1.4 | Casualisation | LLM rewrites clean instructions in 5 styles: rambling, hedging, texting, over-polite, repetitive; clean version kept as reference | `LLM` | ≥ 6,000 casual prompts | ❌ |
 | 2.1.5 | Deduplication | MinHash, Jaccard ≥ 0.8 removed; paraphrase groups kept whole | `CPU` | Duplicate report | ❌ |
 | 2.1.6 | **Source-grouped splits** | Train 70 / val 15 / test 15 by source prompt; test frozen end of week 4 and hash-locked | `CPU` | Automated test: 0 source prompts shared across splits | ❌ |
 | 2.1.7 | DVC stages | `collect → casualise → dedupe → split` | `CPU` | `dvc repro` rebuilds from cache | ❌ |
@@ -287,11 +293,11 @@ downstream can be measured without it.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 2.2.1 | Candidate generation | 6 per prompt: 3 strong-LLM rewrites at low/medium/high aggressiveness, 2 operator stacks, 1 LLMLingua-2 baseline | `API` `CPU` | `candidates` stage output | ❌ |
-| 2.2.2 | Token counts | Every prompt and candidate on every target tokenizer | `CPU` `API` | Counts table, 0 missing | ❌ |
-| 2.2.3 | API targets | 1 Claude model + 1 GPT model, temperature 0 (creative: n = 3 samples) | `API` | `respond` stage output | ❌ |
-| 2.2.4 | Open targets (pre-GPU) | Llama-3.1-8B-Instruct and Qwen2.5-7B-Instruct via hosted inference, or a clearly labelled 1.5B stand-in on 500 prompts | `API` `CPU` | Output tagged `stand_in: true/false` | ❌ |
-| 2.2.5 | Open targets (post-GPU) | Re-run with vLLM bf16 on the RTX 4500 Ada | `GPU` | Queue job `respond-open-targets` done | ❌ |
+| 2.2.1 | Candidate generation | 6 per prompt: 3 rewrites from Qwen2.5-32B-Instruct-AWQ at low/medium/high aggressiveness, 2 operator stacks, 1 LLMLingua-2 baseline | `GPU` `LLM` `CPU` | `candidates` stage output | ❌ |
+| 2.2.2 | Token counts | Every prompt and candidate on every target tokenizer | `CPU` | Counts table, 0 missing | ❌ |
+| 2.2.3 | Target outputs | Llama-3.1-8B-Instruct and Qwen2.5-7B-Instruct on vLLM bf16, temperature 0 (creative: n = 3 samples) | `GPU` `LLM` | `respond` stage output | ❌ |
+| 2.2.4 | Pipeline smoke run (pre-GPU) | `respond → judge → label` on 50 prompts with Qwen2.5-0.5B/1.5B via Ollama on CPU, through the same `terser.llm` client | `CPU` `LLM` | Stages run end to end; every output tagged `stand_in: true` and excluded from labels | ❌ |
+| 2.2.5 | Judge self-preference control | Second judge Llama-3.1-8B-Instruct on 1,000 pairs; compare verdict agreement separately for Qwen-target and Llama-target outputs | `GPU` `LLM` | Report: agreement gap between target families ≤ 5 pp, or mitigation documented | ❌ |
 
 ### 2.3 Quality Judging
 
@@ -299,7 +305,7 @@ downstream can be measured without it.
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 2.3.1 | Task metrics | `code`: unit-test pass rate · `fact`: EM / token F1 · `reason`: final-answer accuracy | `CPU` | `terser.judge.metrics` with tests | ❌ |
 | 2.3.2 | Rubrics | Per-category YAML: coverage, correctness, depth, constraint adherence, tone | `CPU` | `src/terser/judge/rubrics/*.yaml` | ❌ |
-| 2.3.3 | Pairwise judge with position swap | Judge (original-output, rewrite-output) in both A/B orders | `API` | `judge` stage output | ❌ |
+| 2.3.3 | Pairwise judge with position swap | Qwen2.5-32B-Instruct-AWQ (fallback 14B-AWQ) on vLLM judges (original-output, rewrite-output) in both A/B orders | `GPU` `LLM` | `judge` stage output | ❌ |
 | 2.3.4 | Label definition | `preserved` iff task metric not worse **and** judge says tie-or-rewrite-better in **both** orders | `CPU` | `label` stage + tests | ❌ |
 | 2.3.5 | Human annotation | 2 annotators label **300 pairs** (50/category), blind to which is the rewrite | `CPU` | `data/gold/human_300.jsonl` + guideline doc | ❌ |
 | 2.3.6 | Agreement analysis | Human–human κ, judge–human κ per category, position-bias rate | `CPU` | `reports/p2_judge_validation.md` | ❌ |
@@ -310,7 +316,7 @@ downstream can be measured without it.
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 2.4.1 | Oracle rewrite | Shortest candidate still `preserved`, per prompt and target | `CPU` | `oracle` table | ❌ |
 | 2.4.2 | Headroom report | Oracle savings per target × category; degraded share among candidates | `CPU` | `reports/p2_headroom.md` | ❌ |
-| 2.4.3 | Cost report | API spend per stage; cost per labelled pair; estimate vs actual | `CPU` | `reports/p2_cost.md` | ❌ |
+| 2.4.3 | Compute report | Generated tokens and GPU-hours per stage; GPU-seconds per labelled pair; estimate vs actual | `CPU` | `reports/p2_cost.md` | ❌ |
 
 ### Checkpoint C2 — Dataset, Judge, Headroom
 
@@ -522,7 +528,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 | 5.3.3 | Forward algorithm | Sequence likelihood in log space | `CPU` | Matches brute-force enumeration on length-5 sequences | ❌ |
 | 5.3.4 | Viterbi decoding | Most likely tag sequence → compressed prompt | `CPU` | Matches brute force on length-5 sequences | ❌ |
 | 5.3.5 | Baum-Welch | EM on unlabelled casual prompts from supervised initialisation | `CPU` | F1 before vs after | ❌ |
-| 5.3.6 | End-to-end HMM compressor | Viterbi tags → rewrite → Phase 2 judge on **500 val prompts** | `API` | `reports/p5_hmm_compressor.md` | ❌ |
+| 5.3.6 | End-to-end HMM compressor | Viterbi tags → rewrite → Phase 2 judge on **500 val prompts** | `LLM` | `reports/p5_hmm_compressor.md` | ❌ |
 
 ### Checkpoint C5 — Ensembles, Bayes, HMM
 
@@ -533,7 +539,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 | C5.3 | Naive Bayes filler detector | Precision **≥ 0.85** at recall ≥ 0.70 | ❌ |
 | C5.4 | Bayes optimal vs MAP | Bayes optimal **no worse** than MAP on validation accuracy | ❌ |
 | C5.5 | GMM agreement | ARI **≥ 0.4** with judge labels, or open judge-threshold review | ❌ |
-| C5.6 | First non-generative compressor | HMM (or tagger + gate) on 500 val prompts: median savings **≥ 15%**, preservation **≥ 90%** on ≥ 1 API target, and beats best single operator at equal preservation | ❌ |
+| C5.6 | First non-generative compressor | HMM (or tagger + gate) on 500 val prompts: median savings **≥ 15%**, preservation **≥ 90%** on ≥ 1 target, and beats best single operator at equal preservation | ❌ |
 
 ---
 
@@ -570,7 +576,7 @@ dangerous, and use them to stratify training and evaluation.
 
 **Goal:** verify the card end to end and replace every VRAM estimate with a measurement, before
 any queued GPU job runs.
-**Weeks:** as soon as the GPU is connected (target ≤ week 13) · **Depends on:** 0 · **Unlocks:** 2.2.5, 8, 9 (neural), 10 (neural), 11 (quality path)
+**Weeks:** as soon as the GPU is connected (target ≤ week 13) · **Depends on:** 0 · **Unlocks:** all LLM rows of 1–2, 8, 9 (neural), 10 (neural), 11 (quality path)
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
@@ -590,7 +596,7 @@ any queued GPU job runs.
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
 | C7.1 🚧 | Environment | Verification script all green | ❌ |
-| C7.2 | Memory plan | VRAM table in [Compute Allocation](#compute-allocation-cpu-api-and-the-rtx-4500-ada) replaced with measured values | ❌ |
+| C7.2 | Memory plan | VRAM table in [Compute Allocation](#compute-allocation-cpu-local-open-models-and-the-rtx-4500-ada) replaced with measured values | ❌ |
 | C7.3 | CPU/GPU parity | Phase 4 MLP trains to the same val AUC (± 0.005) on GPU as on CPU with the same seed | ❌ |
 | C7.4 | Queue | Dry-run orders all jobs without dependency errors | ❌ |
 
@@ -630,16 +636,16 @@ together with the quality gate and fallback, reach the main quality/savings gate
 | 8.3.6 | Rung 4: 7B QLoRA | NF4 base + LoRA | `GPU` | Same (only if rungs 1–3 fail C8.3) | ❌ |
 | 8.3.7 | Decoding safeguards | Never longer than input on T; fall back to original if longer | `CPU` | Property test | ❌ |
 | 8.3.8 | Inference-time quality gate | Champion gate rejects risky rewrites ⇒ lighter rewrite or original | `CPU` | Integration test | ❌ |
-| 8.3.9 | Baselines | Original · best operator · HMM compressor · LLMLingua-2 · zero-shot strong LLM "rewrite concisely" | `API` `GPU` | Same val table | ❌ |
+| 8.3.9 | Baselines | Original · best operator · HMM compressor · LLMLingua-2 · zero-shot Qwen2.5-32B-Instruct-AWQ "rewrite concisely" | `LLM` `GPU` | Same val table | ❌ |
 | 8.3.10 | Failure analysis | 100 degraded cases hand-categorised: dropped constraint / tone / example / changed meaning / other | `CPU` | `reports/p8_failures.md` | ❌ |
-| 8.3.11 | Tokenizer-awareness test | Rewrite conditioned on T vs on another target, both scored on T's tokenizer | `GPU` `API` | Table per target pair | ❌ |
+| 8.3.11 | Tokenizer-awareness test | Rewrite conditioned on T vs on another target, both scored on T's tokenizer | `GPU` `LLM` | Table per target pair | ❌ |
 
-### 8.4 Local Judge (optional cost reduction)
+### 8.4 Small Judge (optional throughput)
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 8.4.1 | Serve 8B judge | vLLM AWQ int4 on the RTX 4500 Ada (not during training) | `GPU` | Endpoint up | ❌ |
-| 8.4.2 | Agreement with API judge | 1,000 pairs | `GPU` `API` | κ reported | ❌ |
+| 8.4.1 | Serve 8B judge | Llama-3.1-8B-Instruct AWQ on vLLM (not during training) for RL audits and shadow judging | `GPU` | Endpoint up | ❌ |
+| 8.4.2 | Agreement with the 32B judge | 1,000 pairs | `GPU` `LLM` | κ reported | ❌ |
 
 ### Checkpoint C8 — Deep Learning
 
@@ -648,10 +654,10 @@ together with the quality gate and fallback, reach the main quality/savings gate
 | C8.1 | TextCNN parameters | Matches documented count exactly | ❌ |
 | C8.2 | TextCNN tagging | Token macro-F1 **≥ C3.4 best + 0.05**, or documented reason | ❌ |
 | C8.3 🚧 | **Rewriter main gate (val split)** | Median savings **≥ 25%** on every target; preservation **≥ 92%** overall and **≥ 85%** per category (gate + fallback on) | ❌ |
-| C8.4 | vs zero-shot strong LLM | At equal preservation (±1 pp): savings within **5 pp** while **≥ 10× cheaper** per call | ❌ |
+| C8.4 | vs zero-shot large open LLM | At equal preservation (±1 pp): savings within **5 pp** of zero-shot Qwen2.5-32B-AWQ while **≥ 10× lower** rewrite latency on the RTX 4500 Ada | ❌ |
 | C8.5 | vs LLMLingua-2 | Higher preservation at equal or better savings | ❌ |
 | C8.6 | Tokenizer-awareness | Target-conditioned rewrite saves **≥ 2 pp** more on its own tokenizer, or documented finding that it does not (ship one rewriter) | ❌ |
-| C8.7 | Local judge (if 8.4 attempted) | κ **≥ 0.70** vs API judge, else API judge remains for all reported numbers | ❌ |
+| C8.7 | Small judge (if 8.4 attempted) | κ **≥ 0.70** vs the 32B judge, else the 32B judge remains for all reported numbers | ❌ |
 
 ---
 
@@ -677,10 +683,10 @@ reward hacking.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 9.2.1 | Q-learning from scratch | ε-greedy; quality gate as cheap reward model (no API calls during learning) | `CPU` | Learning curve | ❌ |
+| 9.2.1 | Q-learning from scratch | ε-greedy; quality gate as cheap reward model (no LLM calls during learning) | `CPU` | Learning curve | ❌ |
 | 9.2.2 | Hyperparameter sweep | α ∈ {0.05, 0.1, 0.3}, γ ∈ {0.9, 0.99}, ε schedule | `CPU` | Table | ❌ |
 | 9.2.3 | Learned policy | Greedy operator order per category | `CPU` | `reports/p9_policy.md` | ❌ |
-| 9.2.4 | Judge verification | Greedy policy on 300 val prompts with the real judge | `API` | Savings and preservation table | ❌ |
+| 9.2.4 | Judge verification | Greedy policy on 300 val prompts with the real judge | `LLM` | Savings and preservation table | ❌ |
 
 ### 9.3 Policy Optimisation of the Neural Rewriter
 
@@ -688,9 +694,9 @@ reward hacking.
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 9.3.1 | GRPO setup | Start from C8.3 model; LoRA; group size 4–8; KL penalty to SFT reference | `GPU` | Tiny CPU smoke test + queued job | ❌ |
 | 9.3.2 | Reward | `tokens_saved_pct × gate_pass` | `GPU` | Reward logged per step | ❌ |
-| 9.3.3 | Reward-hacking audits | Every N steps sample rewrites → real judge (API), never colocated with training | `API` | Audit log | ❌ |
+| 9.3.3 | Reward-hacking audits | Every N steps sample rewrites → 32B judge in a time-shared vLLM slot, never colocated with training | `LLM` | Audit log | ❌ |
 | 9.3.4 | Degenerate-output monitor | Empty / truncated / non-natural-language rate | `GPU` | Metric logged | ❌ |
-| 9.3.5 | RL vs SFT comparison | Same val table as C8.3 | `GPU` `API` | `reports/p9_rl_vs_sft.md` | ❌ |
+| 9.3.5 | RL vs SFT comparison | Same val table as C8.3 | `GPU` `LLM` | `reports/p9_rl_vs_sft.md` | ❌ |
 
 ### Checkpoint C9 — Reinforcement Learning
 
@@ -774,7 +780,7 @@ quality monitoring.
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 11.4.1 | CI | Every PR: lint, types, unit tests, CPU smoke training, `dvc repro --dry`, feature parity | `CPU` | Median ≤ 15 min | ❌ |
 | 11.4.2 | CD | Tag `v*`: build + scan images → staging → smoke + latency tests → manual approval → production | `CPU` | Staging deploy automated | ❌ |
-| 11.4.3 | CT | Weekly or on drift alert: new consented prompts → judge labels → retrain gate/tagger (CPU) → queue rewriter retrain (GPU) → evaluate → register as Staging if checkpoints pass | `CPU` `GPU` `API` | One full cycle completed | ❌ |
+| 11.4.3 | CT | Weekly or on drift alert: new consented prompts → judge labels → retrain gate/tagger (CPU) → queue rewriter retrain (GPU) → evaluate → register as Staging if checkpoints pass | `CPU` `GPU` `LLM` | One full cycle completed | ❌ |
 | 11.4.4 | Promotion guard | CT refuses promotion when a synthetic regression is injected | `CPU` | Test green | ❌ |
 
 ### 11.5 Monitoring, Drift and Observability
@@ -783,8 +789,8 @@ quality monitoring.
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 11.5.1 | Metrics | Prometheus: RPS, p50/p95/p99 latency per path, fallback rate, gate rejections, tokens saved, net savings, GPU util / VRAM | `CPU` | Exposed at `/metrics` | ❌ |
 | 11.5.2 | Input drift | Evidently daily: embedding drift (PSI / MMD on PCA components), length and category distribution | `CPU` | Report generated | ❌ |
-| 11.5.3 | Tokenizer drift | Re-count fixture set with current tokenizer versions; alert on any change | `CPU` `API` | Alert fires on a pinned-version swap | ❌ |
-| 11.5.4 | Shadow judging | 1% of consented rewrites judged asynchronously; rolling preservation | `API` | Metric on dashboard | ❌ |
+| 11.5.3 | Tokenizer drift | Re-count fixture set with current tokenizer versions; alert on any change | `CPU` | Alert fires on a pinned-version swap | ❌ |
+| 11.5.4 | Shadow judging | 1% of consented rewrites judged asynchronously; rolling preservation | `LLM` | Metric on dashboard | ❌ |
 | 11.5.5 | Dashboard and alerts | Grafana; alert at rolling preservation < 92% | `CPU` | Dashboard live | ❌ |
 | 11.5.6 | Structured logging | Request IDs; hashes by default, raw text only if consented | `CPU` | Log schema doc | ❌ |
 
@@ -793,7 +799,7 @@ quality monitoring.
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 11.6.1 | Prefect flows | `data_flow`, `train_classical_flow`, `train_rewriter_flow` (submits to `gpu_queue`), `evaluate_flow`, `promote_flow`, `drift_flow` | `CPU` | Flows registered | ❌ |
-| 11.6.2 | Reliability | Retries, cached API steps, failure notifications | `CPU` | Injected failure recovers | ❌ |
+| 11.6.2 | Reliability | Retries, cached LLM steps, failure notifications | `CPU` | Injected failure recovers | ❌ |
 
 ### Checkpoint C11 — Production Readiness
 
@@ -818,15 +824,15 @@ quality?", on the untouched test split.
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 12.1 | Test-split unlock | Logged, one-time event | `CPU` | Access log entry | ❌ |
-| 12.2 | Master results table | Every system (original, best operator, HMM, GBM tagger+gate, TextCNN+gate, SFT, RL, LLMLingua-2, zero-shot LLM) × savings × preservation × net savings × latency | `API` `GPU` | `reports/final_results.md` | ❌ |
+| 12.2 | Master results table | Every system (original, best operator, HMM, GBM tagger+gate, TextCNN+gate, SFT, RL, LLMLingua-2, zero-shot LLM) × savings × preservation × net savings × latency | `LLM` `GPU` | `reports/final_results.md` | ❌ |
 | 12.3 | Stratified reporting | Per target × category × high-risk cluster | `CPU` | Tables | ❌ |
 | 12.4 | Statistical rigour | 95% bootstrap CIs (1,000 resamples); ≥ 3 seeds; McNemar between top systems | `CPU` | Error bars on every headline number | ❌ |
-| 12.5 | Cross-model generalisation matrix | Rewrite conditioned on A, evaluated on B, all pairs | `API` `GPU` | Matrix figure | ❌ |
-| 12.6 | **Ablation matrix** | Remove gate / fallback / operator `S` / RL / HPO / cluster stratification one at a time | `API` `GPU` | 6-row ablation table | ❌ |
+| 12.5 | Cross-model generalisation matrix | Rewrite conditioned on A, evaluated on B, all pairs | `LLM` `GPU` | Matrix figure | ❌ |
+| 12.6 | **Ablation matrix** | Remove gate / fallback / operator `S` / RL / HPO / cluster stratification one at a time | `LLM` `GPU` | 6-row ablation table | ❌ |
 | 12.7 | Net savings by prompt length | Savings minus rewriter cost across length percentiles | `CPU` | Figure | ❌ |
 | 12.8 | Error taxonomy | 200 degraded test cases categorised | `CPU` | `reports/final_errors.md` | ❌ |
 | 12.9 | Qualitative gallery | Best and worst casual → rewrite → output pairs | `CPU` | `reports/gallery.md` | ❌ |
-| 12.10 | Compute accounting | API $, GPU-hours, energy per phase | `CPU` | Table | ❌ |
+| 12.10 | Compute accounting | Generated tokens, GPU-hours, energy per phase | `CPU` | Table | ❌ |
 | 12.11 | Benchmark release | Prompts, candidates, labels, rubrics, eval code (licence permitting) | `CPU` | Release tag + data card | ❌ |
 | 12.12 | Reproduction | Second contributor reproduces headline numbers from a fresh clone | all | Within CI bounds | ❌ |
 
@@ -857,12 +863,12 @@ quality?", on the untouched test split.
 | :--- | :--- | :--- |
 | 0 | — | everything |
 | 1 | 0 | 2 |
-| 2 | 1 | 3, 4, 5, 6, 8 |
+| 2 | 1, 7 (all LLM rows) | 3, 4, 5, 6, 8 |
 | 3 | 2 | 4, 5, 6 |
 | 4 | 3 | 5, 8, 10 |
 | 5 | 3, 4 | 6, 8, 9, 11 |
 | 6 | 2, 5 | 8, 11, 12 |
-| 7 | 0 (hardware available) | 2.2.5, 8, 9, 10, 11 |
+| 7 | 0 (hardware available) | 1 (LLM rows), 2, 8, 9, 10, 11 |
 | 8 | 2, 5, 6, 7 | 9, 10, 11 |
 | 9 | 5, 8 | 10, 11 |
 | 10 | 3, 4, 5, 8 | 11, 12 |
@@ -870,7 +876,7 @@ quality?", on the untouched test split.
 | 12 | 8, 9, 10, 11 | 13 |
 | 13 | 12 | delivery |
 
-Hard gates on the critical path: **C2.3–C2.5** (judge trustworthy) → **C2.7** (go/no-go) → **C7.1** (GPU) → **C8.3** (rewriter) → **S1–S5** (final).
+Hard gates on the critical path: **C7.1** (GPU, needed for all labelled data) → **C2.3–C2.5** (judge trustworthy) → **C2.7** (go/no-go) → **C8.3** (rewriter) → **S1–S5** (final).
 
 ---
 
@@ -984,7 +990,7 @@ python -m venv .venv
 # Windows: .venv\Scripts\Activate.ps1    Linux/macOS: source .venv/bin/activate
 pip install -e ".[dev]"            # CPU
 pip install -e ".[dev,gpu]"        # on the RTX 4500 Ada machine
-cp .env.example .env               # ANTHROPIC_API_KEY, OPENAI_API_KEY, HF_TOKEN (never commit)
+cp .env.example .env               # HF_TOKEN, TERSER_LOCAL_LLM_URL (never commit)
 pre-commit install
 pytest -m "not gpu and not api"
 ```
@@ -1018,7 +1024,7 @@ pytest -m "not gpu and not api"
 - Every performance table has per-category rows. An aggregate alone is rejected in review.
 - Every new model is compared to the current champion **and** the "original prompt" baseline
   (0% savings, 100% preservation), with McNemar or paired bootstrap for claimed wins.
-- Log API tokens / $ and GPU-hours per experiment.
+- Log generated tokens and GPU-hours per experiment.
 - Negative results are committed as reports. They are results.
 
 ### Coding standards
@@ -1049,33 +1055,33 @@ PR checklist:
 - [ ] Compute tag(s); for `GPU` rows, CPU smoke test + `gpu_queue/` job
 - [ ] Tests added; `pytest -m "not gpu and not api"` passes
 - [ ] MLflow links for every reported number; per-category results
-- [ ] API spend for this PR's experiments
+- [ ] Generated tokens / GPU-hours for this PR's experiments
 - [ ] No secrets, no raw personal data, no test-split access
 - [ ] Docs / derivations / progress tables updated
 
 Review: ≥ 1 approval. Changes to `judge/`, `eval/`, data splits or checkpoint targets need **2**. Squash-merge into `main`.
 
-### Data, privacy and API usage
+### Data, privacy and LLM usage
 
 - Only datasets whose licences permit research use (and redistribution, for the benchmark), recorded in `data/SOURCES.md`.
 - No real user prompts without explicit consent. Production stores hashes and metrics by default; raw text only when opted in, retained ≤ 30 days.
 - PII scrubbing before `data/interim/`. Secrets in `.env` only; CI uses repository secrets.
-- Per-phase API spend caps in `configs/budget.yaml`; all responses disk-cached.
-- Training on model outputs must comply with each provider's terms. Record the check in ADR-0003 before Phase 8.
+- All LLM calls go through `terser.llm` against local open-source models; per-phase token caps in `configs/budget.yaml` bound compute; all responses disk-cached.
+- Training on model outputs must comply with each open model's licence (Llama 3.1 Community Licence, Qwen2.5 licence). Record the check in ADR-0003 before Phase 8.
 
 ### Risk Register
 
 | Risk | Likelihood | Impact | Mitigation | Watched by |
 | :--- | :---: | :---: | :--- | :--- |
-| Judge disagrees with humans | Medium | Critical | Task metrics first, position swap, rubric iteration, GMM sanity check | C2.3–C2.5, C5.5 |
+| Judge disagrees with humans (open 32B judge weaker than frontier APIs) | Medium–High | Critical | Task metrics first, position swap, rubric iteration, self-preference control (2.2.5), GMM sanity check | C2.3–C2.5, C5.5 |
 | Too little compression headroom | Low–Medium | Critical | Go/no-go with scope-narrowing plan | C2.7 |
-| GPU arrives late | Medium | High | CPU-first ordering, GPU queue, pull CPU halves of 9–11 forward | C7 |
+| GPU arrives late | Medium | **Critical** | No hosted APIs, so all labelled data waits for the GPU: CPU-first ordering, CPU stand-in smoke runs (2.2.4), GPU queue, pull CPU halves of 9–11 forward | C7 |
 | 24 GB VRAM insufficient | Low | Medium | Model ladder 0.5B → 7B QLoRA, grad checkpointing, no colocated serving + training | C7.2, C8.3 |
 | Silent over-compression (dropped constraints) | High | High | Constraint features, gate at sensitivity 0.95, fallback, error taxonomy, shadow judging | C8.3, C11.6 |
 | RL reward hacking | Medium | High | Judge audits, KL penalty, degenerate-output monitor | C9.3, C9.4 |
 | Rewriter overhead wipes savings | Medium | High | Net-savings metric, CPU fast path, skip short prompts (3.5.4) | S4, C11.2 |
 | Tokenizer drift | Medium | Medium | Tokenizer fixture alert, CT retraining | 11.5.3 |
-| API cost overrun | Medium | Medium | Budget caps, caching, local judge | C2.9, C8.7 |
+| LLM compute overrun / GPU contention | Medium | Medium | Token caps, response caching, small judge (8.4), exclusive GPU slots | C2.9, C8.7 |
 | Paraphrase leakage across splits | Medium | High | Source-grouped splits, automated leakage tests | C2.2, C3.2 |
 
 ### Glossary
