@@ -1,0 +1,5 @@
+# CPU-only profile (dev laptop, CI).
+name: cpu
+device: cpu
+precision: fp32
+max_vram_gb: 0
