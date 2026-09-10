@@ -186,7 +186,7 @@ and comparable, and runs on CPU today and on the RTX 4500 Ada later without code
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 0.3.1 | Data card template | Source, licence, size, PII notes, bias notes | `CPU` | `docs/data_cards/_template.md` | ✅ |
 | 0.3.2 | Model card template | Intended use, targets supported, metrics per category, limits | `CPU` | `docs/model_cards/_template.md` | ✅ |
-| 0.3.3 | Naming convention | Runs `<phase>-<task>-<model>-<variant>-<seed>`; branches `phase<N>/<topic>` | `CPU` | `docs/conventions.md` | ❌ |
+| 0.3.3 | Naming convention | Runs `<phase>-<task>-<model>-<variant>-<seed>`; branches `phase<N>/<topic>` | `CPU` | `docs/conventions.md` | ✅ |
 | 0.3.4 | ML lifecycle ADR | data → label → train → evaluate → register → deploy → monitor → retrain | `CPU` | `docs/decisions/ADR-0001-ml-lifecycle.md` | ❌ |
 | 0.3.5 | Risk register | See [Risk Register](#risk-register) | `CPU` | `docs/risks.md` with mitigations | ❌ |
 | 0.3.6 | API budget guard | `configs/budget.yaml` per phase; client refuses calls past cap; disk cache keyed by model+params+prompt hash | `CPU` `API` | Test: cap reached ⇒ call refused; cached call costs 0 | ❌ |
@@ -956,7 +956,7 @@ which were not, and why.
 
 | Phase | Tasks | Checks | Done | Status |
 | :--- | :---: | :---: | :---: | :---: |
-| 0 — Foundations | 22 | 4 | 10 | ❌ |
+| 0 — Foundations | 22 | 4 | 11 | ❌ |
 | 1 — Framing and Concept Learning | 23 | 5 | 0 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 0 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 33 | 7 | 0 | ❌ |
@@ -970,7 +970,7 @@ which were not, and why.
 | 11 — MLOps | 26 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 12 | — | 0 | ❌ |
 | 13 — Documentation | 9 | — | 0 | ❌ |
-| **Total** | **256** | **66** | **10** | ❌ |
+| **Total** | **256** | **66** | **11** | ❌ |
 
 ---
 
