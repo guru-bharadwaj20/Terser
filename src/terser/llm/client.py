@@ -5,10 +5,18 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Protocol, cast
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from terser.llm.budget import Budget, Usage, approx_tokens
 from terser.llm.cache import ResponseCache, cache_key
+from terser.llm.providers import (
+    ProviderConfig,
+    default_providers,
+    openai_compatible_call,
+)
+
+if TYPE_CHECKING:
+    import httpx
 
 DEFAULT_BUDGET_PATH = Path(__file__).resolve().parents[3] / "configs" / "budget.yaml"
 
@@ -18,6 +26,7 @@ class TransportResult:
     text: str
     input_tokens: int
     output_tokens: int
+    usage_reported: bool = True  # False when the server omitted usage (counts are then 0)
 
 
 @dataclass(frozen=True)
@@ -28,6 +37,7 @@ class LLMResponse:
     usd: float | None
     cached: bool
     cache_key: str
+    usage_reported: bool = True
 
 
 class Transport(Protocol):
@@ -85,6 +95,45 @@ def openai_transport(
     return TransportResult(text, resp.usage.prompt_tokens, resp.usage.completion_tokens)
 
 
+class ProviderTransport:
+    """Dispatches to Anthropic, OpenAI or a configured OpenAI-compatible provider."""
+
+    def __init__(
+        self,
+        providers: dict[str, ProviderConfig] | None = None,
+        *,
+        http_client: httpx.Client | None = None,
+    ) -> None:
+        self.providers = providers if providers is not None else default_providers()
+        self.http_client = http_client
+
+    def __call__(
+        self,
+        provider: str,
+        model: str,
+        messages: list[dict[str, Any]],
+        max_tokens: int,
+        system: str | None,
+        params: dict[str, Any],
+    ) -> TransportResult:
+        if provider in self.providers:
+            text, tokens_in, tokens_out, reported = openai_compatible_call(
+                self.providers[provider],
+                model,
+                messages,
+                max_tokens,
+                system,
+                params,
+                http_client=self.http_client,
+            )
+            return TransportResult(text, tokens_in, tokens_out, reported)
+        hosted = {"anthropic": anthropic_transport, "openai": openai_transport}
+        if provider not in hosted:
+            known = sorted({*hosted, *self.providers})
+            raise ValueError(f"unknown provider {provider!r}; expected one of {known}")
+        return hosted[provider](provider, model, messages, max_tokens, system, params)
+
+
 def default_transport(
     provider: str,
     model: str,
@@ -93,14 +142,12 @@ def default_transport(
     system: str | None,
     params: dict[str, Any],
 ) -> TransportResult:
-    transports = {"anthropic": anthropic_transport, "openai": openai_transport}
-    if provider not in transports:
-        raise ValueError(f"unknown provider {provider!r}; expected one of {sorted(transports)}")
-    return transports[provider](provider, model, messages, max_tokens, system, params)
+    """Transport with built-in providers only (``anthropic``, ``openai``, ``local``)."""
+    return ProviderTransport()(provider, model, messages, max_tokens, system, params)
 
 
 class LLMClient:
-    """Every hosted-LLM call in Terser goes through here."""
+    """Every LLM call in Terser (hosted or local) goes through here."""
 
     def __init__(
         self,
@@ -110,10 +157,13 @@ class LLMClient:
         transport: Transport | None = None,
         ledger_path: str | Path | None = None,
         cache_dir: str | Path | None = None,
+        http_client: httpx.Client | None = None,
     ) -> None:
         self.budget = Budget.load(budget_path, phase, ledger_path=ledger_path, cache_dir=cache_dir)
         self.cache = ResponseCache(self.budget.cache_dir)
-        self.transport: Transport = transport or default_transport
+        self.transport: Transport = transport or ProviderTransport(
+            self.budget.providers, http_client=http_client
+        )
 
     def complete(
         self,
@@ -130,7 +180,8 @@ class LLMClient:
         hit = self.cache.get(key)
         if hit is not None:
             tokens_in, tokens_out = hit["input_tokens"], hit["output_tokens"]
-            return LLMResponse(hit["text"], tokens_in, tokens_out, 0.0, True, key)
+            reported = bool(hit.get("usage_reported", True))
+            return LLMResponse(hit["text"], tokens_in, tokens_out, 0.0, True, key, reported)
 
         if input_tokens_estimate is None:
             prompt = json.dumps(messages, ensure_ascii=False) + (system or "")
@@ -138,9 +189,13 @@ class LLMClient:
         self.budget.check(Usage(provider, model, input_tokens_estimate, max_tokens, key))
 
         result = self.transport(provider, model, messages, max_tokens, system, dict(params))
-        usd = self.budget.record(
-            Usage(provider, model, result.input_tokens, result.output_tokens, key)
-        )
+        if result.usage_reported:
+            actual = Usage(provider, model, result.input_tokens, result.output_tokens, key)
+        else:
+            # Server omitted usage: charge approximate counts so token caps still bound compute.
+            out_estimate = approx_tokens(result.text) if result.text else 0
+            actual = Usage(provider, model, input_tokens_estimate, out_estimate, key, False)
+        usd = self.budget.record(actual)
         self.cache.put(
             key,
             {
@@ -150,6 +205,15 @@ class LLMClient:
                 "input_tokens": result.input_tokens,
                 "output_tokens": result.output_tokens,
                 "usd": usd,
+                "usage_reported": result.usage_reported,
             },
         )
-        return LLMResponse(result.text, result.input_tokens, result.output_tokens, usd, False, key)
+        return LLMResponse(
+            result.text,
+            result.input_tokens,
+            result.output_tokens,
+            usd,
+            False,
+            key,
+            result.usage_reported,
+        )
