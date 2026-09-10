@@ -1,0 +1,24 @@
+# Terser root Hydra config. Every script composes this via terser.config.
+defaults:
+  - hardware: cpu
+  - experiment: hello
+  - _self_
+
+seed: 0
+
+# All paths resolve against the project root (env TERSER_ROOT, else the repo root).
+paths:
+  root: ${terser_root:}
+  data_dir: ${paths.root}/data
+  reports_dir: ${paths.root}/reports
+  cache_dir: ${paths.root}/.cache
+  mlruns_dir: ${paths.root}/mlruns
+
+hydra:
+  run:
+    dir: ${paths.root}/experiments/${now:%Y%m%d-%H%M%S}_${experiment.name}
+  sweep:
+    dir: ${paths.root}/experiments/multirun/${now:%Y%m%d-%H%M%S}_${experiment.name}
+    subdir: ${hydra.job.num}
+  job:
+    chdir: false
