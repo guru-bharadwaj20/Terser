@@ -6,6 +6,13 @@ cache_dir: .cache/llm_responses/
 
 # allow_unpriced: when a model's price is null the USD cap cannot be verified, so calls are
 # refused unless this is true for the phase (token caps are always enforced).
+#
+# Local / self-hosted providers (priced: false, see `providers:` below) cost $0 by definition:
+# max_usd and allow_unpriced do NOT apply to them, but max_tokens DOES -- for local models the
+# token cap bounds compute time, not money. A phase with max_tokens: 0 refuses every call.
+# Phases expected to use local open models: phase1, phase2, phase5, phase8, phase9, phase11,
+# phase12 (their max_tokens caps are sized for GPU batch inference with vLLM; a CPU smoke test
+# at ~10-50 tok/s will never get near them).
 phases:
   phase0: {max_usd: 1, max_tokens: 200000, allow_unpriced: false}
   phase1: {max_usd: 25, max_tokens: 5000000, allow_unpriced: false}
@@ -29,3 +36,33 @@ prices:
   claude-haiku-4-5: {input_per_mtok: null, output_per_mtok: null}
   gpt-4o: {input_per_mtok: null, output_per_mtok: null}
   gpt-4o-mini: {input_per_mtok: null, output_per_mtok: null}
+
+# OpenAI-compatible providers, used as LLMClient.complete(provider=<name>, ...).
+#   kind:        only `openai_compatible` is supported (POST {base_url}/chat/completions).
+#   base_url:    API root including /v1.
+#   priced:      false = self-hosted, cost is $0 and only token caps apply;
+#                true  = hosted endpoint that bills you: the model must be listed under `prices`
+#                        (or the phase must set allow_unpriced: true) and max_usd applies.
+#   timeout_s:   per-request timeout in seconds (default 300; CPU inference is slow).
+#   api_key_env: optional env var holding a bearer key.
+# The `local` provider always exists (default base_url http://localhost:11434/v1 = Ollama).
+# Env overrides for `local`: TERSER_LOCAL_LLM_URL (base_url), TERSER_LOCAL_LLM_KEY (bearer key).
+providers:
+  local:
+    kind: openai_compatible
+    base_url: http://localhost:11434/v1  # Ollama; llama-server: :8080/v1, vLLM: :8000/v1
+    priced: false
+    timeout_s: 300
+  # Example of a hosted OpenAI-compatible endpoint that costs money (disabled):
+  # hosted_example:
+  #   kind: openai_compatible
+  #   base_url: https://api.example.com/v1
+  #   priced: true
+  #   timeout_s: 120
+  #   api_key_env: HOSTED_EXAMPLE_API_KEY
+
+# local_models -- SUGGESTIONS only, not enforced anywhere:
+#   CPU smoke tests (Ollama tags):  qwen2.5:0.5b, qwen2.5:1.5b
+#   GPU targets (vLLM, HF ids):     Qwen/Qwen2.5-7B-Instruct, meta-llama/Llama-3.1-8B-Instruct
+#   GPU judge (vLLM, HF ids):       Qwen/Qwen2.5-14B-Instruct-AWQ
+#                                   (Qwen/Qwen2.5-32B-Instruct-AWQ if VRAM allows)
