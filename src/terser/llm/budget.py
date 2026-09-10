@@ -7,7 +7,7 @@ import os
 import tempfile
 import threading
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -63,7 +63,7 @@ class Price:
         return self.input_per_mtok is not None and self.output_per_mtok is not None
 
     def cost(self, input_tokens: int, output_tokens: int) -> float | None:
-        if not self.known:
+        if self.input_per_mtok is None or self.output_per_mtok is None:
             return None
         return (input_tokens * self.input_per_mtok + output_tokens * self.output_per_mtok) / 1e6
 
@@ -101,7 +101,7 @@ class Ledger:
 
     def add(self, phase: str, usage: Usage, usd: float | None) -> dict[str, Any]:
         entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "provider": usage.provider,
             "model": usage.model,
             "input_tokens": usage.input_tokens,
