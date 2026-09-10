@@ -24,6 +24,7 @@ dependencies = [
     "tiktoken",
     "tokenizers",
     "huggingface_hub",
+    "mlflow>=3",
 ]
 
 [project.optional-dependencies]
