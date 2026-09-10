@@ -1,0 +1,200 @@
+{"id": 0, "text": "hey so can you like explain recursion to me"}
+{"id": 1, "text": "yo whats the best way to learn python fast??"}
+{"id": 2, "text": "ok so basically i need help w/ my resume, can u look at it"}
+{"id": 3, "text": "can you pls summarize this article for me thx"}
+{"id": 4, "text": "i was wondering if maybe you could possibly help me write an email to my boss about taking friday off"}
+{"id": 5, "text": "tbh idk what a monad is lol"}
+{"id": 6, "text": "write me a poem about cats but make it funny"}
+{"id": 7, "text": "hmm so like, what's the difference between TCP and UDP?"}
+{"id": 8, "text": "could you kindly please explain, in simple terms, how vaccines work"}
+{"id": 9, "text": "so um my code doesnt work and i dont know why, heres the error"}
+{"id": 10, "text": "gimme 5 ideas for a birthday party"}
+{"id": 11, "text": "whats 15% of 240"}
+{"id": 12, "text": "translate 'good morning' into french, spanish, and german please"}
+{"id": 13, "text": "I'd really appreciate it if you could just go ahead and list the pros and cons of remote work."}
+{"id": 14, "text": "Hello!!! How are you doing today???"}
+{"id": 15, "text": "can u fix grammar: me and him goes to store yesterday"}
+{"id": 16, "text": "just wondering... is it bad to drink coffee at night?"}
+{"id": 17, "text": "Please act as a senior engineer and review my PR description."}
+{"id": 18, "text": "explain like im 5: black holes"}
+{"id": 19, "text": "sooo... what should i cook tonight? i have eggs, rice, and spinach"}
+{"id": 20, "text": "def add(a, b):\n    return a + b\n"}
+{"id": 21, "text": "for i in range(10):\n\tprint(i)"}
+{"id": 22, "text": "SELECT name, COUNT(*) FROM users WHERE age > 30 GROUP BY name ORDER BY 2 DESC;"}
+{"id": 23, "text": "const f = (x) => x ** 2;\nconsole.log([1,2,3].map(f));"}
+{"id": 24, "text": "#include <stdio.h>\nint main(void) { printf(\"hi\\n\"); return 0; }"}
+{"id": 25, "text": "```python\nimport numpy as np\nx = np.zeros((3, 3))\n```"}
+{"id": 26, "text": "git commit -m \"fix: handle None\" && git push origin main"}
+{"id": 27, "text": "<div class=\"container\"><p>Hello &amp; welcome</p></div>"}
+{"id": 28, "text": "{\"name\": \"terser\", \"version\": \"0.1.0\", \"tags\": [\"nlp\", \"prompt\"]}"}
+{"id": 29, "text": "fn main() { let v: Vec<i32> = vec![1, 2, 3]; println!(\"{:?}\", v); }"}
+{"id": 30, "text": "x <- c(1, 2, 3)\nmean(x)"}
+{"id": 31, "text": "public static void main(String[] args) {}"}
+{"id": 32, "text": "if [ -f ~/.bashrc ]; then source ~/.bashrc; fi"}
+{"id": 33, "text": "Traceback (most recent call last):\n  File \"main.py\", line 3, in <module>\n    1/0\nZeroDivisionError: division by zero"}
+{"id": 34, "text": "<|endoftext|> <|im_start|>user\nhi<|im_end|>"}
+{"id": 35, "text": "<|begin_of_text|><|start_header_id|>user<|end_header_id|>"}
+{"id": 36, "text": "lambda x: x if x else None  # noqa: E731"}
+{"id": 37, "text": "a=1;b=2;c=a+b;print(c)"}
+{"id": 38, "text": "    indented\n        more indented\n"}
+{"id": 39, "text": "key: value\nlist:\n  - one\n  - two\n"}
+{"id": 40, "text": "你好，你能帮我写一封邮件吗？"}
+{"id": 41, "text": "日本語のテキストをトークン化します。"}
+{"id": 42, "text": "안녕하세요, 반갑습니다"}
+{"id": 43, "text": "Привет, как дела?"}
+{"id": 44, "text": "مرحبا كيف حالك"}
+{"id": 45, "text": "שלום עולם"}
+{"id": 46, "text": "नमस्ते दुनिया"}
+{"id": 47, "text": "Γειά σου Κόσμε"}
+{"id": 48, "text": "Ça va? Très bien, merci — à bientôt!"}
+{"id": 49, "text": "naïve café résumé coöperate"}
+{"id": 50, "text": "😀😃😄😁😆😅😂🤣"}
+{"id": 51, "text": "👨‍👩‍👧‍👦 family emoji zwj"}
+{"id": 52, "text": "🇺🇸🇯🇵🇩🇪 flags"}
+{"id": 53, "text": "hi 👋 can u help 🙏🙏"}
+{"id": 54, "text": "∑_{i=1}^{n} i = n(n+1)/2"}
+{"id": 55, "text": "≤ ≥ ≠ ≈ ∞ √ π"}
+{"id": 56, "text": "Zalgo: Z̴̡a̶l̷g̸o̵"}
+{"id": 57, "text": "​ zero​width ﻿ bom"}
+{"id": 58, "text": "ｆｕｌｌｗｉｄｔｈ　ｔｅｘｔ"}
+{"id": 59, "text": "Mixed 中文 and English 和 😀 emoji"}
+{"id": 60, "text": "ไทย ภาษา"}
+{"id": 61, "text": "Tiếng Việt có dấu"}
+{"id": 62, "text": "ǅ ǈ ǋ titlecase"}
+{"id": 63, "text": "🧑‍💻 coder"}
+{"id": 64, "text": "combining é vs é"}
+{"id": 65, "text": "𝔘𝔫𝔦𝔠𝔬𝔡𝔢 math letters"}
+{"id": 66, "text": "ᚠᛇᚻ runes"}
+{"id": 67, "text": "© ® ™ § ¶ †"}
+{"id": 68, "text": "中文标点：“引号”、《书名》。"}
+{"id": 69, "text": "emoji at end 🎉"}
+{"id": 70, "text": ""}
+{"id": 71, "text": " "}
+{"id": 72, "text": "  "}
+{"id": 73, "text": "\n"}
+{"id": 74, "text": "\n\n\n"}
+{"id": 75, "text": "\t"}
+{"id": 76, "text": " \t \n "}
+{"id": 77, "text": "\r\n"}
+{"id": 78, "text": "a"}
+{"id": 79, "text": "A"}
+{"id": 80, "text": "."}
+{"id": 81, "text": "?"}
+{"id": 82, "text": "trailing space "}
+{"id": 83, "text": " leading space"}
+{"id": 84, "text": "double  space"}
+{"id": 85, "text": "line1\nline2"}
+{"id": 86, "text": "line1\r\nline2"}
+{"id": 87, "text": "tabs\tbetween\twords"}
+{"id": 88, "text": "   \n  mixed  \t\n"}
+{"id": 89, "text": "a\n\n\nb"}
+{"id": 90, "text": ".................................................."}
+{"id": 91, "text": "--------------------------------------------------------------------------------"}
+{"id": 92, "text": "==="}
+{"id": 93, "text": "                                                                                                    "}
+{"id": 94, "text": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"}
+{"id": 95, "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}
+{"id": 96, "text": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab"}
+{"id": 97, "text": "!?!?!?!?!?!?!?!?!?!?"}
+{"id": 98, "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+{"id": 99, "text": " nbsp "}
+{"id": 100, "text": "0"}
+{"id": 101, "text": "1"}
+{"id": 102, "text": "42"}
+{"id": 103, "text": "123456789"}
+{"id": 104, "text": "3.14159265358979"}
+{"id": 105, "text": "-273.15"}
+{"id": 106, "text": "1e-10"}
+{"id": 107, "text": "6.022e23"}
+{"id": 108, "text": "1,000,000"}
+{"id": 109, "text": "$1,234.56"}
+{"id": 110, "text": "2024-01-15"}
+{"id": 111, "text": "12:30:45"}
+{"id": 112, "text": "+1 (555) 123-4567"}
+{"id": 113, "text": "0xDEADBEEF"}
+{"id": 114, "text": "0b101010"}
+{"id": 115, "text": "192.168.0.1"}
+{"id": 116, "text": "99.9%"}
+{"id": 117, "text": "1/2 3/4"}
+{"id": 118, "text": "v1.2.3-beta.4"}
+{"id": 119, "text": "ISBN 978-3-16-148410-0"}
+{"id": 120, "text": "https://www.example.com"}
+{"id": 121, "text": "http://localhost:8080/api/v1/users?id=42&sort=desc"}
+{"id": 122, "text": "ftp://files.example.org/pub/file.tar.gz"}
+{"id": 123, "text": "mailto:someone@example.com"}
+{"id": 124, "text": "user.name+tag@sub.domain.co.uk"}
+{"id": 125, "text": "https://github.com/anthropics/anthropic-sdk-python/issues/123"}
+{"id": 126, "text": "www.google.com/search?q=token+counting"}
+{"id": 127, "text": "https://en.wikipedia.org/wiki/Byte_pair_encoding#Algorithm"}
+{"id": 128, "text": "C:\\Users\\me\\Documents\\file.txt"}
+{"id": 129, "text": "/usr/local/bin/python3"}
+{"id": 130, "text": "s3://bucket/key/part-0000.parquet"}
+{"id": 131, "text": "https://example.com/%E4%BD%A0%E5%A5%BD"}
+{"id": 132, "text": "@username #hashtag"}
+{"id": 133, "text": "data:image/png;base64,iVBORw0KGgo="}
+{"id": 134, "text": "../relative/path/./file"}
+{"id": 135, "text": "# Heading 1"}
+{"id": 136, "text": "## Heading 2\n\nSome *italic* and **bold** text."}
+{"id": 137, "text": "- item one\n- item two\n  - nested"}
+{"id": 138, "text": "1. first\n2. second\n3. third"}
+{"id": 139, "text": "> a blockquote\n> continued"}
+{"id": 140, "text": "| a | b |\n|---|---|\n| 1 | 2 |"}
+{"id": 141, "text": "[link](https://example.com) and ![img](a.png)"}
+{"id": 142, "text": "`inline code` and ~~strike~~"}
+{"id": 143, "text": "---\ntitle: front matter\n---"}
+{"id": 144, "text": "- [ ] todo\n- [x] done"}
+{"id": 145, "text": "<!-- html comment -->"}
+{"id": 146, "text": "Term\n: definition"}
+{"id": 147, "text": "**Note:** read the _docs_ first."}
+{"id": 148, "text": "$$E = mc^2$$"}
+{"id": 149, "text": "Footnote[^1]\n\n[^1]: the note."}
+{"id": 150, "text": "The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! "}
+{"id": 151, "text": "so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like so like"}
+{"id": 152, "text": "1. step number 1 of the process\n2. step number 2 of the process\n3. step number 3 of the process\n4. step number 4 of the process\n5. step number 5 of the process\n6. step number 6 of the process\n7. step number 7 of the process\n8. step number 8 of the process\n9. step number 9 of the process\n10. step number 10 of the process\n11. step number 11 of the process\n12. step number 12 of the process\n13. step number 13 of the process\n14. step number 14 of the process\n15. step number 15 of the process\n16. step number 16 of the process\n17. step number 17 of the process\n18. step number 18 of the process\n19. step number 19 of the process\n20. step number 20 of the process\n21. step number 21 of the process\n22. step number 22 of the process\n23. step number 23 of the process\n24. step number 24 of the process\n25. step number 25 of the process\n26. step number 26 of the process\n27. step number 27 of the process\n28. step number 28 of the process\n29. step number 29 of the process\n30. step number 30 of the process\n31. step number 31 of the process\n32. step number 32 of the process\n33. step number 33 of the process\n34. step number 34 of the process\n35. step number 35 of the process\n36. step number 36 of the process\n37. step number 37 of the process\n38. step number 38 of the process\n39. step number 39 of the process\n40. step number 40 of the process\n41. step number 41 of the process\n42. step number 42 of the process\n43. step number 43 of the process\n44. step number 44 of the process\n45. step number 45 of the process\n46. step number 46 of the process\n47. step number 47 of the process\n48. step number 48 of the process\n49. step number 49 of the process\n50. step number 50 of the process\n51. step number 51 of the process\n52. step number 52 of the process\n53. step number 53 of the process\n54. step number 54 of the process\n55. step number 55 of the process\n56. step number 56 of the process\n57. step number 57 of the process\n58. step number 58 of the process\n59. step number 59 of the process\n60. step number 60 of the process\n61. step number 61 of the process\n62. step number 62 of the process\n63. step number 63 of the process\n64. step number 64 of the process\n65. step number 65 of the process\n66. step number 66 of the process\n67. step number 67 of the process\n68. step number 68 of the process\n69. step number 69 of the process\n70. step number 70 of the process\n71. step number 71 of the process\n72. step number 72 of the process\n73. step number 73 of the process\n74. step number 74 of the process\n75. step number 75 of the process\n76. step number 76 of the process\n77. step number 77 of the process\n78. step number 78 of the process\n79. step number 79 of the process\n80. step number 80 of the process\n81. step number 81 of the process\n82. step number 82 of the process\n83. step number 83 of the process\n84. step number 84 of the process\n85. step number 85 of the process\n86. step number 86 of the process\n87. step number 87 of the process\n88. step number 88 of the process\n89. step number 89 of the process\n90. step number 90 of the process\n91. step number 91 of the process\n92. step number 92 of the process\n93. step number 93 of the process\n94. step number 94 of the process\n95. step number 95 of the process\n96. step number 96 of the process\n97. step number 97 of the process\n98. step number 98 of the process\n99. step number 99 of the process\n100. step number 100 of the process"}
+{"id": 153, "text": "你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。你好世界。"}
+{"id": 154, "text": "def f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\ndef f():\n    pass\n\n"}
+{"id": 155, "text": "0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 419 420 421 422 423 424 425 426 427 428 429 430 431 432 433 434 435 436 437 438 439 440 441 442 443 444 445 446 447 448 449 450 451 452 453 454 455 456 457 458 459 460 461 462 463 464 465 466 467 468 469 470 471 472 473 474 475 476 477 478 479 480 481 482 483 484 485 486 487 488 489 490 491 492 493 494 495 496 497 498 499"}
+{"id": 156, "text": "I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. I need you to help me with a really long request. Thanks so much!!!"}
+{"id": 157, "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. "}
+{"id": 158, "text": "😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 😀 "}
+{"id": 159, "text": "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word "}
+{"id": 160, "text": "Don't won't can't I'm you're they've"}
+{"id": 161, "text": "UPPERCASE SHOUTING TEXT"}
+{"id": 162, "text": "camelCaseIdentifierName snake_case_name kebab-case-name"}
+{"id": 163, "text": "mIxEd CaSe"}
+{"id": 164, "text": "Hello,world;no:spaces!here"}
+{"id": 165, "text": "\"quoted\" 'single' `back`"}
+{"id": 166, "text": "(parens) [brackets] {braces} <angles>"}
+{"id": 167, "text": "a/b\\c|d"}
+{"id": 168, "text": "the the the the the"}
+{"id": 169, "text": "Supercalifragilisticexpialidocious"}
+{"id": 170, "text": "pneumonoultramicroscopicsilicovolcanoconiosis"}
+{"id": 171, "text": "e.g. i.e. etc. vs. Dr. Mr."}
+{"id": 172, "text": "OK"}
+{"id": 173, "text": "ok."}
+{"id": 174, "text": "Yes/No/Maybe"}
+{"id": 175, "text": "  Summarize the following text in 3 bullet points:\n\n"}
+{"id": 176, "text": "Q: What is 2+2?\nA: 4"}
+{"id": 177, "text": "[INST] hi [/INST]"}
+{"id": 178, "text": "</s><s>"}
+{"id": 179, "text": "Human: hi\n\nAssistant:"}
+{"id": 180, "text": "\\n literal backslash n"}
+{"id": 181, "text": "tab\\tliteral"}
+{"id": 182, "text": "%s %d %f {0} {name}"}
+{"id": 183, "text": "${HOME} $PATH %APPDATA%"}
+{"id": 184, "text": "&lt;tag&gt; &nbsp;"}
+{"id": 185, "text": "\u0000\u0001 control chars"}
+{"id": 186, "text": "a\u2028b\u2029c line separators"}
+{"id": 187, "text": "🙂 ok 👍"}
+{"id": 188, "text": "résumé.pdf"}
+{"id": 189, "text": "Ünïcödé ÄÖÜ ß"}
+{"id": 190, "text": "can you rewrite this to be shorter:\n\"I think that maybe we should consider possibly rescheduling.\""}
+{"id": 191, "text": "Respond ONLY in JSON."}
+{"id": 192, "text": "!!!!!!!!!!"}
+{"id": 193, "text": "?!?!?!"}
+{"id": 194, "text": "...."}
+{"id": 195, "text": "12345678901234567890"}
+{"id": 196, "text": "a b c d e f g h i j k l m n o p"}
+{"id": 197, "text": "yes"}
+{"id": 198, "text": "no"}
+{"id": 199, "text": "maybe later"}
