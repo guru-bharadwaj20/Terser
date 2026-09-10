@@ -172,8 +172,10 @@ def format_dry_run(ordered: list[JobSpec]) -> str:
         for i, j in enumerate(ordered, 1)
     ]
     widths = [max(len(r[c]) for r in [header, *rows]) for c in range(len(header))]
-    lines = ["  ".join(cell.ljust(w) for cell, w in zip(r, widths)).rstrip() for r in rows]
-    head = "  ".join(h.ljust(w) for h, w in zip(header, widths)).rstrip()
+    lines = [
+        "  ".join(cell.ljust(w) for cell, w in zip(r, widths, strict=True)).rstrip() for r in rows
+    ]
+    head = "  ".join(h.ljust(w) for h, w in zip(header, widths, strict=True)).rstrip()
     total = sum(j.est_hours for j in ordered)
     return "\n".join([head, "-" * len(head), *lines, "", f"Total estimated GPU-hours: {total:g}"])
 
@@ -186,7 +188,7 @@ def dry_run(queue_dir: Path | str, root: Path | str | None = None) -> list[JobSp
 def cuda_available() -> bool:
     """True if torch is importable and sees a CUDA device (lazy, optional import)."""
     try:
-        import torch  # type: ignore[import-not-found]
+        import torch
     except ImportError:
         return False
     try:
