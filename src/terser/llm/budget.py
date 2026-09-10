@@ -13,6 +13,8 @@ from typing import Any
 
 import yaml
 
+from terser.llm.providers import ProviderConfig, default_providers, parse_providers
+
 DEFAULT_LEDGER = ".cache/llm_ledger.json"
 DEFAULT_CACHE_DIR = ".cache/llm_responses/"
 
@@ -77,6 +79,7 @@ class Usage:
     input_tokens: int
     output_tokens: int
     cache_key: str | None = None
+    usage_reported: bool = True
 
 
 class Ledger:
@@ -108,6 +111,7 @@ class Ledger:
             "output_tokens": usage.output_tokens,
             "usd": usd,
             "cache_key": usage.cache_key,
+            "usage_reported": usage.usage_reported,
         }
         with self._lock:
             data = self._read()  # merge with whatever is on disk now
@@ -132,6 +136,7 @@ class Budget:
     ledger: Ledger
     cache_dir: Path
     config_path: Path | None = field(default=None)
+    providers: dict[str, ProviderConfig] = field(default_factory=default_providers)
 
     @classmethod
     def load(
@@ -167,24 +172,43 @@ class Budget:
             ledger=Ledger(resolve(ledger_path or cfg.get("ledger_path", DEFAULT_LEDGER))),
             cache_dir=resolve(cache_dir or cfg.get("cache_dir", DEFAULT_CACHE_DIR)),
             config_path=path,
+            providers=parse_providers(cfg.get("providers")),
         )
 
     def price(self, model: str) -> Price:
         return self.prices.get(model, Price(None, None))
 
+    def is_free(self, provider: str) -> bool:
+        """True for self-hosted providers (``priced: false``): cost is $0 by definition."""
+        cfg = self.providers.get(provider)
+        return cfg is not None and not cfg.priced
+
+    def cost(self, usage: Usage) -> float | None:
+        """USD cost of ``usage``: 0.0 for free providers, None if the model is unpriced."""
+        if self.is_free(usage.provider):
+            return 0.0
+        return self.price(usage.model).cost(usage.input_tokens, usage.output_tokens)
+
     def check(self, estimate: Usage) -> float | None:
-        """Raise ``BudgetExceededError`` if ``estimate`` would break a cap; return est. USD."""
+        """Raise ``BudgetExceededError`` if ``estimate`` would break a cap; return est. USD.
+
+        Free (self-hosted) providers skip the USD cap and ``allow_unpriced`` rules; the token cap
+        still applies because it bounds compute time.
+        """
         self.ledger.reload()
         spent = self.ledger.spent(self.phase)
         tokens = estimate.input_tokens + estimate.output_tokens
-        if self.max_tokens <= 0 or self.max_usd <= 0:
+        free = self.is_free(estimate.provider)
+        if self.max_tokens <= 0 or (not free and self.max_usd <= 0):
             raise BudgetExceededError(f"{self.phase}: API calls are not allowed (cap is 0)")
         if spent["tokens"] + tokens > self.max_tokens:
             raise BudgetExceededError(
                 f"{self.phase}: token cap {self.max_tokens} would be exceeded "
                 f"(spent {spent['tokens']} + estimate {tokens})"
             )
-        usd = self.price(estimate.model).cost(estimate.input_tokens, estimate.output_tokens)
+        usd = self.cost(estimate)
+        if free:
+            return usd
         if usd is None:
             if not self.allow_unpriced:
                 raise BudgetExceededError(
@@ -200,6 +224,6 @@ class Budget:
 
     def record(self, actual: Usage) -> float | None:
         """Record an actual call's usage in the ledger; return its USD cost (None if unpriced)."""
-        usd = self.price(actual.model).cost(actual.input_tokens, actual.output_tokens)
+        usd = self.cost(actual)
         self.ledger.add(self.phase, actual, usd)
         return usd
