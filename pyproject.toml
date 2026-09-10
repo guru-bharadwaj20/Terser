@@ -20,6 +20,10 @@ dependencies = [
     "matplotlib",
     "hydra-core>=1.3",
     "omegaconf>=2.3",
+    "anthropic",
+    "tiktoken",
+    "tokenizers",
+    "huggingface_hub",
 ]
 
 [project.optional-dependencies]
@@ -32,7 +36,9 @@ dev = [
     "pre-commit",
     "nbstripout",
     "types-PyYAML",
+    "dvc",
 ]
+openai = ["openai"]
 # Installed only on the RTX 4500 Ada machine (Phase 7).
 gpu = ["torch", "transformers", "peft", "trl", "vllm", "bitsandbytes", "accelerate"]
 

@@ -1,0 +1,7 @@
+[core]
+    remote = local
+    autostage = true
+[cache]
+    type = "hardlink,copy"
+['remote "local"']
+    url = ../../terser-dvc-remote

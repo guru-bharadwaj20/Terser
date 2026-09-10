@@ -1,0 +1,31 @@
+# Per-phase API spend caps, enforced by terser.llm.LLMClient BEFORE every call.
+# A cap of 0 means "no API calls allowed in this phase".
+# Relative paths resolve against the project root (env TERSER_ROOT, else the repo root).
+ledger_path: .cache/llm_ledger.json
+cache_dir: .cache/llm_responses/
+
+# allow_unpriced: when a model's price is null the USD cap cannot be verified, so calls are
+# refused unless this is true for the phase (token caps are always enforced).
+phases:
+  phase0: {max_usd: 1, max_tokens: 200000, allow_unpriced: false}
+  phase1: {max_usd: 25, max_tokens: 5000000, allow_unpriced: false}
+  phase2: {max_usd: 300, max_tokens: 60000000, allow_unpriced: false}
+  phase3: {max_usd: 0, max_tokens: 0, allow_unpriced: false}
+  phase4: {max_usd: 0, max_tokens: 0, allow_unpriced: false}
+  phase5: {max_usd: 30, max_tokens: 6000000, allow_unpriced: false}
+  phase6: {max_usd: 0, max_tokens: 0, allow_unpriced: false}
+  phase7: {max_usd: 0, max_tokens: 0, allow_unpriced: false}
+  phase8: {max_usd: 60, max_tokens: 12000000, allow_unpriced: false}
+  phase9: {max_usd: 60, max_tokens: 12000000, allow_unpriced: false}
+  phase10: {max_usd: 0, max_tokens: 0, allow_unpriced: false}
+  phase11: {max_usd: 20, max_tokens: 4000000, allow_unpriced: false}
+  phase12: {max_usd: 100, max_tokens: 20000000, allow_unpriced: false}
+  phase13: {max_usd: 0, max_tokens: 0, allow_unpriced: false}
+
+# USD per million tokens. Prices are deliberately null: fill them in from the provider's
+# official pricing page before the first paid run. Models not listed here count as unpriced.
+prices:
+  claude-sonnet-4-5: {input_per_mtok: null, output_per_mtok: null}
+  claude-haiku-4-5: {input_per_mtok: null, output_per_mtok: null}
+  gpt-4o: {input_per_mtok: null, output_per_mtok: null}
+  gpt-4o-mini: {input_per_mtok: null, output_per_mtok: null}
