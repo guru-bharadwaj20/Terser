@@ -50,7 +50,8 @@ Every run sets all of these tags. A run missing any of them fails the tracking a
 | `data_hash` | DVC hash of the input dataset version | `3f2a9c…` |
 | `git_sha` | Full commit SHA of the code; runs from a dirty tree also set `git_dirty=true` | `40c00d9…` |
 
-Also log API tokens and $ and GPU-hours per run (Experiment standards in CONTRIBUTING.md).
+Also log generated tokens and GPU-hours per run (Experiment standards in CONTRIBUTING.md). All LLM calls
+go to local open-source models, so there is no $ cost to log.
 
 ## 3. Branches
 
@@ -168,7 +169,7 @@ Job spec fields and queue rules: [hardware.md § 4](hardware.md#4-gpu-job-queue)
 
 | Path | Contents | Tracked by |
 | :--- | :--- | :--- |
-| `data/raw/` | Unmodified downloads and raw API responses | DVC |
+| `data/raw/` | Unmodified downloads and raw LLM responses from local OpenAI-compatible servers | DVC |
 | `data/interim/` | PII-scrubbed and intermediate stage outputs; nothing enters here unscrubbed | DVC |
 | `data/processed/` | Final tables and splits (`train`, `val`, `test`); `test*` is readable only by `terser.eval.final` | DVC |
 | `data/gold/` | Human annotations, e.g. `data/gold/human_300.jsonl` | DVC |
@@ -181,8 +182,8 @@ Data cards: `docs/data_cards/<dataset-name>.md`. Model cards: `docs/model_cards/
 | Marker | Meaning | Run in default CI |
 | :--- | :--- | :---: |
 | `gpu` | Requires a CUDA device | no |
-| `api` | Calls a hosted LLM API (costs money) | no |
-| `network` | Needs network access other than LLM APIs (e.g. model or dataset download) | no |
+| `api` | Calls a paid hosted LLM API. No such keys exist in this project, so these tests are always skipped; the marker stays for optional paths such as Claude token counting | no |
+| `network` | Needs network access (e.g. model or dataset download) | no |
 | `slow` | Takes more than ~30 s on the dev laptop | no |
 
 Default local and CI command:
@@ -191,4 +192,6 @@ Default local and CI command:
 pytest -m "not gpu and not api and not network and not slow"
 ```
 
-CONTRIBUTING.md's minimum `pytest -m "not gpu and not api"` must also stay green.
+CONTRIBUTING.md's minimum `pytest -m "not gpu and not api"` must also stay green. Tests of `terser.llm`
+against the `local` provider use a fake in-process OpenAI-compatible server, so the default run needs no
+Ollama, llama.cpp or vLLM process.
