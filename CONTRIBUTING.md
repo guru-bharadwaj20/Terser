@@ -178,7 +178,7 @@ and comparable, and runs on CPU today and on the RTX 4500 Ada later without code
 | 0.2.7 | Pre-commit | black, ruff, mypy, nbstripout | `CPU` | Hook blocks a bad commit | ❌ |
 | 0.2.8 | Test scaffold | pytest with markers `gpu`, `api`, `slow`; fixtures of 20 casual prompts | `CPU` | `pytest -m "not gpu and not api"` green | ❌ |
 | 0.2.9 | CI | GitHub Actions: lint, types, CPU tests | `CPU` | CI green on a PR | ❌ |
-| 0.2.10 | GPU queue | `gpu_queue/` schema + validator + `python -m terser.gpu_queue {validate,dry-run,run}` | `CPU` | Dry-run orders two sample jobs correctly | ❌ |
+| 0.2.10 | GPU queue | `gpu_queue/` schema + validator + `python -m terser.gpu_queue {validate,dry-run,run}` | `CPU` | Dry-run orders two sample jobs correctly | ✅ |
 
 ### 0.3 Project Governance
 
@@ -956,7 +956,7 @@ which were not, and why.
 
 | Phase | Tasks | Checks | Done | Status |
 | :--- | :---: | :---: | :---: | :---: |
-| 0 — Foundations | 22 | 4 | 15 | ❌ |
+| 0 — Foundations | 22 | 4 | 16 | ❌ |
 | 1 — Framing and Concept Learning | 23 | 5 | 0 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 0 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 33 | 7 | 0 | ❌ |
@@ -970,7 +970,7 @@ which were not, and why.
 | 11 — MLOps | 26 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 12 | — | 0 | ❌ |
 | 13 — Documentation | 9 | — | 0 | ❌ |
-| **Total** | **256** | **66** | **15** | ❌ |
+| **Total** | **256** | **66** | **16** | ❌ |
 
 ---
 
