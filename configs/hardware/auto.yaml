@@ -1,0 +1,4 @@
+# Use cuda:0 if torch + CUDA are available, otherwise fall back to CPU.
+name: auto
+device: auto
+precision: auto

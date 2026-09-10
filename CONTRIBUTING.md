@@ -159,10 +159,10 @@ and comparable, and runs on CPU today and on the RTX 4500 Ada later without code
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 0.1.1 | Python environment | Python ≥ 3.11 venv, `pyproject.toml` with extras `dev` (CPU) and `gpu` (torch CUDA, vllm, peft, trl, bitsandbytes) | `CPU` | `pip install -e ".[dev]"` reproduces from scratch | ✅ |
-| 0.1.2 | Core stack | numpy, pandas, scipy, scikit-learn, lightgbm, cvxopt, matplotlib | `CPU` | Import smoke test passes | ❌ |
+| 0.1.2 | Core stack | numpy, pandas, scipy, scikit-learn, lightgbm, cvxopt, matplotlib | `CPU` | Import smoke test passes | ✅ |
 | 0.1.3 | Tokenizer stack | `tiktoken` (`o200k_base`), HF `tokenizers` (Qwen2.5, Llama-3.1 via ungated mirror), Anthropic token counting | `CPU` `API` | All four targets count a fixture string | ❌ |
-| 0.1.4 | Determinism harness | `set_seed()` for random / numpy / torch / CUDA, `PYTHONHASHSEED` | `CPU` | Two runs of a dummy experiment give identical metrics | ❌ |
-| 0.1.5 | Device abstraction | `terser.hardware.get_device(cfg)` with `device: auto`, no hard-coded `"cuda"` | `CPU` | `hardware=rtx4500ada` on CPU fails with a clear message; `auto` falls back to CPU | ❌ |
+| 0.1.4 | Determinism harness | `set_seed()` for random / numpy / torch / CUDA, `PYTHONHASHSEED` | `CPU` | Two runs of a dummy experiment give identical metrics | ✅ |
+| 0.1.5 | Device abstraction | `terser.hardware.get_device(cfg)` with `device: auto`, no hard-coded `"cuda"` | `CPU` | `hardware=rtx4500ada` on CPU fails with a clear message; `auto` falls back to CPU | ✅ |
 | 0.1.6 | Hardware profile doc | VRAM budget table above, GPU queue rules | `CPU` | `docs/hardware.md` written | ❌ |
 
 ### 0.2 Repository Layout
@@ -170,8 +170,8 @@ and comparable, and runs on CPU today and on the RTX 4500 Ada later without code
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 0.2.1 | Directory tree | `configs/ data/{raw,interim,processed,gold}/ docs/{decisions,checkpoints,derivations}/ notebooks/ src/terser/ gpu_queue/ tests/ reports/` | `CPU` | Tree created with `__init__.py` | ✅ |
-| 0.2.2 | Package modules | `src/terser/{tokenizers,operators,concept,data,judge,features,models/{classical,neural,ensembles,clustering,rewriter,rl},eval,hpo,serving,monitoring,pipelines}` | `CPU` | Each imports cleanly | ❌ |
-| 0.2.3 | Config system | Hydra configs incl. `configs/hardware/{cpu,rtx4500ada}.yaml`; no hard-coded paths or hyperparameters | `CPU` | Every script runs `python -m terser.x experiment=...` | ❌ |
+| 0.2.2 | Package modules | `src/terser/{tokenizers,operators,concept,data,judge,features,models/{classical,neural,ensembles,clustering,rewriter,rl},eval,hpo,serving,monitoring,pipelines}` | `CPU` | Each imports cleanly | ✅ |
+| 0.2.3 | Config system | Hydra configs incl. `configs/hardware/{cpu,rtx4500ada}.yaml`; no hard-coded paths or hyperparameters | `CPU` | Every script runs `python -m terser.x experiment=...` | ✅ |
 | 0.2.4 | Experiment tracking | Local MLflow server + Model Registry; tags `phase`, `task`, `hardware`, `data_hash`, `git_sha` | `CPU` | Dummy run visible with params, metrics, artifacts | ❌ |
 | 0.2.5 | Data versioning | DVC initialised with a local remote | `CPU` | `dvc status` clean | ❌ |
 | 0.2.6 | Task runner | `tasks.ps1` (Windows) + `Makefile` mirror: `data`, `train-classical`, `eval`, `test` | `CPU` | All targets execute | ❌ |
@@ -956,7 +956,7 @@ which were not, and why.
 
 | Phase | Tasks | Checks | Done | Status |
 | :--- | :---: | :---: | :---: | :---: |
-| 0 — Foundations | 22 | 4 | 2 | ❌ |
+| 0 — Foundations | 22 | 4 | 7 | ❌ |
 | 1 — Framing and Concept Learning | 23 | 5 | 0 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 0 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 33 | 7 | 0 | ❌ |
@@ -970,7 +970,7 @@ which were not, and why.
 | 11 — MLOps | 26 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 12 | — | 0 | ❌ |
 | 13 — Documentation | 9 | — | 0 | ❌ |
-| **Total** | **256** | **66** | **2** | ❌ |
+| **Total** | **256** | **66** | **7** | ❌ |
 
 ---
 
