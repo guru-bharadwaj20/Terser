@@ -1,0 +1,7 @@
+# Phase 0 smoke experiment: proves config composition end to end.
+name: hello
+phase: 0
+task: smoke
+params:
+  greeting: hello
+  repeat: 1
