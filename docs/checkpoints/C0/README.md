@@ -13,7 +13,7 @@
 
 | # | Check | Target | Measured | Result |
 | :---: | :--- | :--- | :--- | :---: |
-| C0.1 | CI | Green on `main` | Workflow `.github/workflows/ci.yml` pushed; the repository is private, so the run result could not be read without authenticated GitHub access. Local equivalents all pass: `ruff check .` clean, `black --check .` clean, `mypy src` "no issues found in 38 source files", CPU test suite green (C0.4) | ⏳ pending confirmation |
+| C0.1 | CI | Green on `main` | GitHub Actions run `34499625158` on `3b8582c`: **all 4 jobs green** (ubuntu-latest and windows-latest × Python 3.11 and 3.13: install, ruff, black, mypy, CPU tests). Earlier runs were cancelled only by newer pushes (`cancel-in-progress`) | ✅ |
 | C0.2 | Tokenizer correctness | `count_tokens` equals each official tokenizer on a 200-string fixture set exactly (100%) | `tests/test_tokenizers.py`: gpt-4o (`o200k_base`), qwen2.5 and llama-3.1 each match direct library encoding on **200/200** strings in `tests/fixtures/tokenizer_strings.jsonl`; snapshot `tests/fixtures/tokenizer_counts.json` also matches. Claude counting verified only against a mocked client (no API key available) | ✅ for the three local tokenizers |
 | C0.3 | Reproducibility | Same seed ⇒ identical metrics across two runs | `python -m terser.utils.dummy_experiment --seed 0` run twice in fresh subprocesses with different inherited `PYTHONHASHSEED` (1 and 12345): **byte-identical JSON metrics**; seeds 0 and 1 differ | ✅ |
 | C0.4 | CPU fallback | Full test suite passes on a machine with no GPU | `pytest -m "not gpu and not api"`: **136 passed, 1 deselected** (the single `gpu` test) in 93.7 s. `get_device(hardware=auto)` → `cpu`; `hardware=rtx4500ada` → `HardwareUnavailableError` with an actionable message (suggests `hardware=cpu`/`auto` or `gpu_queue/`) | ✅ |
@@ -28,4 +28,4 @@
 
 ## Decision
 
-`PASS WITH CONDITIONS`. Condition: C0.1 and row 0.2.9 flip to ✅ once a green GitHub Actions run on `main` is confirmed.
+`PASS`. The condition (a green GitHub Actions run on `main`) was met by run `34499625158`, so C0.1 and row 0.2.9 are ✅.

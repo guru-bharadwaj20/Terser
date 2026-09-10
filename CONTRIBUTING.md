@@ -183,7 +183,7 @@ and comparable, and runs on CPU today and on the RTX 4500 Ada later without code
 | 0.2.6 | Task runner | `tasks.ps1` (Windows) + `Makefile` mirror: `data`, `train-classical`, `eval`, `test` | `CPU` | All targets execute | ✅ |
 | 0.2.7 | Pre-commit | black, ruff, mypy, nbstripout | `CPU` | Hook blocks a bad commit | ✅ |
 | 0.2.8 | Test scaffold | pytest with markers `gpu`, `api`, `slow`; fixtures of 20 casual prompts | `CPU` | `pytest -m "not gpu and not api"` green | ✅ |
-| 0.2.9 | CI | GitHub Actions: lint, types, CPU tests | `CPU` | CI green on a PR | ❌ |
+| 0.2.9 | CI | GitHub Actions: lint, types, CPU tests | `CPU` | CI green on a PR | ✅ |
 | 0.2.10 | GPU queue | `gpu_queue/` schema + validator + `python -m terser.gpu_queue {validate,dry-run,run}` | `CPU` | Dry-run orders two sample jobs correctly | ✅ |
 
 ### 0.3 Project Governance
@@ -201,7 +201,7 @@ and comparable, and runs on CPU today and on the RTX 4500 Ada later without code
 
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
-| C0.1 | CI | Green on `main` | ❌ |
+| C0.1 | CI | Green on `main` | ✅ |
 | C0.2 | Tokenizer correctness | `count_tokens` equals each official tokenizer on a 200-string fixture set **exactly (100%)** | ✅ |
 | C0.3 | Reproducibility | Same seed ⇒ identical metrics across two runs | ✅ |
 | C0.4 | CPU fallback | Full test suite passes on a machine with no GPU | ✅ |
@@ -220,8 +220,8 @@ statistical model.
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 1.1.1 | Sub-problem taxonomy | Quality gate (binary classification) · span tagger (sequence labelling KEEP/DROP/REPLACE) · savings predictor (regression) · intent discovery (clustering) · rewriter (conditional generation) · rewrite policy (RL) | `CPU` | `docs/decisions/ADR-0002-problem-framing.md` reviewed | ❌ |
-| 1.1.2 | Task categories | `code`, `fact`, `reason`, `explain`, `creative`, `transform`, each with its quality measure (unit tests / EM-F1 / answer accuracy / rubric judge / pairwise judge / rubric + constraint checklist) | `CPU` | Category spec in `docs/categories.md` | ❌ |
-| 1.1.3 | Positive-class convention | Quality gate positive = **degraded**, so sensitivity = catching degradations, specificity = not rejecting good rewrites | `CPU` | Recorded in ADR-0002 and used by `terser.eval` | ❌ |
+| 1.1.2 | Task categories | `code`, `fact`, `reason`, `explain`, `creative`, `transform`, each with its quality measure (unit tests / EM-F1 / answer accuracy / rubric judge / pairwise judge / rubric + constraint checklist) | `CPU` | Category spec in `docs/categories.md` | ✅ |
+| 1.1.3 | Positive-class convention | Quality gate positive = **degraded**, so sensitivity = catching degradations, specificity = not rejecting good rewrites | `CPU` | Recorded in ADR-0002 and used by `terser.eval` | ✅ |
 
 ### 1.2 Rewrite Operators (the hypothesis-space building blocks)
 
@@ -962,8 +962,8 @@ which were not, and why.
 
 | Phase | Tasks | Checks | Done | Status |
 | :--- | :---: | :---: | :---: | :---: |
-| 0 — Foundations | 22 | 4 | 24 | ❌ |
-| 1 — Framing and Concept Learning | 23 | 5 | 0 | ❌ |
+| 0 — Foundations | 22 | 4 | 26 | ✅ |
+| 1 — Framing and Concept Learning | 23 | 5 | 2 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 0 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 33 | 7 | 0 | ❌ |
 | 4 — ANN and SVM | 29 | 5 | 0 | ❌ |
@@ -976,7 +976,7 @@ which were not, and why.
 | 11 — MLOps | 26 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 12 | — | 0 | ❌ |
 | 13 — Documentation | 9 | — | 0 | ❌ |
-| **Total** | **256** | **66** | **24** | ❌ |
+| **Total** | **256** | **66** | **28** | ❌ |
 
 ---
 
