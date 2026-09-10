@@ -196,9 +196,9 @@ and comparable, and runs on CPU today and on the RTX 4500 Ada later without code
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
 | C0.1 | CI | Green on `main` | ❌ |
-| C0.2 | Tokenizer correctness | `count_tokens` equals each official tokenizer on a 200-string fixture set **exactly (100%)** | ❌ |
-| C0.3 | Reproducibility | Same seed ⇒ identical metrics across two runs | ❌ |
-| C0.4 | CPU fallback | Full test suite passes on a machine with no GPU | ❌ |
+| C0.2 | Tokenizer correctness | `count_tokens` equals each official tokenizer on a 200-string fixture set **exactly (100%)** | ✅ |
+| C0.3 | Reproducibility | Same seed ⇒ identical metrics across two runs | ✅ |
+| C0.4 | CPU fallback | Full test suite passes on a machine with no GPU | ✅ |
 
 ---
 
@@ -956,7 +956,7 @@ which were not, and why.
 
 | Phase | Tasks | Checks | Done | Status |
 | :--- | :---: | :---: | :---: | :---: |
-| 0 — Foundations | 22 | 4 | 21 | ❌ |
+| 0 — Foundations | 22 | 4 | 24 | ❌ |
 | 1 — Framing and Concept Learning | 23 | 5 | 0 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 0 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 33 | 7 | 0 | ❌ |
@@ -970,7 +970,7 @@ which were not, and why.
 | 11 — MLOps | 26 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 12 | — | 0 | ❌ |
 | 13 — Documentation | 9 | — | 0 | ❌ |
-| **Total** | **256** | **66** | **21** | ❌ |
+| **Total** | **256** | **66** | **24** | ❌ |
 
 ---
 
