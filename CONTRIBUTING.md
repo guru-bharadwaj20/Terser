@@ -158,7 +158,7 @@ and comparable, and runs on CPU today and on the RTX 4500 Ada later without code
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 0.1.1 | Python environment | Python ≥ 3.11 venv, `pyproject.toml` with extras `dev` (CPU) and `gpu` (torch CUDA, vllm, peft, trl, bitsandbytes) | `CPU` | `pip install -e ".[dev]"` reproduces from scratch | ❌ |
+| 0.1.1 | Python environment | Python ≥ 3.11 venv, `pyproject.toml` with extras `dev` (CPU) and `gpu` (torch CUDA, vllm, peft, trl, bitsandbytes) | `CPU` | `pip install -e ".[dev]"` reproduces from scratch | ✅ |
 | 0.1.2 | Core stack | numpy, pandas, scipy, scikit-learn, lightgbm, cvxopt, matplotlib | `CPU` | Import smoke test passes | ❌ |
 | 0.1.3 | Tokenizer stack | `tiktoken` (`o200k_base`), HF `tokenizers` (Qwen2.5, Llama-3.1 via ungated mirror), Anthropic token counting | `CPU` `API` | All four targets count a fixture string | ❌ |
 | 0.1.4 | Determinism harness | `set_seed()` for random / numpy / torch / CUDA, `PYTHONHASHSEED` | `CPU` | Two runs of a dummy experiment give identical metrics | ❌ |
@@ -956,7 +956,7 @@ which were not, and why.
 
 | Phase | Tasks | Checks | Done | Status |
 | :--- | :---: | :---: | :---: | :---: |
-| 0 — Foundations | 22 | 4 | 0 | ❌ |
+| 0 — Foundations | 22 | 4 | 1 | ❌ |
 | 1 — Framing and Concept Learning | 23 | 5 | 0 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 0 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 33 | 7 | 0 | ❌ |
@@ -970,7 +970,7 @@ which were not, and why.
 | 11 — MLOps | 26 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 12 | — | 0 | ❌ |
 | 13 — Documentation | 9 | — | 0 | ❌ |
-| **Total** | **256** | **66** | **0** | ❌ |
+| **Total** | **256** | **66** | **1** | ❌ |
 
 ---
 
