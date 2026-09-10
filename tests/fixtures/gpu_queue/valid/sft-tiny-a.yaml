@@ -1,0 +1,10 @@
+id: sft-tiny-a
+phase: 8
+depends_on: [C7.1]
+command: python -m terser.models.rewriter.train experiment=sft_tiny hardware=rtx4500ada
+est_vram_gb: 4
+est_hours: 0.5
+exclusive: true
+priority: 1
+cpu_smoke_test: tests/test_gpu_queue.py
+outputs: [models/rewriter/sft-tiny-a/]

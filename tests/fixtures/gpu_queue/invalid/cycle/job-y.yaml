@@ -1,0 +1,10 @@
+id: job-y
+phase: 8
+depends_on: [job-x]
+command: python -c "print('y')"
+est_vram_gb: 2
+est_hours: 1
+exclusive: false
+priority: 1
+cpu_smoke_test: tests/test_gpu_queue.py
+outputs: []
