@@ -1,0 +1,36 @@
+# Environments and secrets
+.venv/
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Caches and run outputs
+.cache/
+mlruns/
+mlartifacts/
+experiments/
+outputs/
+multirun/
+*.ipynb_checkpoints
+
+# Data is tracked by DVC, never by git
+/data/raw/*
+/data/interim/*
+/data/processed/*
+!/data/**/.gitkeep
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

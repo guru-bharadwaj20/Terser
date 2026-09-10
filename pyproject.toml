@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "terser"
+version = "0.1.0"
+description = "Tokenizer-aware casual-to-efficient prompt rewriting"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "pandas",
+    "scipy",
+    "pyyaml",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "black",
+    "mypy",
+    "pre-commit",
+    "nbstripout",
+    "types-PyYAML",
+]
+# Installed only on the RTX 4500 Ada machine (Phase 7).
+gpu = ["torch", "transformers", "peft", "trl", "vllm", "bitsandbytes", "accelerate"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
