@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Protocol, cast
 
 from terser.llm.budget import Budget, Usage, approx_tokens
 from terser.llm.cache import ResponseCache, cache_key
@@ -58,7 +58,7 @@ def anthropic_transport(
     if system is not None:
         kwargs["system"] = system
     resp = anthropic.Anthropic().messages.create(
-        model=model, messages=messages, max_tokens=max_tokens, **kwargs
+        model=model, messages=cast(Any, messages), max_tokens=max_tokens, **kwargs
     )
     text = "".join(getattr(b, "text", "") for b in resp.content if b.type == "text")
     return TransportResult(text, resp.usage.input_tokens, resp.usage.output_tokens)
