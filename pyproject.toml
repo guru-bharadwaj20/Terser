@@ -45,3 +45,20 @@ gpu = ["torch", "transformers", "peft", "trl", "vllm", "bitsandbytes", "accelera
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+# numpy 2.x stubs use PEP 695 syntax, which mypy only parses when targeting >= 3.12.
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_ignores = true
