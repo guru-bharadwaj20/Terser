@@ -221,7 +221,7 @@ statistical model.
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 1.1.1 | Sub-problem taxonomy | Quality gate (binary classification) · span tagger (sequence labelling KEEP/DROP/REPLACE) · savings predictor (regression) · intent discovery (clustering) · rewriter (conditional generation) · rewrite policy (RL) | `CPU` | `docs/decisions/ADR-0002-problem-framing.md` reviewed | ❌ |
 | 1.1.2 | Task categories | `code`, `fact`, `reason`, `explain`, `creative`, `transform`, each with its quality measure (unit tests / EM-F1 / answer accuracy / rubric judge / pairwise judge / rubric + constraint checklist) | `CPU` | Category spec in `docs/categories.md` | ✅ |
-| 1.1.3 | Positive-class convention | Quality gate positive = **degraded**, so sensitivity = catching degradations, specificity = not rejecting good rewrites | `CPU` | Recorded in ADR-0002 and used by `terser.eval` | ❌ |
+| 1.1.3 | Positive-class convention | Quality gate positive = **degraded**, so sensitivity = catching degradations, specificity = not rejecting good rewrites | `CPU` | Recorded in ADR-0002 and used by `terser.eval` | ✅ |
 
 ### 1.2 Rewrite Operators (the hypothesis-space building blocks)
 
@@ -963,7 +963,7 @@ which were not, and why.
 | Phase | Tasks | Checks | Done | Status |
 | :--- | :---: | :---: | :---: | :---: |
 | 0 — Foundations | 22 | 4 | 26 | ✅ |
-| 1 — Framing and Concept Learning | 23 | 5 | 1 | ❌ |
+| 1 — Framing and Concept Learning | 23 | 5 | 2 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 0 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 33 | 7 | 0 | ❌ |
 | 4 — ANN and SVM | 29 | 5 | 0 | ❌ |
@@ -976,7 +976,7 @@ which were not, and why.
 | 11 — MLOps | 26 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 12 | — | 0 | ❌ |
 | 13 — Documentation | 9 | — | 0 | ❌ |
-| **Total** | **256** | **66** | **27** | ❌ |
+| **Total** | **256** | **66** | **28** | ❌ |
 
 ---
 
