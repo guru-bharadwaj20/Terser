@@ -33,6 +33,7 @@ dev = [
     "pre-commit",
     "nbstripout",
     "types-PyYAML",
+    "dvc",
 ]
 openai = ["openai"]
 # Installed only on the RTX 4500 Ada machine (Phase 7).

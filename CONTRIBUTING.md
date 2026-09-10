@@ -173,7 +173,7 @@ and comparable, and runs on CPU today and on the RTX 4500 Ada later without code
 | 0.2.2 | Package modules | `src/terser/{tokenizers,operators,concept,data,judge,features,models/{classical,neural,ensembles,clustering,rewriter,rl},eval,hpo,serving,monitoring,pipelines}` | `CPU` | Each imports cleanly | ✅ |
 | 0.2.3 | Config system | Hydra configs incl. `configs/hardware/{cpu,rtx4500ada}.yaml`; no hard-coded paths or hyperparameters | `CPU` | Every script runs `python -m terser.x experiment=...` | ✅ |
 | 0.2.4 | Experiment tracking | Local MLflow server + Model Registry; tags `phase`, `task`, `hardware`, `data_hash`, `git_sha` | `CPU` | Dummy run visible with params, metrics, artifacts | ❌ |
-| 0.2.5 | Data versioning | DVC initialised with a local remote | `CPU` | `dvc status` clean | ❌ |
+| 0.2.5 | Data versioning | DVC initialised with a local remote | `CPU` | `dvc status` clean | ✅ |
 | 0.2.6 | Task runner | `tasks.ps1` (Windows) + `Makefile` mirror: `data`, `train-classical`, `eval`, `test` | `CPU` | All targets execute | ❌ |
 | 0.2.7 | Pre-commit | black, ruff, mypy, nbstripout | `CPU` | Hook blocks a bad commit | ❌ |
 | 0.2.8 | Test scaffold | pytest with markers `gpu`, `api`, `slow`; fixtures of 20 casual prompts | `CPU` | `pytest -m "not gpu and not api"` green | ❌ |
@@ -956,7 +956,7 @@ which were not, and why.
 
 | Phase | Tasks | Checks | Done | Status |
 | :--- | :---: | :---: | :---: | :---: |
-| 0 — Foundations | 22 | 4 | 14 | ❌ |
+| 0 — Foundations | 22 | 4 | 15 | ❌ |
 | 1 — Framing and Concept Learning | 23 | 5 | 0 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 0 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 33 | 7 | 0 | ❌ |
@@ -970,7 +970,7 @@ which were not, and why.
 | 11 — MLOps | 26 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 12 | — | 0 | ❌ |
 | 13 — Documentation | 9 | — | 0 | ❌ |
-| **Total** | **256** | **66** | **14** | ❌ |
+| **Total** | **256** | **66** | **15** | ❌ |
 
 ---
 
