@@ -47,6 +47,8 @@ Every run sets all of these tags. A run missing any of them fails the tracking a
 | `row` | Plan row id(s), comma-separated | `3.3.4` |
 | `task` | Same value as the run-name `task` field | `gate` |
 | `hardware` | `cpu`, `rtx4500ada` or `rtx4090` (from the `hardware` config) | `cpu` |
+| `host` | Machine that produced the run. Required on `rtx4090` runs, since `worker-1` and `worker-2` carry different driver and torch versions | `worker-2` |
+
 
 | `data_hash` | DVC hash of the input dataset version | `3f2a9c…` |
 | `git_sha` | Full commit SHA of the code; runs from a dirty tree also set `git_dirty=true` | `40c00d9…` |
