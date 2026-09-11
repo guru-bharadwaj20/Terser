@@ -1,0 +1,82 @@
+# Rubric for `explain` (plan row 2.3.2). Spec: docs/categories.md section 3.4, docs/rubrics.md.
+category: explain
+version: 1
+role: primary
+summary: >-
+  Explanations, comparisons, advice and analysis in prose. No automatic metric: the judge with
+  this rubric is the whole decision. A rewrite is not worse if the verdict is tie-or-better in
+  both orders and no dimension is lower by 2 or more.
+dimensions:
+  - name: coverage
+    description: Every asked sub-question and comparison axis is answered.
+    weight: 0.25
+    anchors:
+      1: The main question is not answered.
+      2: The main question is answered; most sub-questions are missing.
+      3: One asked sub-question or comparison axis is missing.
+      4: Everything is addressed; one part is only touched on.
+      5: Every sub-question and comparison axis is answered.
+  - name: correctness
+    description: Statements are accurate; no misleading simplifications.
+    weight: 0.3
+    anchors:
+      1: Central claims are wrong.
+      2: A significant error that would mislead the reader.
+      3: Mostly accurate with a notable imprecision.
+      4: Accurate with a minor slip.
+      5: Fully accurate.
+  - name: depth
+    description: Level of detail fits the question; not truncated, not padded.
+    weight: 0.2
+    anchors:
+      1: Superficial or cut off.
+      2: Thin; key mechanism or reason missing.
+      3: Adequate but uneven.
+      4: Good depth with minor gaps or padding.
+      5: Right depth throughout.
+  - name: constraint_adherence
+    description: Follows explicit length, format and structure constraints.
+    weight: 0.15
+    anchors:
+      1: Ignores explicit constraints.
+      2: Violates a major constraint (e.g. far over the requested length).
+      3: One constraint partly followed.
+      4: All followed with a small deviation.
+      5: Every explicit constraint followed, or none were given.
+  - name: audience_fit
+    description: Pitched at the audience or level the user asked for ("like I'm not a programmer").
+    weight: 0.1
+    anchors:
+      1: Wrong audience entirely (e.g. jargon-heavy for a beginner who asked for plain words).
+      2: Mostly mismatched to the requested level.
+      3: Mixed; parts are pitched wrong.
+      4: Well pitched with a few lapses.
+      5: Consistently pitched at the requested audience, or natural when none was given.
+degradation_rules:
+  - id: dropped_tone_cue
+    degradation: false
+    description: >-
+      Pure tone wording with no audience or level meaning is not content in explain (only creative
+      treats tone as content).
+  - id: dropped_politeness
+    degradation: false
+    description: Removing please/thanks/apologies or hedging with no semantic effect.
+  - id: dropped_filler
+    degradation: false
+    description: Removing filler, meta-talk or exact duplicate requirements.
+  - id: dropped_audience_cue
+    degradation: true
+    description: Dropping an audience or level cue ("like i'm not a programmer", "for a beginner").
+  - id: dropped_subquestion
+    degradation: true
+    description: Dropping a sub-question or comparison axis ("when would i use one over the other").
+  - id: dropped_payload
+    degradation: true
+    description: Dropping or altering payload (code, error message) that is being explained.
+hard_fails:
+  - id: violates_explicit_constraint
+    description: >-
+      The answer violates an explicit constraint in the user request (length, format, audience,
+      "no code", "in 3 paragraphs").
+  - id: rubric_drop_of_two
+    description: Any rubric dimension scores 2 or more points lower than the other answer's.

@@ -1,0 +1,74 @@
+# Rubric for `code` (plan row 2.3.2). Spec: docs/categories.md section 3.1, docs/rubrics.md.
+category: code
+version: 1
+role: tie_break
+summary: >-
+  Code is the main deliverable. The unit-test pass rate decides first; the rubric guides the
+  judge's tie-break between two answers.
+dimensions:
+  - name: correctness
+    description: The code does what was asked, including edge cases the user named.
+    weight: 0.4
+    anchors:
+      1: Does not run or does something else entirely.
+      2: Runs but is wrong on typical inputs.
+      3: Correct on typical inputs; wrong on a named or obvious edge case.
+      4: Correct including named edge cases; a minor unnamed edge case is mishandled.
+      5: Correct on all reasonable inputs, including every edge case the user named.
+  - name: completeness
+    description: Every requested feature, function and part of the deliverable is present.
+    weight: 0.25
+    anchors:
+      1: The main requested code is missing.
+      2: Only a fragment or pseudocode is given.
+      3: The main function is present; a requested feature or part (tests, explanation) is missing.
+      4: Everything is present; one secondary part is thin.
+      5: Every requested feature and part is present.
+  - name: constraint_adherence
+    description: >-
+      Uses the requested language, library, version, function name, signature and input/output
+      format.
+    weight: 0.25
+    anchors:
+      1: Wrong language, or ignores the requested signature/format entirely.
+      2: Right language but a requested library, name or signature is ignored.
+      3: One explicit constraint is only partly followed.
+      4: All explicit constraints followed with a cosmetic deviation (e.g. parameter name).
+      5: Every explicit constraint followed exactly.
+  - name: code_quality
+    description: Readable, idiomatic, reasonably efficient code without needless complexity.
+    weight: 0.1
+    anchors:
+      1: Unreadable or grossly inefficient.
+      2: Hard to follow; clear bad practices.
+      3: Acceptable but clumsy.
+      4: Clean with minor style issues.
+      5: Clean, idiomatic and appropriately efficient.
+degradation_rules:
+  - id: dropped_tone_cue
+    degradation: false
+    description: Tone wording does not change what code is correct.
+  - id: dropped_politeness
+    degradation: false
+    description: Removing please/thanks/apologies or hedging with no semantic effect.
+  - id: dropped_filler
+    degradation: false
+    description: Removing filler, meta-talk or exact duplicate requirements.
+  - id: changed_signature_or_language
+    degradation: true
+    description: >-
+      Dropping or changing the function name, signature, language, library, version or
+      input/output format.
+  - id: dropped_edge_case
+    degradation: true
+    description: Dropping an edge case the user named ("handle empty lists").
+  - id: altered_payload_code
+    degradation: true
+    description: Any change to a code block the user supplied.
+hard_fails:
+  - id: violates_explicit_constraint
+    description: >-
+      The answer violates an explicit constraint in the user request (language, library,
+      signature, "no external packages", "one-liner").
+  - id: does_not_run
+    description: The code has a syntax error or cannot run while the other answer's code can.

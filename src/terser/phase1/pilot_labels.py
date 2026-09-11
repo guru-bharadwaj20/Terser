@@ -10,7 +10,8 @@ plus the cumulative stacks ``FHC``, ``FHCI``, ``FHCID``, ``FHCIDS``, ``FHCIDSL``
    original prompt's output is generated once and reused by all subsets);
 3. judge (original output, rewrite output) in both A/B orders with
    :class:`terser.judge.pairwise.PairwiseJudge`;
-4. label: ``preserved`` iff tie-or-rewrite-better in both orders (row 2.3.4, judge part);
+4. label: ``preserved`` iff tie-or-rewrite-better in both orders (row 2.3.4, judge part, via
+   :func:`terser.judge.labels.label_pair_from_result` with no task metric);
 5. append a record to ``labels.jsonl`` and write ``labels_review.csv`` for human review of every
    label (the CSV lists all rows; ``needs_human_review`` marks the ones to look at first).
 
@@ -47,6 +48,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
+from terser.judge.labels import label_pair_from_result
 from terser.judge.pairwise import PairwiseJudge, PairwiseResult
 from terser.llm import BudgetExceededError, LLMClient, LocalLLMUnavailableError, cache_key
 
@@ -379,7 +381,7 @@ def _record(item: PilotItem, result: PairwiseResult, settings: PilotSettings) ->
         "judge_model": settings.judge_model,
         "judge_prompt_version": settings.prompt_version,
         "verdicts": result.verdicts(),
-        "label": result.label,
+        "label": label_pair_from_result(None, result).label,
         "stand_in": settings.stand_in,
         "needs_human_review": bool(reasons),
         "review_reasons": reasons,
@@ -474,7 +476,9 @@ def run_pilot(
             rewrite_out = _target_output(client, settings, item.rewrite, counter)
             if settings.stage == "respond":
                 continue
-            result = judge.judge_pair(item.original, original_out, rewrite_out)
+            result = judge.judge_pair(
+                item.original, original_out, rewrite_out, category=item.category
+            )
             for call in (result.original_first, result.rewrite_first):
                 summary.llm_calls += call.attempts
                 summary.cached_calls += call.attempts if call.cached else 0

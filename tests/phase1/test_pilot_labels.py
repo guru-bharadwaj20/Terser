@@ -265,9 +265,9 @@ def test_budget_cap_stops_before_calling(tmp_path: Path, settings: PilotSettings
 
 def test_budget_cap_keeps_completed_records(tmp_path: Path, settings: PilotSettings) -> None:
     fake = FakeLLM()
-    # Each target call estimates ~max_target_tokens; allow a handful of calls only.
+    # Enough for a few target and judge calls (judge prompts include the rubric), not all 13.
     small = replace(settings, max_target_tokens=20, max_judge_tokens=20)
-    client = make_client(tmp_path, fake, max_tokens=400)
+    client = make_client(tmp_path, fake, max_tokens=1100)
     with pytest.raises(BudgetExceededError):
         run_pilot(small, client, apply_ops=fake_apply_ops)
     records = read_jsonl(settings.smoke_dir / "labels.jsonl")
