@@ -19,7 +19,6 @@
 | `CPU` | Runs on the dev laptop. Start immediately |
 | `LLM` | Needs text generation from a **local open-source model** behind an OpenAI-compatible server (`terser.llm` provider `local`). No paid APIs. Results that feed labels, metrics or reports come only from GPU-served models (vLLM on the RTX 4500 Ada); on the CPU laptop these rows may only be smoke-tested with tiny models |
 | `GPU` | Needs a **24 GB Ada-class card**: one of Vivian's RTX 4090 workers (`worker-1`, `worker-2`), or the RTX 4500 Ada once it is connected. Write the code, smoke-test on CPU with a tiny config, and queue the job |
-
 | `CPU→GPU` | Runs at reduced scale on CPU now, re-run at full scale once the GPU is connected |
 | 🚧 | **Hard gate**: failing it blocks every dependent phase, with no conditional pass |
 
@@ -77,8 +76,6 @@ and measurements: [docs/hardware.md § 1](docs/hardware.md#1-resources).
 > **Not yet reflected in the phase gates.** The plan text below, the Phase 7 targets and risk **R03**
 > still describe a single, unconnected GPU. Changing a checkpoint target or the critical path needs
 > an ADR (see Gate rule), so that revision is tracked separately and is not assumed here.
-
-
 
 ### GPU job queue (until the card is connected)
 
@@ -1008,18 +1005,20 @@ are shared out-of-band and never committed.
 
 ### Getting started
 
-
 ```bash
 git clone https://github.com/guru-bharadwaj20/Terser.git && cd Terser
 python -m venv .venv
 # Windows: .venv\Scripts\Activate.ps1    Linux/macOS: source .venv/bin/activate
 pip install -e ".[dev]"            # CPU
 pip install -e ".[dev,gpu]"        # on a GPU machine (RTX 4090 workers, or the RTX 4500 Ada)
-
 cp .env.example .env               # HF_TOKEN, TERSER_LOCAL_LLM_URL (never commit)
 pre-commit install
 pytest -m "not gpu and not api"
 ```
+
+On the RTX 4090 workers the system interpreter is Python 3.10, below this project's minimum.
+Create the environment with an explicit 3.11 or newer interpreter (`uv venv --python 3.11` on
+`worker-1`, `/usr/bin/python3.11 -m venv .venv` on `worker-2`).
 
 ### Picking up work
 
