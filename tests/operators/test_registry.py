@@ -74,28 +74,27 @@ def test_unknown_code_raises_helpful_key_error() -> None:
         apply_ops("Explain DNS.", "FX")
 
 
-# Known non-idempotence (reported, not masked): C's "quick question," intro is anchored to the
-# sentence start, so in "Hey, quick question, and ..." it is hidden behind the greeting that F
-# only removes later in the canonical order; the second pass then strips it (leaving "And ...").
-_KNOWN_NON_IDEMPOTENT = {"fact-01"}
-IDEMPOTENCE_CASES = [
-    (
-        pytest.param(
-            row,
-            id=row["id"],
-            marks=pytest.mark.xfail(strict=True, reason="C intro hidden behind greeting"),
-        )
-        if row["id"] in _KNOWN_NON_IDEMPOTENT
-        else pytest.param(row, id=row["id"])
-    )
-    for row in CASUAL
-]
+PILOT_PATH = Path(__file__).resolve().parents[2] / "data" / "pilot" / "prompts.jsonl"
 
 
-@pytest.mark.parametrize("row", IDEMPOTENCE_CASES)
+@pytest.mark.parametrize("row", CASUAL, ids=CASUAL_IDS)
 def test_full_stack_idempotent(row: dict[str, Any]) -> None:
     once = apply_ops(row["prompt"], CANONICAL_ORDER)
     assert apply_ops(once, CANONICAL_ORDER) == once
+
+
+@pytest.mark.skipif(not PILOT_PATH.exists(), reason="pilot prompts not present")
+def test_full_stack_idempotent_on_pilot_prompts() -> None:
+    with open(PILOT_PATH, encoding="utf-8") as fh:
+        rows = [json.loads(line) for line in fh if line.strip()]
+    assert len(rows) == 500
+    failures = []
+    for row in rows:
+        once = apply_ops(row["prompt"], CANONICAL_ORDER, target=None)
+        twice = apply_ops(once, CANONICAL_ORDER, target=None)
+        if twice != once:
+            failures.append((row["id"], once, twice))
+    assert failures == []
 
 
 @pytest.mark.parametrize("row", CASUAL, ids=CASUAL_IDS)
