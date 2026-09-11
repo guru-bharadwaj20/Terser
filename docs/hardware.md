@@ -174,6 +174,11 @@ outputs: [models/rewriter/sft-qwen0.5b-full/, mlruns/]
    `worker-2`. With two cards available, run one queue per host (`--dir gpu_queue/worker-1`, and so
    on) and record the host in the run's `host` tag. Giving the spec a real `host` field, so both
    cards drain from one queue, is open design work rather than something the current code supports.
+8. The validator's VRAM ceiling is read from `configs/hardware/rtx4500ada.yaml` only, which is
+   hardcoded in `terser.gpu_queue.queue`. Both profiles set `max_vram_gb: 22`, so jobs aimed at a
+   4090 are still checked against the right number today. If the two ever diverge, that path has to
+   become config-driven.
+
 
 
 ---
