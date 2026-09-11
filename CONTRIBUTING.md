@@ -253,7 +253,7 @@ statistical model.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 1.4.1 | Pilot prompt set | **500 casual prompts**: hand-written seeds plus casualisation of clean instructions (Qwen2.5 on vLLM; before the GPU, hand-written seeds only), balanced across categories | `CPU` `LLM` | `data/pilot/prompts.jsonl` + data card | ❌ |
+| 1.4.1 | Pilot prompt set | **500 casual prompts**: hand-written seeds plus casualisation of clean instructions (Qwen2.5 on vLLM; before the GPU, hand-written seeds only), balanced across categories | `CPU` `LLM` | `data/pilot/prompts.jsonl` + data card | ✅ |
 | 1.4.2 | Per-operator savings | Δtokens % for each operator and operator stack on gpt-4o (tokenizer only), qwen2.5, llama-3.1 | `CPU` | `reports/p1_tokenizer_study.{csv,md}` | ❌ |
 | 1.4.3 | Operator applicability | Share of prompts each operator changes, per category | `CPU` | Table in report | ❌ |
 | 1.4.4 | Cross-tokenizer agreement | Spearman ρ of per-(prompt, operator) savings for every tokenizer pair | `CPU` | Table in report | ❌ |
@@ -963,7 +963,7 @@ which were not, and why.
 | Phase | Tasks | Checks | Done | Status |
 | :--- | :---: | :---: | :---: | :---: |
 | 0 — Foundations | 22 | 4 | 26 | ✅ |
-| 1 — Framing and Concept Learning | 23 | 5 | 7 | ❌ |
+| 1 — Framing and Concept Learning | 23 | 5 | 8 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 0 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 33 | 7 | 0 | ❌ |
 | 4 — ANN and SVM | 29 | 5 | 0 | ❌ |
@@ -976,7 +976,7 @@ which were not, and why.
 | 11 — MLOps | 26 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 12 | — | 0 | ❌ |
 | 13 — Documentation | 9 | — | 0 | ❌ |
-| **Total** | **256** | **66** | **33** | ❌ |
+| **Total** | **256** | **66** | **34** | ❌ |
 
 ---
 
