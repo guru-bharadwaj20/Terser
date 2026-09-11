@@ -89,9 +89,11 @@ resolved by `terser.hardware.get_device(cfg)` (row 0.1.5).
 
 | Config | Intended machine | Behaviour |
 | :--- | :--- | :--- |
-| `configs/hardware/cpu.yaml` | Dev laptop, CI | Forces CPU, fp32 |
-| `configs/hardware/rtx4500ada.yaml` | GPU machine | Requires a CUDA device; bf16 enabled. On a machine without CUDA, `get_device` raises with a clear message instead of silently falling back |
-| `configs/hardware/auto.yaml` | Either | Uses CUDA if available, otherwise CPU |
+| `configs/hardware/cpu.yaml` | Dev laptop or workstation, CI | Forces CPU, fp32 |
+| `configs/hardware/rtx4500ada.yaml` | RTX 4500 Ada machine | Requires a CUDA device; bf16 enabled. On a machine without CUDA, `get_device` raises with a clear message instead of silently falling back |
+| `configs/hardware/rtx4090.yaml` | `worker-1` / `worker-2` | Same contract as the RTX 4500 Ada profile: requires CUDA, bf16, 22 GB usable ceiling |
+| `configs/hardware/auto.yaml` | Any | Uses CUDA if available, otherwise CPU |
+
 
 ```powershell
 python -m terser.x experiment=<name> hardware=cpu          # laptop
