@@ -247,7 +247,7 @@ statistical model.
 | 1.3.5 | Version space enumeration | All hypotheses between S and G | `CPU` | Enumerator matches brute force on a 5-attribute toy space | ✅ |
 | 1.3.6 | Pilot labels | **150 prompts (25/category)** × operator subsets (7 singletons + `FHC`, `FHCI`, `FHCID`, `FHCIDS`, all) → target output → position-swapped pilot judge → human review of every label | `LLM` | `data/pilot/labels.jsonl` + human-reviewed CSV | ❌ |
 | 1.3.7 | Version space per category | Run Candidate-Elimination for each of the 6 categories on 1.3.6 | `CPU` | `reports/p1_version_spaces.md` with S, G, size or collapse diagnosis | ❌ |
-| 1.3.8 | Inductive bias write-up | What the conjunctive language cannot express (e.g. "drop hedging *unless* tone matters in creative prompts") and why this motivates Phases 3–5 | `CPU` | Section in `reports/p1_version_spaces.md` | ❌ |
+| 1.3.8 | Inductive bias write-up | What the conjunctive language cannot express (e.g. "drop hedging *unless* tone matters in creative prompts") and why this motivates Phases 3–5 | `CPU` | Section in `reports/p1_version_spaces.md` | ✅ |
 
 ### 1.4 Pilot Tokenizer Economics
 
@@ -963,7 +963,7 @@ which were not, and why.
 | Phase | Tasks | Checks | Done | Status |
 | :--- | :---: | :---: | :---: | :---: |
 | 0 — Foundations | 22 | 4 | 26 | ✅ |
-| 1 — Framing and Concept Learning | 23 | 5 | 16 | ❌ |
+| 1 — Framing and Concept Learning | 23 | 5 | 17 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 0 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 33 | 7 | 0 | ❌ |
 | 4 — ANN and SVM | 29 | 5 | 0 | ❌ |
@@ -976,7 +976,7 @@ which were not, and why.
 | 11 — MLOps | 26 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 12 | — | 0 | ❌ |
 | 13 — Documentation | 9 | — | 0 | ❌ |
-| **Total** | **256** | **66** | **42** | ❌ |
+| **Total** | **256** | **66** | **43** | ❌ |
 
 ---
 
