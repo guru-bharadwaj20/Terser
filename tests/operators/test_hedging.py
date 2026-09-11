@@ -30,12 +30,20 @@ POSITIVE = [
     ),
     ("Write the test, if you don't mind. Thanks a lot :)", "Write the test."),
     ('Please print "please" twice.', 'Print "please" twice.'),
+    # Leading interjections (removed later by F) do not hide a sentence-start hedge.
+    ("hmm, maybe you can help?", "Hmm, you can help?"),
+    ("Ok so perhaps you could explain X?", "Ok so you could explain X?"),
+    # Trailing laughter (left for F) does not make "thanks" part of the content.
+    ("Make it 8 lines. thanks lol", "Make it 8 lines. Lol"),
 ]
 
 NOOP = [
     "Maybe the cache is stale.",
     "Write a thank you note to my aunt.",
     "Thanks!",
+    "Hmm, maybe the cache is stale.",
+    "Tom maybe you could help.",
+    "thanks lol is my catchphrase",
     "I want to please my boss.",
     'Print "please" in `please()`',
     "Thank you for your help with the code",
