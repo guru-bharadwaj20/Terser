@@ -1,0 +1,55 @@
+# Row 2.4.3 / C2.9: compute estimates for the Phase 2 GPU stages, read by
+#   python -m terser.phase2.compute_report --estimates configs/experiment/p2_compute_estimates.yaml \
+#     --ledger .cache/llm_ledger.json --labels data/processed/labels.jsonl
+#
+# !!! PLACEHOLDER ESTIMATES !!!
+# The numbers under `stages` are rough back-of-envelope placeholders written before the GPU
+# (RTX 4500 Ada) was connected. They are NOT measured. While `placeholder: true`, the C2.9 cost
+# line in reports/p2_cost.md is marked "not valid". Replace them with the estimate you commit to
+# BEFORE the real GPU run (e.g. from a timed 100-prompt batch per stage), set placeholder: false,
+# and do not edit them after the run: C2.9 compares actual spend against these numbers.
+#
+# Placeholder arithmetic (all assumptions, vLLM batch inference on one 24 GB GPU):
+#   casualise:  ~1,300 clean prompts x 5 styles, ~150 generated tokens each, 32B-AWQ at ~400 tok/s
+#   candidates: ~6,000 prompts x 3 LLM rewrites, ~120 generated tokens each, 32B-AWQ at ~400 tok/s
+#   respond:    ~6,000 x (1 original + 6 candidates) x 2 targets, ~300 tokens each, 7-8B at ~2,500
+#               tok/s (creative prompts sample n = 3, folded into the average)
+#   judge:      ~6,000 x 6 candidates x 2 targets x 2 orders, ~60 tokens each, 32B-AWQ at ~400 tok/s
+name: p2_compute_estimates
+phase: 2
+row: "2.4.3"
+task: computereport
+params:
+  placeholder: true
+  # Spend tolerance for C2.9 ("spend within +/-20% of estimate"). Spend = GPU-seconds: every LLM
+  # call goes to a local open model, so there is no USD cost (docs/conventions.md).
+  tolerance: 0.20
+  labelled_pairs: 72000          # prompts x candidates x targets that receive a label (2.3.4)
+  stages:
+    casualise:  {generated_tokens: 975000, gpu_seconds: 2440}
+    candidates: {generated_tokens: 2160000, gpu_seconds: 5400}
+    respond:    {generated_tokens: 25200000, gpu_seconds: 10080}
+    judge:      {generated_tokens: 8640000, gpu_seconds: 21600}
+  # Which MLflow runs belong to which stage: the `task` tag set by terser.tracking.start_run.
+  mlflow:
+    experiment: phase2
+    tasks:
+      casualise: casualise
+      candidates: candidates
+      respond: respond
+      judge: judge
+  # Ledger entries (src/terser/llm/budget.py) carry no stage. Attribution order:
+  #   1. a per-stage ledger file given as --ledger STAGE=PATH (recommended for the GPU run:
+  #      LLMClient(..., ledger_path=".cache/ledger_<stage>.json"));
+  #   2. a `stage` key on the entry, if a future client writes one;
+  #   3. ledger_phases: ledger phase key -> stage;
+  #   4. models: model name -> stage (ambiguous when two stages share a model, e.g. the 32B
+  #      rewriter and the 32B judge, so prefer 1).
+  # Anything else is reported as "unattributed".
+  attribution:
+    ledger_phases: {}
+    models:
+      meta-llama/Llama-3.1-8B-Instruct: respond
+      Qwen/Qwen2.5-7B-Instruct: respond
+  # CPU stand-in models (row 2.2.4 smoke tests): their ledger entries are excluded from totals.
+  stand_in_models: ["qwen2.5:0.5b", "qwen2.5:1.5b"]
