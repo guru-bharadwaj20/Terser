@@ -1,0 +1,60 @@
+# Rubric for `fact` (plan row 2.3.2). Spec: docs/categories.md section 3.2, docs/rubrics.md.
+category: fact
+version: 1
+role: tie_break
+summary: >-
+  Short, verifiable answers. The automatic metric (exact match / token F1) decides first; the
+  rubric guides the judge's tie-break between two answers.
+dimensions:
+  - name: correctness
+    description: Every stated fact (name, date, number, unit, scope) is true for the question asked.
+    weight: 0.55
+    anchors:
+      1: The main fact is wrong or missing.
+      2: The main fact is right but stated with a wrong unit, scope or qualifier that changes it.
+      3: The main fact is right; a secondary detail is wrong.
+      4: All facts are right; one is vague or imprecise (e.g. a rounded number without saying so).
+      5: All facts are right and precise.
+  - name: completeness
+    description: Every fact the user asked for is given, in the unit or scope they asked for.
+    weight: 0.3
+    anchors:
+      1: None of the asked facts are given.
+      2: Fewer than half of the asked facts are given.
+      3: The main fact is given; another asked fact or the requested unit/scope is missing.
+      4: All asked facts are given; one needs to be inferred from surrounding text.
+      5: All asked facts are given explicitly, in the requested unit and scope.
+  - name: concision
+    description: The answer is easy to find; extra text does not bury or contradict it.
+    weight: 0.15
+    anchors:
+      1: The answer cannot be found, or two contradictory answers are given.
+      2: The answer is buried in long unrelated text.
+      3: The answer is present with noticeable padding.
+      4: Short, with a little unnecessary context.
+      5: Direct answer, with at most a brief supporting sentence.
+degradation_rules:
+  - id: dropped_tone_cue
+    degradation: false
+    description: Tone or mood wording does not change a factual answer.
+  - id: dropped_politeness
+    degradation: false
+    description: Removing please/thanks/apologies or hedging with no semantic effect.
+  - id: dropped_filler
+    degradation: false
+    description: Removing filler, meta-talk or exact duplicate requirements.
+  - id: dropped_scope_qualifier
+    degradation: true
+    description: >-
+      Dropping an entity, date, unit, qualifier or scope ("in Fahrenheit", "in 2019", "in the UK")
+      that changes the reference answer.
+  - id: merged_questions
+    degradation: true
+    description: Merging or dropping one of several asked questions.
+hard_fails:
+  - id: violates_explicit_constraint
+    description: >-
+      The answer violates an explicit constraint in the user request (e.g. requested unit, "just
+      the year", "one word").
+  - id: wrong_answer
+    description: The main fact is wrong while the other answer's is right.

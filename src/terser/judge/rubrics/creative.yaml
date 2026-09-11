@@ -1,0 +1,76 @@
+# Rubric for `creative` (plan row 2.3.2). Spec: docs/categories.md section 3.5, docs/rubrics.md.
+category: creative
+version: 1
+role: primary
+summary: >-
+  Open-ended writing where style matters. No automatic metric: the pairwise judge decides, with
+  this rubric as guidance. Tone cues are content in this category.
+dimensions:
+  - name: tone_adherence
+    description: Matches every requested tone, mood and style cue ("bittersweet", "funny", "nothing too cheesy").
+    weight: 0.3
+    anchors:
+      1: Opposite or unrelated tone.
+      2: Requested tone is mostly absent.
+      3: Requested tone present but one cue is ignored.
+      4: All tone cues followed with a small lapse.
+      5: Every tone, mood and style cue is followed throughout.
+  - name: form_constraints
+    description: Follows form constraints (length, rhyme, meter, format, number of items).
+    weight: 0.25
+    anchors:
+      1: Ignores the requested form.
+      2: Violates a major form constraint.
+      3: One form constraint partly followed.
+      4: All followed with a minor deviation.
+      5: Every form constraint followed, or none were given.
+  - name: content_requirements
+    description: Includes named subjects, details and audience the user asked for.
+    weight: 0.25
+    anchors:
+      1: Requested content missing.
+      2: Most requested details missing.
+      3: One requested detail missing.
+      4: All present; one only barely.
+      5: Every requested subject and detail is present and used well.
+  - name: originality
+    description: Fresh, specific and engaging rather than generic or cliched.
+    weight: 0.1
+    anchors:
+      1: Entirely generic or copied boilerplate.
+      2: Mostly cliches.
+      3: Serviceable with some cliches.
+      4: Mostly fresh.
+      5: Distinctive and memorable.
+  - name: fluency
+    description: Grammatical, natural and well-paced.
+    weight: 0.1
+    anchors:
+      1: Hard to read.
+      2: Frequent errors or awkwardness.
+      3: Readable with some awkwardness.
+      4: Fluent with minor issues.
+      5: Polished.
+degradation_rules:
+  - id: dropped_tone_cue
+    degradation: true
+    description: >-
+      Dropping any tone, mood or style cue ("kinda bittersweet", "nothing too cheesy", "funny",
+      "bad puns"), including emoji used as tone signals. Tone cues are content here.
+  - id: dropped_politeness
+    degradation: false
+    description: Removing pure politeness ("please", "thanks") with no tone meaning.
+  - id: dropped_filler
+    degradation: false
+    description: Removing filler, meta-talk or exact duplicate requirements.
+  - id: dropped_form_constraint
+    degradation: true
+    description: Dropping an audience, form or length constraint ("keep it short", "a haiku").
+  - id: dropped_named_content
+    degradation: true
+    description: Dropping a named subject or detail ("she loves cats").
+hard_fails:
+  - id: violates_explicit_constraint
+    description: >-
+      The answer violates an explicit constraint in the user request (length, form, tone, "no
+      rhyming", "keep it short").

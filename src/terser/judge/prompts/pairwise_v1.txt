@@ -6,7 +6,7 @@ language, style), and appropriate tone. Do not prefer a response because it is l
 its position (A or B), or because of its writing style alone. If the two responses are of
 essentially equal quality, answer "tie".
 
-[User request]
+{rubric}[User request]
 {prompt}
 [End of user request]
 

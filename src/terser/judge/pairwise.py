@@ -13,6 +13,10 @@ orders can be compared. The label rule (:func:`label_from_sides`) is: ``preserve
 says tie-or-rewrite-better in **both** orders; ``degraded`` if either order prefers the original;
 no label (``None``) if either verdict could not be parsed after all retries.
 
+When the item's category is known, the rendered category rubric (:func:`rubric_section`, row
+2.3.2) is inserted at the template's ``{rubric}`` placeholder; without a category the placeholder
+renders empty, so the prompt (and its cache key) is unchanged.
+
 All calls go through :class:`terser.llm.LLMClient` (budget check, disk cache) at temperature 0.
 Because identical requests hit the cache, a retry after unparseable output appends a corrective
 follow-up turn, which changes the request and therefore the cache key.
@@ -27,7 +31,10 @@ from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
+from terser.judge.rubrics import render_rubric
+
 if TYPE_CHECKING:
+    from terser.data.categories import Category
     from terser.llm import LLMClient
 
 __all__ = [
@@ -41,6 +48,7 @@ __all__ = [
     "load_prompt_template",
     "parse_verdict",
     "render_prompt",
+    "rubric_section",
     "to_side",
 ]
 
@@ -56,7 +64,7 @@ RETRY_MESSAGE = (
     '{"verdict": "A" | "B" | "tie", "reason": "<one sentence>"} and no other text.'
 )
 
-_PLACEHOLDER_RE = re.compile(r"\{(prompt|response_a|response_b)\}")
+_PLACEHOLDER_RE = re.compile(r"\{(prompt|response_a|response_b|rubric)\}")
 _FENCE_RE = re.compile(r"```(?:json)?\s*(.*?)```", re.DOTALL | re.IGNORECASE)
 _VERDICT_KEYS = ("verdict", "winner", "choice", "answer", "better")
 _REASON_KEYS = ("reason", "reasoning", "explanation", "rationale")
@@ -76,13 +84,37 @@ def load_prompt_template(version: str = DEFAULT_PROMPT_VERSION) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def render_prompt(template: str, prompt: str, response_a: str, response_b: str) -> str:
-    """Fill ``{prompt}``, ``{response_a}``, ``{response_b}`` in a single pass.
+def rubric_section(category: Category | str | None) -> str:
+    """The ``{rubric}`` block for a category: rendered rubric plus markers, or ``""`` for None."""
+    if category is None:
+        return ""
+    return (
+        "[Rubric for this request]\n"
+        "Apply this rubric to both responses when deciding your verdict.\n"
+        f"{render_rubric(category)}\n"
+        "[End of rubric]\n\n"
+    )
+
+
+def render_prompt(
+    template: str, prompt: str, response_a: str, response_b: str, rubric: str = ""
+) -> str:
+    """Fill ``{prompt}``, ``{response_a}``, ``{response_b}`` and ``{rubric}`` in a single pass.
 
     A single regex pass means placeholder-like text *inside* a response is never substituted, and
     the literal JSON braces in the template are left alone.
+
+    Raises:
+        ValueError: If ``rubric`` is non-empty but the template has no ``{rubric}`` placeholder.
     """
-    values = {"prompt": prompt, "response_a": response_a, "response_b": response_b}
+    if rubric and "{rubric}" not in template:
+        raise ValueError("judge template has no {rubric} placeholder for the category rubric")
+    values = {
+        "prompt": prompt,
+        "response_a": response_a,
+        "response_b": response_b,
+        "rubric": rubric,
+    }
     return _PLACEHOLDER_RE.sub(lambda m: values[m.group(1)], template)
 
 
@@ -271,12 +303,23 @@ class PairwiseJudge:
         self.prompt_version = prompt_version
         self.template = load_prompt_template(prompt_version)
 
-    def judge_once(self, prompt: str, response_a: str, response_b: str, order: Order) -> JudgeCall:
-        """Judge one ordering, retrying with a corrective turn when the reply is unparseable."""
+    def judge_once(
+        self,
+        prompt: str,
+        response_a: str,
+        response_b: str,
+        order: Order,
+        category: Category | str | None = None,
+    ) -> JudgeCall:
+        """Judge one ordering, retrying with a corrective turn when the reply is unparseable.
+
+        ``category`` adds that category's rubric to the prompt; None leaves it out.
+        """
+        rubric = rubric_section(category)
         messages: list[dict[str, Any]] = [
             {
                 "role": "user",
-                "content": render_prompt(self.template, prompt, response_a, response_b),
+                "content": render_prompt(self.template, prompt, response_a, response_b, rubric),
             }
         ]
         raw = ""
@@ -313,8 +356,17 @@ class PairwiseJudge:
             ]
         return JudgeCall(order, None, None, "", raw, self.retries + 1, cached_all, out_tokens)
 
-    def judge_pair(self, prompt: str, original_output: str, rewrite_output: str) -> PairwiseResult:
-        """Judge (original output, rewrite output) in both A/B orders and derive the label."""
-        first = self.judge_once(prompt, original_output, rewrite_output, "original_first")
-        second = self.judge_once(prompt, rewrite_output, original_output, "rewrite_first")
+    def judge_pair(
+        self,
+        prompt: str,
+        original_output: str,
+        rewrite_output: str,
+        category: Category | str | None = None,
+    ) -> PairwiseResult:
+        """Judge (original output, rewrite output) in both A/B orders and derive the label.
+
+        ``category`` adds that category's rubric (row 2.3.2) to both judge prompts.
+        """
+        first = self.judge_once(prompt, original_output, rewrite_output, "original_first", category)
+        second = self.judge_once(prompt, rewrite_output, original_output, "rewrite_first", category)
         return PairwiseResult(first, second, label_from_sides(first.side, second.side))
