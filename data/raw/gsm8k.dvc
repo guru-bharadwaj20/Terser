@@ -1,0 +1,6 @@
+outs:
+- md5: 79ef82188ca7c2f8ee08a93f38188015.dir
+  size: 2726160
+  nfiles: 3
+  hash: md5
+  path: gsm8k

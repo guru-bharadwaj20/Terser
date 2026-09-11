@@ -281,8 +281,8 @@ downstream can be measured without it.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 2.1.1 | Source datasets | Permissively licensed instruction sets (e.g. Dolly, OpenAssistant), HumanEval/MBPP prompts, GSM8K problems | `CPU` | `data/SOURCES.md` + one data card per source | ❌ |
-| 2.1.2 | Licence audit | Research use and redistribution terms; unknown ⇒ non-redistributable | `CPU` | `reports/license_audit.md` | ❌ |
+| 2.1.1 | Source datasets | Permissively licensed instruction sets (e.g. Dolly, OpenAssistant), HumanEval/MBPP prompts, GSM8K problems | `CPU` | `data/SOURCES.md` + one data card per source | ✅ |
+| 2.1.2 | Licence audit | Research use and redistribution terms; unknown ⇒ non-redistributable | `CPU` | `reports/license_audit.md` | ✅ |
 | 2.1.3 | PII scrubbing | PII detector over all text before `data/interim/` | `CPU` | Scrub report; 0 detected PII in a 500-row manual sample | ❌ |
 | 2.1.4 | Casualisation | LLM rewrites clean instructions in 5 styles: rambling, hedging, texting, over-polite, repetitive; clean version kept as reference | `LLM` | ≥ 6,000 casual prompts | ❌ |
 | 2.1.5 | Deduplication | MinHash, Jaccard ≥ 0.8 removed; paraphrase groups kept whole | `CPU` | Duplicate report | ✅ |
@@ -303,10 +303,10 @@ downstream can be measured without it.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 2.3.1 | Task metrics | `code`: unit-test pass rate · `fact`: EM / token F1 · `reason`: final-answer accuracy | `CPU` | `terser.judge.metrics` with tests | ❌ |
+| 2.3.1 | Task metrics | `code`: unit-test pass rate · `fact`: EM / token F1 · `reason`: final-answer accuracy | `CPU` | `terser.judge.metrics` with tests | ✅ |
 | 2.3.2 | Rubrics | Per-category YAML: coverage, correctness, depth, constraint adherence, tone | `CPU` | `src/terser/judge/rubrics/*.yaml` | ❌ |
 | 2.3.3 | Pairwise judge with position swap | Qwen2.5-32B-Instruct-AWQ (fallback 14B-AWQ) on vLLM judges (original-output, rewrite-output) in both A/B orders | `GPU` `LLM` | `judge` stage output | ❌ |
-| 2.3.4 | Label definition | `preserved` iff task metric not worse **and** judge says tie-or-rewrite-better in **both** orders | `CPU` | `label` stage + tests | ❌ |
+| 2.3.4 | Label definition | `preserved` iff task metric not worse **and** judge says tie-or-rewrite-better in **both** orders | `CPU` | `label` stage + tests | ✅ |
 | 2.3.5 | Human annotation | 2 annotators label **300 pairs** (50/category), blind to which is the rewrite | `CPU` | `data/gold/human_300.jsonl` + guideline doc | ❌ |
 | 2.3.6 | Agreement analysis | Human–human κ, judge–human κ per category, position-bias rate | `CPU` | `reports/p2_judge_validation.md` | ❌ |
 
@@ -964,7 +964,7 @@ which were not, and why.
 | :--- | :---: | :---: | :---: | :---: |
 | 0 — Foundations | 22 | 4 | 26 | ✅ |
 | 1 — Framing and Concept Learning | 23 | 5 | 22 | ❌ |
-| 2 — Data Pipeline and Judge | 21 | 9 | 2 | ❌ |
+| 2 — Data Pipeline and Judge | 21 | 9 | 6 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 33 | 7 | 0 | ❌ |
 | 4 — ANN and SVM | 29 | 5 | 0 | ❌ |
 | 5 — Boosting, Bayes, GMM, HMM | 19 | 6 | 0 | ❌ |
@@ -976,7 +976,7 @@ which were not, and why.
 | 11 — MLOps | 26 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 12 | — | 0 | ❌ |
 | 13 — Documentation | 9 | — | 0 | ❌ |
-| **Total** | **256** | **66** | **50** | ❌ |
+| **Total** | **256** | **66** | **54** | ❌ |
 
 ---
 
