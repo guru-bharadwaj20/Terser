@@ -1,0 +1,13 @@
+# Phase 1 rows 1.4.2-1.4.4: pilot tokenizer economics of the rewrite operators.
+# python -m terser.phase1.token_study experiment=p1_token_study
+name: p1_token_study
+phase: 1
+row: "1.4.2"
+task: tokenizer_study
+params:
+  # A directory of per-category {category}.jsonl files, or a single JSONL file.
+  prompts: ${paths.data_dir}/pilot/prompts
+  reports_dir: ${paths.reports_dir}
+  targets: [gpt-4o, qwen2.5, llama-3.1]
+  op_sets: [F, H, D, I, L, C, S, FHC, FHCI, FHCID, FHCIDS, FHCIDSL]
+  n_bootstrap: 1000

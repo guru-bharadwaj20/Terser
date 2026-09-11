@@ -32,8 +32,10 @@ _THANKS = re.compile(
     r"(?:[ \t]+in[ \t]+advance)?"
     r"(?:[ \t]+for[ \t]+(?:your|the|any)[ \t]+(?:help|time|assistance))?"
     r"(?:[ \t]+in[ \t]+advance)?"
-    r"[ \t]*[!.]*(?:[ \t]*(?:[:;]-?\)|🙏|😊))?"
-    r"(?=[ \t]*(?:$|[,;]|(?-i:[A-Z])|\ue000))",
+    r"(?:[ \t]*[!.]+)?(?:[ \t]*(?:[:;]-?\)|🙏|😊))?"
+    # Trailing laughter (left for ``F``) does not make "thanks" part of the content.
+    r"(?=[ \t]*(?:(?:lol|lmao|rofl|ha(?:ha)+h?|he(?:he)+)\b[ \t]*[!.]*[ \t]*)*"
+    r"(?:$|[,;]|(?-i:[A-Z])|\ue000))",
     _I | re.MULTILINE,
 )
 
@@ -66,8 +68,16 @@ _REQUEST_HEDGE = re.compile(
     r"(?: please)?)[ \t]+(?:maybe|possibly|perhaps|kindly)\b,?(?=[ \t]+\S)",
     _I,
 )
+# Leading interjections that ``F`` strips ("hmm, maybe you could ..."); matched past and kept,
+# so the result does not depend on whether ``F`` ran first.
+_LEAD = (
+    r"(?P<lead>(?:(?:(?:hey|hi|hello|yo)(?:[ \t]+there)?|ok(?:ay)?|well|anyway|so|"
+    r"u+m+|u+h+|e+r+m+|hm+)\b(?![-'’])[ \t]*[,!.]*[ \t]+)*)"
+)
 _MAYBE_YOU_COULD = re.compile(
-    r"(?P<pre>^[ \t]*|(?<=[.!?])[ \t]+)(?:maybe|perhaps)[ \t]+(?=you (?:could|can)\b)",
+    r"(?P<pre>^[ \t]*|(?<=[.!?])[ \t]+)"
+    + _LEAD
+    + r"(?:maybe|perhaps)[ \t]+(?=you (?:could|can)\b)",
     _I | re.MULTILINE,
 )
 
@@ -78,7 +88,7 @@ def _rewrite(text: str) -> str:
     text = _THANKS.sub("", text)
     text = _CONDITIONAL.sub("", text)
     text = _REQUEST_HEDGE.sub(lambda m: m.group("frame"), text)
-    text = _MAYBE_YOU_COULD.sub(lambda m: m.group("pre"), text)
+    text = _MAYBE_YOU_COULD.sub(lambda m: m.group("pre") + m.group("lead"), text)
     text = _PLEASE.sub(" ", text)
     return text
 
