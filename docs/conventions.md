@@ -69,7 +69,9 @@ For checkpoint work: `phase<N>/C<N>-checkpoint`, e.g. `phase2/C2-checkpoint`.
 ## 4. Commits
 
 [Conventional Commits](https://www.conventionalcommits.org/) with the plan row id as the first token
-of the description. **One commit per plan subtask.** Squash-merge PRs into `main`.
+of the description. **One commit per coherent change**, finer than a plan subtask where the subtask
+has separable parts. Rebase-merge PRs into `main` so every commit is preserved on the branch history.
+
 
 Format: `<type>(<scope>): <row-id> <imperative summary>`
 
