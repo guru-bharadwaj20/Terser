@@ -995,7 +995,19 @@ which were not, and why.
 
 # How to Contribute
 
+### Contributors and the compute they bring
+
+| Contributor | Machines | Reviews |
+| :--- | :--- | :--- |
+| Guru Bharadwaj (`guru-bharadwaj20`) | Dev laptop (Windows 11, CPU only); NVIDIA RTX 4500 Ada, not connected yet | Repository owner |
+| Vivian Sobers (`vivianedwardbangalore@gmail.com`) | Dev workstation (Fedora 44, CPU only); `worker-1` and `worker-2`, one RTX 4090 each, administered by Vivian | GPU onboarding (Phase 7), serving and queue work |
+
+Machine details, access and the measurements taken on them:
+[docs/hardware.md § 1.1](docs/hardware.md#11-vivians-gpu-workers). Credentials for the GPU workers
+are shared out-of-band and never committed.
+
 ### Getting started
+
 
 ```bash
 git clone https://github.com/guru-bharadwaj20/Terser.git && cd Terser
