@@ -96,12 +96,16 @@ resolved by `terser.hardware.get_device(cfg)` (row 0.1.5).
 
 
 ```powershell
-python -m terser.x experiment=<name> hardware=cpu          # laptop
-python -m terser.x experiment=<name> hardware=rtx4500ada   # GPU machine
+python -m terser.x experiment=<name> hardware=cpu          # laptop or workstation
+python -m terser.x experiment=<name> hardware=rtx4500ada   # RTX 4500 Ada machine
+python -m terser.x experiment=<name> hardware=rtx4090      # worker-1 / worker-2
 python -m terser.x experiment=<name> hardware=auto         # portable default
 ```
 
-The `hardware` value is logged as an MLflow tag (`cpu` or `rtx4500ada`) on every run.
+The `hardware` value is logged as an MLflow tag (`cpu`, `rtx4500ada` or `rtx4090`) on every run.
+Runs on an RTX 4090 also set a `host` tag (`worker-1` or `worker-2`), because the two workers have
+different driver and torch versions.
+
 
 ---
 
