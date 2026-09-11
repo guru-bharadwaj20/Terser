@@ -27,6 +27,9 @@ POSITIVE = [
         "Be concise. Compare Go and Rust.",
     ),
     ("Would you mind explaining TCP?", "Explain TCP."),
+    # "? word" ends the sentence whether or not the next word is capitalised (tidy capitalises
+    # it anyway, so anything else would make the full stack non-idempotent).
+    ("Can you explain what a monad is? what about Y?", "Explain what a monad is. What about Y?"),
 ]
 
 NOOP = [
@@ -36,7 +39,7 @@ NOOP = [
     "Would you mind jumping?",
     "Will you be there?",
     "Explain recursion.",
-    "Can you explain what a monad is? what about Y?",
+    "Can you explain what a?b means",
     'Say "can you explain this?" to the user.',
     "```\ncan you explain this?\n```",
     "Why can you explain it but not me?",
