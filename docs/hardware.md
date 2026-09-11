@@ -27,6 +27,59 @@ Consequences of the profile:
   Before the card is connected, Phase 2 stages are only smoke-tested end to end with the CPU stand-in
   model (row 2.2.4).
 
+### 1.1 Vivian's GPU workers
+
+Two shared lab machines administered by Vivian Sobers. Both were verified reachable and idle on
+2026-09-10; they are shared with other users' work, so availability is not guaranteed at any moment.
+
+| | `worker-1` | `worker-2` |
+| :--- | :--- | :--- |
+| Address | `ccbd@10.10.3.83` | `ccbd@10.10.3.50` |
+| GPU | RTX 4090, 24564 MiB, cap 8.9 | RTX 4090, 24564 MiB, cap 8.9 |
+| Driver | 595.84 | 580.173.02 |
+| CPU / RAM | i9-13900, 32 threads, 125 GB | i9-13900, 26 threads, 125 GB |
+| OS | Ubuntu 22.04.5 | Ubuntu 22.04.5 |
+| Disk free | 235 GB of 938 GB | 141 GB of 938 GB |
+| torch | 2.8.0+cu128 | 2.7.0+cu126 |
+| vLLM | 0.28.0 in `~/vllm-env` (torch 2.13.0+cu130) | not installed |
+| Ollama | installed | running, 12 models incl. `qwen2.5:32b` |
+| Other | transformers 4.57.6, peft, trl, accelerate, datasets; 39 GB HF cache | transformers 4.46.3, peft, accelerate, mlflow 3.5.0; 19 GB HF cache |
+
+Access and serving notes:
+
+- SSH with password authentication as user `ccbd`. **Credentials are provisioned out-of-band and are
+  never committed** (same rule as `.env`, row 7.1).
+- Ollama binds to `127.0.0.1` on both hosts, so nothing is reachable directly from a dev machine.
+  Forward the port and point the client at the tunnel:
+
+  ```bash
+  ssh -f -N -L 127.0.0.1:11434:127.0.0.1:11434 ccbd@10.10.3.50
+  export TERSER_LOCAL_LLM_URL=http://localhost:11434/v1
+  ```
+
+  This path was exercised end to end on 2026-09-10: a rewrite request through the tunnel to
+  `qwen2.5:32b` returned in about 20 s with `usage` counts populated, so `terser.llm` provider
+  `local` needs no code change to use these hosts.
+- System Python is 3.10.12 on both, below the project's `requires-python >= 3.11`. Use an explicit
+  interpreter: `worker-1` has 3.11.13 / 3.12.11 / 3.13.7 via `uv`, `worker-2` has
+  `/usr/bin/python3.11`.
+- The two hosts have drifted (different drivers, different torch builds, vLLM on `worker-1` only).
+  Any experiment reported from these machines must record which host produced it. This is risk
+  **R14** in [risks.md](risks.md), now observed rather than hypothetical.
+- `configs/hardware/rtx4090.yaml` selects either card; the queue runner is single-host, so jobs are
+  currently placed on a host by hand (see [§ 4.2](#42-queue-rules)).
+
+Consequences of the profile:
+
+- bf16 is the default mixed-precision dtype on the GPU. fp16 loss scaling is not needed.
+- ECC memory means VRAM available to CUDA is slightly below 24 GB. Row 7.10 uses **22 GB** as the
+  usable ceiling for any single job.
+- Until Phase 7 is ✅, nothing in the repository may *require* a GPU to pass CI.
+- **The GPU is on the critical path.** With no hosted APIs, every labelled example (target outputs,
+  candidates, judge verdicts) is produced on the RTX 4500 Ada, so Phase 2 cannot finish before Phase 7.
+  Before the card is connected, Phase 2 stages are only smoke-tested end to end with the CPU stand-in
+  model (row 2.2.4).
+
 ---
 
 ## 2. Device selection in code
