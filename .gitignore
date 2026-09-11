@@ -28,6 +28,8 @@ multirun/
 /data/interim/*
 /data/processed/*
 !/data/**/.gitkeep
+!/data/**/*.dvc
+!/data/**/.gitignore
 
 # OS / editor
 .DS_Store

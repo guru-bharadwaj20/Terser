@@ -1,0 +1,6 @@
+outs:
+- md5: a7df72185595e6bc02136570dfcec116.dir
+  size: 236959
+  nfiles: 5
+  hash: md5
+  path: mbpp
