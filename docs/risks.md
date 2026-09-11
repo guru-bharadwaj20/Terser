@@ -66,3 +66,4 @@ them belongs to a checkpoint review and, for R03, to the ADR that re-scopes the 
 
 | ID | Effect of the new compute |
 | :---: | :--- |
+| R03 | GPU arrives late: the trigger ("card not connected by end of week 6") is now unlikely to fire. Two cards are reachable today and the 32B judge was measured fitting on one of them. Re-rating this from Critical is the subject of a pending ADR |
