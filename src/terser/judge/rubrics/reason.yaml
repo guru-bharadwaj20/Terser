@@ -1,0 +1,64 @@
+# Rubric for `reason` (plan row 2.3.2). Spec: docs/categories.md section 3.3, docs/rubrics.md.
+category: reason
+version: 1
+role: tie_break
+summary: >-
+  Multi-step problems with one checkable final answer. Final-answer accuracy decides first; the
+  rubric guides the judge's tie-break between two answers.
+dimensions:
+  - name: final_answer_correctness
+    description: The final answer is right and clearly stated.
+    weight: 0.5
+    anchors:
+      1: No final answer, or it is wrong.
+      2: Wrong final answer, but close (e.g. an arithmetic slip in the last step).
+      3: Right final answer that is hard to find or stated ambiguously.
+      4: Right final answer, clearly stated, with a minor unit or rounding issue.
+      5: Right final answer, clearly stated, in the requested unit and form.
+  - name: step_validity
+    description: The working is logically valid and supports the final answer.
+    weight: 0.3
+    anchors:
+      1: Steps are wrong or unrelated to the answer.
+      2: Major logical gap or error, even if the answer happens to be right.
+      3: Mostly valid; one unjustified or confusing step.
+      4: Valid steps with minor imprecision.
+      5: Every step is valid and easy to follow.
+  - name: format_adherence
+    description: >-
+      Follows the requested working format ("show your work", "just the number", "as a fraction").
+    weight: 0.2
+    anchors:
+      1: Ignores the requested format entirely.
+      2: Requested format mostly ignored (e.g. no working when working was asked for).
+      3: Requested format partly followed.
+      4: Requested format followed with a small deviation.
+      5: Requested format followed exactly, or no format was requested and the answer is clear.
+degradation_rules:
+  - id: dropped_tone_cue
+    degradation: false
+    description: Tone wording does not change the final answer.
+  - id: dropped_politeness
+    degradation: false
+    description: Removing please/thanks/apologies or hedging with no semantic effect.
+  - id: dropped_filler
+    degradation: false
+    description: >-
+      Removing filler, meta-talk, exact duplicates, or context like "for my kid's homework" unless
+      the user also asked for the answer pitched at that level.
+  - id: changed_quantity
+    degradation: true
+    description: Dropping or changing any number, unit or quantity relation ("3 times as many").
+  - id: dropped_format_instruction
+    degradation: true
+    description: Dropping an answer-format instruction ("show working", "answer as a fraction").
+  - id: changed_question
+    degradation: true
+    description: Changing which quantity is actually asked for.
+hard_fails:
+  - id: violates_explicit_constraint
+    description: >-
+      The answer violates an explicit constraint in the user request ("just the number", "as a
+      fraction", "show your work step by step").
+  - id: wrong_final_answer
+    description: The final answer is wrong while the other answer's is right.
