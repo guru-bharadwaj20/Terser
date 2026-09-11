@@ -56,3 +56,13 @@ R01, R03, R04, R09, R11, R13 and R16 were updated for it and R17 was added.
 | R15 | Annotator availability or low human–human agreement | Medium | Critical | Fewer than 2 annotators confirmed by end of week 4; κ on the first 50 pairs < 0.60 | Written annotation guideline with examples (2.3.5); blind presentation; calibration round before the 300 pairs | Revise guideline and re-annotate; recruit an adjudicator; reduce to categories with adequate agreement via ADR | C2.3 | Open |
 | R16 | CPU stand-in outputs leak into results | Low | High | Any output tagged `stand_in: true` (Qwen2.5-0.5B/1.5B via Ollama or llama.cpp) appears in `data/processed/`, a label table or a reported number; pipeline bugs that surface only at 8B/32B scale on the GPU | Stand-in used only for the pre-GPU smoke run (2.2.4); every stand-in output tagged `stand_in: true` and excluded from labels; all labels and metrics come from vLLM-served models | Delete affected labels and re-generate on vLLM; re-run affected evaluations; record in the checkpoint report | 2.2.4, C2 review, C7 | Open |
 | R17 | Open judge weaker than frontier models / self-preference bias | Medium–High | Critical | Verdict agreement gap between Qwen-target and Llama-target outputs > 5 pp on the 1,000-pair control (2.2.5); judge–human κ (C2.4) or sensitivity/specificity (C2.5) below target for one target family only | Task metrics before judge where available (2.3.1); position swap (2.3.3); second judge from the other family, Llama-3.1-8B-Instruct (2.2.5); agreement reported per target family alongside κ | Document and apply a mitigation (e.g. cross-family judging per target, or restricting judge-only categories); change judge model and re-validate on `data/gold/human_300.jsonl`; narrow scope via ADR if C2.3–C2.5 still fail | C2.3–C2.5, 2.2.5 | Open |
+
+## Compute added 2026-09-11
+
+Two RTX 4090 workers administered by Vivian Sobers were verified available on 2026-09-10
+([hardware.md § 1.1](hardware.md#11-vivians-gpu-workers)). They affect the register as follows.
+Likelihood, impact and status values in the table above are **unchanged** here, because revising
+them belongs to a checkpoint review and, for R03, to the ADR that re-scopes the critical path.
+
+| ID | Effect of the new compute |
+| :---: | :--- |
