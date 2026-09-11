@@ -1,0 +1,44 @@
+# Row 2.2.1: candidate generation (6 per prompt).
+#   python -m terser.data.candidates experiment=p2_candidates
+#
+# Non-LLM candidates only (CPU, no server needed):
+#   python -m terser.data.candidates experiment=p2_candidates \
+#     'experiment.params.methods=[ops_FHC,ops_CHFIDSL,llmlingua2]'
+#
+# DEFAULT LLM = CPU smoke test with a stand-in served by Ollama (`ollama pull qwen2.5:1.5b`).
+# Stand-in rewrites are tagged stand_in: true and written ONLY to smoke_output_path.
+#
+# GPU VARIANT (real rewrites, RTX 4500 Ada, exclusive vLLM slot):
+#   vllm serve Qwen/Qwen2.5-32B-Instruct-AWQ --quantization awq --max-model-len 4096
+#   export TERSER_LOCAL_LLM_URL=http://<gpu-host>:8000/v1
+#   python -m terser.data.candidates experiment=p2_candidates hardware=rtx4500ada \
+#     experiment.params.stand_in=false \
+#     experiment.params.rewrite_model=Qwen/Qwen2.5-32B-Instruct-AWQ
+# (fallback: Qwen/Qwen2.5-14B-Instruct-AWQ)
+name: p2_candidates
+phase: 2
+row: "2.2.1"
+task: candidates
+params:
+  prompts_path: ${paths.data_dir}/pilot/prompts.jsonl
+  output_path: ${paths.data_dir}/interim/pilot_candidates.jsonl
+  smoke_output_path: ${paths.data_dir}/interim/smoke/pilot_candidates.jsonl
+  # null = operator stacks + llmlingua2 + llm_low/medium/high; or an explicit list of methods.
+  methods: null
+  operator_stacks: [FHC, CHFIDSL]
+  operator_target: null         # tokenizer target for operator S; null = price in characters
+  provider: local
+  stand_in: true
+  rewrite_model: qwen2.5:1.5b   # GPU: Qwen/Qwen2.5-32B-Instruct-AWQ
+  prompt_version: rewrite_v1    # src/terser/data/prompts/<version>.txt
+  temperature: 0.0
+  max_rewrite_tokens: 1024
+  # A rewrite is rejected if it costs more tokens than the original on any of these.
+  length_targets: [gpt-4o, qwen2.5, llama-3.1]
+  llmlingua_model: microsoft/llmlingua-2-bert-base-multilingual-cased-meetingbank
+  # larger: microsoft/llmlingua-2-xlm-roberta-large-meetingbank
+  llmlingua_rate: 0.5
+  llmlingua_device: cpu
+  llmlingua_cache_dir: ${paths.cache_dir}/llmlingua2
+  limit: null                   # first N prompts; null = all
+  budget_phase: phase2
