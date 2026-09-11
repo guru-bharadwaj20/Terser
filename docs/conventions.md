@@ -46,7 +46,8 @@ Every run sets all of these tags. A run missing any of them fails the tracking a
 | `phase` | Phase number | `3` |
 | `row` | Plan row id(s), comma-separated | `3.3.4` |
 | `task` | Same value as the run-name `task` field | `gate` |
-| `hardware` | `cpu` or `rtx4500ada` (from the `hardware` config) | `cpu` |
+| `hardware` | `cpu`, `rtx4500ada` or `rtx4090` (from the `hardware` config) | `cpu` |
+
 | `data_hash` | DVC hash of the input dataset version | `3f2a9c…` |
 | `git_sha` | Full commit SHA of the code; runs from a dirty tree also set `git_dirty=true` | `40c00d9…` |
 
