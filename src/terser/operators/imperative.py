@@ -97,11 +97,13 @@ _FRAME = (
 )
 
 # The sentence ends at "." / "!" before whitespace, at end of line, or at a "?" followed by the
-# end of line, a closing quote or a capitalised next sentence. A "?" anywhere else stops the match.
+# end of line, a closing quote or a next sentence (capitalised or not: ``tidy`` capitalises
+# "? word" anyway, so treating it differently would make the full stack non-idempotent). A "?"
+# anywhere else (e.g. "a?b") stops the match.
 _REQUEST = re.compile(
     rf"(?P<pre>^[ \t]*|(?<=[.!?])[ \t]+)(?:{_FRAME})[ \t]+(?P<verb>[A-Za-z]+)\b(?![-'’])"
     r"(?P<rest>[^\n?]*?)"
-    r"(?P<end>\?(?=[ \t]*(?:$|[\"'”’)\]]|(?-i:[A-Z])|\ue000))|[.!](?=\s|$)|$)",
+    r"(?P<end>\?(?=[ \t]*(?:$|[\"'”’)\]]|(?-i:[A-Z])|\ue000)|[ \t]+(?-i:[a-z]))|[.!](?=\s|$)|$)",
     re.IGNORECASE | re.MULTILINE,
 )
 
