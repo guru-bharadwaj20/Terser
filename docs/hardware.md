@@ -169,6 +169,12 @@ outputs: [models/rewriter/sft-qwen0.5b-full/, mlruns/]
    complete is skipped, not failed.
 5. After Phase 7, every job must satisfy `est_vram_gb ≤ 22` using measured values (row 7.10).
 6. Each job logs GPU-hours to MLflow (see Experiment standards in CONTRIBUTING.md).
+7. **The runner is single-host.** `terser.gpu_queue` validates and drains one queue on the machine it
+   runs on, and the job spec has no host field, so a job cannot be addressed to `worker-1` or
+   `worker-2`. With two cards available, run one queue per host (`--dir gpu_queue/worker-1`, and so
+   on) and record the host in the run's `host` tag. Giving the spec a real `host` field, so both
+   cards drain from one queue, is open design work rather than something the current code supports.
+
 
 ---
 
