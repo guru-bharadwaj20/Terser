@@ -69,6 +69,15 @@ Supporting sections: [Compute Allocation](#compute-allocation-cpu-local-open-mod
 | **2 × NVIDIA GeForce RTX 4090** | Vivian Sobers | `worker-1` (10.10.3.83) and `worker-2` (10.10.3.50). Each 24 GB, Ada Lovelace (compute capability 8.9), bf16 supported. Ubuntu 22.04.5, i9-13900, 125 GB RAM. Shared lab machines reached over SSH | ✅ available |
 | Local open-model serving | both | OpenAI-compatible servers only: Ollama / llama.cpp on a dev machine for tiny models (Qwen2.5-0.5B/1.5B, smoke tests), vLLM or Ollama on an RTX 4090 (and later the RTX 4500 Ada) for all real generation and judging. **No hosted API keys are available or assumed** | CPU: available · GPU: ✅ on the 4090s |
 
+The two RTX 4090s have the same compute capability (8.9), VRAM (24 GB) and bf16 support as the
+RTX 4500 Ada, so the precision and VRAM planning below applies to them unchanged. Details, access
+and measurements: [docs/hardware.md § 1](docs/hardware.md#1-resources).
+
+> **Not yet reflected in the phase gates.** The plan text below, the Phase 7 targets and risk **R03**
+> still describe a single, unconnected GPU. Changing a checkpoint target or the critical path needs
+> an ADR (see Gate rule), so that revision is tracked separately and is not assumed here.
+
+
 
 ### GPU job queue (until the card is connected)
 
