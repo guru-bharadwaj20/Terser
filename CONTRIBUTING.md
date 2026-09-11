@@ -227,7 +227,7 @@ statistical model.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 1.2.1 | `F` drop filler | "hey so um, basically" → "" (conservative: "like" as comparison kept) | `CPU` | Unit tests incl. no-op on efficient prompts | ❌ |
+| 1.2.1 | `F` drop filler | "hey so um, basically" → "" (conservative: "like" as comparison kept) | `CPU` | Unit tests incl. no-op on efficient prompts | ✅ |
 | 1.2.2 | `H` drop hedging / politeness | "could you maybe please", "thanks in advance" → "" | `CPU` | Same | ❌ |
 | 1.2.3 | `D` deduplicate restated requirements | "keep it short… keep it brief" → one sentence; never touches code blocks | `CPU` | Same | ❌ |
 | 1.2.4 | `I` imperative conversion | "I was wondering if you could explain" → "Explain" | `CPU` | Same | ❌ |
@@ -963,7 +963,7 @@ which were not, and why.
 | Phase | Tasks | Checks | Done | Status |
 | :--- | :---: | :---: | :---: | :---: |
 | 0 — Foundations | 22 | 4 | 26 | ✅ |
-| 1 — Framing and Concept Learning | 23 | 5 | 8 | ❌ |
+| 1 — Framing and Concept Learning | 23 | 5 | 9 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 0 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 33 | 7 | 0 | ❌ |
 | 4 — ANN and SVM | 29 | 5 | 0 | ❌ |
@@ -976,7 +976,7 @@ which were not, and why.
 | 11 — MLOps | 26 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 12 | — | 0 | ❌ |
 | 13 — Documentation | 9 | — | 0 | ❌ |
-| **Total** | **256** | **66** | **34** | ❌ |
+| **Total** | **256** | **66** | **35** | ❌ |
 
 ---
 
