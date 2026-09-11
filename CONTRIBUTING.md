@@ -263,10 +263,10 @@ statistical model.
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
 | C1.1 | ADR-0002 merged | Reviewed by ≥ 1 other contributor | ❌ |
-| C1.2 | Operator safety | Every operator is a no-op on 50 already-efficient prompts (100%) | ❌ |
+| C1.2 | Operator safety | Every operator is a no-op on 50 already-efficient prompts (100%) | ✅ |
 | C1.3 | Version space | Non-empty for **≥ 4 of 6** categories; each collapse explained by named conflicting examples | ❌ |
 | C1.4 | Savings exist | Median best-single-operator savings **≥ 10%** on the pilot set | ❌ |
-| C1.5 | Tokenizer dependence | Spearman ρ < 0.9 for ≥ 1 tokenizer pair **or** documented finding that tokenizers agree (Phase 8 then ships a single target-agnostic rewriter) | ❌ |
+| C1.5 | Tokenizer dependence | Spearman ρ < 0.9 for ≥ 1 tokenizer pair **or** documented finding that tokenizers agree (Phase 8 then ships a single target-agnostic rewriter) | ✅ |
 
 ---
 
@@ -963,7 +963,7 @@ which were not, and why.
 | Phase | Tasks | Checks | Done | Status |
 | :--- | :---: | :---: | :---: | :---: |
 | 0 — Foundations | 22 | 4 | 26 | ✅ |
-| 1 — Framing and Concept Learning | 23 | 5 | 20 | ❌ |
+| 1 — Framing and Concept Learning | 23 | 5 | 22 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 0 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 33 | 7 | 0 | ❌ |
 | 4 — ANN and SVM | 29 | 5 | 0 | ❌ |
@@ -976,7 +976,7 @@ which were not, and why.
 | 11 — MLOps | 26 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 12 | — | 0 | ❌ |
 | 13 — Documentation | 9 | — | 0 | ❌ |
-| **Total** | **256** | **66** | **46** | ❌ |
+| **Total** | **256** | **66** | **48** | ❌ |
 
 ---
 
