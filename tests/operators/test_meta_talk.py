@@ -28,6 +28,19 @@ POSITIVE = [
     ("so the thing is my tests are flaky", "My tests are flaky"),
     ("Line one.\nI have a small question - is Python typed?", "Line one.\nIs Python typed?"),
     ("I’m going to send you a log and I want you to find the error.", "Find the error."),
+    # Leading greeting/interjection: the intro is removed, the greeting is left for F.
+    ("Hey, quick question: what is DNS?", "Hey, what is DNS?"),
+    ("hi there, quick question. what's 2+2?", "Hi there, what's 2+2?"),
+    ("ok so I have a question. I need a regex.", "Ok so I need a regex."),
+    ("Hey, so my question is: why?", "Hey, so why?"),
+    ("Well, here's what I need: a list.", "Well, a list."),
+    ("Um, so the thing is, my build fails.", "Um, my build fails."),
+    # Dangling conjunction left by the removal.
+    ("Quick question, and I forgot the year.", "I forgot the year."),
+    (
+        "Hey, quick question, and honestly I should know this... what year did it fall?",
+        "Hey, honestly I should know this... What year did it fall?",
+    ),
 ]
 
 NOOP = [
@@ -43,6 +56,15 @@ NOOP = [
     "Here's what I need.",
     "The question is: what is X?",
     "I think the bug is in line 3.",
+    # "and" that is not left dangling by a removed intro is meaning-bearing.
+    "Hey, I have a question and an answer.",
+    "Hello there, quick question and answer sessions are fun.",
+    "Tom and I have a question about taxes.",
+    "Salt and pepper, and I like it.",
+    "Quick question and I forgot.",
+    # Only known interjections are looked past.
+    "Hey Tom, quick question: hi",
+    "Anyway the question is: what?",
 ]
 
 
