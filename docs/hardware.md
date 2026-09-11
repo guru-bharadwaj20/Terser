@@ -7,11 +7,14 @@ If this document and CONTRIBUTING.md disagree, CONTRIBUTING.md wins and this fil
 
 ## 1. Resources
 
-| Resource | Details | Used for | Status |
-| :--- | :--- | :--- | :---: |
-| Dev laptop (Windows 11) | CPU only, no CUDA device | Classical ML (Phases 3–6), tokenization, DVC pipelines, CI, CPU smoke tests, fast-path serving | Available |
-| NVIDIA RTX 4500 Ada Generation | 24 GB GDDR6 ECC · Ada Lovelace · compute capability 8.9 · bf16 supported · ~210 W board power · attached later via remote access (row 7.1) | vLLM serving of all real LLM work (casualisation, candidate generation, judges, open targets), rewriter SFT/RL, neural HPO, quality-path serving | ❌ not connected |
-| Local open-model serving | OpenAI-compatible servers only, reached through `terser.llm` provider `local`: Ollama / llama.cpp on the laptop for tiny models (Qwen2.5-0.5B/1.5B, smoke tests), vLLM on the RTX 4500 Ada for all real generation and judging. Per-phase token caps in `configs/budget.yaml` bound compute; responses disk-cached. **No hosted API keys are available or assumed** | CPU smoke tests (laptop); every output that feeds labels, metrics or reports (GPU) | CPU: available · GPU: ❌ |
+| Resource | Owner | Details | Used for | Status |
+| :--- | :--- | :--- | :--- | :---: |
+| Dev laptop (Windows 11) | Guru Bharadwaj | CPU only, no CUDA device | Classical ML (Phases 3–6), tokenization, DVC pipelines, CI, CPU smoke tests, fast-path serving | Available |
+| Dev workstation (Fedora 44) | Vivian Sobers | AMD Ryzen AI 7 350 (16 threads) · 14 GB RAM · 475 GB disk · no NVIDIA GPU · Python 3.14 system interpreter | Same as above | Available |
+| NVIDIA RTX 4500 Ada Generation | Guru Bharadwaj | 24 GB GDDR6 ECC · Ada Lovelace · compute capability 8.9 · bf16 supported · ~210 W board power · attached later via remote access (row 7.1) | vLLM serving of all real LLM work (casualisation, candidate generation, judges, open targets), rewriter SFT/RL, neural HPO, quality-path serving | ❌ not connected |
+| 2 × NVIDIA GeForce RTX 4090 | Vivian Sobers | `worker-1` / `worker-2`, see [§ 1.1](#11-vivians-gpu-workers) · each 24 GB · Ada Lovelace · compute capability 8.9 · bf16 supported | Same as the RTX 4500 Ada row | ✅ available |
+| Local open-model serving | both | OpenAI-compatible servers only, reached through `terser.llm` provider `local`: Ollama / llama.cpp on a dev machine for tiny models (Qwen2.5-0.5B/1.5B, smoke tests), vLLM or Ollama on a GPU host for all real generation and judging. Per-phase token caps in `configs/budget.yaml` bound compute; responses disk-cached. **No hosted API keys are available or assumed** | CPU smoke tests (dev machines); every output that feeds labels, metrics or reports (GPU) | CPU: available · GPU: ✅ on the 4090s |
+
 
 Consequences of the profile:
 
