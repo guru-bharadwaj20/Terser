@@ -1,0 +1,50 @@
+{"id": "eff-code-01", "category": "code", "prompt": "Write a Python function that returns the n-th Fibonacci number iteratively. Include type hints."}
+{"id": "eff-code-02", "category": "code", "prompt": "Explain the bug in this function and give a fixed version:\n\n```python\ndef mean(xs):\n    return sum(xs) / len(xs) - 1\n```"}
+{"id": "eff-code-03", "category": "code", "prompt": "Write a Bash one-liner that counts lines in all .py files under src/."}
+{"id": "eff-code-04", "category": "code", "prompt": "Convert this JavaScript callback to async/await:\n\n```js\nfs.readFile(path, (err, data) => {\n  if (err) throw err;\n  console.log(data);\n});\n```"}
+{"id": "eff-code-05", "category": "code", "prompt": "PostgreSQL: select the 10 most recent rows from events, ordered by created_at descending."}
+{"id": "eff-code-06", "category": "code", "prompt": "Implement a thread-safe LRU cache in Go with Get and Put methods."}
+{"id": "eff-code-07", "category": "code", "prompt": "Write a regex that matches ISO 8601 dates (YYYY-MM-DD)."}
+{"id": "eff-code-08", "category": "code", "prompt": "Add error handling to this Rust function so it returns Result instead of panicking:\n\n```rust\nfn parse(s: &str) -> i32 {\n    s.parse().unwrap()\n}\n```"}
+{"id": "eff-code-09", "category": "code", "prompt": "Write a pytest test for a function slugify(title: str) -> str covering empty strings and Unicode."}
+{"id": "eff-fact-01", "category": "fact", "prompt": "What is the boiling point of water at sea level in Fahrenheit?"}
+{"id": "eff-fact-02", "category": "fact", "prompt": "Who wrote One Hundred Years of Solitude?"}
+{"id": "eff-fact-03", "category": "fact", "prompt": "When did the Berlin Wall fall?"}
+{"id": "eff-fact-04", "category": "fact", "prompt": "What is the capital of Australia?"}
+{"id": "eff-fact-05", "category": "fact", "prompt": "List the noble gases in order of atomic number."}
+{"id": "eff-fact-06", "category": "fact", "prompt": "What does HTTP status code 418 mean?"}
+{"id": "eff-fact-07", "category": "fact", "prompt": "How many bones are in the adult human body?"}
+{"id": "eff-fact-08", "category": "fact", "prompt": "Which JVM feature does just-in-time compilation replace interpretation with?"}
+{"id": "eff-reason-01", "category": "reason", "prompt": "A train leaves at 14:10 and arrives at 17:45. How long is the journey?"}
+{"id": "eff-reason-02", "category": "reason", "prompt": "If all bloops are razzies and some razzies are lazzies, must some bloops be lazzies? Justify briefly."}
+{"id": "eff-reason-03", "category": "reason", "prompt": "Three boxes are labelled apples, oranges and mixed; every label is wrong. Which single box should you open to relabel all three?"}
+{"id": "eff-reason-04", "category": "reason", "prompt": "Is 391 prime? Show the factorisation if not."}
+{"id": "eff-reason-05", "category": "reason", "prompt": "A bat and a ball cost $1.10; the bat costs $1.00 more than the ball. What does the ball cost?"}
+{"id": "eff-reason-06", "category": "reason", "prompt": "Estimate how many piano tuners work in Chicago. State your assumptions."}
+{"id": "eff-reason-07", "category": "reason", "prompt": "Which is larger, 2^100 or 10^30? Explain in two sentences."}
+{"id": "eff-reason-08", "category": "reason", "prompt": "Compare the time complexity of merge sort and quicksort in the worst case."}
+{"id": "eff-explain-01", "category": "explain", "prompt": "Explain just-in-time compilation and how it differs from ahead-of-time compilation."}
+{"id": "eff-explain-02", "category": "explain", "prompt": "Explain how TCP congestion control works, in under 150 words."}
+{"id": "eff-explain-03", "category": "explain", "prompt": "Explain what a Python decorator is, with a short example."}
+{"id": "eff-explain-04", "category": "explain", "prompt": "Explain the difference between a process and a thread."}
+{"id": "eff-explain-05", "category": "explain", "prompt": "Why does ice float on water?"}
+{"id": "eff-explain-06", "category": "explain", "prompt": "Explain Big O notation to a first-year student."}
+{"id": "eff-explain-07", "category": "explain", "prompt": "Explain what this SQL does:\n\n```sql\nSELECT dept, AVG(salary) FROM staff GROUP BY dept HAVING COUNT(*) > 5;\n```"}
+{"id": "eff-explain-08", "category": "explain", "prompt": "Describe how public-key cryptography enables secure key exchange."}
+{"id": "eff-creative-01", "category": "creative", "prompt": "Write a poem about autumn rain, shaped like a haiku."}
+{"id": "eff-creative-02", "category": "creative", "prompt": "Write a 100-word story about a lighthouse keeper who finds a message in a bottle."}
+{"id": "eff-creative-03", "category": "creative", "prompt": "Suggest five names for a coffee shop run by retired astronauts."}
+{"id": "eff-creative-04", "category": "creative", "prompt": "Write a limerick about a cat who learns to code."}
+{"id": "eff-creative-05", "category": "creative", "prompt": "Write a product description for a waterproof hiking backpack in a playful tone."}
+{"id": "eff-creative-06", "category": "creative", "prompt": "Draft a wedding toast for my sister, under 200 words, warm and funny."}
+{"id": "eff-creative-07", "category": "creative", "prompt": "Write dialogue between a detective and a suspect who speaks only in questions."}
+{"id": "eff-creative-08", "category": "creative", "prompt": "Write a slogan for a bicycle repair shop."}
+{"id": "eff-transform-01", "category": "transform", "prompt": "Translate into French: \"I think the meeting should start at nine.\""}
+{"id": "eff-transform-02", "category": "transform", "prompt": "Summarise the following in one sentence:\n\n\"The council approved the new cycling lanes after a two-year consultation, citing safety data and resident support.\""}
+{"id": "eff-transform-03", "category": "transform", "prompt": "Rewrite this email to sound more formal: \"Please send me the report by Friday, thanks.\""}
+{"id": "eff-transform-04", "category": "transform", "prompt": "Convert this CSV to a Markdown table:\n\nname,age\nAna,31\nBo,27"}
+{"id": "eff-transform-05", "category": "transform", "prompt": "Fix the grammar: \"Their going to the store tomorrow, weather or not it rains.\""}
+{"id": "eff-transform-06", "category": "transform", "prompt": "Translate into Spanish: \"Please close the door when you leave.\""}
+{"id": "eff-transform-07", "category": "transform", "prompt": "Convert this JSON to YAML:\n\n```json\n{\"name\": \"terser\", \"version\": 1, \"tags\": [\"nlp\", \"prompts\"]}\n```"}
+{"id": "eff-transform-08", "category": "transform", "prompt": "Extract all email addresses from this text: \"Contact ana@example.com or bo@example.org for access.\""}
+{"id": "eff-transform-09", "category": "transform", "prompt": "Paraphrase: \"Basically, the results are like what we expected.\""}
