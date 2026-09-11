@@ -1014,7 +1014,8 @@ git clone https://github.com/guru-bharadwaj20/Terser.git && cd Terser
 python -m venv .venv
 # Windows: .venv\Scripts\Activate.ps1    Linux/macOS: source .venv/bin/activate
 pip install -e ".[dev]"            # CPU
-pip install -e ".[dev,gpu]"        # on the RTX 4500 Ada machine
+pip install -e ".[dev,gpu]"        # on a GPU machine (RTX 4090 workers, or the RTX 4500 Ada)
+
 cp .env.example .env               # HF_TOKEN, TERSER_LOCAL_LLM_URL (never commit)
 pre-commit install
 pytest -m "not gpu and not api"
