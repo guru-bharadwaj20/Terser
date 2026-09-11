@@ -1,0 +1,73 @@
+# Rubric for `transform` (plan row 2.3.2). Spec: docs/categories.md section 3.6, docs/rubrics.md.
+category: transform
+version: 1
+role: primary
+summary: >-
+  Summarise, translate, reformat, extract from or restyle a supplied payload. The judge uses this
+  rubric together with a checklist of explicit constraints from the original request.
+dimensions:
+  - name: constraint_adherence
+    description: >-
+      Every explicit constraint is satisfied (count, length, format, columns, language, "keep the
+      names exactly").
+    weight: 0.4
+    anchors:
+      1: Most constraints violated.
+      2: A major constraint violated (e.g. wrong format or language).
+      3: One constraint partly violated (e.g. 4 bullets when "3 max" was asked).
+      4: All satisfied with a cosmetic deviation.
+      5: Every explicit constraint satisfied.
+  - name: content_fidelity
+    description: Nothing lost, added or altered from the payload beyond what was asked.
+    weight: 0.35
+    anchors:
+      1: Content invented or the payload's meaning changed.
+      2: Important content lost or distorted.
+      3: A secondary detail lost or altered.
+      4: Faithful with a trivial omission.
+      5: Fully faithful to the payload.
+  - name: format_correctness
+    description: The output is well-formed in the requested format (valid table, JSON, bullets).
+    weight: 0.15
+    anchors:
+      1: Not in the requested format.
+      2: Requested format with breaking errors (e.g. invalid JSON, broken table).
+      3: Valid but inconsistent formatting.
+      4: Correct with minor formatting issues.
+      5: Clean and fully correct format.
+  - name: fluency
+    description: Natural, grammatical output in the target language and register.
+    weight: 0.1
+    anchors:
+      1: Hard to read.
+      2: Frequent errors.
+      3: Readable with awkwardness.
+      4: Fluent with minor issues.
+      5: Polished.
+degradation_rules:
+  - id: dropped_tone_cue
+    degradation: false
+    description: >-
+      A tone word in the instruction wrapper is not content unless it is the requested
+      transformation itself ("make it more polite"), which is an explicit constraint.
+  - id: dropped_politeness
+    degradation: false
+    description: Removing please/thanks/apologies or hedging with no semantic effect.
+  - id: dropped_filler
+    degradation: false
+    description: >-
+      Removing meta-talk ("I'm going to give you some text and I want you to") as long as the
+      instruction survives.
+  - id: dropped_constraint
+    degradation: true
+    description: Violating or dropping any explicit constraint (count, length, format, columns, language).
+  - id: altered_payload
+    degradation: true
+    description: Any change to the payload itself; operators must treat it as opaque.
+hard_fails:
+  - id: violates_explicit_constraint
+    description: >-
+      The answer violates an explicit constraint that the other answer satisfies (checklist item
+      from the original request).
+  - id: payload_content_invented
+    description: The answer adds facts or content that are not in the payload and were not asked for.
