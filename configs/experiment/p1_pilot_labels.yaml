@@ -1,0 +1,49 @@
+# Row 1.3.6: pilot labelling pipeline.
+#   python -m terser.phase1.pilot_labels experiment=p1_pilot_labels
+#
+# DEFAULT = CPU smoke test with stand-in models served by Ollama on the laptop
+# (`ollama pull qwen2.5:1.5b && ollama pull qwen2.5:0.5b && ollama serve`). Stand-in runs are
+# tagged stand_in: true and write ONLY to data/pilot/smoke/; they are never labels.
+# A small smoke run on the hand-written fixtures:
+#   python -m terser.phase1.pilot_labels experiment=p1_pilot_labels \
+#     experiment.params.prompts_path=tests/fixtures/casual_prompts.jsonl experiment.params.limit=1
+#
+# GPU VARIANT (real pilot labels, RTX 4500 Ada, vLLM). Target and judge never share the card, so
+# run two stages against the `local` provider pointed at vLLM (TERSER_LOCAL_LLM_URL):
+#   export TERSER_LOCAL_LLM_URL=http://<gpu-host>:8000/v1
+#   vllm serve Qwen/Qwen2.5-7B-Instruct --dtype bfloat16 --gpu-memory-utilization 0.90
+#   python -m terser.phase1.pilot_labels experiment=p1_pilot_labels hardware=rtx4500ada \
+#     experiment.params.stand_in=false experiment.params.stage=respond \
+#     experiment.params.target_model=Qwen/Qwen2.5-7B-Instruct
+#   # stop the target server, then:
+#   vllm serve Qwen/Qwen2.5-32B-Instruct-AWQ --quantization awq --max-model-len 4096
+#   python -m terser.phase1.pilot_labels experiment=p1_pilot_labels hardware=rtx4500ada \
+#     experiment.params.stand_in=false experiment.params.stage=judge \
+#     experiment.params.target_model=Qwen/Qwen2.5-7B-Instruct \
+#     experiment.params.judge_model=Qwen/Qwen2.5-32B-Instruct-AWQ
+# Repeat both stages with target_model=meta-llama/Llama-3.1-8B-Instruct and
+# output_dir=${paths.data_dir}/pilot/llama31_8b (fallback judge: Qwen/Qwen2.5-14B-Instruct-AWQ).
+name: p1_pilot_labels
+phase: 1
+row: "1.3.6"
+task: pilotlabels
+params:
+  provider: local
+  judge_provider: null          # null = same as provider
+  stand_in: true
+  target_model: qwen2.5:1.5b    # GPU: Qwen/Qwen2.5-7B-Instruct | meta-llama/Llama-3.1-8B-Instruct
+  judge_model: qwen2.5:0.5b     # GPU: Qwen/Qwen2.5-32B-Instruct-AWQ
+  stage: all                    # all | respond | judge (GPU runs use respond then judge)
+  prompts_path: ${paths.data_dir}/pilot/prompts.jsonl   # 150 prompts, 25 per category
+  output_dir: ${paths.data_dir}/pilot                   # used only when stand_in: false
+  smoke_dir: ${paths.data_dir}/pilot/smoke              # used whenever stand_in: true
+  operator_subsets: [F, H, D, I, L, C, S, FHC, FHCI, FHCID, FHCIDS, FHCIDSL]
+  operator_target: null         # tokenizer target passed to apply_ops (operator S)
+  categories: null              # e.g. [code, fact]; null = all six
+  limit: null                   # max prompts per category; null = all
+  max_target_tokens: 512
+  max_judge_tokens: 256
+  judge_retries: 2
+  temperature: 0.0
+  prompt_version: pairwise_v1   # src/terser/judge/prompts/<version>.txt
+  budget_phase: phase1          # token cap from configs/budget.yaml
