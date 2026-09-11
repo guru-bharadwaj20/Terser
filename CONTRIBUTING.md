@@ -18,7 +18,8 @@
 | ❌ | Not done: pending or in progress |
 | `CPU` | Runs on the dev laptop. Start immediately |
 | `LLM` | Needs text generation from a **local open-source model** behind an OpenAI-compatible server (`terser.llm` provider `local`). No paid APIs. Results that feed labels, metrics or reports come only from GPU-served models (vLLM on the RTX 4500 Ada); on the CPU laptop these rows may only be smoke-tested with tiny models |
-| `GPU` | Needs the **NVIDIA RTX 4500 Ada (24 GB)**. Not connected yet: write the code, smoke-test on CPU with a tiny config, and queue the job |
+| `GPU` | Needs a **24 GB Ada-class card**: one of Vivian's RTX 4090 workers (`worker-1`, `worker-2`), or the RTX 4500 Ada once it is connected. Write the code, smoke-test on CPU with a tiny config, and queue the job |
+
 | `CPU→GPU` | Runs at reduced scale on CPU now, re-run at full scale once the GPU is connected |
 | 🚧 | **Hard gate**: failing it blocks every dependent phase, with no conditional pass |
 
