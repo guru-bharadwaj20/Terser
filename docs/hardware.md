@@ -250,6 +250,12 @@ note for comparison, and update the same table in CONTRIBUTING.md in the same co
 
 Slots are separated in time so that rule 4.2.3 (no colocated serving and training) holds by construction.
 
+With two RTX 4090s the same rule can be satisfied in space instead of time: serve the judge on one
+worker and train on the other, rather than time-slicing a single card. Both hosts are shared with
+other users' work, so check `nvidia-smi` before claiming a card and prefer the host with more free
+disk (`worker-1`, 235 GB) for anything that writes checkpoints.
+
+
 ---
 
 ## 7. Fallback: GPU still not connected by week 6
