@@ -189,6 +189,23 @@ outputs: [models/rewriter/sft-qwen0.5b-full/, mlruns/]
 > overheads, not measured on this card. Phase 7 rows **7.6** (serving) and **7.7** (training)
 > replace them with measurements, and checkpoint **C7.2** requires this table to be updated.
 
+### 5.0 Spot measurements on an RTX 4090 (not a substitute for Phase 7)
+
+Taken on `worker-2` on 2026-09-10 with Ollama, to check whether the judge fits on a 24 GB card at
+all. This is Q4_K_M GGUF through Ollama, **not** AWQ int4 through vLLM, so it does not satisfy row
+7.6 and does not replace any estimate below.
+
+| Model | Context | VRAM used | Placement | Cold load |
+| :--- | :---: | ---: | :--- | ---: |
+| `qwen2.5:32b` | 4096 | 20707 MiB | 100% GPU | 10.4 s |
+| `qwen2.5:32b` | 32768 | 21271 MiB | 24% CPU / 76% GPU (31 GB total) | 25 s |
+| `llama3.2:3b` | 32768 | — | 100% GPU | 67 s |
+
+Reading: the 32B judge fits entirely in 24 GB **only at a short context**. At 4096, which is the max
+length the plan specifies for the judge, it fits with about 3.7 GB to spare. At Ollama's default 32k
+context it does not fit and spills a quarter of the model to CPU. Whatever serving stack is chosen,
+the judge's context length has to be pinned.
+
 | Workload | Phase | Compute | Precision / method | Est. VRAM | Notes |
 | :--- | :---: | :--- | :--- | :--- | :--- |
 | Token counting (tiktoken, HF tokenizers) | 0+ | `CPU` | — | 0 | Ground truth, never approximated |
