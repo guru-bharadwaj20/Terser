@@ -256,17 +256,17 @@ statistical model.
 | 1.4.1 | Pilot prompt set | **500 casual prompts**: hand-written seeds plus casualisation of clean instructions (Qwen2.5 on vLLM; before the GPU, hand-written seeds only), balanced across categories | `CPU` `LLM` | `data/pilot/prompts.jsonl` + data card | ✅ |
 | 1.4.2 | Per-operator savings | Δtokens % for each operator and operator stack on gpt-4o (tokenizer only), qwen2.5, llama-3.1 | `CPU` | `reports/p1_tokenizer_study.{csv,md}` | ✅ |
 | 1.4.3 | Operator applicability | Share of prompts each operator changes, per category | `CPU` | Table in report | ✅ |
-| 1.4.4 | Cross-tokenizer agreement | Spearman ρ of per-(prompt, operator) savings for every tokenizer pair | `CPU` | Table in report | ❌ |
+| 1.4.4 | Cross-tokenizer agreement | Spearman ρ of per-(prompt, operator) savings for every tokenizer pair | `CPU` | Table in report | ✅ |
 
 ### Checkpoint C1 — Framing and Operators
 
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
 | C1.1 | ADR-0002 merged | Reviewed by ≥ 1 other contributor | ❌ |
-| C1.2 | Operator safety | Every operator is a no-op on 50 already-efficient prompts (100%) | ❌ |
+| C1.2 | Operator safety | Every operator is a no-op on 50 already-efficient prompts (100%) | ✅ |
 | C1.3 | Version space | Non-empty for **≥ 4 of 6** categories; each collapse explained by named conflicting examples | ❌ |
 | C1.4 | Savings exist | Median best-single-operator savings **≥ 10%** on the pilot set | ❌ |
-| C1.5 | Tokenizer dependence | Spearman ρ < 0.9 for ≥ 1 tokenizer pair **or** documented finding that tokenizers agree (Phase 8 then ships a single target-agnostic rewriter) | ❌ |
+| C1.5 | Tokenizer dependence | Spearman ρ < 0.9 for ≥ 1 tokenizer pair **or** documented finding that tokenizers agree (Phase 8 then ships a single target-agnostic rewriter) | ✅ |
 
 ---
 
@@ -285,8 +285,8 @@ downstream can be measured without it.
 | 2.1.2 | Licence audit | Research use and redistribution terms; unknown ⇒ non-redistributable | `CPU` | `reports/license_audit.md` | ❌ |
 | 2.1.3 | PII scrubbing | PII detector over all text before `data/interim/` | `CPU` | Scrub report; 0 detected PII in a 500-row manual sample | ❌ |
 | 2.1.4 | Casualisation | LLM rewrites clean instructions in 5 styles: rambling, hedging, texting, over-polite, repetitive; clean version kept as reference | `LLM` | ≥ 6,000 casual prompts | ❌ |
-| 2.1.5 | Deduplication | MinHash, Jaccard ≥ 0.8 removed; paraphrase groups kept whole | `CPU` | Duplicate report | ❌ |
-| 2.1.6 | **Source-grouped splits** | Train 70 / val 15 / test 15 by source prompt; test frozen end of week 4 and hash-locked | `CPU` | Automated test: 0 source prompts shared across splits | ❌ |
+| 2.1.5 | Deduplication | MinHash, Jaccard ≥ 0.8 removed; paraphrase groups kept whole | `CPU` | Duplicate report | ✅ |
+| 2.1.6 | **Source-grouped splits** | Train 70 / val 15 / test 15 by source prompt; test frozen end of week 4 and hash-locked | `CPU` | Automated test: 0 source prompts shared across splits | ✅ |
 | 2.1.7 | DVC stages | `collect → casualise → dedupe → split` | `CPU` | `dvc repro` rebuilds from cache | ❌ |
 
 ### 2.2 Candidates and Target Outputs
@@ -963,8 +963,8 @@ which were not, and why.
 | Phase | Tasks | Checks | Done | Status |
 | :--- | :---: | :---: | :---: | :---: |
 | 0 — Foundations | 22 | 4 | 26 | ✅ |
-| 1 — Framing and Concept Learning | 23 | 5 | 19 | ❌ |
-| 2 — Data Pipeline and Judge | 21 | 9 | 0 | ❌ |
+| 1 — Framing and Concept Learning | 23 | 5 | 22 | ❌ |
+| 2 — Data Pipeline and Judge | 21 | 9 | 2 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 33 | 7 | 0 | ❌ |
 | 4 — ANN and SVM | 29 | 5 | 0 | ❌ |
 | 5 — Boosting, Bayes, GMM, HMM | 19 | 6 | 0 | ❌ |
@@ -976,7 +976,7 @@ which were not, and why.
 | 11 — MLOps | 26 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 12 | — | 0 | ❌ |
 | 13 — Documentation | 9 | — | 0 | ❌ |
-| **Total** | **256** | **66** | **45** | ❌ |
+| **Total** | **256** | **66** | **50** | ❌ |
 
 ---
 
