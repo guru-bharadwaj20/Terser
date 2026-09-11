@@ -1084,7 +1084,8 @@ PR checklist:
 - [ ] No secrets, no raw personal data, no test-split access
 - [ ] Docs / derivations / progress tables updated
 
-Review: ≥ 1 approval. Changes to `judge/`, `eval/`, data splits or checkpoint targets need **2**. Squash-merge into `main`.
+Review: ≥ 1 approval. Changes to `judge/`, `eval/`, data splits or checkpoint targets need **2**. Rebase-merge into `main`.
+
 
 ### Data, privacy and LLM usage
 
