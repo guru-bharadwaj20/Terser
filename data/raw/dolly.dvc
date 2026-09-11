@@ -1,0 +1,6 @@
+outs:
+- md5: 6f7bfcb28337e4dc79c46719c41e3bad.dir
+  size: 13085719
+  nfiles: 2
+  hash: md5
+  path: dolly

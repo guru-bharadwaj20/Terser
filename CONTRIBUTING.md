@@ -281,7 +281,7 @@ downstream can be measured without it.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 2.1.1 | Source datasets | Permissively licensed instruction sets (e.g. Dolly, OpenAssistant), HumanEval/MBPP prompts, GSM8K problems | `CPU` | `data/SOURCES.md` + one data card per source | ❌ |
+| 2.1.1 | Source datasets | Permissively licensed instruction sets (e.g. Dolly, OpenAssistant), HumanEval/MBPP prompts, GSM8K problems | `CPU` | `data/SOURCES.md` + one data card per source | ✅ |
 | 2.1.2 | Licence audit | Research use and redistribution terms; unknown ⇒ non-redistributable | `CPU` | `reports/license_audit.md` | ❌ |
 | 2.1.3 | PII scrubbing | PII detector over all text before `data/interim/` | `CPU` | Scrub report; 0 detected PII in a 500-row manual sample | ❌ |
 | 2.1.4 | Casualisation | LLM rewrites clean instructions in 5 styles: rambling, hedging, texting, over-polite, repetitive; clean version kept as reference | `LLM` | ≥ 6,000 casual prompts | ❌ |
@@ -964,7 +964,7 @@ which were not, and why.
 | :--- | :---: | :---: | :---: | :---: |
 | 0 — Foundations | 22 | 4 | 26 | ✅ |
 | 1 — Framing and Concept Learning | 23 | 5 | 22 | ❌ |
-| 2 — Data Pipeline and Judge | 21 | 9 | 3 | ❌ |
+| 2 — Data Pipeline and Judge | 21 | 9 | 4 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 33 | 7 | 0 | ❌ |
 | 4 — ANN and SVM | 29 | 5 | 0 | ❌ |
 | 5 — Boosting, Bayes, GMM, HMM | 19 | 6 | 0 | ❌ |
@@ -976,7 +976,7 @@ which were not, and why.
 | 11 — MLOps | 26 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 12 | — | 0 | ❌ |
 | 13 — Documentation | 9 | — | 0 | ❌ |
-| **Total** | **256** | **66** | **51** | ❌ |
+| **Total** | **256** | **66** | **52** | ❌ |
 
 ---
 
