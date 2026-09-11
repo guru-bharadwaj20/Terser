@@ -1,0 +1,5 @@
+outs:
+- md5: d3a46d2fde8c68546e70363299ecec12
+  size: 1115400
+  hash: md5
+  path: p1_tokenizer_study.csv
