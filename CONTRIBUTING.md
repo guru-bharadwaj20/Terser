@@ -61,11 +61,14 @@ Supporting sections: [Compute Allocation](#compute-allocation-cpu-local-open-mod
 
 ### Hardware profile
 
-| Resource | Details | Status |
-| :--- | :--- | :---: |
-| Dev laptop (Windows 11) | CPU only; all classical ML, tokenization, pipelines, CI | Available |
-| **NVIDIA RTX 4500 Ada Generation** | 24 GB GDDR6 ECC, Ada Lovelace (compute capability 8.9), bf16 supported, ~210 W. Attached later via remote access | ❌ not connected |
-| Local open-model serving | OpenAI-compatible servers only: Ollama / llama.cpp on the laptop for tiny models (Qwen2.5-0.5B/1.5B, smoke tests), vLLM on the RTX 4500 Ada for all real generation and judging. **No hosted API keys are available or assumed** | CPU: available · GPU: ❌ |
+| Resource | Owner | Details | Status |
+| :--- | :--- | :--- | :---: |
+| Dev laptop (Windows 11) | Guru Bharadwaj | CPU only; all classical ML, tokenization, pipelines, CI | Available |
+| Dev workstation (Fedora 44) | Vivian Sobers | AMD Ryzen AI 7 350, 16 threads, 14 GB RAM, no NVIDIA GPU; classical ML, tokenization, pipelines, CI | Available |
+| **NVIDIA RTX 4500 Ada Generation** | Guru Bharadwaj | 24 GB GDDR6 ECC, Ada Lovelace (compute capability 8.9), bf16 supported, ~210 W. Attached later via remote access | ❌ not connected |
+| **2 × NVIDIA GeForce RTX 4090** | Vivian Sobers | `worker-1` (10.10.3.83) and `worker-2` (10.10.3.50). Each 24 GB, Ada Lovelace (compute capability 8.9), bf16 supported. Ubuntu 22.04.5, i9-13900, 125 GB RAM. Shared lab machines reached over SSH | ✅ available |
+| Local open-model serving | both | OpenAI-compatible servers only: Ollama / llama.cpp on a dev machine for tiny models (Qwen2.5-0.5B/1.5B, smoke tests), vLLM or Ollama on an RTX 4090 (and later the RTX 4500 Ada) for all real generation and judging. **No hosted API keys are available or assumed** | CPU: available · GPU: ✅ on the 4090s |
+
 
 ### GPU job queue (until the card is connected)
 
