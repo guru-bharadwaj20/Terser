@@ -136,7 +136,8 @@ Hydra config groups live in `configs/<group>/<name>.yaml`. Names are `snake_case
 
 | Group | Examples |
 | :--- | :--- |
-| `hardware` | `cpu.yaml`, `rtx4500ada.yaml`, `auto.yaml` |
+| `hardware` | `cpu.yaml`, `rtx4500ada.yaml`, `rtx4090.yaml`, `auto.yaml` |
+
 | `model` | `tiny.yaml`, `qwen05b.yaml`, `textcnn.yaml` |
 | `experiment` | `sft_qwen05b_full.yaml`, `gate_lgbm_grid.yaml` |
 | `data` | `pilot.yaml`, `full.yaml` |
