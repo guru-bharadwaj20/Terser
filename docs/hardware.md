@@ -15,18 +15,6 @@ If this document and CONTRIBUTING.md disagree, CONTRIBUTING.md wins and this fil
 | 2 × NVIDIA GeForce RTX 4090 | Vivian Sobers | `worker-1` / `worker-2`, see [§ 1.1](#11-vivians-gpu-workers) · each 24 GB · Ada Lovelace · compute capability 8.9 · bf16 supported | Same as the RTX 4500 Ada row | ✅ available |
 | Local open-model serving | both | OpenAI-compatible servers only, reached through `terser.llm` provider `local`: Ollama / llama.cpp on a dev machine for tiny models (Qwen2.5-0.5B/1.5B, smoke tests), vLLM or Ollama on a GPU host for all real generation and judging. Per-phase token caps in `configs/budget.yaml` bound compute; responses disk-cached. **No hosted API keys are available or assumed** | CPU smoke tests (dev machines); every output that feeds labels, metrics or reports (GPU) | CPU: available · GPU: ✅ on the 4090s |
 
-
-Consequences of the profile:
-
-- bf16 is the default mixed-precision dtype on the GPU. fp16 loss scaling is not needed.
-- ECC memory means VRAM available to CUDA is slightly below 24 GB. Row 7.10 uses **22 GB** as the
-  usable ceiling for any single job.
-- Until Phase 7 is ✅, nothing in the repository may *require* a GPU to pass CI.
-- **The GPU is on the critical path.** With no hosted APIs, every labelled example (target outputs,
-  candidates, judge verdicts) is produced on the RTX 4500 Ada, so Phase 2 cannot finish before Phase 7.
-  Before the card is connected, Phase 2 stages are only smoke-tested end to end with the CPU stand-in
-  model (row 2.2.4).
-
 ### 1.1 Vivian's GPU workers
 
 Two shared lab machines administered by Vivian Sobers. Both were verified reachable and idle on
@@ -94,7 +82,6 @@ resolved by `terser.hardware.get_device(cfg)` (row 0.1.5).
 | `configs/hardware/rtx4090.yaml` | `worker-1` / `worker-2` | Same contract as the RTX 4500 Ada profile: requires CUDA, bf16, 22 GB usable ceiling |
 | `configs/hardware/auto.yaml` | Any | Uses CUDA if available, otherwise CPU |
 
-
 ```powershell
 python -m terser.x experiment=<name> hardware=cpu          # laptop or workstation
 python -m terser.x experiment=<name> hardware=rtx4500ada   # RTX 4500 Ada machine
@@ -105,7 +92,6 @@ python -m terser.x experiment=<name> hardware=auto         # portable default
 The `hardware` value is logged as an MLflow tag (`cpu`, `rtx4500ada` or `rtx4090`) on every run.
 Runs on an RTX 4090 also set a `host` tag (`worker-1` or `worker-2`), because the two workers have
 different driver and torch versions.
-
 
 ---
 
@@ -119,7 +105,6 @@ Every task row in CONTRIBUTING.md carries one or more tags.
 | `LLM` | Needs text generation from a local open-source model behind an OpenAI-compatible server (`terser.llm` provider `local`). No paid APIs | Build the code now and smoke-test it on CPU with a tiny model (Qwen2.5-0.5B/1.5B via Ollama or llama.cpp), within the phase token cap in `configs/budget.yaml`. Results that feed labels, metrics or reports come only from GPU-served models (an RTX 4090 worker, or the RTX 4500 Ada) |
 | `GPU` | Needs a 24 GB Ada-class card: `worker-1`, `worker-2`, or the RTX 4500 Ada once connected | Write the code, smoke-test on CPU with `configs/model/tiny.yaml`, add a `gpu_queue/` job. The row stays ❌ until the job has run on a card |
 | `CPU→GPU` | Reduced scale on CPU now, full scale on a GPU host | Run the CPU version, record it as reduced-scale, and queue the full-scale job |
-
 
 ---
 
@@ -178,8 +163,6 @@ outputs: [models/rewriter/sft-qwen0.5b-full/, mlruns/]
    hardcoded in `terser.gpu_queue.queue`. Both profiles set `max_vram_gb: 22`, so jobs aimed at a
    4090 are still checked against the right number today. If the two ever diverge, that path has to
    become config-driven.
-
-
 
 ---
 
@@ -255,10 +238,15 @@ worker and train on the other, rather than time-slicing a single card. Both host
 other users' work, so check `nvidia-smi` before claiming a card and prefer the host with more free
 disk (`worker-1`, 235 GB) for anything that writes checkpoints.
 
-
 ---
 
 ## 7. Fallback: GPU still not connected by week 6
+
+> **Largely superseded.** This section was written when the RTX 4500 Ada was the only GPU. Two
+> RTX 4090s ([§ 1.1](#11-vivians-gpu-workers)) have been available since 2026-09-10, so the trigger
+> for this fallback is unlikely to fire. It is kept verbatim because retiring it changes risk **R03**
+> and the Phase 7 schedule, which needs an ADR (Gate rule in CONTRIBUTING.md). Read it as the plan
+> for losing access to the workers, not as the current state.
 
 The target for Phase 7 is week 13 at the latest, but all labelled data waits for the GPU, so the
 fallback starts earlier. Until the card is connected, complete the CPU rows of Phase 1, build and
