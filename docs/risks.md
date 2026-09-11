@@ -67,3 +67,4 @@ them belongs to a checkpoint review and, for R03, to the ADR that re-scopes the 
 | ID | Effect of the new compute |
 | :---: | :--- |
 | R03 | GPU arrives late: the trigger ("card not connected by end of week 6") is now unlikely to fire. Two cards are reachable today and the 32B judge was measured fitting on one of them. Re-rating this from Critical is the subject of a pending ADR |
+| R04 | 24 GB VRAM insufficient: partly de-risked. `qwen2.5:32b` (Q4_K_M, Ollama) held 20707 MiB at context 4096 on one 4090, with the caveat that it spills to CPU at 32k context. The AWQ-under-vLLM measurement of row 7.6 is still outstanding |
