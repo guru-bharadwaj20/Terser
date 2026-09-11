@@ -242,7 +242,7 @@ statistical model.
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 1.3.1 | Instance representation | Discrete attributes: `length{short,medium,long}`, `has_constraints`, `has_payload`, `tone_cue`, `filler_density{low,high}` + operator flags `op_F … op_S` | `CPU` | `terser.concept.attributes` with tests | ✅ |
 | 1.3.2 | Hypotheses | Conjunctive constraint vectors with `?` (any) and `∅` (none), e.g. `<long, ?, no, no, high, op_F=yes, …>` ⇒ "preserved" | `CPU` | Documented in `docs/derivations/concept_learning.md` | ✅ |
-| 1.3.3 | Find-S | Most specific hypothesis covering all positives | `CPU` | Reproduces Mitchell's EnjoySport result `<Sunny, Warm, ?, Strong, ?, ?>` | ❌ |
+| 1.3.3 | Find-S | Most specific hypothesis covering all positives | `CPU` | Reproduces Mitchell's EnjoySport result `<Sunny, Warm, ?, Strong, ?, ?>` | ✅ |
 | 1.3.4 | Candidate-Elimination | S and G boundaries; collapse detection that reports the offending example and the examples it conflicts with | `CPU` | Reproduces EnjoySport S/G; version space of size 6 | ❌ |
 | 1.3.5 | Version space enumeration | All hypotheses between S and G | `CPU` | Enumerator matches brute force on a 5-attribute toy space | ❌ |
 | 1.3.6 | Pilot labels | **150 prompts (25/category)** × operator subsets (7 singletons + `FHC`, `FHCI`, `FHCID`, `FHCIDS`, all) → target output → position-swapped pilot judge → human review of every label | `LLM` | `data/pilot/labels.jsonl` + human-reviewed CSV | ❌ |
@@ -963,7 +963,7 @@ which were not, and why.
 | Phase | Tasks | Checks | Done | Status |
 | :--- | :---: | :---: | :---: | :---: |
 | 0 — Foundations | 22 | 4 | 26 | ✅ |
-| 1 — Framing and Concept Learning | 23 | 5 | 4 | ❌ |
+| 1 — Framing and Concept Learning | 23 | 5 | 5 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 0 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 33 | 7 | 0 | ❌ |
 | 4 — ANN and SVM | 29 | 5 | 0 | ❌ |
@@ -976,7 +976,7 @@ which were not, and why.
 | 11 — MLOps | 26 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 12 | — | 0 | ❌ |
 | 13 — Documentation | 9 | — | 0 | ❌ |
-| **Total** | **256** | **66** | **30** | ❌ |
+| **Total** | **256** | **66** | **31** | ❌ |
 
 ---
 
