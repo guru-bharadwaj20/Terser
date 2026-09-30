@@ -372,9 +372,9 @@ bias–variance and overfitting.
 | 3.2.3 | Threshold rule | Maximise specificity subject to **sensitivity ≥ 0.95** | `CPU` | `eval/threshold.py` + test | ✅ |
 | 3.2.4 | **Grouped stratified k-fold** | `StratifiedGroupKFold(k=5)`, group = source prompt, stratify = category × label | `CPU` | `eval/cv.py`; out-of-fold predictions as the shared unit | ✅ |
 | 3.2.5 | Leakage demonstration | Naive KFold vs grouped CV on the same model | `CPU` | Gap recorded in `reports/p3_cv_leakage.md` | ❌ |
-| 3.2.6 | Nested CV | Outer 5 / inner 3 for unbiased estimates while tuning | `CPU` | Used by 3.6 | ❌ |
+| 3.2.6 | Nested CV | Outer 5 / inner 3 for unbiased estimates while tuning | `CPU` | Used by 3.6 | ✅ |
 | 3.2.7 | Leave-one-category-out | Generalisation to unseen task types | `CPU` | Per-category table | ❌ |
-| 3.2.8 | Statistical comparison | McNemar on shared out-of-fold predictions; bootstrap CIs | `CPU` | `eval/significance.py` | ❌ |
+| 3.2.8 | Statistical comparison | McNemar on shared out-of-fold predictions; bootstrap CIs | `CPU` | `eval/significance.py` | ✅ |
 
 ### 3.3 Decision Trees
 
@@ -392,7 +392,7 @@ bias–variance and overfitting.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 3.4.1 | From-scratch batch GD | Sigmoid, log-loss, gradient | `CPU` | Coefficients within 1e-3 of scikit-learn | ❌ |
+| 3.4.1 | From-scratch batch GD | Sigmoid, log-loss, gradient | `CPU` | Coefficients within 1e-3 of scikit-learn | ✅ |
 | 3.4.2 | Regularisation | L1 / L2 / elastic-net, C sweep | `CPU` | Grid results table | ❌ |
 | 3.4.3 | Calibration | Reliability diagram, Brier score, ECE | `CPU` | `reports/figures/p3_lr_calibration.png` | ❌ |
 | 3.4.5 | Coefficient interpretation | Odds ratios on standardised features | `CPU` | `reports/p3_lr_coefficients.md` | ❌ |
@@ -441,9 +441,9 @@ implementations verified against libraries, plus controlled activation and optim
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 4.1.1 | Perceptron from scratch | Step activation; filler vs non-filler spans | `CPU` | Converges on the linearly separable subset; fails to converge on the full set (logged) | ❌ |
 | 4.1.2 | Pair embedding input | `[e_o, e_r, \|e_o − e_r\|, e_o ⊙ e_r]` from 384-d bge-small ⇒ **1536-d** | `CPU` | Cached `data/features/pair_emb.npy` + id index | ❌ |
-| 4.1.3 | NumPy MLP with backprop | Forward, backward, update; no autograd | `CPU` | Gradient check vs finite differences, relative error **< 1e-6**; matches `torch.autograd` | ❌ |
+| 4.1.3 | NumPy MLP with backprop | Forward, backward, update; no autograd | `CPU` | Gradient check vs finite differences, relative error **< 1e-6**; matches `torch.autograd` | ✅ |
 | 4.1.4 | PyTorch MLP quality gate | 1536 → 256 → 64 → 1 | `CPU` | Scored under the 3.2.4 protocol | ❌ |
-| 4.1.5 | Parameter calculation | 1536×256+256 = 393,472 · 256×64+64 = 16,448 · 64×1+1 = 65 · **total 409,985** | `CPU` | Equals `sum(p.numel())` in a test | ❌ |
+| 4.1.5 | Parameter calculation | 1536×256+256 = 393,472 · 256×64+64 = 16,448 · 64×1+1 = 65 · **total 409,985** | `CPU` | Equals `sum(p.numel())` in a test | ✅ |
 | 4.1.7 | Backprop derivation | Chain rule through sigmoid output + BCE; hidden-layer recursion | `CPU` | `docs/derivations/backprop.md` | ❌ |
 
 ### 4.2 Activation Functions
@@ -918,8 +918,8 @@ which were not, and why.
 | 0 — Foundations | 22 | 4 | 26 | ✅ |
 | 1 — Framing and Concept Learning | 23 | 5 | 22 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 7 | ❌ |
-| 3 — Metrics, Trees, LR, KNN | 31 | 7 | 4 | ❌ |
-| 4 — ANN and SVM | 16 | 5 | 0 | ❌ |
+| 3 — Metrics, Trees, LR, KNN | 31 | 7 | 7 | ❌ |
+| 4 — ANN and SVM | 16 | 5 | 2 | ❌ |
 | 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 0 | ❌ |
 | 6 — Clustering | 9 | 3 | 0 | ❌ |
 | 7 — GPU Onboarding | 8 | 3 | 0 | ❌ |
@@ -929,7 +929,7 @@ which were not, and why.
 | 11 — MLOps | 25 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 11 | — | 0 | ❌ |
 | 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **59** | ❌ |
+| **Total** | **214** | **60** | **64** | ❌ |
 
 Stretch rows are not counted.
 

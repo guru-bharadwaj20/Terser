@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import numpy as np
 import pytest
 from sklearn.linear_model import LogisticRegression
@@ -60,3 +62,27 @@ def test_length_mismatch() -> None:
         strata([0, 1], ["a"])
     with pytest.raises(ValueError):
         list(grouped_folds([0, 1], ["a", "b"], ["g"]))
+
+
+def test_nested_cv_picks_useful_regularisation() -> None:
+    from terser.eval.curves import roc_auc
+    from terser.eval.cv import nested_cv_scores
+
+    X, y, cats, groups = _data(4)
+    X = np.c_[X, np.random.default_rng(4).normal(0, 1, (len(y), 20))]
+
+    def make(params: dict[str, object]) -> Callable[..., np.ndarray]:
+        def fit_predict(Xtr: np.ndarray, ytr: np.ndarray, Xva: np.ndarray) -> np.ndarray:
+            m = LogisticRegression(C=float(str(params["C"])))
+            return m.fit(Xtr, ytr).predict_proba(Xva)[:, 1]
+
+        return fit_predict
+
+    grid = [{"C": 1e-6}, {"C": 1.0}]
+    res = nested_cv_scores(make, grid, roc_auc, X, y, cats, groups)
+    assert not np.isnan(res.scores).any()
+    assert len(res.best_params) == 5
+    assert all(p["C"] == 1.0 for p in res.best_params)
+    assert roc_auc(y, res.scores) > 0.6
+    with pytest.raises(ValueError):
+        nested_cv_scores(make, [], roc_auc, X, y, cats, groups)
