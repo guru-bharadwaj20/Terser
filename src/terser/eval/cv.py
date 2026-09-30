@@ -5,7 +5,8 @@ Every Phase 3-5 model is scored under one protocol: ``StratifiedGroupKFold(k=5)`
 validation, and **stratum = category x label**, so each fold keeps the category mix and the
 degraded share. Out-of-fold (OOF) predictions are the shared unit: every example gets exactly one
 score from a model that never saw its group, and all model comparisons (row 3.2.8) and threshold
-choices (row 3.2.3) use those scores.
+choices (row 3.2.3) use those scores. :func:`nested_cv_scores` (row 3.2.6) wraps the same protocol
+around a hyperparameter search.
 """
 
 from __future__ import annotations
@@ -22,8 +23,10 @@ from terser.eval.labels import ArrayLike, _as_binary_array
 
 __all__ = [
     "N_SPLITS",
+    "NestedCvResult",
     "OofResult",
     "grouped_folds",
+    "nested_cv_scores",
     "out_of_fold_scores",
     "strata",
 ]
@@ -110,3 +113,60 @@ def out_of_fold_scores(
         scores[va] = pred
         fold[va] = k
     return OofResult(scores=scores, fold=fold)
+
+
+@dataclass(frozen=True)
+class NestedCvResult:
+    """Outer-fold OOF scores and the hyperparameters the inner search picked in each outer fold."""
+
+    scores: FloatArray
+    fold: IntArray
+    best_params: list[dict[str, object]]
+
+
+def nested_cv_scores(
+    make_fit_predict: Callable[[dict[str, object]], FitPredict],
+    param_grid: Sequence[dict[str, object]],
+    inner_score: Callable[[IntArray, FloatArray], float],
+    X: npt.ArrayLike,
+    y: ArrayLike,
+    categories: Sequence[Hashable],
+    groups: Sequence[Hashable],
+    outer_splits: int = N_SPLITS,
+    inner_splits: int = 3,
+    seed: int = 0,
+) -> NestedCvResult:
+    """Nested grouped CV (plan row **3.2.6**): outer 5 folds for estimates, inner 3 for tuning.
+
+    For each outer fold, every candidate in ``param_grid`` is scored by inner grouped CV on the
+    outer-training part only (``inner_score`` over its inner OOF scores, higher is better); the
+    winner is refit on the whole outer-training part and scores the outer validation part. The
+    outer OOF scores are therefore unbiased by the tuning.
+
+    Raises:
+        ValueError: If ``param_grid`` is empty.
+    """
+    if not param_grid:
+        raise ValueError("param_grid must not be empty")
+    Xa = np.asarray(X, dtype=np.float64)
+    labels = _as_binary_array(y)
+    cats = list(categories)
+    grps = list(groups)
+    scores = np.full(len(labels), np.nan)
+    fold = np.full(len(labels), -1, dtype=np.int64)
+    chosen: list[dict[str, object]] = []
+    for k, (tr, va) in enumerate(grouped_folds(labels, cats, grps, outer_splits, seed)):
+        sub_c = [cats[i] for i in tr]
+        sub_g = [grps[i] for i in tr]
+        best, best_val = param_grid[0], -np.inf
+        for params in param_grid:
+            inner = out_of_fold_scores(
+                make_fit_predict(params), Xa[tr], labels[tr], sub_c, sub_g, inner_splits, seed
+            )
+            val = inner_score(labels[tr], inner.scores)
+            if val > best_val:
+                best, best_val = params, val
+        scores[va] = make_fit_predict(best)(Xa[tr], labels[tr], Xa[va])
+        fold[va] = k
+        chosen.append(dict(best))
+    return NestedCvResult(scores=scores, fold=fold, best_params=chosen)
