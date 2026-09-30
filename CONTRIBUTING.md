@@ -392,7 +392,7 @@ bias–variance and overfitting.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 3.4.1 | From-scratch batch GD | Sigmoid, log-loss, gradient | `CPU` | Coefficients within 1e-3 of scikit-learn | ❌ |
+| 3.4.1 | From-scratch batch GD | Sigmoid, log-loss, gradient | `CPU` | Coefficients within 1e-3 of scikit-learn | ✅ |
 | 3.4.2 | Regularisation | L1 / L2 / elastic-net, C sweep | `CPU` | Grid results table | ❌ |
 | 3.4.3 | Calibration | Reliability diagram, Brier score, ECE | `CPU` | `reports/figures/p3_lr_calibration.png` | ❌ |
 | 3.4.5 | Coefficient interpretation | Odds ratios on standardised features | `CPU` | `reports/p3_lr_coefficients.md` | ❌ |
@@ -918,7 +918,7 @@ which were not, and why.
 | 0 — Foundations | 22 | 4 | 26 | ✅ |
 | 1 — Framing and Concept Learning | 23 | 5 | 22 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 7 | ❌ |
-| 3 — Metrics, Trees, LR, KNN | 31 | 7 | 6 | ❌ |
+| 3 — Metrics, Trees, LR, KNN | 31 | 7 | 7 | ❌ |
 | 4 — ANN and SVM | 16 | 5 | 0 | ❌ |
 | 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 0 | ❌ |
 | 6 — Clustering | 9 | 3 | 0 | ❌ |
@@ -929,7 +929,7 @@ which were not, and why.
 | 11 — MLOps | 25 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 11 | — | 0 | ❌ |
 | 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **61** | ❌ |
+| **Total** | **214** | **60** | **62** | ❌ |
 
 Stretch rows are not counted.
 
