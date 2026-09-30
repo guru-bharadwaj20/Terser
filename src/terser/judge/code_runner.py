@@ -750,7 +750,7 @@ def run_code_tests(
             str(result_path),
         ]
         popen_kwargs: dict[str, Any] = {}
-        if os.name == "nt":
+        if sys.platform == "win32":
             popen_kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
         else:
             popen_kwargs["start_new_session"] = True
