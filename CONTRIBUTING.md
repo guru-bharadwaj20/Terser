@@ -372,7 +372,7 @@ bias–variance and overfitting.
 | 3.2.3 | Threshold rule | Maximise specificity subject to **sensitivity ≥ 0.95** | `CPU` | `eval/threshold.py` + test | ✅ |
 | 3.2.4 | **Grouped stratified k-fold** | `StratifiedGroupKFold(k=5)`, group = source prompt, stratify = category × label | `CPU` | `eval/cv.py`; out-of-fold predictions as the shared unit | ✅ |
 | 3.2.5 | Leakage demonstration | Naive KFold vs grouped CV on the same model | `CPU` | Gap recorded in `reports/p3_cv_leakage.md` | ❌ |
-| 3.2.6 | Nested CV | Outer 5 / inner 3 for unbiased estimates while tuning | `CPU` | Used by 3.6 | ❌ |
+| 3.2.6 | Nested CV | Outer 5 / inner 3 for unbiased estimates while tuning | `CPU` | Used by 3.6 | ✅ |
 | 3.2.7 | Leave-one-category-out | Generalisation to unseen task types | `CPU` | Per-category table | ❌ |
 | 3.2.8 | Statistical comparison | McNemar on shared out-of-fold predictions; bootstrap CIs | `CPU` | `eval/significance.py` | ✅ |
 
@@ -918,7 +918,7 @@ which were not, and why.
 | 0 — Foundations | 22 | 4 | 26 | ✅ |
 | 1 — Framing and Concept Learning | 23 | 5 | 22 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 7 | ❌ |
-| 3 — Metrics, Trees, LR, KNN | 31 | 7 | 5 | ❌ |
+| 3 — Metrics, Trees, LR, KNN | 31 | 7 | 6 | ❌ |
 | 4 — ANN and SVM | 16 | 5 | 0 | ❌ |
 | 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 0 | ❌ |
 | 6 — Clustering | 9 | 3 | 0 | ❌ |
@@ -929,7 +929,7 @@ which were not, and why.
 | 11 — MLOps | 25 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 11 | — | 0 | ❌ |
 | 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **60** | ❌ |
+| **Total** | **214** | **60** | **61** | ❌ |
 
 Stretch rows are not counted.
 
