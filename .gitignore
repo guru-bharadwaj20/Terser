@@ -36,3 +36,6 @@ multirun/
 Thumbs.db
 .vscode/
 .idea/
+
+# CPU stand-in smoke outputs (row 2.2.4): never data, never committed
+/data/pilot/smoke/

@@ -301,7 +301,7 @@ downstream can be measured without it.
 | 2.1.5 | Deduplication | MinHash, Jaccard ≥ 0.8 removed; paraphrase groups kept whole | `CPU` | Duplicate report | ✅ |
 | 2.1.6 | **Source-grouped splits** | Train 70 / val 15 / test 15 by source prompt; test frozen end of week 4 and hash-locked | `CPU` | Automated test: 0 source prompts shared across splits | ✅ |
 | 2.1.7 | DVC stages | `collect → casualise → dedupe → split` | `CPU` | `dvc repro` rebuilds from cache | ❌ |
-| 2.1.8 | **Real-prompt slice** | ~1,000 first-turn user prompts from a licence-audited public chat log (e.g. WildChat), PII-scrubbed, category-tagged. Never casualised and never used for training: headroom (2.4.2) and final test (12.3) only. Guards against rewriters that merely undo the verbosity 2.1.4 injected | `CPU` | Data card + licence row; frozen with the test split | ❌ |
+| 2.1.8 | **Real-prompt slice** | ~1,000 first-turn user prompts from a licence-audited public chat log (e.g. WildChat), PII-scrubbed, category-tagged. Never casualised and never used for training: headroom (2.4.2) and final test (12.3) only. Guards against rewriters that merely undo the verbosity 2.1.4 injected | `CPU` | Data card + licence row; frozen with the test split | ✅ |
 
 ### 2.2 Candidates and Target Outputs
 
@@ -310,7 +310,7 @@ downstream can be measured without it.
 | 2.2.1 | Candidate generation | 6 per prompt: 3 rewrites from Qwen2.5-32B-Instruct-AWQ at low/medium/high aggressiveness, 2 operator stacks, 1 LLMLingua-2 baseline | `GPU` `LLM` `CPU` | `candidates` stage output | ❌ |
 | 2.2.2 | Token counts | Every prompt and candidate on every target tokenizer | `CPU` | Counts table, 0 missing | ❌ |
 | 2.2.3 | Target outputs | Llama-3.1-8B-Instruct and Qwen2.5-7B-Instruct on vLLM bf16, temperature 0 (creative: n = 3 samples) | `GPU` `LLM` | `respond` stage output | ❌ |
-| 2.2.4 | Pipeline smoke run (pre-GPU) | `respond → judge → label` on 50 prompts with Qwen2.5-0.5B/1.5B via Ollama on CPU, through the same `terser.llm` client | `CPU` `LLM` | Stages run end to end; every output tagged `stand_in: true` and excluded from labels | ❌ |
+| 2.2.4 | Pipeline smoke run (pre-GPU) | `respond → judge → label` on 50 prompts with Qwen2.5-0.5B/1.5B via Ollama on CPU, through the same `terser.llm` client | `CPU` `LLM` | Stages run end to end; every output tagged `stand_in: true` and excluded from labels | ✅ |
 | 2.2.5 | Judge self-preference control | Second judge Llama-3.1-8B-Instruct on 1,000 pairs; compare verdict agreement separately for Qwen-target and Llama-target outputs | `GPU` `LLM` | Report: agreement gap between target families ≤ 5 pp, or mitigation documented | ❌ |
 
 ### 2.3 Quality Judging
@@ -515,8 +515,8 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 5.3.1 | Model definition | Hidden states {KEEP, DROP, REPLACE}; observations = discretised token class (filler-lexicon id × POS × cost bucket) | `CPU` | `models/classical/hmm.py` | ❌ |
 | 5.3.2 | Supervised MLE | Initial, transition, emission matrices from alignment labels with smoothing | `CPU` | Rows sum to 1 (test) | ❌ |
-| 5.3.3 | Forward algorithm | Sequence likelihood in log space | `CPU` | Matches brute-force enumeration on length-5 sequences | ❌ |
-| 5.3.4 | Viterbi decoding | Most likely tag sequence → compressed prompt | `CPU` | Matches brute force on length-5 sequences | ❌ |
+| 5.3.3 | Forward algorithm | Sequence likelihood in log space | `CPU` | Matches brute-force enumeration on length-5 sequences | ✅ |
+| 5.3.4 | Viterbi decoding | Most likely tag sequence → compressed prompt | `CPU` | Matches brute force on length-5 sequences | ✅ |
 | 5.3.5 | Baum-Welch | EM on unlabelled casual prompts from supervised initialisation | `CPU` | F1 before vs after | ❌ |
 | 5.3.6 | End-to-end HMM compressor | Viterbi tags → rewrite → Phase 2 judge on **500 val prompts** | `LLM` | `reports/p5_hmm_compressor.md` | ❌ |
 
@@ -917,10 +917,10 @@ which were not, and why.
 | :--- | :---: | :---: | :---: | :---: |
 | 0 — Foundations | 22 | 4 | 26 | ✅ |
 | 1 — Framing and Concept Learning | 23 | 5 | 22 | ❌ |
-| 2 — Data Pipeline and Judge | 21 | 9 | 7 | ❌ |
+| 2 — Data Pipeline and Judge | 21 | 9 | 9 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 31 | 7 | 7 | ❌ |
 | 4 — ANN and SVM | 16 | 5 | 6 | ❌ |
-| 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 1 | ❌ |
+| 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 3 | ❌ |
 | 6 — Clustering | 9 | 3 | 0 | ❌ |
 | 7 — GPU Onboarding | 8 | 3 | 0 | ❌ |
 | 8 — CNN and Rewriter | 14 | 5 | 0 | ❌ |
@@ -929,7 +929,7 @@ which were not, and why.
 | 11 — MLOps | 25 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 11 | — | 0 | ❌ |
 | 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **69** | ❌ |
+| **Total** | **214** | **60** | **73** | ❌ |
 
 Stretch rows are not counted.
 
