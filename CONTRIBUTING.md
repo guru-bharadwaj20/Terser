@@ -444,7 +444,7 @@ implementations verified against libraries, plus controlled activation and optim
 | 4.1.3 | NumPy MLP with backprop | Forward, backward, update; no autograd | `CPU` | Gradient check vs finite differences, relative error **< 1e-6**; matches `torch.autograd` | ✅ |
 | 4.1.4 | PyTorch MLP quality gate | 1536 → 256 → 64 → 1 | `CPU` | Scored under the 3.2.4 protocol | ❌ |
 | 4.1.5 | Parameter calculation | 1536×256+256 = 393,472 · 256×64+64 = 16,448 · 64×1+1 = 65 · **total 409,985** | `CPU` | Equals `sum(p.numel())` in a test | ✅ |
-| 4.1.7 | Backprop derivation | Chain rule through sigmoid output + BCE; hidden-layer recursion | `CPU` | `docs/derivations/backprop.md` | ❌ |
+| 4.1.7 | Backprop derivation | Chain rule through sigmoid output + BCE; hidden-layer recursion | `CPU` | `docs/derivations/backprop.md` | ✅ |
 
 ### 4.2 Activation Functions
 
@@ -462,9 +462,9 @@ implementations verified against libraries, plus controlled activation and optim
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 4.4.1 | Margin and primal | Margin = 2/‖w‖; hard- and soft-margin primal | `CPU` | `docs/derivations/svm.md` §1–2 | ❌ |
-| 4.4.2 | Lagrangian dual | Lagrangian, KKT conditions, dual problem, recovering w and b from support vectors | `CPU` | `docs/derivations/svm.md` §3–4 | ❌ |
-| 4.4.3 | Linear kernel derivation | K(x, z) = xᵀz substituted into the dual | `CPU` | `docs/derivations/svm.md` §5 | ❌ |
+| 4.4.1 | Margin and primal | Margin = 2/‖w‖; hard- and soft-margin primal | `CPU` | `docs/derivations/svm.md` §1–2 | ✅ |
+| 4.4.2 | Lagrangian dual | Lagrangian, KKT conditions, dual problem, recovering w and b from support vectors | `CPU` | `docs/derivations/svm.md` §3–4 | ✅ |
+| 4.4.3 | Linear kernel derivation | K(x, z) = xᵀz substituted into the dual | `CPU` | `docs/derivations/svm.md` §5 | ✅ |
 | 4.4.4 | **Dual solver from scratch** | QP via `cvxopt` on span features | `CPU` | Same support-vector set as scikit-learn; ‖w − w_sk‖/‖w_sk‖ **< 1e-3** | ❌ |
 | 4.4.5 | Hard margin | Linearly separable filler subset | `CPU` | Support vectors plotted | ❌ |
 | 4.4.6 | Soft margin | C ∈ {0.01, 0.1, 1, 10, 100}: margin width, # support vectors, val metrics | `CPU` | Table + figure | ❌ |
@@ -506,7 +506,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 | 5.2.1 | Bayes theorem | P(filler \| phrase, context) worked from corpus counts | `CPU` | `docs/derivations/bayes.md` | ❌ |
 | 5.2.3 | Naive Bayes filler detector | Multinomial NB on 1–3-grams: MLE parameters with Laplace smoothing (and why smoothing is MAP); vs LR on the same features | `CPU` | PR curve + table | ❌ |
 | 5.2.4 | Bayes optimal classifier | Phase 1 hypotheses as H; P(h \| D) from validation likelihood; posterior-weighted vote vs MAP hypothesis | `CPU` | `reports/p5_bayes_optimal.md` | ❌ |
-| 5.2.5 | EM from scratch | E-step responsibilities, M-step means/variances/weights; log-likelihood monotone | `CPU` | Test asserts non-decreasing log-likelihood; matches scikit-learn GMM | ❌ |
+| 5.2.5 | EM from scratch | E-step responsibilities, M-step means/variances/weights; log-likelihood monotone | `CPU` | Test asserts non-decreasing log-likelihood; matches scikit-learn GMM | ✅ |
 | 5.2.6 | GMM on judge score deltas | 2-component GMM on (rewrite score − original score): unsupervised preserved/degraded split vs threshold labels | `CPU` | ARI reported; judge-threshold review issue opened if low | ❌ |
 
 ### 5.3 Hidden Markov Model Span Tagger
@@ -919,8 +919,8 @@ which were not, and why.
 | 1 — Framing and Concept Learning | 23 | 5 | 22 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 7 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 31 | 7 | 7 | ❌ |
-| 4 — ANN and SVM | 16 | 5 | 2 | ❌ |
-| 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 0 | ❌ |
+| 4 — ANN and SVM | 16 | 5 | 6 | ❌ |
+| 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 1 | ❌ |
 | 6 — Clustering | 9 | 3 | 0 | ❌ |
 | 7 — GPU Onboarding | 8 | 3 | 0 | ❌ |
 | 8 — CNN and Rewriter | 14 | 5 | 0 | ❌ |
@@ -929,7 +929,7 @@ which were not, and why.
 | 11 — MLOps | 25 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 11 | — | 0 | ❌ |
 | 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **64** | ❌ |
+| **Total** | **214** | **60** | **69** | ❌ |
 
 Stretch rows are not counted.
 
