@@ -57,3 +57,27 @@ def test_validation() -> None:
         hmm.log_likelihood([])
     with pytest.raises(ValueError):
         hmm.log_likelihood([4])
+
+
+@pytest.mark.parametrize("seed", range(10))
+def test_viterbi_matches_brute_force(seed: int) -> None:
+    hmm = _random_hmm(seed)
+    obs = np.random.default_rng(seed + 200).integers(0, 4, 5)
+    best = max(itertools.product(range(3), repeat=5), key=lambda st: _joint(hmm, st, obs))
+    path, logp = hmm.viterbi(obs)
+    assert tuple(path.tolist()) == best
+    assert logp == pytest.approx(np.log(_joint(hmm, best, obs)), abs=1e-12)
+    assert logp <= hmm.log_likelihood(obs)
+
+
+def test_viterbi_decodes_obvious_path() -> None:
+    # State 0 emits only symbol 0, state 1 only symbol 1: the path must copy the observations.
+    hmm = DiscreteHMM(
+        start=np.array([0.5, 0.5]),
+        trans=np.array([[0.8, 0.2], [0.3, 0.7]]),
+        emit=np.eye(2),
+    )
+    obs = np.array([0, 0, 1, 1, 1, 0, 1] * 300)
+    path, logp = hmm.viterbi(obs)
+    np.testing.assert_array_equal(path, obs)
+    assert np.isfinite(logp)

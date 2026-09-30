@@ -1,4 +1,4 @@
-"""Discrete hidden Markov model inference (plan row **5.3.3**).
+"""Discrete hidden Markov model inference (plan rows **5.3.3**, **5.3.4**).
 
 Hidden states ``s_t`` in ``{0..S-1}`` (the Phase 5 tagger uses KEEP / DROP / REPLACE, row 5.3.1),
 observations ``o_t`` in ``{0..V-1}``. Parameters:
@@ -13,6 +13,12 @@ All recursions run in log space so long prompts do not underflow.
 ``alpha_1(s) = log start[s] + log emit[s, o_1]`` and
 ``alpha_t(s') = logsumexp_s(alpha_{t-1}(s) + log trans[s, s']) + log emit[s', o_t]``;
 ``log P(o) = logsumexp_s alpha_T(s)``. Cost ``O(T S^2)`` instead of ``O(T S^T)`` enumeration.
+
+**Viterbi decoding (5.3.4).** ``delta_t(s) = max over s_1..s_{t-1} of log P(s_1..s_{t-1}, s_t = s,
+o_1..o_t)``: the forward recursion with ``max`` in place of ``logsumexp``, plus back-pointers
+``psi_t(s') = argmax_s(delta_{t-1}(s) + log trans[s, s'])``. Backtracking from
+``argmax_s delta_T(s)`` yields the single most likely state sequence (ties go to the lowest
+state id).
 """
 
 from __future__ import annotations
@@ -77,3 +83,20 @@ class DiscreteHMM:
     def log_likelihood(self, obs: npt.ArrayLike) -> float:
         """``log P(o_1..o_T)`` by the forward algorithm."""
         return float(logsumexp(self.forward(obs)[-1]))
+
+    def viterbi(self, obs: npt.ArrayLike) -> tuple[npt.NDArray[np.int64], float]:
+        """Most likely state path and its joint log-probability ``log P(path, o)``."""
+        o = self._check(obs)
+        log_t, log_e = _log(self.trans), _log(self.emit)
+        n = len(o)
+        delta = _log(self.start) + log_e[:, o[0]]
+        back = np.zeros((n, self.n_states), dtype=np.int64)
+        for t in range(1, n):
+            scores = delta[:, None] + log_t
+            back[t] = np.argmax(scores, axis=0)
+            delta = scores[back[t], np.arange(self.n_states)] + log_e[:, o[t]]
+        path = np.empty(n, dtype=np.int64)
+        path[-1] = int(np.argmax(delta))
+        for t in range(n - 1, 0, -1):
+            path[t - 1] = back[t, path[t]]
+        return path, float(delta[path[-1]])
