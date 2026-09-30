@@ -444,7 +444,7 @@ implementations verified against libraries, plus controlled activation and optim
 | 4.1.3 | NumPy MLP with backprop | Forward, backward, update; no autograd | `CPU` | Gradient check vs finite differences, relative error **< 1e-6**; matches `torch.autograd` | ✅ |
 | 4.1.4 | PyTorch MLP quality gate | 1536 → 256 → 64 → 1 | `CPU` | Scored under the 3.2.4 protocol | ❌ |
 | 4.1.5 | Parameter calculation | 1536×256+256 = 393,472 · 256×64+64 = 16,448 · 64×1+1 = 65 · **total 409,985** | `CPU` | Equals `sum(p.numel())` in a test | ✅ |
-| 4.1.7 | Backprop derivation | Chain rule through sigmoid output + BCE; hidden-layer recursion | `CPU` | `docs/derivations/backprop.md` | ❌ |
+| 4.1.7 | Backprop derivation | Chain rule through sigmoid output + BCE; hidden-layer recursion | `CPU` | `docs/derivations/backprop.md` | ✅ |
 
 ### 4.2 Activation Functions
 
@@ -919,7 +919,7 @@ which were not, and why.
 | 1 — Framing and Concept Learning | 23 | 5 | 22 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 7 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 31 | 7 | 7 | ❌ |
-| 4 — ANN and SVM | 16 | 5 | 2 | ❌ |
+| 4 — ANN and SVM | 16 | 5 | 3 | ❌ |
 | 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 0 | ❌ |
 | 6 — Clustering | 9 | 3 | 0 | ❌ |
 | 7 — GPU Onboarding | 8 | 3 | 0 | ❌ |
@@ -929,7 +929,7 @@ which were not, and why.
 | 11 — MLOps | 25 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 11 | — | 0 | ❌ |
 | 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **64** | ❌ |
+| **Total** | **214** | **60** | **65** | ❌ |
 
 Stretch rows are not counted.
 
