@@ -20,6 +20,7 @@ This is an engineering record for the project, not legal advice.
 | [`humaneval`](#humaneval) | `MIT` | yes | yes | Retain copyright + permission notice | include |
 | [`mbpp`](#mbpp) | `CC-BY-4.0` | yes | yes | Attribution; indicate changes; no extra restrictions | include |
 | [`gsm8k`](#gsm8k) | `MIT` | yes | yes | Retain copyright + permission notice | include |
+| [`wildchat`](#wildchat) (eval only, row 2.1.8) | `ODC-By-1.0` | yes | yes | Attribution; user turns only | include (evaluation only) |
 
 No source has unknown terms, so none is downgraded to `include-no-redistribute`. The binding
 constraint on the benchmark release (row 12.11) is Dolly's ShareAlike clause, plus the model licence
@@ -149,6 +150,37 @@ release.
 OpenAI"); cite Cobbe et al. (2021).
 
 ---
+
+## wildchat
+
+Audited 2026-09-30. This source feeds only the real-prompt evaluation slice (row 2.1.8,
+[`docs/data_cards/real_slice.md`](../docs/data_cards/real_slice.md)), never the training pool.
+
+| Item | Value |
+| :--- | :--- |
+| Repo / revision | `allenai/WildChat-1M` @ `7d6490e462285cf85d91eabea0f9a954fbddcd1f` |
+| Licence source | Dataset card `README.md` and `LICENSE.md` at the pinned revision |
+| Card licence field | `license: odc-by` |
+| LICENSE.md header | "# ODC Attribution License (ODC-By)" |
+| Card note | "**2024-06-26: License Change.** We have updated the license of WildChat to ODC-BY … This change is retroactively applied to any previous downloads under the ImpACT license." |
+| SPDX | `ODC-By-1.0` |
+| Gated | no |
+| Research use | yes |
+| Redistribution | yes (attribution) |
+| Decision | **include (evaluation only)** |
+
+**Conditions.** Attribute the database (cite Zhao et al., 2024, "WildChat: 1M ChatGPT Interaction
+Logs in the Wild") in any release that contains slice prompts.
+
+**Other considerations (not licence).**
+
+- Real user text. The authors de-identified it with Presidio plus hand-written rules, and removed
+  toxic and flagged conversations.
+- Terser adds three safeguards:
+  - it excludes every row the authors marked `redacted`;
+  - it drops all user metadata at parse time;
+  - it re-runs its own PII scrub.
+- Only user turns are used, so no ChatGPT outputs (and no OpenAI terms on outputs) are involved.
 
 ## Generating models
 

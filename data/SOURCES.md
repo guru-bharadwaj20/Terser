@@ -43,6 +43,16 @@ Retrieved 2026-09-11 (UTC timestamps in each manifest). `verify` reports OK for 
 
 The sha256 of each file is in the source's `MANIFEST.json`.
 
+## Evaluation-only source
+
+| Source | HF repo | Pinned revision | Licence (SPDX) | Files | Use |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `wildchat` | [`allenai/WildChat-1M`](https://huggingface.co/datasets/allenai/WildChat-1M) | `7d6490e462285cf85d91eabea0f9a954fbddcd1f` | `ODC-By-1.0` | `data/train-00000-of-00014.parquet` (230,786,095 bytes) | Real-prompt slice only (row 2.1.8); never training |
+
+Kept out of `SOURCES`, so `python -m terser.data.sources download` never fetches it. Build it with
+`python -m terser.data.real_slice download && python -m terser.data.real_slice build`. Card:
+[`docs/data_cards/real_slice.md`](../docs/data_cards/real_slice.md).
+
 ## Records per Terser category hint
 
 Computed with `iter_records` over the files on disk. `—` means no hint (`None`): the source gives no
