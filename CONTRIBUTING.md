@@ -462,7 +462,7 @@ implementations verified against libraries, plus controlled activation and optim
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 4.4.1 | Margin and primal | Margin = 2/‖w‖; hard- and soft-margin primal | `CPU` | `docs/derivations/svm.md` §1–2 | ❌ |
+| 4.4.1 | Margin and primal | Margin = 2/‖w‖; hard- and soft-margin primal | `CPU` | `docs/derivations/svm.md` §1–2 | ✅ |
 | 4.4.2 | Lagrangian dual | Lagrangian, KKT conditions, dual problem, recovering w and b from support vectors | `CPU` | `docs/derivations/svm.md` §3–4 | ❌ |
 | 4.4.3 | Linear kernel derivation | K(x, z) = xᵀz substituted into the dual | `CPU` | `docs/derivations/svm.md` §5 | ❌ |
 | 4.4.4 | **Dual solver from scratch** | QP via `cvxopt` on span features | `CPU` | Same support-vector set as scikit-learn; ‖w − w_sk‖/‖w_sk‖ **< 1e-3** | ❌ |
@@ -919,7 +919,7 @@ which were not, and why.
 | 1 — Framing and Concept Learning | 23 | 5 | 22 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 7 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 31 | 7 | 7 | ❌ |
-| 4 — ANN and SVM | 16 | 5 | 3 | ❌ |
+| 4 — ANN and SVM | 16 | 5 | 4 | ❌ |
 | 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 0 | ❌ |
 | 6 — Clustering | 9 | 3 | 0 | ❌ |
 | 7 — GPU Onboarding | 8 | 3 | 0 | ❌ |
@@ -929,7 +929,7 @@ which were not, and why.
 | 11 — MLOps | 25 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 11 | — | 0 | ❌ |
 | 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **65** | ❌ |
+| **Total** | **214** | **60** | **66** | ❌ |
 
 Stretch rows are not counted.
 
