@@ -1,0 +1,6 @@
+outs:
+- md5: 5b1034c3caa360ba193b82ad72bb973f.dir
+  size: 679347
+  nfiles: 2
+  hash: md5
+  path: real_slice
