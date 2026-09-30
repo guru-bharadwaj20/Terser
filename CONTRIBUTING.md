@@ -506,7 +506,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 | 5.2.1 | Bayes theorem | P(filler \| phrase, context) worked from corpus counts | `CPU` | `docs/derivations/bayes.md` | ❌ |
 | 5.2.3 | Naive Bayes filler detector | Multinomial NB on 1–3-grams: MLE parameters with Laplace smoothing (and why smoothing is MAP); vs LR on the same features | `CPU` | PR curve + table | ❌ |
 | 5.2.4 | Bayes optimal classifier | Phase 1 hypotheses as H; P(h \| D) from validation likelihood; posterior-weighted vote vs MAP hypothesis | `CPU` | `reports/p5_bayes_optimal.md` | ❌ |
-| 5.2.5 | EM from scratch | E-step responsibilities, M-step means/variances/weights; log-likelihood monotone | `CPU` | Test asserts non-decreasing log-likelihood; matches scikit-learn GMM | ❌ |
+| 5.2.5 | EM from scratch | E-step responsibilities, M-step means/variances/weights; log-likelihood monotone | `CPU` | Test asserts non-decreasing log-likelihood; matches scikit-learn GMM | ✅ |
 | 5.2.6 | GMM on judge score deltas | 2-component GMM on (rewrite score − original score): unsupervised preserved/degraded split vs threshold labels | `CPU` | ARI reported; judge-threshold review issue opened if low | ❌ |
 
 ### 5.3 Hidden Markov Model Span Tagger
@@ -920,7 +920,7 @@ which were not, and why.
 | 2 — Data Pipeline and Judge | 21 | 9 | 7 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 31 | 7 | 7 | ❌ |
 | 4 — ANN and SVM | 16 | 5 | 6 | ❌ |
-| 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 0 | ❌ |
+| 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 1 | ❌ |
 | 6 — Clustering | 9 | 3 | 0 | ❌ |
 | 7 — GPU Onboarding | 8 | 3 | 0 | ❌ |
 | 8 — CNN and Rewriter | 14 | 5 | 0 | ❌ |
@@ -929,7 +929,7 @@ which were not, and why.
 | 11 — MLOps | 25 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 11 | — | 0 | ❌ |
 | 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **68** | ❌ |
+| **Total** | **214** | **60** | **69** | ❌ |
 
 Stretch rows are not counted.
 
