@@ -516,7 +516,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 | 5.3.1 | Model definition | Hidden states {KEEP, DROP, REPLACE}; observations = discretised token class (filler-lexicon id × POS × cost bucket) | `CPU` | `models/classical/hmm.py` | ❌ |
 | 5.3.2 | Supervised MLE | Initial, transition, emission matrices from alignment labels with smoothing | `CPU` | Rows sum to 1 (test) | ❌ |
 | 5.3.3 | Forward algorithm | Sequence likelihood in log space | `CPU` | Matches brute-force enumeration on length-5 sequences | ✅ |
-| 5.3.4 | Viterbi decoding | Most likely tag sequence → compressed prompt | `CPU` | Matches brute force on length-5 sequences | ❌ |
+| 5.3.4 | Viterbi decoding | Most likely tag sequence → compressed prompt | `CPU` | Matches brute force on length-5 sequences | ✅ |
 | 5.3.5 | Baum-Welch | EM on unlabelled casual prompts from supervised initialisation | `CPU` | F1 before vs after | ❌ |
 | 5.3.6 | End-to-end HMM compressor | Viterbi tags → rewrite → Phase 2 judge on **500 val prompts** | `LLM` | `reports/p5_hmm_compressor.md` | ❌ |
 
@@ -920,7 +920,7 @@ which were not, and why.
 | 2 — Data Pipeline and Judge | 21 | 9 | 7 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | 31 | 7 | 7 | ❌ |
 | 4 — ANN and SVM | 16 | 5 | 6 | ❌ |
-| 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 2 | ❌ |
+| 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 3 | ❌ |
 | 6 — Clustering | 9 | 3 | 0 | ❌ |
 | 7 — GPU Onboarding | 8 | 3 | 0 | ❌ |
 | 8 — CNN and Rewriter | 14 | 5 | 0 | ❌ |
@@ -929,7 +929,7 @@ which were not, and why.
 | 11 — MLOps | 25 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 11 | — | 0 | ❌ |
 | 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **70** | ❌ |
+| **Total** | **214** | **60** | **71** | ❌ |
 
 Stretch rows are not counted.
 
