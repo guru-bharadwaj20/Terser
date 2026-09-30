@@ -1,4 +1,4 @@
-"""The running example in docs/derivations/svm.md (rows 4.4.1-4.4.2)."""
+"""The running example in docs/derivations/svm.md (rows 4.4.1-4.4.3)."""
 
 from __future__ import annotations
 
@@ -63,3 +63,24 @@ def test_kkt_groups_on_noisy_data() -> None:
     free = (alpha > 1e-6) & (alpha < C - 1e-6)
     np.testing.assert_allclose(margin[free], 1.0, atol=1e-3)
     assert np.all(margin[alpha > C - 1e-6] <= 1 + 1e-4)
+
+
+def test_linear_kernel_dual_matches_primal_decision() -> None:
+    rng = np.random.default_rng(2)
+    Xs = rng.normal(0, 1, (50, 3))
+    ys = np.where(Xs @ [1.0, -0.5, 0.2] + 0.3 * rng.normal(0, 1, 50) > 0, 1, -1)
+    lin = SVC(kernel="linear", C=1.0).fit(Xs, ys)
+    pre = SVC(kernel="precomputed", C=1.0).fit(Xs @ Xs.T, ys)
+    Z = rng.normal(0, 1, (20, 3))
+    gram_test = Z @ Xs[pre.support_].T
+    via_kernel = gram_test @ pre.dual_coef_[0] + pre.intercept_[0]
+    np.testing.assert_allclose(via_kernel, lin.decision_function(Z), atol=1e-6)
+    np.testing.assert_allclose(Z @ lin.coef_[0] + lin.intercept_[0], via_kernel, atol=1e-6)
+    assert np.linalg.eigvalsh(Xs @ Xs.T).min() > -1e-9
+    np.testing.assert_allclose(X @ X.T, [[2.0, -2.0], [-2.0, 2.0]])
+
+
+def test_polynomial_feature_count_quoted_in_doc() -> None:
+    from math import comb
+
+    assert 5e8 < comb(1536 + 3, 3) < 7e8
