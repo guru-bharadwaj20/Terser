@@ -369,7 +369,7 @@ bias–variance and overfitting.
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 3.2.1 | Metric suite | Accuracy, Precision, Recall, **Sensitivity**, **Specificity**, F1, confusion matrix, per-category breakdown | `CPU` | `eval/metrics.py`, matches scikit-learn to 1e-9 | ✅ |
 | 3.2.2 | ROC / AUC | ROC curves, AUC; PR curves and AP (degraded is the minority) | `CPU` | `eval/curves.py` + figure template | ✅ |
-| 3.2.3 | Threshold rule | Maximise specificity subject to **sensitivity ≥ 0.95** | `CPU` | `eval/threshold.py` + test | ❌ |
+| 3.2.3 | Threshold rule | Maximise specificity subject to **sensitivity ≥ 0.95** | `CPU` | `eval/threshold.py` + test | ✅ |
 | 3.2.4 | **Grouped stratified k-fold** | `StratifiedGroupKFold(k=5)`, group = source prompt, stratify = category × label | `CPU` | `eval/cv.py`; out-of-fold predictions as the shared unit | ❌ |
 | 3.2.5 | Leakage demonstration | Naive KFold vs grouped CV on the same model | `CPU` | Gap recorded in `reports/p3_cv_leakage.md` | ❌ |
 | 3.2.6 | Nested CV | Outer 5 / inner 3 for unbiased estimates while tuning | `CPU` | Used by 3.6 | ❌ |
@@ -838,7 +838,7 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 | 1 | Concept learning: hypotheses, version space | 1.3.2–1.3.7 | ❌ |
 | 1 | Inductive bias | 1.3.8, 3.3.6 | ❌ |
 | 1 | Accuracy, Precision, Recall, Sensitivity, Specificity | 3.2.1 | ✅ |
-| 1 | ROC, AUC | 3.2.2, 3.2.3 | ❌ |
+| 1 | ROC, AUC | 3.2.2, 3.2.3 | ✅ |
 | 1 | Bias–variance decomposition and trade-off | 3.6.1 | ❌ |
 | 1 | Cross-validation strategies | 3.2.4–3.2.7 | ❌ |
 | 1 | Decision trees: ID3 | 3.3.1 | ❌ |
@@ -918,7 +918,7 @@ which were not, and why.
 | 0 — Foundations | 22 | 4 | 26 | ✅ |
 | 1 — Framing and Concept Learning | 23 | 5 | 22 | ❌ |
 | 2 — Data Pipeline and Judge | 21 | 9 | 7 | ❌ |
-| 3 — Metrics, Trees, LR, KNN | 31 | 7 | 2 | ❌ |
+| 3 — Metrics, Trees, LR, KNN | 31 | 7 | 3 | ❌ |
 | 4 — ANN and SVM | 16 | 5 | 0 | ❌ |
 | 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 0 | ❌ |
 | 6 — Clustering | 9 | 3 | 0 | ❌ |
@@ -929,7 +929,7 @@ which were not, and why.
 | 11 — MLOps | 25 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 11 | — | 0 | ❌ |
 | 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **57** | ❌ |
+| **Total** | **214** | **60** | **58** | ❌ |
 
 Stretch rows are not counted.
 
