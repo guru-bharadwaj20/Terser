@@ -1,6 +1,6 @@
 # Support vector machines: margin, primal, dual, kernels
 
-Rows **4.4.1–4.4.2** of `CONTRIBUTING.md`. It derives the objects that the from-scratch dual solver
+Rows **4.4.1–4.4.3** of `CONTRIBUTING.md`. It derives the objects that the from-scratch dual solver
 (row 4.4.4) optimises. The running example is recomputed by `tests/test_svm_doc.py`.
 
 Notation: training pairs $(x_i, y_i)$, $i = 1..n$, with $x_i \in \mathbb{R}^d$ and
@@ -125,3 +125,46 @@ $a = \alpha_1 = \alpha_2 = 0.25$, with value $0.25$. Then
 $w = 0.25 (1, 1) - 0.25 (-1, -1) = (0.5, 0.5)$, and $b = y_1 - w^\top x_1 = 0$. This matches
 section 1. The dual optimum $0.25$ equals the primal optimum $\tfrac12 \lVert w \rVert^2 = 0.25$
 (strong duality).
+
+## 5. The linear kernel in the dual
+
+A **kernel** is a function $K(x, z) = \phi(x)^\top \phi(z)$ for some feature map $\phi$. The
+**linear kernel** uses the identity map $\phi(x) = x$:
+
+$$
+K(x, z) = x^\top z .
+$$
+
+Substituting it into the dual of section 3 gives
+
+$$
+\max_{\alpha} \; \sum_i \alpha_i - \tfrac12 \sum_{i,j} \alpha_i \alpha_j y_i y_j \, K(x_i, x_j)
+\quad \text{s.t.} \quad 0 \le \alpha_i \le C, \;\; \sum_i \alpha_i y_i = 0 .
+$$
+
+The QP matrix becomes $P = (y y^\top) \odot G$, where $G_{ij} = K(x_i, x_j)$ is the **Gram matrix**.
+The decision function needs only kernel evaluations against the support vectors:
+
+$$
+f(x) = w^\top x + b = \Big(\sum_i \alpha_i y_i x_i\Big)^\top x + b
+= \sum_{i \in \text{SV}} \alpha_i y_i \, K(x_i, x) + b ,
+$$
+
+and $b = y_s - \sum_i \alpha_i y_i K(x_i, x_s)$ for a free support vector $s$.
+
+Two properties follow:
+
+- **Validity.** $G = X X^\top$ is positive semidefinite, since $v^\top G v = \lVert X^\top v \rVert^2 \ge 0$.
+  So $P$ is PSD, the dual is concave, and every local optimum is global.
+- **Why derive it at all.** With the linear kernel, the primal ($d + 1$ variables) and the dual ($n$
+  variables) give the same classifier, and $w$ can be formed explicitly. The kernel form matters
+  because any other PSD kernel drops into the *same* QP unchanged.
+
+  The polynomial kernel of row 4.4.7, $K(x, z) = (\gamma x^\top z + r)^p$, corresponds to all
+  monomials of degree $\le p$. For the 1536-d pair embedding with $p = 3$, that is about
+  $6 \times 10^8$ features, which are never materialised. The cost moves from $d$ to $n^2$ kernel
+  evaluations.
+
+*Example.* $G = \begin{pmatrix} 2 & -2 \\ -2 & 2 \end{pmatrix}$ and
+$f(x) = 0.25 \, K(x_1, x) - 0.25 \, K(x_2, x) = 0.5\, x^{(1)} + 0.5\, x^{(2)}$, the same
+classifier as section 4.
