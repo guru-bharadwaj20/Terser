@@ -95,6 +95,12 @@ Row 7.3 (GPU environment): `pytest tests/test_gpu_env.py --run-gpu` → 6 passed
 machine, so it does not resolve here. Nothing in Phase 7 needs DVC data; rows that do must either
 copy the remote over or regenerate their inputs, and record which.
 
+Row 7.9 (GPU test suite), 2026-10-01: `pytest -m gpu --run-gpu -q` → **8 passed** (`test_gpu_env.py`,
+`test_hardware.py::test_real_gpu`, `test_hardware_verify.py::test_verify_on_gpu`). The full suite with
+GPU tests enabled, `pytest --run-gpu -m "not api" -q`, → 2244 passed, 4 skipped.
+
+Measurements from rows 7.4–7.7 are in [checkpoints/C7/](checkpoints/C7/README.md).
+
 Consequences of the profile:
 
 - bf16 is the default mixed-precision dtype on the GPU. fp16 loss scaling is not needed.
@@ -232,15 +238,15 @@ the judge's context length has to be pinned.
 | Token counting (tiktoken, HF tokenizers) | 0+ | `CPU` | — | 0 | Ground truth, never approximated |
 | Claude token counts (optional) | 0+ | `CPU` | token-counting endpoint, only if an Anthropic key is ever added | 0 | Never required for any reported number |
 | CPU smoke-test LLM (Qwen2.5-0.5B / 1.5B, GGUF Q4 via Ollama or llama.cpp) | 1+ | `CPU` | 4-bit | ~1–2 GB RAM | Pipeline tests only (a few tokens/s on the i3 laptop); outputs tagged `stand_in: true`, never used for labels |
-| Candidate generation + pairwise judge (Qwen2.5-32B-Instruct-AWQ; fallback Qwen2.5-14B-Instruct-AWQ) | 2+ | `GPU` | vLLM AWQ int4 | ~19 GB weights (32B) / ~9 GB (14B) + KV cache | Exclusive slot, never colocated with target serving; 32B fit at max len 4096 is an estimate verified in 7.6 |
-| Target LLM outputs (Llama-3.1-8B-Instruct, Qwen2.5-7B-Instruct) | 2, 8+ | `GPU` | vLLM bf16, `gpu_memory_utilization=0.90` | ~16 GB weights + KV cache | Before GPU: only the CPU smoke-test stand-in above |
+| Candidate generation + pairwise judge (Qwen2.5-32B-Instruct-AWQ; fallback Qwen2.5-14B-Instruct-AWQ) | 2+ | `GPU` | vLLM AWQ int4 | **Measured (7.6), 32B:** 18.14 GiB weights + 1.46 GiB KV, peak 22.15 GiB net · 14B: ~9 GB (est.) | Exclusive slot. At max len 4096 the 32B fits **only** with `max_num_batched_tokens=2048` (fails at vLLM defaults); KV holds 5,968 tokens, 18.5 / 281 tok/s at batch 1 / 16. Was est. ~19 GB weights. [C7/serving.md](checkpoints/C7/serving.md) |
+| Target LLM outputs (Llama-3.1-8B-Instruct, Qwen2.5-7B-Instruct) | 2, 8+ | `GPU` | vLLM bf16, `gpu_memory_utilization=0.90` | **Measured (7.6), Qwen2.5-7B:** 14.29 GiB weights + 5.54 GiB KV, peak 20.79 GiB net · Llama-3.1-8B: not measured (gated) | 24.1 / 376 tok/s at batch 1 / 16. Was est. ~16 GB weights. [C7/serving.md](checkpoints/C7/serving.md) |
 | Small judge (Llama-3.1-8B-Instruct AWQ) | 2, 8+ | `GPU` | vLLM AWQ int4 | ~6 GB + KV | Self-preference control (2.2.5) and fast audits (8.4); replaces the 32B judge only after C8.7 |
 | Sentence embeddings (bge-small / e5-base) | 3+ | `CPU→GPU` | fp32 / fp16 | < 2 GB | CPU fine up to ~50k texts |
 | All classical models (ID3, LR, KNN, SVM, NB, GMM, HMM, RF, GBM, k-means) | 3–6 | `CPU` | — | 0 | Never on GPU |
 | Perceptron / MLP / optimizer study | 4 | `CPU` | fp32 | 0 | Small models |
 | TextCNN span scorer | 8 | `CPU→GPU` | fp32 / bf16 | < 2 GB | GPU only for sweeps |
-| Rewriter SFT: Qwen2.5-0.5B full fine-tune | 8 | `GPU` | bf16 + AdamW, grad checkpointing | ~12–16 GB | ~16 bytes/param for weights + grads + Adam (~8 GB) + activations |
-| Rewriter SFT: Qwen2.5-1.5B / 3B LoRA | 8 | `GPU` | bf16 base, LoRA r=16 | ~8–16 GB | Main candidates |
+| Rewriter SFT: Qwen2.5-0.5B full fine-tune | 8 | `GPU` | bf16 + AdamW, grad checkpointing | **Measured (7.7):** 16.32 GiB reserved fp32-master / 11.77 GiB pure bf16 (seq 1024, mb 4); 0.44 / 0.37 s per step | ~16 bytes/param for weights + grads + Adam (~8 GB) + activations; was est. ~12–16 GB. [C7/training.md](checkpoints/C7/training.md) |
+| Rewriter SFT: Qwen2.5-1.5B / 3B LoRA | 8 | `GPU` | bf16 base, LoRA r=16 | **Measured (7.7), 1.5B:** 12.19 GiB reserved (seq 1024, mb 4), 1.11 s per step · 3B: ~8–16 GB (est.) | Main candidates; 1.5B was est. ~8–16 GB 
 | Rewriter SFT: 7B QLoRA | 8 | `GPU` | NF4 base + LoRA | ~10–18 GB at seq ≤ 1024 | Only if smaller rungs fail C8.3 |
 | GRPO rewriter policy | 9 | `GPU` | 0.5B–1.5B LoRA | ~12–20 GB | Target and judge calls go to a time-shared vLLM slot, never colocated with training |
 | Tabular Q-learning | 9 | `CPU` | — | 0 | |
