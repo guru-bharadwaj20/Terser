@@ -1,0 +1,87 @@
+# Phase 2 dataset pipeline (plan row 2.1.7): collect -> casualise -> dedupe -> split.
+#   dvc repro split
+# casualise calls a local OpenAI-compatible server (vLLM, see the stage comment) only for
+# requests that are not yet in .cache/llm_responses; with a populated cache `dvc repro`
+# rebuilds every stage on CPU with identical outputs.
+stages:
+  collect:
+    cmd: >-
+      python -m terser.data.collect --out data/interim/clean.jsonl
+      --per-category ${collect.per_category} --seed ${seed}
+      --min-words ${collect.min_words} --max-words ${collect.max_words}
+      --stats reports/p2_collect_stats.json
+    deps:
+      - src/terser/data/collect.py
+      - src/terser/data/sources.py
+      - src/terser/data/pii.py
+      - data/raw/dolly
+      - data/raw/oasst1
+      - data/raw/humaneval
+      - data/raw/mbpp
+      - data/raw/gsm8k
+    params:
+      - seed
+      - collect
+    outs:
+      - data/interim/clean.jsonl
+    metrics:
+      - reports/p2_collect_stats.json:
+          cache: false
+
+  casualise:
+    # GPU: vllm serve Qwen/Qwen2.5-32B-Instruct-AWQ --quantization awq_marlin --max-model-len 4096
+    #        --gpu-memory-utilization 0.90 --max-num-batched-tokens 2048 --max-num-seqs 64
+    #      export TERSER_LOCAL_LLM_URL=http://localhost:8000/v1
+    cmd: >-
+      python -m terser.data.casualise --in data/interim/clean.jsonl
+      --out data/interim/casual.jsonl --rejected data/interim/casual_rejected.jsonl
+      --model ${casualise.model} --workers ${casualise.workers}
+      --max-ratio ${casualise.max_ratio} --temperature ${casualise.temperature}
+      --stats reports/p2_casualise_stats.json
+    deps:
+      - data/interim/clean.jsonl
+      - src/terser/data/casualise.py
+      - src/terser/data/prompts/casualise_v1.txt
+      - src/terser/data/prompts/casualise_check_v1.txt
+    params:
+      - casualise.model
+      - casualise.max_ratio
+      - casualise.temperature
+    outs:
+      - data/interim/casual.jsonl
+      - data/interim/casual_rejected.jsonl
+    metrics:
+      - reports/p2_casualise_stats.json:
+          cache: false
+
+  dedupe:
+    cmd: >-
+      python -m terser.data.dedupe --in data/interim/casual.jsonl
+      --out data/interim/casual_dedup.jsonl --report reports/p2_duplicates.md
+      --threshold ${dedupe.threshold} --seed ${seed}
+      --source-priority ${dedupe.source_priority}
+    deps:
+      - data/interim/casual.jsonl
+      - src/terser/data/dedupe.py
+    params:
+      - seed
+      - dedupe
+    outs:
+      - data/interim/casual_dedup.jsonl
+      - reports/p2_duplicates.md:
+          cache: false
+
+  split:
+    cmd: >-
+      python -m terser.data.splits --in data/interim/casual_dedup.jsonl
+      --out-dir data/processed/splits --seed ${seed}
+      --train-frac ${split.train_frac} --val-frac ${split.val_frac}
+      --expect-test-sha256 ${split.test_sha256} --freeze
+    deps:
+      - data/interim/casual_dedup.jsonl
+      - src/terser/data/splits.py
+    params:
+      - seed
+      - split
+    outs:
+      - data/processed/splits

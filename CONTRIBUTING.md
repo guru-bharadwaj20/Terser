@@ -300,7 +300,7 @@ downstream can be measured without it.
 | 2.1.4 | Casualisation | LLM rewrites clean instructions in 5 styles: rambling, hedging, texting, over-polite, repetitive; clean version kept as reference | `LLM` | ≥ 6,000 casual prompts | ✅ |
 | 2.1.5 | Deduplication | MinHash, Jaccard ≥ 0.8 removed; paraphrase groups kept whole | `CPU` | Duplicate report | ✅ |
 | 2.1.6 | **Source-grouped splits** | Train 70 / val 15 / test 15 by source prompt; test frozen end of week 4 and hash-locked | `CPU` | Automated test: 0 source prompts shared across splits | ✅ |
-| 2.1.7 | DVC stages | `collect → casualise → dedupe → split` | `CPU` | `dvc repro` rebuilds from cache | ❌ |
+| 2.1.7 | DVC stages | `collect → casualise → dedupe → split` | `CPU` | `dvc repro` rebuilds from cache | ✅ |
 | 2.1.8 | **Real-prompt slice** | ~1,000 first-turn user prompts from a licence-audited public chat log (e.g. WildChat), PII-scrubbed, category-tagged. Never casualised and never used for training: headroom (2.4.2) and final test (12.3) only. Guards against rewriters that merely undo the verbosity 2.1.4 injected | `CPU` | Data card + licence row; frozen with the test split | ✅ |
 
 ### 2.2 Candidates and Target Outputs
@@ -335,8 +335,8 @@ downstream can be measured without it.
 
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
-| C2.1 | Dataset size | ≥ 6,000 casual prompts, ≥ 800 per category, < 1% near-duplicates | ❌ |
-| C2.2 | Leakage | 0 source prompts shared across splits | ❌ |
+| C2.1 | Dataset size | ≥ 6,000 casual prompts, ≥ 800 per category, < 1% near-duplicates | ✅ |
+| C2.2 | Leakage | 0 source prompts shared across splits | ✅ |
 | C2.3 🚧 | Human–human agreement | Cohen's κ **≥ 0.60** | ❌ |
 | C2.4 🚧 | Judge–human agreement | κ **≥ 0.60** overall and **≥ 0.50** in every category | ❌ |
 | C2.5 🚧 | Judge as degradation detector | Sensitivity **≥ 0.85**, specificity **≥ 0.80** vs human labels | ❌ |
@@ -358,10 +358,10 @@ bias–variance and overfitting.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 3.1.1 | Alignment labels | Token-level KEEP/DROP/REPLACE from diff-aligning each prompt with its oracle rewrite | `CPU` | `features/alignment.py` + tests on 20 hand-aligned pairs | ❌ |
+| 3.1.1 | Alignment labels | Token-level KEEP/DROP/REPLACE from diff-aligning each prompt with its oracle rewrite | `CPU` | `features/alignment.py` + tests on 20 hand-aligned pairs | ✅ |
 | 3.1.2 | Span features | Token cost on T, self-information under GPT-2 small, stopword ratio, relative position, POS, filler-lexicon hit, negation / number / constraint keyword flags | `CPU` | `features/span.py`; feature table in DVC | ❌ |
 | 3.1.3 | Pair features | Token ratio, max self-information removed, # negations / numbers / constraint keywords removed, embedding cosine, category one-hot | `CPU` | `features/pair.py`; feature table in DVC | ❌ |
-| 3.1.4 | Continuous-value handling | Standardisation for LR/KNN; C4.5 threshold search for trees; equal-frequency bins for ID3 | `CPU` | Documented per model | ❌ |
+| 3.1.4 | Continuous-value handling | Standardisation for LR/KNN; C4.5 threshold search for trees; equal-frequency bins for ID3 | `CPU` | Documented per model | ✅ |
 
 ### 3.2 Evaluation Backbone
 
@@ -381,7 +381,7 @@ bias–variance and overfitting.
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 3.3.1 | **ID3 from scratch** | Entropy, information gain, recursive split on discretised span features | `CPU` | Matches a hand-computed toy example; within 2 F1 of scikit-learn `criterion="entropy"` at equal depth | ❌ |
-| 3.3.2 | Continuous values | C4.5-style threshold search on midpoints between class changes | `CPU` | Test on a 1-D separable fixture | ❌ |
+| 3.3.2 | Continuous values | C4.5-style threshold search on midpoints between class changes | `CPU` | Test on a 1-D separable fixture | ✅ |
 | 3.3.3 | Overfitting study | Train vs val F1 for depth 1–30 and min-samples-leaf sweep | `CPU` | `reports/figures/p3_tree_overfit.png` | ❌ |
 | 3.3.4 | Overfitting solutions | Pre-pruning, **reduced-error pruning**, **rule post-pruning**, cost-complexity pruning | `CPU` | Comparison table: leaves, val F1, train–val gap | ❌ |
 | 3.3.5 | Decision boundary (x–y) | Axis-aligned regions on `self_information` vs `token_cost` | `CPU` | `reports/figures/p3_tree_boundary.png` | ❌ |

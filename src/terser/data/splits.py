@@ -428,6 +428,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--no-near-dup-check", action="store_true", help="skip MinHash leakage check"
     )
+    parser.add_argument(
+        "--expect-test-sha256",
+        default=None,
+        help="fail unless the rebuilt test.jsonl has this sha256 (the frozen hash); none = skip",
+    )
     args = parser.parse_args(argv)
 
     records = read_jsonl(args.inp)
@@ -443,6 +448,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     (args.out_dir / "splits.json").write_text(
         json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
     )
+    if args.expect_test_sha256 and args.expect_test_sha256.lower() != "none":
+        digest = _sha256(args.out_dir / "test.jsonl")
+        if digest != args.expect_test_sha256:
+            raise FrozenTestSetError(
+                f"rebuilt test split sha256 {digest} != frozen {args.expect_test_sha256}"
+            )
     if args.freeze:
         freeze_test(args.out_dir)
         verify_frozen(args.out_dir)

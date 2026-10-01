@@ -1,0 +1,19 @@
+# Row 2.2.1: real LLM rewrite candidates (llm_low/medium/high) with Qwen2.5-32B-Instruct-AWQ on vLLM.
+# The command starts the vLLM server, waits for it, runs candidate generation against it, stops it.
+# Operator-stack and LLMLingua-2 candidates are produced in the same run.
+id: p2-candidates-qwen32b
+phase: 2
+depends_on: []
+command: >-
+  bash -c 'vllm serve Qwen/Qwen2.5-32B-Instruct-AWQ --quantization awq_marlin --max-model-len 4096
+  --gpu-memory-utilization 0.90 & SRV=$!;
+  until curl -sf http://localhost:8000/v1/models >/dev/null; do sleep 10; done;
+  TERSER_LOCAL_LLM_URL=http://localhost:8000/v1 python -m terser.data.candidates
+  experiment=p2_candidates hardware=rtx4500ada experiment.params.stand_in=false
+  experiment.params.rewrite_model=Qwen/Qwen2.5-32B-Instruct-AWQ; RC=$?; kill $SRV; exit $RC'
+est_vram_gb: 21
+est_hours: 3
+exclusive: true
+priority: 1
+cpu_smoke_test: tests/test_data_candidates.py
+outputs: [data/interim/pilot_candidates.jsonl, mlruns/]

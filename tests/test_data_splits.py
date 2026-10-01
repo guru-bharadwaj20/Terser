@@ -170,3 +170,16 @@ def test_cli_runs_and_freezes(tmp_path: Path) -> None:
     sp.verify_frozen(out)
     counts = Counter(len(read_jsonl(out / f"{n}.jsonl")) for n in sp.SPLIT_NAMES)
     assert sum(k * v for k, v in counts.items()) == 300
+
+
+def test_cli_expected_test_hash(tmp_path: Path) -> None:
+    inp = tmp_path / "in.jsonl"
+    write_jsonl(inp, _synthetic(50))
+    first = tmp_path / "a"
+    assert sp.main(["--in", str(inp), "--out-dir", str(first)]) == 0
+    digest = sp._sha256(first / "test.jsonl")
+    again = tmp_path / "b"
+    args = ["--in", str(inp), "--out-dir", str(again), "--expect-test-sha256", digest]
+    assert sp.main(args) == 0
+    with pytest.raises(sp.FrozenTestSetError):
+        sp.main(["--in", str(inp), "--out-dir", str(tmp_path / "c"), "--expect-test-sha256", "0"])

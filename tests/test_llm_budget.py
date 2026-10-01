@@ -174,6 +174,21 @@ def test_atomic_write_leaves_no_partial_file(tmp_path: Path, monkeypatch) -> Non
         ledger.add("p", Usage("anthropic", "m", 5, 5), 0.0)
     assert (tmp_path / "ledger.json").read_text(encoding="utf-8") == good
     assert [p.name for p in tmp_path.iterdir()] == ["ledger.json"]
+    monkeypatch.undo()
+    ledger.reload()  # the failed add must not survive in memory
+    assert ledger.spent("p")["tokens"] == 2
+
+
+def test_two_ledgers_on_one_file_see_each_other(tmp_path: Path) -> None:
+    a, b = Ledger(tmp_path / "ledger.json"), Ledger(tmp_path / "ledger.json")
+    a.add("p", Usage("local", "m", 3, 4), 0.0)
+    b.reload()
+    assert b.spent("p")["tokens"] == 7
+    b.add("p", Usage("local", "m", 1, 1), 0.0)
+    a.add("p", Usage("local", "m", 1, 1), 0.0)  # merges with b's write on disk
+    b.reload()
+    assert b.spent("p")["tokens"] == 11 and len(b.spent("p")["calls"]) == 3
+    assert "\n" not in (tmp_path / "ledger.json").read_text(encoding="utf-8")  # compact
 
 
 def test_transport_error_records_nothing(tmp_path: Path) -> None:
