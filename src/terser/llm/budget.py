@@ -23,13 +23,20 @@ class BudgetExceededError(RuntimeError):
     """Raised before an API call that would exceed (or cannot be verified against) a cap."""
 
 
-def atomic_write_json(path: Path, data: Any) -> None:
-    """Write JSON to ``path`` via a temp file in the same dir + ``os.replace``."""
+def atomic_write_json(path: Path, data: Any, compact: bool = False) -> None:
+    """Write JSON to ``path`` via a temp file in the same dir + ``os.replace``.
+
+    ``compact`` drops indentation so the C encoder is used (``indent`` forces the pure-Python
+    one, ~10x slower); use it for large, frequently rewritten files such as the ledger.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as fh:
-            json.dump(data, fh, indent=2, sort_keys=True)
+            if compact:
+                fh.write(json.dumps(data, sort_keys=True, separators=(",", ":")))
+            else:
+                json.dump(data, fh, indent=2, sort_keys=True)
             fh.flush()
             os.fsync(fh.fileno())
         os.replace(tmp, path)
@@ -88,10 +95,24 @@ class Ledger:
     def __init__(self, path: Path) -> None:
         self.path = Path(path)
         self._lock = threading.Lock()
+        self._stamp: tuple[int, int] | None = None
         self.data: dict[str, Any] = self._read()
 
+    def _file_stamp(self) -> tuple[int, int] | None:
+        try:
+            st = self.path.stat()
+        except FileNotFoundError:
+            return None
+        return st.st_mtime_ns, st.st_size
+
     def _read(self) -> dict[str, Any]:
-        if self.path.exists():
+        """Return the on-disk ledger, re-parsing only if the file changed since the last read
+        or write by this object (other processes may append to the same ledger)."""
+        stamp = self._file_stamp()
+        if stamp is not None and stamp == self._stamp and hasattr(self, "data"):
+            return self.data
+        self._stamp = stamp
+        if stamp is not None:
             return json.loads(self.path.read_text(encoding="utf-8"))
         return {"phases": {}}
 
@@ -119,7 +140,12 @@ class Ledger:
             rec["tokens"] += usage.input_tokens + usage.output_tokens
             rec["usd"] += usd or 0.0
             rec["calls"].append(entry)
-            atomic_write_json(self.path, data)
+            try:
+                atomic_write_json(self.path, data, compact=True)
+            except BaseException:
+                self._stamp = None  # in-memory data now differs from disk: re-read next time
+                raise
+            self._stamp = self._file_stamp()
             self.data = data
         return entry
 
