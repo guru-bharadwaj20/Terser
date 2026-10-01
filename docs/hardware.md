@@ -78,6 +78,23 @@ here (no hosted API keys exist).
 Row 7.2 (driver + CUDA): `nvidia-smi` on 2026-10-01 shows the 24 GB card; `torch.cuda.is_available()` is
 `True` with the pinned torch build, so driver and runtime are compatible.
 
+Row 7.3 (GPU environment): `pytest tests/test_gpu_env.py --run-gpu` → 6 passed on 2026-10-01.
+
+| Package | Version |
+| :--- | :--- |
+| torch | 2.13.0+cu130 |
+| vllm | 0.30.0 |
+| transformers | 5.18.0 |
+| peft | 0.21.1 |
+| trl | 0.11.4 |
+| bitsandbytes | 0.50.2 (already present, no install needed) |
+| mlflow | 3.16.1, local `./mlruns` file store (no shared server) |
+| dvc | 3.67.1 |
+
+`dvc pull` was **not run**: the DVC remote `local` is `../../terser-dvc-remote`, a path on another
+machine, so it does not resolve here. Nothing in Phase 7 needs DVC data; rows that do must either
+copy the remote over or regenerate their inputs, and record which.
+
 Consequences of the profile:
 
 - bf16 is the default mixed-precision dtype on the GPU. fp16 loss scaling is not needed.
