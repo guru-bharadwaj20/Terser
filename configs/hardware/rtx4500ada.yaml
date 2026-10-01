@@ -1,4 +1,4 @@
-# NVIDIA RTX 4500 Ada Generation (24 GB, Ada Lovelace, bf16). Not connected yet.
+# NVIDIA RTX 4500 Ada Generation (24 GB, Ada Lovelace, bf16). Connected 2026-10-01 (WSL2 workstation, docs/hardware.md § 1.2).
 name: "NVIDIA RTX 4500 Ada Generation"
 device: "cuda:0"
 precision: bf16

@@ -11,7 +11,7 @@ If this document and CONTRIBUTING.md disagree, CONTRIBUTING.md wins and this fil
 | :--- | :--- | :--- | :--- | :---: |
 | Dev laptop (Windows 11) | Guru Bharadwaj | CPU only, no CUDA device | Classical ML (Phases 3–6), tokenization, DVC pipelines, CI, CPU smoke tests, fast-path serving | Available |
 | Dev workstation (Fedora 44) | Vivian Sobers | AMD Ryzen AI 7 350 (16 threads) · 14 GB RAM · 475 GB disk · no NVIDIA GPU · Python 3.14 system interpreter | Same as above | Available |
-| NVIDIA RTX 4500 Ada Generation | Guru Bharadwaj | 24 GB GDDR6 ECC · Ada Lovelace · compute capability 8.9 · bf16 supported · ~210 W board power · attached later via remote access (row 7.1) | vLLM serving of all real LLM work (casualisation, candidate generation, judges, open targets), rewriter SFT/RL, neural HPO, quality-path serving | ❌ not connected |
+| NVIDIA RTX 4500 Ada Generation | Guru Bharadwaj | 24 GB GDDR6 ECC · Ada Lovelace · compute capability 8.9 · bf16 supported · ~210 W board power · WSL2 workstation, see [§ 1.2](#12-rtx-4500-ada-workstation-wsl2) | vLLM serving of all real LLM work (casualisation, candidate generation, judges, open targets), rewriter SFT/RL, neural HPO, quality-path serving | ✅ available |
 | 2 × NVIDIA GeForce RTX 4090 | Vivian Sobers | `worker-1` / `worker-2`, see [§ 1.1](#11-vivians-gpu-workers) · each 24 GB · Ada Lovelace · compute capability 8.9 · bf16 supported | Same as the RTX 4500 Ada row | ✅ available |
 | Local open-model serving | both | OpenAI-compatible servers only, reached through `terser.llm` provider `local`: Ollama / llama.cpp on a dev machine for tiny models (Qwen2.5-0.5B/1.5B, smoke tests), vLLM or Ollama on a GPU host for all real generation and judging. Per-phase token caps in `configs/budget.yaml` bound compute; responses disk-cached. **No hosted API keys are available or assumed** | CPU smoke tests (dev machines); every output that feeds labels, metrics or reports (GPU) | CPU: available · GPU: ✅ on the 4090s |
 
@@ -56,6 +56,21 @@ Access and serving notes:
   **R14** in [risks.md](risks.md), now observed rather than hypothetical.
 - `configs/hardware/rtx4090.yaml` selects either card; the queue runner is single-host, so jobs are
   currently placed on a host by hand (see [§ 4.2](#42-queue-rules)).
+
+### 1.2 RTX 4500 Ada workstation, WSL2
+
+Guru Bharadwaj's workstation, connected 2026-10-01. Work runs locally inside WSL2, not over SSH.
+
+| | RTX 4500 Ada workstation |
+| :--- | :--- |
+| OS | Windows 11 host · WSL2 Ubuntu 24.04.5 LTS |
+| CPU / RAM (visible to WSL) | 32 threads · 62 GB |
+| Disk free (WSL root) | ~940 GB of 1007 GB |
+| Python | 3.12.3, venv at `~/Terser/.venv`, `pip install -e ".[dev,gpu]"` |
+
+Row 7.1 (access): repository cloned at `~/Terser`; `pytest -m "not gpu and not api" -q` on
+2026-10-01 → **2224 passed, 4 skipped, 1 deselected** (46 s). `.env` is not needed for any row run
+here (no hosted API keys exist).
 
 Consequences of the profile:
 
