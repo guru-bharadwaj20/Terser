@@ -191,7 +191,7 @@ def _load_hf(p: DictConfig, device: Any) -> tuple[Any, Any]:  # pragma: no cover
 
     dtype = torch.bfloat16 if device.precision == "bf16" else torch.float32
     tok = AutoTokenizer.from_pretrained(p.model)
-    model = AutoModelForCausalLM.from_pretrained(p.model, torch_dtype=dtype)
+    model: Any = AutoModelForCausalLM.from_pretrained(p.model, torch_dtype=dtype)
     if p.get("grad_checkpointing", False):
         model.gradient_checkpointing_enable()
         model.config.use_cache = False

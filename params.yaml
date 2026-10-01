@@ -16,3 +16,8 @@ split:
   train_frac: 0.70
   val_frac: 0.15
   test_sha256: b4b264a80bcf8b1c415643b5f54156d214841e77088b75ae8b148bf2c9e106c7  # frozen test.jsonl; a rebuild that changes it fails
+label_subset:
+  per_category: 300      # labelled prompts per category; sized to the phase2 token cap (see label_subset.py)
+candidates:
+  model: Qwen/Qwen2.5-32B-Instruct-AWQ
+  workers: 32
