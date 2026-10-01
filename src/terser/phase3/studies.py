@@ -36,7 +36,7 @@ Row         Study                                      Artifact
 
 Every score comes from the grouped protocol of row 3.2.4 unless the study says otherwise, and every
 table carries per-category rows and the three baselines. Seeds default to 0, 1, 2 (mean ± std).
-The runner refuses paths under ``data/processed/test*`` (never tune on test) and stand-in tables
+The runner refuses frozen held-out split paths (never tune on held-out data) and stand-in tables
 (``stand_in`` column true) unless ``--allow-stand-in`` is given, in which case every report is
 stamped ``STAND-IN``.
 """

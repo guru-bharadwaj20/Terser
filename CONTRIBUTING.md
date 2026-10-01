@@ -917,19 +917,19 @@ which were not, and why.
 | :--- | :---: | :---: | :---: | :---: |
 | 0 — Foundations | 22 | 4 | 26 | ✅ |
 | 1 — Framing and Concept Learning | 23 | 5 | 22 | ❌ |
-| 2 — Data Pipeline and Judge | 21 | 9 | 9 | ❌ |
-| 3 — Metrics, Trees, LR, KNN | 31 | 7 | 7 | ❌ |
-| 4 — ANN and SVM | 16 | 5 | 6 | ❌ |
-| 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 3 | ❌ |
-| 6 — Clustering | 9 | 3 | 0 | ❌ |
+| 2 — Data Pipeline and Judge | 21 | 9 | 13 | ❌ |
+| 3 — Metrics, Trees, LR, KNN | 31 | 7 | 10 | ❌ |
+| 4 — ANN and SVM | 16 | 5 | 7 | ❌ |
+| 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 6 | ❌ |
+| 6 — Clustering | 9 | 3 | 2 | ❌ |
 | 7 — GPU Onboarding | 8 | 3 | 9 | ❌ |
-| 8 — CNN and Rewriter | 14 | 5 | 0 | ❌ |
-| 9 — Reinforcement Learning | 7 | 2 | 0 | ❌ |
-| 10 — HPO | 5 | 4 | 0 | ❌ |
-| 11 — MLOps | 25 | 7 | 0 | ❌ |
+| 8 — CNN and Rewriter | 14 | 5 | 6 | ❌ |
+| 9 — Reinforcement Learning | 7 | 2 | 3 | ❌ |
+| 10 — HPO | 5 | 4 | 2 | ❌ |
+| 11 — MLOps | 25 | 7 | 10 | ❌ |
 | 12 — Final Evaluation | 11 | — | 0 | ❌ |
 | 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **82** | ❌ |
+| **Total** | **214** | **60** | **116** | ❌ |
 
 Stretch rows are not counted.
 
