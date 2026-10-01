@@ -95,6 +95,12 @@ Row 7.3 (GPU environment): `pytest tests/test_gpu_env.py --run-gpu` → 6 passed
 machine, so it does not resolve here. Nothing in Phase 7 needs DVC data; rows that do must either
 copy the remote over or regenerate their inputs, and record which.
 
+Row 7.9 (GPU test suite), 2026-10-01: `pytest -m gpu --run-gpu -q` → **8 passed** (`test_gpu_env.py`,
+`test_hardware.py::test_real_gpu`, `test_hardware_verify.py::test_verify_on_gpu`). The full suite with
+GPU tests enabled, `pytest --run-gpu -m "not api" -q`, → 2244 passed, 4 skipped.
+
+Measurements from rows 7.4–7.7 are in [checkpoints/C7/](checkpoints/C7/README.md).
+
 Consequences of the profile:
 
 - bf16 is the default mixed-precision dtype on the GPU. fp16 loss scaling is not needed.
