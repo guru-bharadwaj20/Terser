@@ -576,7 +576,7 @@ before any queued GPU job runs. The RTX 4500 Ada, if connected later, repeats 7.
 | 7.5 | vLLM smoke test | Qwen2.5-0.5B-Instruct generates 32 tokens | `GPU` | Logged | ✅ |
 | 7.6 | Serving measurement | Llama-3.1-8B-Instruct bf16 and Qwen2.5-32B-AWQ, `gpu_memory_utilization=0.90`, max len 4096: peak VRAM, tokens/s at batch 1 and 16 | `GPU` | VRAM table updated | ✅ |
 | 7.7 | Training measurement | Qwen2.5-0.5B full FT and 1.5B LoRA, seq 1024, micro-batch 4, grad checkpointing: peak VRAM, step time | `GPU` | VRAM table updated | ✅ |
-| 7.9 | GPU test suite | All `@pytest.mark.gpu` tests | `GPU` | Green | ❌ |
+| 7.9 | GPU test suite | All `@pytest.mark.gpu` tests | `GPU` | Green | ✅ |
 
 ### Checkpoint C7 — GPU Ready 🚧
 
@@ -922,14 +922,14 @@ which were not, and why.
 | 4 — ANN and SVM | 16 | 5 | 6 | ❌ |
 | 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 3 | ❌ |
 | 6 — Clustering | 9 | 3 | 0 | ❌ |
-| 7 — GPU Onboarding | 8 | 3 | 7 | ❌ |
+| 7 — GPU Onboarding | 8 | 3 | 8 | ❌ |
 | 8 — CNN and Rewriter | 14 | 5 | 0 | ❌ |
 | 9 — Reinforcement Learning | 7 | 2 | 0 | ❌ |
 | 10 — HPO | 5 | 4 | 0 | ❌ |
 | 11 — MLOps | 25 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 11 | — | 0 | ❌ |
 | 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **80** | ❌ |
+| **Total** | **214** | **60** | **81** | ❌ |
 
 Stretch rows are not counted.
 
