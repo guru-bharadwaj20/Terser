@@ -544,10 +544,10 @@ dangerous, and use them to stratify training and evaluation.
 | 6.1 | Prompt embeddings | bge-small 384-d for all train prompts | `CPU` | Cached matrix + id index; raises on missing id | ❌ |
 | 6.2 | K-means | k-means++, k ∈ 4..30; elbow + silhouette | `CPU` | `reports/figures/p6_kmeans_k.png` | ❌ |
 | 6.3 | Bisecting K-means | Same k range; SSE and cluster-size balance vs K-means | `CPU` | Comparison table | ❌ |
-| 6.4 | Hierarchical vs non-hierarchical | Written comparison of assumptions, cost, output | `CPU` | `reports/p6_clustering.md` §1 | ❌ |
+| 6.4 | Hierarchical vs non-hierarchical | Written comparison of assumptions, cost, output | `CPU` | `reports/p6_clustering.md` §1 | ✅ |
 | 6.5 | Agglomerative clustering | Ward / average / complete linkage on a 2,000-prompt sample | `CPU` | Dendrograms | ❌ |
 | 6.6 | Divisive clustering | Top-down recursive bisection; tree compared with 6.5 | `CPU` | Figure + cophenetic correlation | ❌ |
-| 6.7 | **K-means as a special case of EM** | GMM-EM with shared spherical covariance σ²I; anneal σ → 0; responsibilities become hard | `CPU` | `docs/derivations/kmeans_em.md` + assignment agreement vs K-means | ❌ |
+| 6.7 | **K-means as a special case of EM** | GMM-EM with shared spherical covariance σ²I; anneal σ → 0; responsibilities become hard | `CPU` | `docs/derivations/kmeans_em.md` + assignment agreement vs K-means | ✅ |
 | 6.8 | Clusters vs categories | ARI, NMI, contingency table against the 6 hand-defined categories | `CPU` | Table | ❌ |
 | 6.9 | Per-cluster risk | Oracle savings and degradation rate per cluster; high-risk clusters become eval slices in 12.3 | `CPU` | `reports/p6_cluster_risk.md` | ❌ |
 
@@ -865,10 +865,10 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 | 3 | Naive Bayes | 5.2.3 | ❌ |
 | 3 | Expectation maximisation and GMM | 5.2.5, 5.2.6 | ❌ |
 | 3 | Hidden Markov Models | 5.3 | ❌ |
-| 4 | Hierarchical vs non-hierarchical clustering | 6.4 | ❌ |
+| 4 | Hierarchical vs non-hierarchical clustering | 6.4 | ✅ |
 | 4 | Agglomerative and divisive clustering | 6.5, 6.6 | ❌ |
 | 4 | K-means, bisecting K-means | 6.2, 6.3 | ❌ |
-| 4 | K-means as special case of EM | 6.7 | ❌ |
+| 4 | K-means as special case of EM | 6.7 | ✅ |
 | 4 | RL: agent, environment, states, actions, rewards, policy, value functions | 9.1.1, 9.1.2, 9.1.4 | ❌ |
 | 4 | Bellman equation and Q-learning | 9.1.1, 9.2 | ❌ |
 | 4 | Introduction to deep learning | 8.1.1, 8.3 | ❌ |
