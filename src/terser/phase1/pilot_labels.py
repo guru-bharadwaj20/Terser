@@ -41,9 +41,11 @@ import csv
 import json
 import re
 import sys
+import threading
 import time
 from collections import Counter
 from collections.abc import Callable, Iterable, Iterator, Mapping
+from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
@@ -144,10 +146,13 @@ class PilotSettings:
     temperature: float = 0.0
     prompt_version: str = "pairwise_v1"
     budget_phase: str = "phase1"
+    workers: int = 1
 
     def __post_init__(self) -> None:
         if self.stage not in ("all", "respond", "judge"):
             raise ValueError(f"stage must be all|respond|judge, got {self.stage!r}")
+        if self.workers < 1:
+            raise ValueError(f"workers must be >= 1, got {self.workers}")
         if not self.stand_in:
             tags = [m for m in (self.target_model, self.judge_model) if _OLLAMA_TAG_RE.match(m)]
             if tags:
@@ -312,17 +317,29 @@ def iter_items(
 
 
 class _Counting:
-    """Tracks calls/tokens over a client's responses."""
+    """Tracks calls/tokens over a client's responses (thread-safe)."""
 
     def __init__(self, summary: PilotSummary) -> None:
         self.summary = summary
+        self._lock = threading.Lock()
 
     def add(self, cached: bool, output_tokens: int) -> None:
-        self.summary.llm_calls += 1
-        if cached:
-            self.summary.cached_calls += 1
-        else:
-            self.summary.generated_tokens += output_tokens
+        with self._lock:
+            self.summary.llm_calls += 1
+            if cached:
+                self.summary.cached_calls += 1
+            else:
+                self.summary.generated_tokens += output_tokens
+
+
+class _NoCounting(_Counting):
+    """Counter for cache re-reads already counted by the parallel prefetch."""
+
+    def __init__(self) -> None:
+        pass
+
+    def add(self, cached: bool, output_tokens: int) -> None:
+        return None
 
 
 def _target_output(
@@ -466,19 +483,47 @@ def run_pilot(
     records: list[dict[str, Any]] = []
     labels_path = out_dir / "labels.jsonl"
     fh = None
+    pool: ThreadPoolExecutor | None = None
+
+    def judged(item: PilotItem, count: _Counting) -> PairwiseResult | None:
+        original_out = _target_output(client, settings, item.original, count)
+        rewrite_out = _target_output(client, settings, item.rewrite, count)
+        if settings.stage == "respond":
+            return None
+        return judge.judge_pair(item.original, original_out, rewrite_out, category=item.category)
+
     try:
         if settings.stage != "respond":
             out_dir.mkdir(parents=True, exist_ok=True)
             fh = labels_path.open("w", encoding="utf-8", newline="\n")
-        for item in items:
-            summary.n_items += 1
-            original_out = _target_output(client, settings, item.original, counter)
-            rewrite_out = _target_output(client, settings, item.rewrite, counter)
-            if settings.stage == "respond":
-                continue
-            result = judge.judge_pair(
-                item.original, original_out, rewrite_out, category=item.category
+        if settings.workers == 1:
+            results: Iterator[tuple[PilotItem, PairwiseResult | None]] = (
+                (item, judged(item, counter)) for item in _counted(items, summary)
             )
+        else:
+            # Concurrent requests let vLLM batch. Unique target texts are generated once; then
+            # the first item of each distinct judge request is judged concurrently and repeats
+            # are resolved in order from the cache, so records match a sequential run exactly.
+            pool = ThreadPoolExecutor(max_workers=settings.workers)
+            item_list = list(items)
+            summary.n_items = len(item_list)
+            texts = dict.fromkeys(t for it in item_list for t in (it.original, it.rewrite))
+            if settings.stage != "judge":
+                list(pool.map(lambda t: _target_output(client, settings, t, counter), texts))
+            no_count = _NoCounting()
+            seen: set[tuple[str, str, str]] = set()
+            futures: list[Future[PairwiseResult | None] | None] = []
+            for it in item_list:
+                key = (it.original, it.rewrite, it.category)
+                futures.append(None if key in seen else pool.submit(judged, it, no_count))
+                seen.add(key)
+            results = (
+                (it, fut.result() if fut is not None else judged(it, no_count))
+                for it, fut in zip(item_list, futures, strict=True)
+            )
+        for item, result in results:
+            if result is None:
+                continue
             for call in (result.original_first, result.rewrite_first):
                 summary.llm_calls += call.attempts
                 summary.cached_calls += call.attempts if call.cached else 0
@@ -504,12 +549,21 @@ def run_pilot(
         summary.stopped_reason = "budget_exceeded"
         raise
     finally:
+        if pool is not None:
+            pool.shutdown(wait=True, cancel_futures=True)
         summary.n_pairs_considered = summary.n_items + summary.n_skipped_unchanged
         if fh is not None:
             fh.close()
             write_review_csv(records, out_dir / "labels_review.csv")
         summary.wall_seconds = time.perf_counter() - start
     return summary
+
+
+def _counted(items: Iterable[PilotItem], summary: PilotSummary) -> Iterator[PilotItem]:
+    """Count each item before it is processed (so a mid-item failure still counts it)."""
+    for item in items:
+        summary.n_items += 1
+        yield item
 
 
 def _opt_tuple(value: Any) -> tuple[str, ...] | None:
@@ -543,6 +597,7 @@ def settings_from_config(cfg: DictConfig) -> PilotSettings:
         temperature=float(p.get("temperature", 0.0)),
         prompt_version=str(p.get("prompt_version", "pairwise_v1")),
         budget_phase=str(p.get("budget_phase", "phase1")),
+        workers=int(p.get("workers", 1)),
     )
 
 
@@ -582,6 +637,7 @@ def run_from_config(
         "temperature": settings.temperature,
         "limit": settings.limit,
         "prompts_path": settings.prompts_path.as_posix(),
+        "workers": settings.workers,
     }
     with start_run(
         phase=1,
