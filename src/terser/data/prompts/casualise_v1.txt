@@ -1,0 +1,42 @@
+=== template ===
+You turn clean, well-written instructions into the kind of casual message a real person types
+to an AI assistant. You do not carry out the instruction. You only rewrite how it is asked.
+
+Style: {style}
+{style_guidance}
+Opening: {opening}
+
+Rules that apply to every style:
+1. Ask for exactly the same thing. Keep the task, its subject and every detail, constraint,
+   number, name, unit and quoted text of the instruction. Numbers stay as digits.
+2. Do not add any new requirement, constraint, preference, fact or question, and do not drop
+   any. Personal backstory or feelings are fine only if they change nothing about the task.
+3. If the instruction refers to text, code or data that follows it ("the passage below", "the
+   following function"), keep that reference: the material will be appended unchanged after
+   your message. Do not invent or include the material yourself.
+4. Write in English, in the first person, as the user. No emoji, no hashtags, no sign-off name.
+5. Use your own wording. Avoid stock openers such as "I'm not sure if this makes sense",
+   "So basically", "Good day" or "Hey there", and follow the opening given above.
+6. Output only the casual message: no preamble, no explanation, no quotation marks around it.
+
+[Clean instruction]
+{instruction}
+[End of clean instruction]
+=== rambling ===
+Rambling: the person thinks out loud. Long run-on sentences joined loosely, filler words, side
+remarks and a little irrelevant context about why they are asking, with the actual request
+buried in the middle or near the end. Two to five sentences.
+=== hedging ===
+Hedging: the person is unsure and apologetic. Qualifiers and softeners, doubts about whether
+the request is reasonable, indirect phrasing instead of a direct request. Every requirement is
+still stated, only hedged.
+=== texting ===
+Texting: written fast on a phone. Mostly lowercase, little punctuation, common chat
+abbreviations, dropped words where meaning stays clear. Short, but every requirement is still
+present.
+=== over_polite ===
+Over-polite: formal courtesy far beyond what is needed: deferential requests, repeated thanks,
+apologies for the trouble and a warm closing line of thanks.
+=== repetitive ===
+Repetitive: the person states the request, then restates it and its key requirements again in
+different words, as if worried it was missed. The repeats add no new requirement.

@@ -83,6 +83,10 @@ def parse_providers(raw: Mapping[str, Any] | None) -> dict[str, ProviderConfig]:
     return providers
 
 
+TokenLogprobs = tuple[tuple[str, tuple[tuple[str, float], ...]], ...]
+"""Per generated token: ``(token, ((candidate, logprob), ...))`` from ``top_logprobs``."""
+
+
 def openai_compatible_call(
     config: ProviderConfig,
     model: str,
@@ -96,6 +100,39 @@ def openai_compatible_call(
     """POST ``/chat/completions``; return ``(text, prompt_tokens, completion_tokens, usage_ok)``.
 
     Missing ``usage`` in the reply yields zero counts and ``usage_ok=False``.
+    """
+    text, tokens_in, tokens_out, ok, _ = openai_compatible_request(
+        config, model, messages, max_tokens, system, params, http_client=http_client
+    )
+    return text, tokens_in, tokens_out, ok
+
+
+def parse_logprobs(choice: Mapping[str, Any]) -> TokenLogprobs | None:
+    """Extract ``choices[0].logprobs.content`` as :data:`TokenLogprobs` (None if absent)."""
+    content = (choice.get("logprobs") or {}).get("content")
+    if not isinstance(content, list):
+        return None
+    out = []
+    for entry in content:
+        top = tuple((str(t["token"]), float(t["logprob"])) for t in entry.get("top_logprobs") or ())
+        out.append((str(entry.get("token", "")), top))
+    return tuple(out)
+
+
+def openai_compatible_request(
+    config: ProviderConfig,
+    model: str,
+    messages: list[dict[str, Any]],
+    max_tokens: int,
+    system: str | None,
+    params: dict[str, Any],
+    *,
+    http_client: httpx.Client | None = None,
+) -> tuple[str, int, int, bool, TokenLogprobs | None]:
+    """:func:`openai_compatible_call` plus the per-token ``top_logprobs`` when requested.
+
+    Logprobs are returned only when the server sent them (request ``logprobs=True`` and
+    ``top_logprobs=<k>`` in ``params``); otherwise the last element is None.
     """
     import httpx
 
@@ -135,7 +172,9 @@ def openai_compatible_call(
         )
     try:
         data = resp.json()
-        text = data["choices"][0]["message"]["content"] or ""
+        choice = data["choices"][0]
+        text = choice["message"]["content"] or ""
+        logprobs = parse_logprobs(choice)
     except (ValueError, KeyError, IndexError, TypeError) as exc:
         raise LocalLLMError(
             f"provider {config.name!r}: unexpected response from {url}: {resp.text[:500]}"
@@ -145,5 +184,5 @@ def openai_compatible_call(
     prompt_tokens = usage.get("prompt_tokens")
     completion_tokens = usage.get("completion_tokens")
     if isinstance(prompt_tokens, int) and isinstance(completion_tokens, int):
-        return text, prompt_tokens, completion_tokens, True
-    return text, 0, 0, False
+        return text, prompt_tokens, completion_tokens, True, logprobs
+    return text, 0, 0, False, logprobs

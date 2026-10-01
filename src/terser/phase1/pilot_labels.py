@@ -50,8 +50,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
-from terser.judge.labels import label_pair_from_result
+from terser.judge.labels import label_pair, label_pair_from_result
 from terser.judge.pairwise import PairwiseJudge, PairwiseResult
+from terser.judge.protocols import DEFAULT_TOP_LOGPROBS, LOW_MARGIN, order_averaged_side
 from terser.llm import BudgetExceededError, LLMClient, LocalLLMUnavailableError, cache_key
 
 if TYPE_CHECKING:
@@ -90,6 +91,7 @@ OPERATOR_SUBSETS: tuple[str, ...] = (
 """The 12 operator subsets of row 1.3.6: 7 singletons + cumulative stacks up to all operators."""
 
 Stage = Literal["all", "respond", "judge"]
+JudgeProtocolName = Literal["pairwise", "pairwise_avg"]
 ApplyOps = Callable[[str, str, str | None], str]
 
 REVIEW_COLUMNS: tuple[str, ...] = (
@@ -99,6 +101,9 @@ REVIEW_COLUMNS: tuple[str, ...] = (
     "label",
     "verdict_original_first",
     "verdict_rewrite_first",
+    "protocol",
+    "averaged_side",
+    "averaged_margin",
     "reason_original_first",
     "reason_rewrite_first",
     "needs_human_review",
@@ -147,8 +152,11 @@ class PilotSettings:
     prompt_version: str = "pairwise_v1"
     budget_phase: str = "phase1"
     workers: int = 1
+    protocol: JudgeProtocolName = "pairwise"
 
     def __post_init__(self) -> None:
+        if self.protocol not in ("pairwise", "pairwise_avg"):
+            raise ValueError(f"protocol must be pairwise|pairwise_avg, got {self.protocol!r}")
         if self.stage not in ("all", "respond", "judge"):
             raise ValueError(f"stage must be all|respond|judge, got {self.stage!r}")
         if self.workers < 1:
@@ -374,20 +382,37 @@ def _target_output(
     return resp.text
 
 
-def _review_reasons(result: PairwiseResult, settings: PilotSettings) -> list[str]:
+def _review_reasons(
+    result: PairwiseResult, settings: PilotSettings, margin: float | None = None
+) -> list[str]:
     reasons = []
     if result.parse_failed:
         reasons.append("unparseable_verdict")
     elif not result.position_consistent:
         reasons.append("position_inconsistent")
+    if settings.protocol == "pairwise_avg" and not result.parse_failed:
+        if margin is None or margin < LOW_MARGIN:
+            reasons.append("low_margin")
     if settings.stand_in:
         reasons.append("stand_in")
     return reasons
 
 
 def _record(item: PilotItem, result: PairwiseResult, settings: PilotSettings) -> dict[str, Any]:
-    reasons = _review_reasons(result, settings)
-    return {
+    aggregate: dict[str, Any] | None = None
+    if settings.protocol == "pairwise_avg":
+        side, probs = order_averaged_side(result.original_first, result.rewrite_first)
+        margin = None
+        if probs is not None:
+            top, second = sorted(probs.values(), reverse=True)[:2]
+            margin = top - second
+        label = label_pair(None, side, side).label
+        aggregate = {"protocol": "pairwise_avg", "side": side, "probs": probs, "margin": margin}
+        reasons = _review_reasons(result, settings, margin)
+    else:
+        label = label_pair_from_result(None, result).label
+        reasons = _review_reasons(result, settings)
+    rec = {
         "id": item.id,
         "prompt_id": item.prompt_id,
         "category": item.category,
@@ -398,11 +423,15 @@ def _record(item: PilotItem, result: PairwiseResult, settings: PilotSettings) ->
         "judge_model": settings.judge_model,
         "judge_prompt_version": settings.prompt_version,
         "verdicts": result.verdicts(),
-        "label": label_pair_from_result(None, result).label,
+        "label": label,
         "stand_in": settings.stand_in,
         "needs_human_review": bool(reasons),
         "review_reasons": reasons,
     }
+    if aggregate is not None:
+        rec["judge_protocol"] = "pairwise_avg"
+        rec["aggregate"] = aggregate
+    return rec
 
 
 def write_review_csv(records: Iterable[Mapping[str, Any]], path: Path) -> None:
@@ -421,6 +450,9 @@ def write_review_csv(records: Iterable[Mapping[str, Any]], path: Path) -> None:
                     "label": rec["label"] or "",
                     "verdict_original_first": v["original_first"]["side"] or "",
                     "verdict_rewrite_first": v["rewrite_first"]["side"] or "",
+                    "protocol": rec.get("judge_protocol", "pairwise"),
+                    "averaged_side": (rec.get("aggregate") or {}).get("side") or "",
+                    "averaged_margin": _fmt_margin((rec.get("aggregate") or {}).get("margin")),
                     "reason_original_first": v["original_first"]["reason"],
                     "reason_rewrite_first": v["rewrite_first"]["reason"],
                     "needs_human_review": rec["needs_human_review"],
@@ -433,6 +465,10 @@ def write_review_csv(records: Iterable[Mapping[str, Any]], path: Path) -> None:
                     "notes": "",
                 }
             )
+
+
+def _fmt_margin(value: float | None) -> str:
+    return "" if value is None else f"{value:.3f}"
 
 
 def run_pilot(
@@ -479,6 +515,7 @@ def run_pilot(
         retries=settings.judge_retries,
         temperature=settings.temperature,
         prompt_version=settings.prompt_version,
+        top_logprobs=DEFAULT_TOP_LOGPROBS if settings.protocol == "pairwise_avg" else None,
     )
     records: list[dict[str, Any]] = []
     labels_path = out_dir / "labels.jsonl"
@@ -598,12 +635,15 @@ def settings_from_config(cfg: DictConfig) -> PilotSettings:
         prompt_version=str(p.get("prompt_version", "pairwise_v1")),
         budget_phase=str(p.get("budget_phase", "phase1")),
         workers=int(p.get("workers", 1)),
+        protocol=p.get("protocol", "pairwise"),
     )
 
 
 def _run_name(settings: PilotSettings) -> str:
     model = re.sub(r"[^A-Za-z0-9_.]", "_", settings.target_model.split("/")[-1])
-    variant = "standin" if settings.stand_in else settings.stage
+    variant: str = "standin" if settings.stand_in else settings.stage
+    if settings.protocol == "pairwise_avg":
+        variant += "avg"
     return f"1-pilotlabels-{model}-{variant}-0"
 
 
@@ -638,6 +678,7 @@ def run_from_config(
         "limit": settings.limit,
         "prompts_path": settings.prompts_path.as_posix(),
         "workers": settings.workers,
+        "protocol": settings.protocol,
     }
     with start_run(
         phase=1,

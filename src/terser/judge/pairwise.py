@@ -25,6 +25,7 @@ follow-up turn, which changes the request and therefore the cache key.
 from __future__ import annotations
 
 import json
+import math
 import re
 from dataclasses import asdict, dataclass
 from functools import cache
@@ -35,7 +36,7 @@ from terser.judge.rubrics import render_rubric
 
 if TYPE_CHECKING:
     from terser.data.categories import Category
-    from terser.llm import LLMClient
+    from terser.llm import LLMClient, TokenLogprobs
 
 __all__ = [
     "DEFAULT_PROMPT_VERSION",
@@ -50,6 +51,7 @@ __all__ = [
     "render_prompt",
     "rubric_section",
     "to_side",
+    "verdict_probs",
 ]
 
 Verdict = Literal["A", "B", "tie"]
@@ -195,6 +197,43 @@ def parse_verdict(text: str) -> tuple[Verdict, str] | None:
     return None
 
 
+_VERDICT_VALUE_RE = re.compile(r"""["']?verdict["']?\s*:\s*["']?""", re.IGNORECASE)
+
+
+def _token_verdict(token: str) -> Verdict | None:
+    """Map one generated token (``"A"``, ``' "B'``, ``"tie"``...) to a verdict, else None."""
+    key = token.strip().strip("\"'").strip().lower()
+    return {"a": "A", "b": "B", "tie": "tie"}.get(key)  # type: ignore[return-value]
+
+
+def verdict_probs(text: str, logprobs: TokenLogprobs | None) -> dict[str, float] | None:
+    """Probability of each verdict (``A``, ``B``, ``tie``) at the reply's verdict token.
+
+    Finds the first token at or after the end of ``"verdict": "`` in the generated text and
+    renormalises the ``top_logprobs`` mass of the candidates that spell a verdict. Returns None
+    when there are no logprobs, no verdict key, or no verdict candidate in the top list.
+    """
+    if not logprobs:
+        return None
+    joined = "".join(tok for tok, _ in logprobs)
+    match = _VERDICT_VALUE_RE.search(joined)
+    if match is None:
+        return None
+    pos = 0
+    for token, top in logprobs:
+        end = pos + len(token)
+        if end > match.end() and token.strip().strip("\"'"):
+            mass: dict[str, float] = {"A": 0.0, "B": 0.0, "tie": 0.0}
+            for cand, lp in top:
+                verdict = _token_verdict(cand)
+                if verdict is not None:
+                    mass[verdict] += math.exp(lp)
+            total = sum(mass.values())
+            return {k: v / total for k, v in mass.items()} if total > 0 else None
+        pos = end
+    return None
+
+
 def to_side(verdict: Verdict | None, order: Order) -> Side | None:
     """Translate a positional verdict into the side it favours for the given order."""
     if verdict is None:
@@ -244,6 +283,7 @@ class JudgeCall:
     attempts: int
     cached: bool
     output_tokens: int
+    verdict_probs: dict[str, float] | None = None  # positional A/B/tie, with top_logprobs only
 
     def to_dict(self) -> dict[str, Any]:
         """JSON-serialisable form."""
@@ -291,9 +331,15 @@ class PairwiseJudge:
         retries: int = 2,
         temperature: float = 0.0,
         prompt_version: str = DEFAULT_PROMPT_VERSION,
+        top_logprobs: int | None = None,
     ) -> None:
+        """``top_logprobs=k`` requests the top-k logprobs per token so each call also carries
+        :func:`verdict_probs` (OpenAI-compatible servers such as vLLM; changes the cache key)."""
         if retries < 0:
             raise ValueError("retries must be >= 0")
+        if top_logprobs is not None and top_logprobs < 1:
+            raise ValueError("top_logprobs must be >= 1 or None")
+        self.top_logprobs = top_logprobs
         self.client = client
         self.provider = provider
         self.model = model
@@ -325,6 +371,9 @@ class PairwiseJudge:
         raw = ""
         cached_all = True
         out_tokens = 0
+        extra: dict[str, Any] = (
+            {"logprobs": True, "top_logprobs": self.top_logprobs} if self.top_logprobs else {}
+        )
         for attempt in range(1, self.retries + 2):
             resp = self.client.complete(
                 self.provider,
@@ -332,6 +381,7 @@ class PairwiseJudge:
                 messages,
                 self.max_tokens,
                 temperature=self.temperature,
+                **extra,
             )
             raw = resp.text
             cached_all = cached_all and resp.cached
@@ -348,6 +398,7 @@ class PairwiseJudge:
                     attempts=attempt,
                     cached=cached_all,
                     output_tokens=out_tokens,
+                    verdict_probs=verdict_probs(raw, resp.logprobs),
                 )
             messages = [
                 *messages,
