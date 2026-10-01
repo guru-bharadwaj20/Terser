@@ -18,7 +18,7 @@ Reliability (row 11.6.2): shell steps are Prefect tasks with ``retries`` and ``r
 LLM calls inside those steps are disk-cached by :mod:`terser.llm` so a retry never re-pays for a
 completed generation; a failed flow run triggers Prefect's notification automations.
 
-Prefect is optional (``pip install -e ".[mlops]"``). Without it the decorators below are
+Prefect is optional (``pip install -e ".[orchestrate]"``). Without it the decorators below are
 no-ops, so every flow is still a plain callable (``flow.fn`` works in both cases). To register
 the flows with a Prefect server as deployments::
 
@@ -194,7 +194,7 @@ def main(argv: Sequence[str] | None = None) -> int:  # pragma: no cover - needs 
         print("usage: python -m terser.pipelines.flows serve", file=sys.stderr)
         return 2
     if not HAVE_PREFECT:
-        print('Prefect is not installed: pip install -e ".[mlops]"', file=sys.stderr)
+        print('Prefect is not installed: pip install -e ".[orchestrate]"', file=sys.stderr)
         return 1
     from prefect import serve
 
