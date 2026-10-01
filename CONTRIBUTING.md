@@ -646,9 +646,9 @@ neural rewriter is a [stretch goal](#stretch-goals-never-block-a-checkpoint).
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 9.1.1 | RL derivation | Agent = rewriter, environment = draft + tokenizer + gate; policy π(a \| s), V^π, Q^π; Bellman expectation and optimality forms; Q-learning update derived from optimality | `CPU` | `docs/derivations/rl.md` | ❌ |
-| 9.1.2 | Environment | States (remaining filler bucket, constraint count, length bucket, category, ops applied); actions `F H D I L C S` or `STOP` | `CPU` | `rl/env.py` with tests | ❌ |
-| 9.1.4 | Rewards | On `STOP`: Δtokens% − λ·1[degraded] (λ = 100); per step −0.01 | `CPU` | Reward unit tests | ❌ |
+| 9.1.1 | RL derivation | Agent = rewriter, environment = draft + tokenizer + gate; policy π(a \| s), V^π, Q^π; Bellman expectation and optimality forms; Q-learning update derived from optimality | `CPU` | `docs/derivations/rl.md` | ✅ |
+| 9.1.2 | Environment | States (remaining filler bucket, constraint count, length bucket, category, ops applied); actions `F H D I L C S` or `STOP` | `CPU` | `rl/env.py` with tests | ✅ |
+| 9.1.4 | Rewards | On `STOP`: Δtokens% − λ·1[degraded] (λ = 100); per step −0.01 | `CPU` | Reward unit tests | ✅ |
 
 ### 9.2 Tabular Q-Learning
 
@@ -869,7 +869,7 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 | 4 | Agglomerative and divisive clustering | 6.5, 6.6 | ❌ |
 | 4 | K-means, bisecting K-means | 6.2, 6.3 | ❌ |
 | 4 | K-means as special case of EM | 6.7 | ✅ |
-| 4 | RL: agent, environment, states, actions, rewards, policy, value functions | 9.1.1, 9.1.2, 9.1.4 | ❌ |
+| 4 | RL: agent, environment, states, actions, rewards, policy, value functions | 9.1.1, 9.1.2, 9.1.4 | ✅ |
 | 4 | Bellman equation and Q-learning | 9.1.1, 9.2 | ❌ |
 | 4 | Introduction to deep learning | 8.1.1, 8.3 | ❌ |
 | 4 | Convolution operation and CNNs | 8.1.2, 8.2.1 | ✅ |
