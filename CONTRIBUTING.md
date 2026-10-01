@@ -503,7 +503,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 5.2.1 | Bayes theorem | P(filler \| phrase, context) worked from corpus counts | `CPU` | `docs/derivations/bayes.md` | ❌ |
+| 5.2.1 | Bayes theorem | P(filler \| phrase, context) worked from corpus counts | `CPU` | `docs/derivations/bayes.md` | ✅ |
 | 5.2.3 | Naive Bayes filler detector | Multinomial NB on 1–3-grams: MLE parameters with Laplace smoothing (and why smoothing is MAP); vs LR on the same features | `CPU` | PR curve + table | ❌ |
 | 5.2.4 | Bayes optimal classifier | Phase 1 hypotheses as H; P(h \| D) from validation likelihood; posterior-weighted vote vs MAP hypothesis | `CPU` | `reports/p5_bayes_optimal.md` | ❌ |
 | 5.2.5 | EM from scratch | E-step responsibilities, M-step means/variances/weights; log-likelihood monotone | `CPU` | Test asserts non-decreasing log-likelihood; matches scikit-learn GMM | ✅ |
