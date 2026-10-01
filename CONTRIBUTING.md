@@ -572,7 +572,7 @@ before any queued GPU job runs. The RTX 4500 Ada, if connected later, repeats 7.
 | 7.1 | Remote access | SSH to `worker-1` / `worker-2`; repo cloned; `.env` provisioned out-of-band | `GPU` | Contributor can run `pytest` remotely | ✅ |
 | 7.2 | Driver + CUDA | Driver and CUDA runtime compatible with the pinned PyTorch build on each worker | `GPU` | `nvidia-smi` shows a 24 GB card; versions recorded in `docs/hardware.md` | ✅ |
 | 7.3 | GPU environment | Python ≥ 3.11 venv; `pip install -e ".[dev,gpu]"`; `dvc pull`; MLflow pointed at shared server | `GPU` | Import test for torch/vllm/peft/trl/bitsandbytes | ✅ |
-| 7.4 | Verification script | `python -m terser.hardware.verify`: device name, memory, capability (8, 9), bf16 matmul benchmark + parity with fp32 | `GPU` | Report in `docs/checkpoints/C7/hardware.md` | ❌ |
+| 7.4 | Verification script | `python -m terser.hardware.verify`: device name, memory, capability (8, 9), bf16 matmul benchmark + parity with fp32 | `GPU` | Report in `docs/checkpoints/C7/hardware.md` | ✅ |
 | 7.5 | vLLM smoke test | Qwen2.5-0.5B-Instruct generates 32 tokens | `GPU` | Logged | ❌ |
 | 7.6 | Serving measurement | Llama-3.1-8B-Instruct bf16 and Qwen2.5-32B-AWQ, `gpu_memory_utilization=0.90`, max len 4096: peak VRAM, tokens/s at batch 1 and 16 | `GPU` | VRAM table updated | ❌ |
 | 7.7 | Training measurement | Qwen2.5-0.5B full FT and 1.5B LoRA, seq 1024, micro-batch 4, grad checkpointing: peak VRAM, step time | `GPU` | VRAM table updated | ❌ |
@@ -922,14 +922,14 @@ which were not, and why.
 | 4 — ANN and SVM | 16 | 5 | 6 | ❌ |
 | 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 3 | ❌ |
 | 6 — Clustering | 9 | 3 | 0 | ❌ |
-| 7 — GPU Onboarding | 8 | 3 | 3 | ❌ |
+| 7 — GPU Onboarding | 8 | 3 | 4 | ❌ |
 | 8 — CNN and Rewriter | 14 | 5 | 0 | ❌ |
 | 9 — Reinforcement Learning | 7 | 2 | 0 | ❌ |
 | 10 — HPO | 5 | 4 | 0 | ❌ |
 | 11 — MLOps | 25 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 11 | — | 0 | ❌ |
 | 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **76** | ❌ |
+| **Total** | **214** | **60** | **77** | ❌ |
 
 Stretch rows are not counted.
 
