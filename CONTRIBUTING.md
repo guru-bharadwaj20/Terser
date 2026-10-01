@@ -676,11 +676,11 @@ for the gate and the rewriter.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 10.1 | HPO module | `terser.hpo` wrapping grid / random / Optuna TPE / GP samplers; MLflow parent-child runs | `CPU` | Module + tests | ❌ |
+| 10.1 | HPO module | `terser.hpo` wrapping grid / random / Optuna TPE / GP samplers; MLflow parent-child runs | `CPU` | Module + tests | ✅ |
 | 10.2 | Method study | GBM quality gate: 60-point grid vs random, TPE and GP at 60 trials × 5 repeats. Random and TPE also on the Phase 4 MLP (depth 1–3, width {64..512}, dropout, lr, weight decay) | `CPU` | Best-so-far curves logged to MLflow | ❌ |
 | 10.5 | Method comparison | Grid vs Random vs Bayesian at equal budget | `CPU` | `reports/figures/p10_hpo_methods.png` + report | ❌ |
 | 10.7 | Rewriter LoRA tuning | Rank, α, lr, warmup, epochs; objective = savings s.t. preservation ≥ 0.92; median pruner | `GPU` | Tuned model registered | ❌ |
-| 10.8 | Test-set isolation audit | Data-access logs show HPO touched only train/val | `CPU` | Automated check green | ❌ |
+| 10.8 | Test-set isolation audit | Data-access logs show HPO touched only train/val | `CPU` | Automated check green | ✅ |
 
 ### Checkpoint C10 — Tuning
 
@@ -706,8 +706,8 @@ quality monitoring.
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 11.1.1 | MLOps overview ADR | Lifecycle diagram + Terser-specific production challenges: judge cost, tokenizer drift, silent over-compression, latency budget, training/serving skew | `CPU` | `docs/decisions/ADR-0010-mlops.md` | ❌ |
 | 11.1.2 | Full DVC pipeline | `collect → casualise → candidates → respond → judge → label → features → split → stratify` | `CPU` | `dvc repro` end to end | ❌ |
-| 11.1.3 | Shared feature code | One `terser.features` used offline and online | `CPU` | Parity test: 100/100 prompts identical | ❌ |
-| 11.1.4 | Data validation | pandera schemas: nulls, token-ratio ranges, category balance | `CPU` | Fails on a corrupted fixture | ❌ |
+| 11.1.3 | Shared feature code | One `terser.features` used offline and online | `CPU` | Parity test: 100/100 prompts identical | ✅ |
+| 11.1.4 | Data validation | pandera schemas: nulls, token-ratio ranges, category balance | `CPU` | Fails on a corrupted fixture | ✅ |
 
 ### 11.2 Experiment Tracking and Model Versioning
 
@@ -720,12 +720,12 @@ quality monitoring.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 11.3.1 | API | FastAPI `POST /rewrite {prompt, target, mode: fast\|quality}` → `{rewrite, tokens_before, tokens_after, gate_score, fallback_used}` | `CPU` | OpenAPI docs + request/response examples | ❌ |
+| 11.3.1 | API | FastAPI `POST /rewrite {prompt, target, mode: fast\|quality}` → `{rewrite, tokens_before, tokens_after, gate_score, fallback_used}` | `CPU` | OpenAPI docs + request/response examples | ✅ |
 | 11.3.2 | Fast path | Span tagger + gate exported to ONNX Runtime | `CPU` | Runs with no GPU | ❌ |
 | 11.3.3 | Quality path | Rewriter on vLLM with continuous batching + gate + fallback | `GPU` | Endpoint live on a GPU worker | ❌ |
-| 11.3.4 | Caching | LRU keyed on normalised prompt hash + target | `CPU` | Warm-hit latency measured | ❌ |
-| 11.3.5 | Timeout fallback | Quality path over budget ⇒ fast-path result | `CPU` | Fault-injection test | ❌ |
-| 11.3.6 | Net-savings accounting | Per request: price_T × (tokens_before − tokens_after) − rewriter_cost | `CPU` | Logged per request | ❌ |
+| 11.3.4 | Caching | LRU keyed on normalised prompt hash + target | `CPU` | Warm-hit latency measured | ✅ |
+| 11.3.5 | Timeout fallback | Quality path over budget ⇒ fast-path result | `CPU` | Fault-injection test | ✅ |
+| 11.3.6 | Net-savings accounting | Per request: price_T × (tokens_before − tokens_after) − rewriter_cost | `CPU` | Logged per request | ✅ |
 | 11.3.7 | Containers | `terser-cpu` and `terser-gpu` (CUDA base) images; docker-compose | `CPU` `GPU` | `docker compose up` serves both paths | ❌ |
 
 ### 11.4 CI / CD / CT
@@ -735,18 +735,18 @@ quality monitoring.
 | 11.4.1 | CI | Every PR: lint, types, unit tests, CPU smoke training, `dvc repro --dry`, feature parity | `CPU` | Median ≤ 15 min | ❌ |
 | 11.4.2 | CD | Tag `v*`: build + scan images → push to GHCR → start the container in CI → smoke + latency tests | `CPU` | Release images published by the workflow | ❌ |
 | 11.4.3 | CT | On drift alert or a new data batch: judge labels → retrain gate/tagger (CPU) → queue rewriter retrain (GPU) → evaluate → register as Staging if checkpoints pass | `CPU` `GPU` `LLM` | One full cycle completed | ❌ |
-| 11.4.4 | Promotion guard | CT refuses promotion when a synthetic regression is injected | `CPU` | Test green | ❌ |
+| 11.4.4 | Promotion guard | CT refuses promotion when a synthetic regression is injected | `CPU` | Test green | ✅ |
 
 ### 11.5 Monitoring, Drift and Observability
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 11.5.1 | Metrics | Prometheus: RPS, p50/p95/p99 latency per path, fallback rate, gate rejections, tokens saved, net savings, GPU util / VRAM | `CPU` | Exposed at `/metrics` | ❌ |
+| 11.5.1 | Metrics | Prometheus: RPS, p50/p95/p99 latency per path, fallback rate, gate rejections, tokens saved, net savings, GPU util / VRAM | `CPU` | Exposed at `/metrics` | ✅ |
 | 11.5.2 | Input drift | Evidently daily: embedding drift (PSI / MMD on PCA components), length and category distribution | `CPU` | Report generated | ❌ |
-| 11.5.3 | Tokenizer drift | Re-count fixture set with current tokenizer versions; alert on any change | `CPU` | Alert fires on a pinned-version swap | ❌ |
+| 11.5.3 | Tokenizer drift | Re-count fixture set with current tokenizer versions; alert on any change | `CPU` | Alert fires on a pinned-version swap | ✅ |
 | 11.5.4 | Quality canary | Nightly: a fixed 200-prompt canary set goes through the deployed service and the judge; rolling preservation | `LLM` | Metric on dashboard | ❌ |
 | 11.5.5 | Dashboard and alerts | Grafana; alert at rolling preservation < 92% | `CPU` | Dashboard live | ❌ |
-| 11.5.6 | Structured logging | Request IDs; hashes by default, raw text only if consented | `CPU` | Log schema doc | ❌ |
+| 11.5.6 | Structured logging | Request IDs; hashes by default, raw text only if consented | `CPU` | Log schema doc | ✅ |
 
 ### 11.6 ML Orchestration
 

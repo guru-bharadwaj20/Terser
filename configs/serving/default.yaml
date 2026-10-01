@@ -1,0 +1,23 @@
+# Inference service config (Phase 11, rows 11.3.x). Loaded by terser.serving.api.load_config.
+# Override the file with TERSER_SERVING_CONFIG=<path>.
+
+gate_threshold: 0.5          # reject a rewrite when P(degraded) > threshold
+gate_onnx: null              # path to the exported trained gate; null = rule-based ConstraintGate
+quality_timeout_s: 0.4       # quality-path latency budget (C11.3 targets p95 <= 400 ms)
+cache_size: 10000            # LRU entries (row 11.3.4)
+
+quality:
+  base_url: null             # e.g. http://worker-1:8000/v1 (vLLM); null = quality path disabled
+  model: null                # served rewriter name, e.g. terser-rewriter
+  http_timeout_s: 2.0
+
+# Net-savings accounting inputs (row 11.3.6), USD. These are deployment *assumptions*, not
+# measurements: set them to what the deployment actually pays.
+pricing:
+  target_input_per_mtok:     # price per million input tokens on each target
+    gpt-4o: 2.50             # public list price at the time of writing; update when it changes
+    qwen2.5: 0.20            # assumed self-hosted cost; replace with the measured GPU-hour cost
+    llama-3.1: 0.20          # assumed self-hosted cost; replace with the measured GPU-hour cost
+  rewriter_input_per_mtok: 0.05    # assumed cost of the self-hosted quality-path rewriter
+  rewriter_output_per_mtok: 0.10
+  fast_path_per_request: 0.0       # CPU fast path, treated as free unless measured otherwise
