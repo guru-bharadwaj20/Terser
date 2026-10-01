@@ -16,7 +16,8 @@
 #     --max-model-len 4096
 #   python -m terser.phase1.pilot_labels experiment=p1_pilot_labels hardware=rtx4500ada \
 #     experiment.params.stand_in=false experiment.params.stage=respond experiment.params.limit=25 \
-#     experiment.params.workers=32 experiment.params.target_model=Qwen/Qwen2.5-7B-Instruct
+#     experiment.params.workers=32 experiment.params.target_model=Qwen/Qwen2.5-7B-Instruct \
+#     experiment.params.judge_model=Qwen/Qwen2.5-32B-Instruct-AWQ   # required: stand-in tags are refused
 #   # stop the target server, then:
 #   # 32B AWQ fits 24 GB at max len 4096 only with a 2048-token prefill chunk (row 7.6)
 #   vllm serve Qwen/Qwen2.5-32B-Instruct-AWQ --quantization awq_marlin --max-model-len 4096 \
