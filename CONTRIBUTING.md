@@ -120,8 +120,8 @@ the card · **vLLM serving and training never run at the same time on 24 GB** ·
 | All classical models (ID3, LR, KNN, SVM, NB, GMM, HMM, RF, GBM, k-means) | 3–6 | `CPU` | — | 0 | Never on GPU |
 | Perceptron / MLP / optimizer study | 4 | `CPU` | fp32 | 0 | Small models |
 | TextCNN span scorer | 8 | `CPU→GPU` | fp32 / bf16 | < 2 GB | GPU only for sweeps |
-| Rewriter SFT: Qwen2.5-0.5B full fine-tune | 8 | `GPU` | bf16 + AdamW, grad checkpointing | ~12–16 GB | ~16 bytes/param for weights+grads+Adam (~8 GB) + activations |
-| Rewriter SFT: Qwen2.5-1.5B / 3B LoRA | 8 | `GPU` | bf16 base, LoRA r=16 | ~8–16 GB | Main candidates |
+| Rewriter SFT: Qwen2.5-0.5B full fine-tune | 8 | `GPU` | bf16 + AdamW, grad checkpointing | **Measured (7.7):** 16.32 GiB reserved fp32-master / 11.77 GiB pure bf16 (seq 1024, mb 4); 0.44 / 0.37 s per step | ~16 bytes/param for weights+grads+Adam (~8 GB) + activations; was est. ~12–16 GB. [C7/training.md](docs/checkpoints/C7/training.md) |
+| Rewriter SFT: Qwen2.5-1.5B / 3B LoRA | 8 | `GPU` | bf16 base, LoRA r=16 | **Measured (7.7), 1.5B:** 12.19 GiB reserved (seq 1024, mb 4), 1.11 s per step · 3B: ~8–16 GB (est.) | Main candidates; 1.5B was est. ~8–16 GB 
 | Rewriter SFT: 7B QLoRA | 8 | `GPU` | NF4 base + LoRA | ~10–18 GB at seq ≤ 1024 | Only if smaller rungs fail C8.3 |
 | GRPO rewriter policy (stretch) | 9 | `GPU` | 0.5B–1.5B LoRA | ~12–20 GB | Only if the stretch rows are attempted; never colocated with serving |
 | Tabular Q-learning | 9 | `CPU` | — | 0 | |
@@ -575,7 +575,7 @@ before any queued GPU job runs. The RTX 4500 Ada, if connected later, repeats 7.
 | 7.4 | Verification script | `python -m terser.hardware.verify`: device name, memory, capability (8, 9), bf16 matmul benchmark + parity with fp32 | `GPU` | Report in `docs/checkpoints/C7/hardware.md` | ✅ |
 | 7.5 | vLLM smoke test | Qwen2.5-0.5B-Instruct generates 32 tokens | `GPU` | Logged | ✅ |
 | 7.6 | Serving measurement | Llama-3.1-8B-Instruct bf16 and Qwen2.5-32B-AWQ, `gpu_memory_utilization=0.90`, max len 4096: peak VRAM, tokens/s at batch 1 and 16 | `GPU` | VRAM table updated | ✅ |
-| 7.7 | Training measurement | Qwen2.5-0.5B full FT and 1.5B LoRA, seq 1024, micro-batch 4, grad checkpointing: peak VRAM, step time | `GPU` | VRAM table updated | ❌ |
+| 7.7 | Training measurement | Qwen2.5-0.5B full FT and 1.5B LoRA, seq 1024, micro-batch 4, grad checkpointing: peak VRAM, step time | `GPU` | VRAM table updated | ✅ |
 | 7.9 | GPU test suite | All `@pytest.mark.gpu` tests | `GPU` | Green | ❌ |
 
 ### Checkpoint C7 — GPU Ready 🚧
@@ -922,14 +922,14 @@ which were not, and why.
 | 4 — ANN and SVM | 16 | 5 | 6 | ❌ |
 | 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 3 | ❌ |
 | 6 — Clustering | 9 | 3 | 0 | ❌ |
-| 7 — GPU Onboarding | 8 | 3 | 6 | ❌ |
+| 7 — GPU Onboarding | 8 | 3 | 7 | ❌ |
 | 8 — CNN and Rewriter | 14 | 5 | 0 | ❌ |
 | 9 — Reinforcement Learning | 7 | 2 | 0 | ❌ |
 | 10 — HPO | 5 | 4 | 0 | ❌ |
 | 11 — MLOps | 25 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 11 | — | 0 | ❌ |
 | 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **79** | ❌ |
+| **Total** | **214** | **60** | **80** | ❌ |
 
 Stretch rows are not counted.
 

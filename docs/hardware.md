@@ -239,8 +239,8 @@ the judge's context length has to be pinned.
 | All classical models (ID3, LR, KNN, SVM, NB, GMM, HMM, RF, GBM, k-means) | 3–6 | `CPU` | — | 0 | Never on GPU |
 | Perceptron / MLP / optimizer study | 4 | `CPU` | fp32 | 0 | Small models |
 | TextCNN span scorer | 8 | `CPU→GPU` | fp32 / bf16 | < 2 GB | GPU only for sweeps |
-| Rewriter SFT: Qwen2.5-0.5B full fine-tune | 8 | `GPU` | bf16 + AdamW, grad checkpointing | ~12–16 GB | ~16 bytes/param for weights + grads + Adam (~8 GB) + activations |
-| Rewriter SFT: Qwen2.5-1.5B / 3B LoRA | 8 | `GPU` | bf16 base, LoRA r=16 | ~8–16 GB | Main candidates |
+| Rewriter SFT: Qwen2.5-0.5B full fine-tune | 8 | `GPU` | bf16 + AdamW, grad checkpointing | **Measured (7.7):** 16.32 GiB reserved fp32-master / 11.77 GiB pure bf16 (seq 1024, mb 4); 0.44 / 0.37 s per step | ~16 bytes/param for weights + grads + Adam (~8 GB) + activations; was est. ~12–16 GB. [C7/training.md](checkpoints/C7/training.md) |
+| Rewriter SFT: Qwen2.5-1.5B / 3B LoRA | 8 | `GPU` | bf16 base, LoRA r=16 | **Measured (7.7), 1.5B:** 12.19 GiB reserved (seq 1024, mb 4), 1.11 s per step · 3B: ~8–16 GB (est.) | Main candidates; 1.5B was est. ~8–16 GB 
 | Rewriter SFT: 7B QLoRA | 8 | `GPU` | NF4 base + LoRA | ~10–18 GB at seq ≤ 1024 | Only if smaller rungs fail C8.3 |
 | GRPO rewriter policy | 9 | `GPU` | 0.5B–1.5B LoRA | ~12–20 GB | Target and judge calls go to a time-shared vLLM slot, never colocated with training |
 | Tabular Q-learning | 9 | `CPU` | — | 0 | |
