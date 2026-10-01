@@ -582,7 +582,7 @@ before any queued GPU job runs. The RTX 4500 Ada, if connected later, repeats 7.
 
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
-| C7.1 🚧 | Environment | Verification script all green on ≥ 1 worker | ❌ |
+| C7.1 🚧 | Environment | Verification script all green on ≥ 1 worker | ✅ |
 | C7.2 | Memory plan | VRAM table in [Compute Allocation](#compute-allocation-cpu-local-open-models-and-the-rtx-4500-ada) replaced with measured values | ❌ |
 | C7.4 | Queue | Dry-run orders all jobs without dependency errors; every job's `est_vram_gb` ≤ 22 GB measured headroom | ❌ |
 
@@ -922,14 +922,14 @@ which were not, and why.
 | 4 — ANN and SVM | 16 | 5 | 6 | ❌ |
 | 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 3 | ❌ |
 | 6 — Clustering | 9 | 3 | 0 | ❌ |
-| 7 — GPU Onboarding | 8 | 3 | 8 | ❌ |
+| 7 — GPU Onboarding | 8 | 3 | 9 | ❌ |
 | 8 — CNN and Rewriter | 14 | 5 | 0 | ❌ |
 | 9 — Reinforcement Learning | 7 | 2 | 0 | ❌ |
 | 10 — HPO | 5 | 4 | 0 | ❌ |
 | 11 — MLOps | 25 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 11 | — | 0 | ❌ |
 | 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **81** | ❌ |
+| **Total** | **214** | **60** | **82** | ❌ |
 
 Stretch rows are not counted.
 

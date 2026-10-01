@@ -23,4 +23,4 @@ Notes:
 - A large share of each peak is the logits: 4 × 1024 × 151,936 vocabulary entries are about
   2.3 GiB in fp32 before cross-entropy. Chunked or fused cross-entropy would cut this.
 - Step time is for random tokens. Real SFT batches with padding or packing will differ slightly.
-  Row 7.8, the 30-minute sustained run, measures throughput drift.
+  Sustained-throughput drift was not measured.
