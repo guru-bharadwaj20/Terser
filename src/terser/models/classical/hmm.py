@@ -200,7 +200,7 @@ class TokenClassEncoder:
 
     def encode_word(self, word: str) -> int:
         """Observation id of one word."""
-        w = word.lower()
+        w = word.lower().strip(".,!?;:\"'")  # "um," and "so," hit the lexicon
         lex = self.lexicon.index(w) + 1 if w in self.lexicon else 0
         pos = POS_CLASSES.index(self.pos(word))
         c = self.cost(word)
