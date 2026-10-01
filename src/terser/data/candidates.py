@@ -40,6 +40,7 @@ import sys
 import time
 from collections import Counter
 from collections.abc import Callable, Sequence
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from functools import cache
 from pathlib import Path
@@ -394,8 +395,11 @@ class CandidateSettings:
     llmlingua_cache_dir: Path | None = None
     limit: int | None = None
     budget_phase: str = "phase2"
+    workers: int = 1
 
     def __post_init__(self) -> None:
+        if self.workers < 1:
+            raise ValueError(f"workers must be >= 1, got {self.workers}")
         for method in self.methods:
             method_kind(method)
         if len(set(self.methods)) != len(self.methods):
@@ -606,6 +610,16 @@ def run_candidates(
 
         path.parent.mkdir(parents=True, exist_ok=True)
         t0 = time.perf_counter()
+        if kind == "llm" and settings.workers > 1:
+            # Warm the response cache concurrently so vLLM can batch; the ordered loop below
+            # then reads every rewrite from the cache and writes records in prompt order.
+            assert client is not None
+
+            def warm(row: dict[str, Any], method: str = method, llm: LLMClient = client) -> None:
+                _llm_candidate(llm, settings, str(row["id"]), method, str(row["prompt"]), count_fn)
+
+            with ThreadPoolExecutor(max_workers=settings.workers) as pool:
+                list(pool.map(warm, todo))
         with path.open("a", encoding="utf-8", newline="\n") as fh:
             for row in todo:
                 pid, original = str(row["id"]), str(row["prompt"])
@@ -706,6 +720,7 @@ def settings_from_config(cfg: DictConfig) -> CandidateSettings:
         llmlingua_cache_dir=_opt_path(p.get("llmlingua_cache_dir")),
         limit=p.get("limit"),
         budget_phase=str(p.get("budget_phase", "phase2")),
+        workers=int(p.get("workers", 1)),
     )
 
 

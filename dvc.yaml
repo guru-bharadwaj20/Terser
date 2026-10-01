@@ -85,3 +85,35 @@ stages:
       - split
     outs:
       - data/processed/splits
+
+  label_subset:
+    cmd: >-
+      python -m terser.data.label_subset --splits-dir data/processed/splits
+      --out data/interim/label_prompts.jsonl --per-category ${label_subset.per_category}
+      --seed ${seed}
+    deps:
+      - data/processed/splits
+      - src/terser/data/label_subset.py
+    params:
+      - seed
+      - label_subset
+    outs:
+      - data/interim/label_prompts.jsonl
+
+  candidates:
+    # GPU: same vLLM server as casualise (32B-AWQ); LLMLingua-2 runs on CPU.
+    cmd: >-
+      python -m terser.data.candidates experiment=p2_candidates hardware=rtx4500ada
+      experiment.params.stand_in=false experiment.params.rewrite_model=${candidates.model}
+      experiment.params.prompts_path=data/interim/label_prompts.jsonl
+      experiment.params.output_path=data/interim/candidates.jsonl
+      experiment.params.workers=${candidates.workers}
+    deps:
+      - data/interim/label_prompts.jsonl
+      - src/terser/data/candidates.py
+      - src/terser/data/prompts/rewrite_v1.txt
+      - configs/experiment/p2_candidates.yaml
+    params:
+      - candidates.model
+    outs:
+      - data/interim/candidates.jsonl

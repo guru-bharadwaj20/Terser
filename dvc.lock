@@ -155,3 +155,58 @@ stages:
       md5: d14a09789965490c9a919d1c81a4921c.dir
       size: 16559882
       nfiles: 5
+  label_subset:
+    cmd: python -m terser.data.label_subset --splits-dir data/processed/splits 
+      --out data/interim/label_prompts.jsonl --per-category 300 --seed 0
+    deps:
+    - path: data/processed/splits
+      hash: md5
+      md5: d14a09789965490c9a919d1c81a4921c.dir
+      size: 16559882
+      nfiles: 5
+    - path: src/terser/data/label_subset.py
+      hash: md5
+      md5: 161043d486618cb4467b92f1315200a2
+      size: 3486
+    params:
+      params.yaml:
+        label_subset:
+          per_category: 300
+        seed: 0
+    outs:
+    - path: data/interim/label_prompts.jsonl
+      hash: md5
+      md5: 334923879c540cc283ff61641a5fb73b
+      size: 4238888
+  candidates:
+    cmd: python -m terser.data.candidates experiment=p2_candidates 
+      hardware=rtx4500ada experiment.params.stand_in=false 
+      experiment.params.rewrite_model=Qwen/Qwen2.5-32B-Instruct-AWQ 
+      experiment.params.prompts_path=data/interim/label_prompts.jsonl 
+      experiment.params.output_path=data/interim/candidates.jsonl 
+      experiment.params.workers=32
+    deps:
+    - path: configs/experiment/p2_candidates.yaml
+      hash: md5
+      md5: 7821f4b13ed032369e0f4ecf1648659a
+      size: 2202
+    - path: data/interim/label_prompts.jsonl
+      hash: md5
+      md5: 334923879c540cc283ff61641a5fb73b
+      size: 4238888
+    - path: src/terser/data/candidates.py
+      hash: md5
+      md5: 1018056e9bff8c9f5367be6a4eba9c65
+      size: 30570
+    - path: src/terser/data/prompts/rewrite_v1.txt
+      hash: md5
+      md5: 6e87aff38ced06780e3783c17bce0544
+      size: 2452
+    params:
+      params.yaml:
+        candidates.model: Qwen/Qwen2.5-32B-Instruct-AWQ
+    outs:
+    - path: data/interim/candidates.jsonl
+      hash: md5
+      md5: 3a84861bfd7b23dce7191e524740e2fa
+      size: 5941103
