@@ -146,7 +146,8 @@ def run(args: argparse.Namespace) -> ServingResult:
         if args.smoke:
             params = SamplingParams(temperature=0.0, max_tokens=32, ignore_eos=True)
             start = time.perf_counter()
-            out = llm.chat([{"role": "user", "content": "Say hello in one sentence."}], params)
+            hello: list[Any] = [{"role": "user", "content": "Say hello in one sentence."}]
+            out = llm.chat(hello, params)
             seconds = time.perf_counter() - start
             result.sample_text = out[0].outputs[0].text
             result.batches.append(BatchResult(1, len(out[0].outputs[0].token_ids), seconds))
