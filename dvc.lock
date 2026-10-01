@@ -210,3 +210,25 @@ stages:
       hash: md5
       md5: 3a84861bfd7b23dce7191e524740e2fa
       size: 5941103
+  token_counts:
+    cmd: python -m terser.data.token_counts --prompts 
+      data/interim/label_prompts.jsonl --candidates 
+      data/interim/candidates.jsonl --out data/interim/token_counts.parquet
+    deps:
+    - path: data/interim/candidates.jsonl
+      hash: md5
+      md5: 3a84861bfd7b23dce7191e524740e2fa
+      size: 5941103
+    - path: data/interim/label_prompts.jsonl
+      hash: md5
+      md5: 334923879c540cc283ff61641a5fb73b
+      size: 4238888
+    - path: src/terser/data/token_counts.py
+      hash: md5
+      md5: 7bddce591d39c335cc5eb88005f2bed7
+      size: 10474
+    outs:
+    - path: data/interim/token_counts.parquet
+      hash: md5
+      md5: 5c5a6bba088a4784370af9f96bbf00e0
+      size: 230822
