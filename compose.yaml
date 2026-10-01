@@ -1,0 +1,43 @@
+# Row 11.3.7: the serving stack.
+#   docker compose up --build                  # terser-cpu only: fast path on :8080
+#   docker compose --profile gpu up --build    # + terser-gpu: quality path (needs an NVIDIA GPU)
+# The rewriter checkpoint is read from ./models/rewriter (override with TERSER_MODELS_DIR).
+name: terser
+
+services:
+  terser-cpu:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.cpu
+    image: terser-cpu:latest
+    ports:
+      - "8080:8080"
+    environment:
+      TERSER_SERVING_CONFIG: /app/docker/serving.compose.yaml
+    volumes:
+      - ./docker/serving.compose.yaml:/app/docker/serving.compose.yaml:ro
+    restart: unless-stopped
+
+  terser-gpu:
+    profiles: ["gpu"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.gpu
+    image: terser-gpu:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ${TERSER_MODELS_DIR:-./models}:/models:ro
+      - hf-cache:/root/.cache/huggingface
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  hf-cache:
