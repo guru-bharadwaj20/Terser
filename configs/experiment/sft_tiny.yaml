@@ -1,0 +1,17 @@
+# Row 8.3.2: CPU smoke test of the full SFT loop on a tiny byte-level causal LM.
+# python -m terser.models.rewriter.train experiment=sft_tiny
+name: sft_tiny
+phase: 8
+row: "8.3.2"
+task: rewriter_sft
+params:
+  model: tiny
+  tiny: {d_model: 64, n_layers: 2, n_heads: 4, max_len: 512}
+  data: ${paths.root}/tests/fixtures/casual_prompts.jsonl
+  limit: null
+  max_len: 512
+  steps: 40
+  batch_size: 4
+  lr: 3.0e-3
+  output_dir: ${paths.root}/models/rewriter/sft-tiny
+  save_weights: false

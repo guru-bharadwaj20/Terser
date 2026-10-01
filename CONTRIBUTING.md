@@ -618,8 +618,8 @@ together with the quality gate and fallback, reach the main quality/savings gate
 | 8.3.2 | Tiny-config smoke test | Full training loop on a tiny model on CPU | `CPU` | CI test passes; GPU jobs queued | ❌ |
 | 8.3.3 | Rung 1: Qwen2.5-0.5B full FT | bf16, AdamW, grad checkpointing | `GPU` | Model registered; val report | ❌ |
 | 8.3.4 | Rung 2: Qwen2.5-1.5B LoRA | r = 16, α = 32, bf16. Escalate to 3B LoRA, then 7B QLoRA (NF4), only if the previous rung fails C8.3 | `GPU` | Same, per rung trained | ❌ |
-| 8.3.7 | Decoding safeguards | Never longer than input on T; fall back to original if longer | `CPU` | Property test | ❌ |
-| 8.3.8 | Inference-time quality gate | Champion gate rejects risky rewrites ⇒ lighter rewrite or original | `CPU` | Integration test | ❌ |
+| 8.3.7 | Decoding safeguards | Never longer than input on T; fall back to original if longer | `CPU` | Property test | ✅ |
+| 8.3.8 | Inference-time quality gate | Champion gate rejects risky rewrites ⇒ lighter rewrite or original | `CPU` | Integration test | ✅ |
 | 8.3.9 | Baselines | Original · best operator · HMM compressor · LLMLingua-2 · zero-shot Qwen2.5-32B-Instruct-AWQ "rewrite concisely" | `LLM` `GPU` | Same val table | ❌ |
 | 8.3.10 | Failure analysis | 100 degraded cases hand-categorised: dropped constraint / tone / example / changed meaning / other | `CPU` | `reports/p8_failures.md` | ❌ |
 
