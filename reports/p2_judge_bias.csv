@@ -1,0 +1,8 @@
+run,protocol,judge_model,n_pairs,n_parsed,position_disagreement,n_disagree,first_position_share,consistent_tie_share,degraded_share,identical_pairs,identical_preserved,ref_n,ref_agreement,ref_kappa,disagree_code,disagree_creative,disagree_explain,disagree_fact,disagree_reason,disagree_transform,calls,cached_calls,generated_tokens,wall_seconds
+pilot_v1,pairwise,Qwen/Qwen2.5-32B-Instruct-AWQ,836,836,0.4067,340,0.7676,0.2847,0.5120,59,59,496,1.0000,1.0000,0.1697,0.6913,0.6144,0.2931,0.2277,0.3816,,,,
+pairwise_32b,pairwise,Qwen/Qwen2.5-32B-Instruct-AWQ,836,836,0.4091,342,0.7719,0.2859,0.5144,59,59,496,0.9960,0.9887,0.1697,0.6913,0.6275,0.2931,0.2277,0.3816,592.0000,42.0000,23740.0000,350.8703
+pairwise_32b,pairwise_avg,Qwen/Qwen2.5-32B-Instruct-AWQ,836,836,0.0000,0,,0.3062,0.3158,59,59,496,1.0000,1.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,592.0000,42.0000,23740.0000,350.8703
+pointwise_32b,pointwise,Qwen/Qwen2.5-32B-Instruct-AWQ,836,836,0.0000,0,,0.6447,0.1388,59,59,496,0.8407,0.4778,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,592.0000,20.0000,38885.0000,267.9788
+pairwise_14b,pairwise,Qwen/Qwen2.5-14B-Instruct-AWQ,836,836,0.2871,240,0.1083,0.5467,0.2596,59,59,496,0.8468,0.5563,0.1636,0.3423,0.3007,0.4655,0.1188,0.3289,592.0000,16.0000,22158.0000,141.0226
+pairwise_14b,pairwise_avg,Qwen/Qwen2.5-14B-Instruct-AWQ,836,836,0.0000,0,,0.6447,0.1734,59,59,496,0.8952,0.6500,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,592.0000,16.0000,22158.0000,141.0226
+pointwise_14b,pointwise,Qwen/Qwen2.5-14B-Instruct-AWQ,836,836,0.0000,0,,0.7967,0.1100,59,59,496,0.8044,0.2932,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,592.0000,18.0000,39668.0000,103.3105
