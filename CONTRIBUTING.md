@@ -465,7 +465,7 @@ implementations verified against libraries, plus controlled activation and optim
 | 4.4.1 | Margin and primal | Margin = 2/‖w‖; hard- and soft-margin primal | `CPU` | `docs/derivations/svm.md` §1–2 | ✅ |
 | 4.4.2 | Lagrangian dual | Lagrangian, KKT conditions, dual problem, recovering w and b from support vectors | `CPU` | `docs/derivations/svm.md` §3–4 | ✅ |
 | 4.4.3 | Linear kernel derivation | K(x, z) = xᵀz substituted into the dual | `CPU` | `docs/derivations/svm.md` §5 | ✅ |
-| 4.4.4 | **Dual solver from scratch** | QP via `cvxopt` on span features | `CPU` | Same support-vector set as scikit-learn; ‖w − w_sk‖/‖w_sk‖ **< 1e-3** | ❌ |
+| 4.4.4 | **Dual solver from scratch** | QP via `cvxopt` on span features | `CPU` | Same support-vector set as scikit-learn; ‖w − w_sk‖/‖w_sk‖ **< 1e-3** | ✅ |
 | 4.4.5 | Hard margin | Linearly separable filler subset | `CPU` | Support vectors plotted | ❌ |
 | 4.4.6 | Soft margin | C ∈ {0.01, 0.1, 1, 10, 100}: margin width, # support vectors, val metrics | `CPU` | Table + figure | ❌ |
 | 4.4.7 | Polynomial kernel | Degree 2, 3 × coef0 × C vs linear | `CPU` | Table: AUC, time, # SVs | ❌ |
