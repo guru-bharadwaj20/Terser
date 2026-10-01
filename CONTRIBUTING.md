@@ -300,7 +300,7 @@ downstream can be measured without it.
 | 2.1.4 | Casualisation | LLM rewrites clean instructions in 5 styles: rambling, hedging, texting, over-polite, repetitive; clean version kept as reference | `LLM` | ≥ 6,000 casual prompts | ✅ |
 | 2.1.5 | Deduplication | MinHash, Jaccard ≥ 0.8 removed; paraphrase groups kept whole | `CPU` | Duplicate report | ✅ |
 | 2.1.6 | **Source-grouped splits** | Train 70 / val 15 / test 15 by source prompt; test frozen end of week 4 and hash-locked | `CPU` | Automated test: 0 source prompts shared across splits | ✅ |
-| 2.1.7 | DVC stages | `collect → casualise → dedupe → split` | `CPU` | `dvc repro` rebuilds from cache | ❌ |
+| 2.1.7 | DVC stages | `collect → casualise → dedupe → split` | `CPU` | `dvc repro` rebuilds from cache | ✅ |
 | 2.1.8 | **Real-prompt slice** | ~1,000 first-turn user prompts from a licence-audited public chat log (e.g. WildChat), PII-scrubbed, category-tagged. Never casualised and never used for training: headroom (2.4.2) and final test (12.3) only. Guards against rewriters that merely undo the verbosity 2.1.4 injected | `CPU` | Data card + licence row; frozen with the test split | ✅ |
 
 ### 2.2 Candidates and Target Outputs
@@ -335,8 +335,8 @@ downstream can be measured without it.
 
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
-| C2.1 | Dataset size | ≥ 6,000 casual prompts, ≥ 800 per category, < 1% near-duplicates | ❌ |
-| C2.2 | Leakage | 0 source prompts shared across splits | ❌ |
+| C2.1 | Dataset size | ≥ 6,000 casual prompts, ≥ 800 per category, < 1% near-duplicates | ✅ |
+| C2.2 | Leakage | 0 source prompts shared across splits | ✅ |
 | C2.3 🚧 | Human–human agreement | Cohen's κ **≥ 0.60** | ❌ |
 | C2.4 🚧 | Judge–human agreement | κ **≥ 0.60** overall and **≥ 0.50** in every category | ❌ |
 | C2.5 🚧 | Judge as degradation detector | Sensitivity **≥ 0.85**, specificity **≥ 0.80** vs human labels | ❌ |

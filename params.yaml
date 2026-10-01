@@ -1,0 +1,18 @@
+# DVC pipeline parameters (dvc.yaml, plan row 2.1.7).
+seed: 0
+collect:
+  per_category: 280      # x 5 styles = 8,400 generations; ~20% fail validation (smoke run) -> >= 6,000
+  min_words: 3
+  max_words: 350         # instruction + input; keeps target outputs inside a 4,096 context
+casualise:
+  model: Qwen/Qwen2.5-32B-Instruct-AWQ
+  workers: 32
+  max_ratio: 4.0
+  temperature: 0.8       # generation only, with a per-request seed; the meaning check is greedy
+dedupe:
+  threshold: 0.8
+  source_priority: humaneval,mbpp,gsm8k,dolly,oasst1
+split:
+  train_frac: 0.70
+  val_frac: 0.15
+  test_sha256: b4b264a80bcf8b1c415643b5f54156d214841e77088b75ae8b148bf2c9e106c7  # frozen test.jsonl; a rebuild that changes it fails
