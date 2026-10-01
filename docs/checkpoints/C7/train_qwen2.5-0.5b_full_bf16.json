@@ -1,0 +1,25 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "mode": "full",
+  "weights_dtype": "bf16",
+  "seq_len": 1024,
+  "micro_batch": 4,
+  "trainable_params": 494032768,
+  "total_params": 494032768,
+  "peak_allocated_gib": 9.94,
+  "peak_reserved_gib": 11.77,
+  "step_seconds": [
+    0.3641,
+    0.3642,
+    0.3614,
+    0.3645,
+    0.3659,
+    0.362,
+    0.3672,
+    0.3657,
+    0.3995,
+    0.3659
+  ],
+  "mean_step_seconds": 0.368,
+  "tokens_per_s": 11129.2
+}
