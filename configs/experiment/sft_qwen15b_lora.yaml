@@ -1,0 +1,18 @@
+# Row 8.3.4 (rung 2): Qwen2.5-1.5B LoRA r=16, alpha=32, bf16. Escalation (3B LoRA, 7B QLoRA)
+# only if this rung fails C8.3. Queued: gpu_queue/sft-qwen1.5b-lora.yaml.
+name: sft_qwen15b_lora
+phase: 8
+row: "8.3.4"
+task: rewriter_sft
+params:
+  model: Qwen/Qwen2.5-1.5B-Instruct
+  lora: {r: 16, alpha: 32, dropout: 0.05}
+  grad_checkpointing: true
+  data: ${paths.data_dir}/processed/sft/train.jsonl
+  limit: null
+  max_len: 1024
+  steps: 3000
+  batch_size: 4
+  lr: 2.0e-4
+  output_dir: ${paths.root}/models/rewriter/sft-qwen1.5b-lora
+  save_weights: true

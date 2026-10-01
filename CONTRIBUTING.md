@@ -544,10 +544,10 @@ dangerous, and use them to stratify training and evaluation.
 | 6.1 | Prompt embeddings | bge-small 384-d for all train prompts | `CPU` | Cached matrix + id index; raises on missing id | ❌ |
 | 6.2 | K-means | k-means++, k ∈ 4..30; elbow + silhouette | `CPU` | `reports/figures/p6_kmeans_k.png` | ❌ |
 | 6.3 | Bisecting K-means | Same k range; SSE and cluster-size balance vs K-means | `CPU` | Comparison table | ❌ |
-| 6.4 | Hierarchical vs non-hierarchical | Written comparison of assumptions, cost, output | `CPU` | `reports/p6_clustering.md` §1 | ❌ |
+| 6.4 | Hierarchical vs non-hierarchical | Written comparison of assumptions, cost, output | `CPU` | `reports/p6_clustering.md` §1 | ✅ |
 | 6.5 | Agglomerative clustering | Ward / average / complete linkage on a 2,000-prompt sample | `CPU` | Dendrograms | ❌ |
 | 6.6 | Divisive clustering | Top-down recursive bisection; tree compared with 6.5 | `CPU` | Figure + cophenetic correlation | ❌ |
-| 6.7 | **K-means as a special case of EM** | GMM-EM with shared spherical covariance σ²I; anneal σ → 0; responsibilities become hard | `CPU` | `docs/derivations/kmeans_em.md` + assignment agreement vs K-means | ❌ |
+| 6.7 | **K-means as a special case of EM** | GMM-EM with shared spherical covariance σ²I; anneal σ → 0; responsibilities become hard | `CPU` | `docs/derivations/kmeans_em.md` + assignment agreement vs K-means | ✅ |
 | 6.8 | Clusters vs categories | ARI, NMI, contingency table against the 6 hand-defined categories | `CPU` | Table | ❌ |
 | 6.9 | Per-cluster risk | Oracle savings and degradation rate per cluster; high-risk clusters become eval slices in 12.3 | `CPU` | `reports/p6_cluster_risk.md` | ❌ |
 
@@ -598,15 +598,15 @@ together with the quality gate and fallback, reach the main quality/savings gate
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 8.1.1 | Introduction write-up | Representation learning; why learned features beat Phase 3 hand features for span importance; decoder-only transformer overview | `CPU` | `docs/derivations/deep_learning_intro.md` | ❌ |
-| 8.1.2 | Convolution operation | Manual 1-D convolution (kernel, stride, padding, output length) | `CPU` | Equals `nn.Conv1d` on fixture input (test) | ❌ |
+| 8.1.1 | Introduction write-up | Representation learning; why learned features beat Phase 3 hand features for span importance; decoder-only transformer overview | `CPU` | `docs/derivations/deep_learning_intro.md` | ✅ |
+| 8.1.2 | Convolution operation | Manual 1-D convolution (kernel, stride, padding, output length) | `CPU` | Equals `nn.Conv1d` on fixture input (test) | ✅ |
 
 ### 8.2 TextCNN Span Scorer
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 8.2.1 | Architecture | Token embeddings (d = 384) → parallel Conv1d k = 3 and k = 5, 128 filters each, 'same' padding → per-token KEEP head + pooled prompt-compressibility head | `CPU→GPU` | `models/neural/textcnn.py` | ❌ |
-| 8.2.2 | **Parameter calculation** | Conv k=3: 384×3×128+128 = 147,584 · Conv k=5: 384×5×128+128 = 245,888 · token head 256+1 = 257 · prompt head 256+1 = 257 · **total 393,986** | `CPU` | Equals `sum(p.numel())` in a test; derivation in docs | ❌ |
+| 8.2.1 | Architecture | Token embeddings (d = 384) → parallel Conv1d k = 3 and k = 5, 128 filters each, 'same' padding → per-token KEEP head + pooled prompt-compressibility head | `CPU→GPU` | `models/neural/textcnn.py` | ✅ |
+| 8.2.2 | **Parameter calculation** | Conv k=3: 384×3×128+128 = 147,584 · Conv k=5: 384×5×128+128 = 245,888 · token head 256+1 = 257 · prompt head 256+1 = 257 · **total 393,986** | `CPU` | Equals `sum(p.numel())` in a test; derivation in docs | ✅ |
 | 8.2.3 | **Max vs average pooling** | Prompt head on global max, global avg, and concatenated (head becomes 512+1 = 513 params); 3 seeds each | `CPU→GPU` | Table + interpretation ("any droppable region" vs "how much is droppable") | ❌ |
 | 8.2.4 | Comparison | TextCNN vs HMM vs GBM span taggers on identical folds | `CPU→GPU` | McNemar + table | ❌ |
 
@@ -618,8 +618,8 @@ together with the quality gate and fallback, reach the main quality/savings gate
 | 8.3.2 | Tiny-config smoke test | Full training loop on a tiny model on CPU | `CPU` | CI test passes; GPU jobs queued | ❌ |
 | 8.3.3 | Rung 1: Qwen2.5-0.5B full FT | bf16, AdamW, grad checkpointing | `GPU` | Model registered; val report | ❌ |
 | 8.3.4 | Rung 2: Qwen2.5-1.5B LoRA | r = 16, α = 32, bf16. Escalate to 3B LoRA, then 7B QLoRA (NF4), only if the previous rung fails C8.3 | `GPU` | Same, per rung trained | ❌ |
-| 8.3.7 | Decoding safeguards | Never longer than input on T; fall back to original if longer | `CPU` | Property test | ❌ |
-| 8.3.8 | Inference-time quality gate | Champion gate rejects risky rewrites ⇒ lighter rewrite or original | `CPU` | Integration test | ❌ |
+| 8.3.7 | Decoding safeguards | Never longer than input on T; fall back to original if longer | `CPU` | Property test | ✅ |
+| 8.3.8 | Inference-time quality gate | Champion gate rejects risky rewrites ⇒ lighter rewrite or original | `CPU` | Integration test | ✅ |
 | 8.3.9 | Baselines | Original · best operator · HMM compressor · LLMLingua-2 · zero-shot Qwen2.5-32B-Instruct-AWQ "rewrite concisely" | `LLM` `GPU` | Same val table | ❌ |
 | 8.3.10 | Failure analysis | 100 degraded cases hand-categorised: dropped constraint / tone / example / changed meaning / other | `CPU` | `reports/p8_failures.md` | ❌ |
 
@@ -646,9 +646,9 @@ neural rewriter is a [stretch goal](#stretch-goals-never-block-a-checkpoint).
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 9.1.1 | RL derivation | Agent = rewriter, environment = draft + tokenizer + gate; policy π(a \| s), V^π, Q^π; Bellman expectation and optimality forms; Q-learning update derived from optimality | `CPU` | `docs/derivations/rl.md` | ❌ |
-| 9.1.2 | Environment | States (remaining filler bucket, constraint count, length bucket, category, ops applied); actions `F H D I L C S` or `STOP` | `CPU` | `rl/env.py` with tests | ❌ |
-| 9.1.4 | Rewards | On `STOP`: Δtokens% − λ·1[degraded] (λ = 100); per step −0.01 | `CPU` | Reward unit tests | ❌ |
+| 9.1.1 | RL derivation | Agent = rewriter, environment = draft + tokenizer + gate; policy π(a \| s), V^π, Q^π; Bellman expectation and optimality forms; Q-learning update derived from optimality | `CPU` | `docs/derivations/rl.md` | ✅ |
+| 9.1.2 | Environment | States (remaining filler bucket, constraint count, length bucket, category, ops applied); actions `F H D I L C S` or `STOP` | `CPU` | `rl/env.py` with tests | ✅ |
+| 9.1.4 | Rewards | On `STOP`: Δtokens% − λ·1[degraded] (λ = 100); per step −0.01 | `CPU` | Reward unit tests | ✅ |
 
 ### 9.2 Tabular Q-Learning
 
@@ -865,14 +865,14 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 | 3 | Naive Bayes | 5.2.3 | ❌ |
 | 3 | Expectation maximisation and GMM | 5.2.5, 5.2.6 | ❌ |
 | 3 | Hidden Markov Models | 5.3 | ❌ |
-| 4 | Hierarchical vs non-hierarchical clustering | 6.4 | ❌ |
+| 4 | Hierarchical vs non-hierarchical clustering | 6.4 | ✅ |
 | 4 | Agglomerative and divisive clustering | 6.5, 6.6 | ❌ |
 | 4 | K-means, bisecting K-means | 6.2, 6.3 | ❌ |
-| 4 | K-means as special case of EM | 6.7 | ❌ |
-| 4 | RL: agent, environment, states, actions, rewards, policy, value functions | 9.1.1, 9.1.2, 9.1.4 | ❌ |
+| 4 | K-means as special case of EM | 6.7 | ✅ |
+| 4 | RL: agent, environment, states, actions, rewards, policy, value functions | 9.1.1, 9.1.2, 9.1.4 | ✅ |
 | 4 | Bellman equation and Q-learning | 9.1.1, 9.2 | ❌ |
 | 4 | Introduction to deep learning | 8.1.1, 8.3 | ❌ |
-| 4 | Convolution operation and CNNs | 8.1.2, 8.2.1 | ❌ |
+| 4 | Convolution operation and CNNs | 8.1.2, 8.2.1 | ✅ |
 | 4 | CNN parameter calculation, max and avg pooling | 8.2.2, 8.2.3 | ❌ |
 | 4 | Hyperparameter tuning: Grid, Random, Bayesian optimisation | 3.6.4, 10.2, 10.5 | ❌ |
 | 4 | MLOps overview, ML lifecycle and production challenges | 0.3.4, 11.1.1 | ❌ |
