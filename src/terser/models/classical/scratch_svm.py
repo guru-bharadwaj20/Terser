@@ -1,4 +1,4 @@
-"""Support vector machine trained by solving the dual QP with ``cvxopt`` (plan rows **4.4.4**-**4.4.8**).
+"""Support vector machine solved in the dual with ``cvxopt`` (plan rows **4.4.4**-**4.4.8**).
 
 Derivation: ``docs/derivations/svm.md`` §3-5. With labels ``y_i in {-1, +1}`` and kernel
 ``K``, the soft-margin dual is
