@@ -11,7 +11,7 @@ def test_run_names() -> None:
         run_name("Qwen/Qwen2.5-0.5B-Instruct", "full", "fp32"),
         run_name("Qwen/Qwen2.5-1.5B-Instruct", "lora", "bf16"),
     ]
-    assert names == ["7-trainbench-qwen2.50.5b-full-fp32-0", "7-trainbench-qwen2.51.5b-lora-r16-0"]
+    assert names == ["7-trainbench-qwen2.50.5b-full_fp32-0", "7-trainbench-qwen2.51.5b-lora_r16-0"]
     assert all(RUN_NAME_RE.match(n) for n in names)
 
 
