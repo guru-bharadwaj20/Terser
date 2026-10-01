@@ -1,0 +1,18 @@
+# Row 8.3.3 (rung 1): Qwen2.5-0.5B full fine-tune, bf16, AdamW, gradient checkpointing.
+# Queued: gpu_queue/sft-qwen0.5b-full.yaml. Data: row 8.3.1 SFT split (not yet built).
+name: sft_qwen05b_full
+phase: 8
+row: "8.3.3"
+task: rewriter_sft
+params:
+  model: Qwen/Qwen2.5-0.5B-Instruct
+  lora: null
+  grad_checkpointing: true
+  data: ${paths.data_dir}/processed/sft/train.jsonl
+  limit: null
+  max_len: 1024
+  steps: 3000
+  batch_size: 4
+  lr: 1.0e-5
+  output_dir: ${paths.root}/models/rewriter/sft-qwen0.5b-full
+  save_weights: true
