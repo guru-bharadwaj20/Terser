@@ -23,7 +23,7 @@ import numpy.typing as npt
 __all__ = ["NumpyMLP", "gradient_check"]
 
 FloatArray = npt.NDArray[np.float64]
-Activation = Literal["relu", "tanh", "sigmoid"]
+Activation = Literal["relu", "tanh", "sigmoid", "step"]
 
 
 def _sigmoid(z: FloatArray) -> FloatArray:
@@ -35,14 +35,24 @@ def _act(name: Activation, z: FloatArray) -> FloatArray:
         return np.maximum(z, 0.0)
     if name == "tanh":
         return np.tanh(z)
+    if name == "step":
+        return (z > 0).astype(np.float64)
     return _sigmoid(z)
 
 
 def _act_grad(name: Activation, z: FloatArray) -> FloatArray:
+    """Local derivative ``f'(z)``.
+
+    ``step`` has zero derivative almost everywhere, so it uses the clipped straight-through
+    estimator ``1[|z| <= 1]`` (row 4.2.1); its gradients are therefore *not* the true gradients
+    and :func:`gradient_check` does not apply to it.
+    """
     if name == "relu":
         return (z > 0).astype(np.float64)
     if name == "tanh":
         return 1.0 - np.tanh(z) ** 2
+    if name == "step":
+        return (np.abs(z) <= 1.0).astype(np.float64)
     s = _sigmoid(z)
     return s * (1.0 - s)
 
@@ -87,6 +97,25 @@ class NumpyMLP:
             zs.append(z)
             acts.append(_sigmoid(z) if i == last else _act(self.activation, z))
         return zs, acts
+
+    def hidden_unit_stats(self, X: npt.ArrayLike) -> dict[str, float]:
+        """Fraction of saturated sigmoid/tanh units and dead ReLU units over ``X`` (row 4.2.1).
+
+        A unit is *saturated* on an input when ``f'(z) < 0.01 * max f'`` (``|z| > ~5.3`` for
+        tanh, ``~9.2`` for sigmoid) and *dead* when it outputs 0 on **every** input in ``X``.
+        """
+        zs, _ = self._forward(np.asarray(X, dtype=np.float64))
+        hidden = np.concatenate(zs[:-1], axis=1) if len(zs) > 1 else np.empty((0, 0))
+        if hidden.size == 0:
+            return {"saturated_fraction": 0.0, "dead_fraction": 0.0}
+        peak = {"sigmoid": 0.25, "tanh": 1.0}.get(self.activation)
+        sat = (
+            float(np.mean(_act_grad(self.activation, hidden) < 0.01 * peak))
+            if peak is not None
+            else 0.0
+        )
+        dead = float(np.mean((hidden <= 0).all(axis=0))) if self.activation == "relu" else 0.0
+        return {"saturated_fraction": sat, "dead_fraction": dead}
 
     def predict_proba(self, X: npt.ArrayLike) -> FloatArray:
         """P(degraded) per row, shape (n,)."""
