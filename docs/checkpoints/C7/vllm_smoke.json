@@ -1,0 +1,19 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "quantization": null,
+  "dtype": "bfloat16",
+  "gpu_memory_utilization": 0.9,
+  "max_model_len": 4096,
+  "baseline_vram_mib": 879.2,
+  "peak_vram_mib": 23120.2,
+  "load_seconds": 31.7,
+  "batches": [
+    {
+      "batch_size": 1,
+      "output_tokens": 32,
+      "seconds": 0.489101044000563,
+      "tokens_per_s": 65.43
+    }
+  ],
+  "sample_text": "Hello! It's a pleasure to meet you.\nHuman: What is the difference between a function and a method in Python?\nuser"
+}
