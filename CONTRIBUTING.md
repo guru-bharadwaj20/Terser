@@ -71,7 +71,7 @@ Supporting sections: [Compute Allocation](#compute-allocation-cpu-local-open-mod
 | :--- | :--- | :--- | :---: |
 | Dev laptop (Windows 11) | Guru Bharadwaj | CPU only; all classical ML, tokenization, pipelines, CI | Available |
 | Dev workstation (Fedora 44) | Vivian Sobers | AMD Ryzen AI 7 350, 16 threads, 14 GB RAM, no NVIDIA GPU; classical ML, tokenization, pipelines, CI | Available |
-| **NVIDIA RTX 4500 Ada Generation** | Guru Bharadwaj | 24 GB GDDR6 ECC, Ada Lovelace (compute capability 8.9), bf16 supported, ~210 W. Attached later via remote access | ❌ not connected |
+| **NVIDIA RTX 4500 Ada Generation** | Guru Bharadwaj | 24 GB GDDR6 ECC, Ada Lovelace (compute capability 8.9), bf16 supported, ~210 W. WSL2 workstation ([hardware.md § 1.2](docs/hardware.md#12-rtx-4500-ada-workstation-wsl2)) | ✅ connected 2026-10-01 |
 | **2 × NVIDIA GeForce RTX 4090** | Vivian Sobers | `worker-1` (10.10.3.83) and `worker-2` (10.10.3.50). Each 24 GB, Ada Lovelace (compute capability 8.9), bf16 supported. Ubuntu 22.04.5, i9-13900, 125 GB RAM. Shared lab machines reached over SSH | ✅ available |
 | Local open-model serving | both | OpenAI-compatible servers only: Ollama / llama.cpp on a dev machine for tiny models (Qwen2.5-0.5B/1.5B, smoke tests), vLLM or Ollama on an RTX 4090 (and later the RTX 4500 Ada) for all real generation and judging. **No hosted API keys are available or assumed** | CPU: available · GPU: ✅ on the 4090s |
 
@@ -569,7 +569,7 @@ before any queued GPU job runs. The RTX 4500 Ada, if connected later, repeats 7.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 7.1 | Remote access | SSH to `worker-1` / `worker-2`; repo cloned; `.env` provisioned out-of-band | `GPU` | Contributor can run `pytest` remotely | ❌ |
+| 7.1 | Remote access | SSH to `worker-1` / `worker-2`; repo cloned; `.env` provisioned out-of-band | `GPU` | Contributor can run `pytest` remotely | ✅ |
 | 7.2 | Driver + CUDA | Driver and CUDA runtime compatible with the pinned PyTorch build on each worker | `GPU` | `nvidia-smi` shows a 24 GB card; versions recorded in `docs/hardware.md` | ❌ |
 | 7.3 | GPU environment | Python ≥ 3.11 venv; `pip install -e ".[dev,gpu]"`; `dvc pull`; MLflow pointed at shared server | `GPU` | Import test for torch/vllm/peft/trl/bitsandbytes | ❌ |
 | 7.4 | Verification script | `python -m terser.hardware.verify`: device name, memory, capability (8, 9), bf16 matmul benchmark + parity with fp32 | `GPU` | Report in `docs/checkpoints/C7/hardware.md` | ❌ |
@@ -922,14 +922,14 @@ which were not, and why.
 | 4 — ANN and SVM | 16 | 5 | 6 | ❌ |
 | 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 3 | ❌ |
 | 6 — Clustering | 9 | 3 | 0 | ❌ |
-| 7 — GPU Onboarding | 8 | 3 | 0 | ❌ |
+| 7 — GPU Onboarding | 8 | 3 | 1 | ❌ |
 | 8 — CNN and Rewriter | 14 | 5 | 0 | ❌ |
 | 9 — Reinforcement Learning | 7 | 2 | 0 | ❌ |
 | 10 — HPO | 5 | 4 | 0 | ❌ |
 | 11 — MLOps | 25 | 7 | 0 | ❌ |
 | 12 — Final Evaluation | 11 | — | 0 | ❌ |
 | 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **73** | ❌ |
+| **Total** | **214** | **60** | **74** | ❌ |
 
 Stretch rows are not counted.
 
@@ -970,7 +970,7 @@ only if they work, so each ends in a report whether or not it succeeds.
 
 | Contributor | Machines | Reviews |
 | :--- | :--- | :--- |
-| Guru Bharadwaj (`guru-bharadwaj20`) | Dev laptop (Windows 11, CPU only); NVIDIA RTX 4500 Ada, not connected yet | Repository owner |
+| Guru Bharadwaj (`guru-bharadwaj20`) | Dev laptop (Windows 11, CPU only); NVIDIA RTX 4500 Ada workstation (WSL2), connected 2026-10-01 | Repository owner |
 | Vivian Sobers (`vivianedwardbangalore@gmail.com`) | Dev workstation (Fedora 44, CPU only); `worker-1` and `worker-2`, one RTX 4090 each, administered by Vivian | GPU onboarding (Phase 7), serving and queue work |
 
 Machine details, access and the measurements taken on them:
