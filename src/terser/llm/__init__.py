@@ -7,6 +7,7 @@ from terser.llm.providers import (
     LocalLLMError,
     LocalLLMUnavailableError,
     ProviderConfig,
+    TokenLogprobs,
     parse_providers,
 )
 
@@ -22,6 +23,7 @@ __all__ = [
     "ProviderTransport",
     "ResponseCache",
     "Transport",
+    "TokenLogprobs",
     "TransportResult",
     "Usage",
     "cache_key",

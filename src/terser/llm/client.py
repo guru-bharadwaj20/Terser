@@ -11,8 +11,9 @@ from terser.llm.budget import Budget, Usage, approx_tokens
 from terser.llm.cache import ResponseCache, cache_key
 from terser.llm.providers import (
     ProviderConfig,
+    TokenLogprobs,
     default_providers,
-    openai_compatible_call,
+    openai_compatible_request,
 )
 
 if TYPE_CHECKING:
@@ -27,6 +28,7 @@ class TransportResult:
     input_tokens: int
     output_tokens: int
     usage_reported: bool = True  # False when the server omitted usage (counts are then 0)
+    logprobs: TokenLogprobs | None = None  # only when requested and returned by the server
 
 
 @dataclass(frozen=True)
@@ -38,6 +40,7 @@ class LLMResponse:
     cached: bool
     cache_key: str
     usage_reported: bool = True
+    logprobs: TokenLogprobs | None = None
 
 
 class Transport(Protocol):
@@ -117,7 +120,7 @@ class ProviderTransport:
         params: dict[str, Any],
     ) -> TransportResult:
         if provider in self.providers:
-            text, tokens_in, tokens_out, reported = openai_compatible_call(
+            text, tokens_in, tokens_out, reported, logprobs = openai_compatible_request(
                 self.providers[provider],
                 model,
                 messages,
@@ -126,7 +129,7 @@ class ProviderTransport:
                 params,
                 http_client=self.http_client,
             )
-            return TransportResult(text, tokens_in, tokens_out, reported)
+            return TransportResult(text, tokens_in, tokens_out, reported, logprobs)
         hosted = {"anthropic": anthropic_transport, "openai": openai_transport}
         if provider not in hosted:
             known = sorted({*hosted, *self.providers})
@@ -181,7 +184,16 @@ class LLMClient:
         if hit is not None:
             tokens_in, tokens_out = hit["input_tokens"], hit["output_tokens"]
             reported = bool(hit.get("usage_reported", True))
-            return LLMResponse(hit["text"], tokens_in, tokens_out, 0.0, True, key, reported)
+            return LLMResponse(
+                hit["text"],
+                tokens_in,
+                tokens_out,
+                0.0,
+                True,
+                key,
+                reported,
+                _logprobs_from_json(hit.get("logprobs")),
+            )
 
         if input_tokens_estimate is None:
             prompt = json.dumps(messages, ensure_ascii=False) + (system or "")
@@ -196,18 +208,18 @@ class LLMClient:
             out_estimate = approx_tokens(result.text) if result.text else 0
             actual = Usage(provider, model, input_tokens_estimate, out_estimate, key, False)
         usd = self.budget.record(actual)
-        self.cache.put(
-            key,
-            {
-                "provider": provider,
-                "model": model,
-                "text": result.text,
-                "input_tokens": result.input_tokens,
-                "output_tokens": result.output_tokens,
-                "usd": usd,
-                "usage_reported": result.usage_reported,
-            },
-        )
+        payload: dict[str, Any] = {
+            "provider": provider,
+            "model": model,
+            "text": result.text,
+            "input_tokens": result.input_tokens,
+            "output_tokens": result.output_tokens,
+            "usd": usd,
+            "usage_reported": result.usage_reported,
+        }
+        if result.logprobs is not None:
+            payload["logprobs"] = result.logprobs
+        self.cache.put(key, payload)
         return LLMResponse(
             result.text,
             result.input_tokens,
@@ -216,4 +228,12 @@ class LLMClient:
             False,
             key,
             result.usage_reported,
+            result.logprobs,
         )
+
+
+def _logprobs_from_json(raw: Any) -> TokenLogprobs | None:
+    """Rebuild :data:`TokenLogprobs` from its cached JSON form (lists instead of tuples)."""
+    if raw is None:
+        return None
+    return tuple((str(token), tuple((str(c), float(lp)) for c, lp in top)) for token, top in raw)

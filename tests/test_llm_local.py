@@ -240,3 +240,26 @@ def test_parse_providers_validation() -> None:
         parse_providers({"x": {"kind": "grpc", "base_url": "http://h"}})
     with pytest.raises(ValueError, match="base_url"):
         parse_providers({"x": {"kind": "openai_compatible"}})
+
+
+def test_parse_logprobs_reads_top_logprobs() -> None:
+    from terser.llm.providers import parse_logprobs
+
+    choice = {
+        "logprobs": {
+            "content": [
+                {
+                    "token": "A",
+                    "logprob": -0.1,
+                    "top_logprobs": [
+                        {"token": "A", "logprob": -0.1},
+                        {"token": "B", "logprob": -2.5},
+                    ],
+                },
+                {"token": "}", "logprob": 0.0},
+            ]
+        }
+    }
+    assert parse_logprobs(choice) == (("A", (("A", -0.1), ("B", -2.5))), ("}", ()))
+    assert parse_logprobs({"message": {"content": "x"}}) is None
+    assert parse_logprobs({"logprobs": None}) is None
