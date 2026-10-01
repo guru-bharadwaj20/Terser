@@ -71,10 +71,46 @@ leaving **836 labelled pairs** from 127 prompts. 23 prompts are unchanged by eve
    cumulative stacks repeat each other's rewrites (`FHCID`, `FHCIDS` and `FHCIDSL` give the same rewrite for 124 of 127 prompts), which is
    why so many judge calls were cache hits.
 
+## Relabel with the ADR-0005 judge protocol (2026-10-01)
+
+Because of finding 1, the judge protocol was compared on these 836 pairs
+([p2_judge_bias.md](p2_judge_bias.md)) and changed to **`pairwise_avg`**
+([ADR-0005](../docs/decisions/ADR-0005-judge-protocol.md), Proposed): the same two
+`pairwise_v1` calls, with the A/B/tie probabilities of both orders averaged before the 2.3.4 rule
+is applied. The pilot was relabelled with it
+(`experiment.params.protocol=pairwise_avg`, stage `judge`; MLflow `508e0d17bce8`; all 1,672
+requests from the cache, 0 new tokens).
+
+| Labels | File | Preserved | Degraded | Flagged for review |
+| :--- | :--- | ---: | ---: | ---: |
+| `pairwise_v1` both-orders rule (original) | `data/pilot/labels_pairwise_v1.jsonl`, `labels_review_pairwise_v1.csv` | 408 | 428 | 340 |
+| **`pairwise_avg` (current)** | `data/pilot/labels.jsonl`, `labels_review.csv` | **572** | **264** | **342** |
+
+| Category | Preserved | Degraded |
+| :--- | ---: | ---: |
+| code | 118 | 47 |
+| fact | 96 | 20 |
+| reason | 86 | 15 |
+| explain | 92 | 61 |
+| creative | 58 | 91 |
+| transform | 122 | 30 |
+
+165 labels changed from `degraded` to `preserved` and 1 the other way (`transform-001:F`, an
+order-inconsistent pair whose averaged probabilities favour the original). All 494
+position-consistent pairs keep their label. The 342 flagged rows are the
+position-inconsistent pairs; 209 of them also carry `low_margin` (averaged margin < 0.2), and
+these are the closest calls. The review CSV has three new columns: `protocol`,
+`averaged_side`, `averaged_margin`.
+
+The provisional 1.3.7 analysis was re-run on these labels
+([p1_version_spaces.md](p1_version_spaces.md), MLflow `1bd3ceeae1cb`): the version space still
+collapses in all 6 categories.
+
 ## Owner action required (to finish 1.3.6)
 
-1. Open `data/pilot/labels_review.csv` and fill `human_label` (`preserved` / `degraded`),
-   `reviewer` and `notes` for **every** row, starting with `needs_human_review = True`.
+1. Open `data/pilot/labels_review.csv` (the `pairwise_avg` labels) and fill `human_label`
+   (`preserved` / `degraded`), `reviewer` and `notes` for **every** row, starting with
+   `needs_human_review = True` and, among those, `low_margin`.
 2. Merge the reviewed labels back into `data/pilot/labels.jsonl` as a `human_label` field. Note
    that `terser.phase1.version_spaces` lets a non-empty `human_label` override `label`.
 3. Re-run 1.3.7:

@@ -51,5 +51,6 @@ params:
   judge_retries: 2
   temperature: 0.0
   prompt_version: pairwise_v1   # src/terser/judge/prompts/<version>.txt
+  protocol: pairwise            # pairwise | pairwise_avg (ADR-0005: order-averaged logprobs)
   budget_phase: phase1          # token cap from configs/budget.yaml
   workers: 1                    # concurrent requests; GPU runs use 16-32 so vLLM can batch

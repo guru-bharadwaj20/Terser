@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import math
 import re
 from dataclasses import replace
 from pathlib import Path
@@ -398,3 +399,34 @@ def test_parallel_respond_then_judge(tmp_path: Path, settings: PilotSettings) ->
 def test_workers_must_be_positive(settings: PilotSettings) -> None:
     with pytest.raises(ValueError, match="workers"):
         replace(settings, workers=0)
+
+
+class BiasedLogprobLLM(FakeLLM):
+    """Judge that always answers A; logprobs say A 0.5 / B 0.45 / tie 0.05 in every order."""
+
+    def __call__(self, provider, model, messages, max_tokens, system, params):  # type: ignore[no-untyped-def]
+        if model == TARGET:
+            return super().__call__(provider, model, messages, max_tokens, system, params)
+        assert params.get("logprobs") is True and params.get("top_logprobs") == 20
+        top = (("A", math.log(0.5)), ("B", math.log(0.45)), ("tie", math.log(0.05)))
+        toks = (('{"verdict": "', (("x", 0.0),)), ("A", top))
+        return TransportResult('{"verdict": "A", "reason": "r"}', 50, 9, True, toks)
+
+
+def test_pairwise_avg_protocol(tmp_path: Path, settings: PilotSettings) -> None:
+    avg = replace(settings, protocol="pairwise_avg")
+    run_pilot(avg, make_client(tmp_path, BiasedLogprobLLM()), apply_ops=fake_apply_ops)
+    recs = read_jsonl(settings.smoke_dir / "labels.jsonl")
+    rec = recs[0]
+    # Raw orders disagree (always A); averaged they are an exact original/rewrite tie, broken
+    # conservatively towards original, so the label is degraded and the margin is 0.
+    assert rec["verdicts"]["position_consistent"] is False
+    assert rec["judge_protocol"] == "pairwise_avg"
+    assert rec["aggregate"]["side"] == "original" and rec["label"] == "degraded"
+    assert rec["aggregate"]["margin"] == pytest.approx(0.0)
+    assert {"position_inconsistent", "low_margin"} <= set(rec["review_reasons"])
+    with (settings.smoke_dir / "labels_review.csv").open(encoding="utf-8", newline="") as fh:
+        row = next(csv.DictReader(fh))
+    assert row["protocol"] == "pairwise_avg" and row["averaged_side"] == "original"
+    with pytest.raises(ValueError):
+        replace(settings, protocol="bogus")
