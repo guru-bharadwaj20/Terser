@@ -598,15 +598,15 @@ together with the quality gate and fallback, reach the main quality/savings gate
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 8.1.1 | Introduction write-up | Representation learning; why learned features beat Phase 3 hand features for span importance; decoder-only transformer overview | `CPU` | `docs/derivations/deep_learning_intro.md` | ❌ |
-| 8.1.2 | Convolution operation | Manual 1-D convolution (kernel, stride, padding, output length) | `CPU` | Equals `nn.Conv1d` on fixture input (test) | ❌ |
+| 8.1.1 | Introduction write-up | Representation learning; why learned features beat Phase 3 hand features for span importance; decoder-only transformer overview | `CPU` | `docs/derivations/deep_learning_intro.md` | ✅ |
+| 8.1.2 | Convolution operation | Manual 1-D convolution (kernel, stride, padding, output length) | `CPU` | Equals `nn.Conv1d` on fixture input (test) | ✅ |
 
 ### 8.2 TextCNN Span Scorer
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 8.2.1 | Architecture | Token embeddings (d = 384) → parallel Conv1d k = 3 and k = 5, 128 filters each, 'same' padding → per-token KEEP head + pooled prompt-compressibility head | `CPU→GPU` | `models/neural/textcnn.py` | ❌ |
-| 8.2.2 | **Parameter calculation** | Conv k=3: 384×3×128+128 = 147,584 · Conv k=5: 384×5×128+128 = 245,888 · token head 256+1 = 257 · prompt head 256+1 = 257 · **total 393,986** | `CPU` | Equals `sum(p.numel())` in a test; derivation in docs | ❌ |
+| 8.2.1 | Architecture | Token embeddings (d = 384) → parallel Conv1d k = 3 and k = 5, 128 filters each, 'same' padding → per-token KEEP head + pooled prompt-compressibility head | `CPU→GPU` | `models/neural/textcnn.py` | ✅ |
+| 8.2.2 | **Parameter calculation** | Conv k=3: 384×3×128+128 = 147,584 · Conv k=5: 384×5×128+128 = 245,888 · token head 256+1 = 257 · prompt head 256+1 = 257 · **total 393,986** | `CPU` | Equals `sum(p.numel())` in a test; derivation in docs | ✅ |
 | 8.2.3 | **Max vs average pooling** | Prompt head on global max, global avg, and concatenated (head becomes 512+1 = 513 params); 3 seeds each | `CPU→GPU` | Table + interpretation ("any droppable region" vs "how much is droppable") | ❌ |
 | 8.2.4 | Comparison | TextCNN vs HMM vs GBM span taggers on identical folds | `CPU→GPU` | McNemar + table | ❌ |
 
@@ -872,7 +872,7 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 | 4 | RL: agent, environment, states, actions, rewards, policy, value functions | 9.1.1, 9.1.2, 9.1.4 | ❌ |
 | 4 | Bellman equation and Q-learning | 9.1.1, 9.2 | ❌ |
 | 4 | Introduction to deep learning | 8.1.1, 8.3 | ❌ |
-| 4 | Convolution operation and CNNs | 8.1.2, 8.2.1 | ❌ |
+| 4 | Convolution operation and CNNs | 8.1.2, 8.2.1 | ✅ |
 | 4 | CNN parameter calculation, max and avg pooling | 8.2.2, 8.2.3 | ❌ |
 | 4 | Hyperparameter tuning: Grid, Random, Bayesian optimisation | 3.6.4, 10.2, 10.5 | ❌ |
 | 4 | MLOps overview, ML lifecycle and production challenges | 0.3.4, 11.1.1 | ❌ |
