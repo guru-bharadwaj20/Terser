@@ -704,7 +704,7 @@ quality monitoring.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 11.1.1 | MLOps overview ADR | Lifecycle diagram + Terser-specific production challenges: judge cost, tokenizer drift, silent over-compression, latency budget, training/serving skew | `CPU` | `docs/decisions/ADR-0010-mlops.md` | ❌ |
+| 11.1.1 | MLOps overview ADR | Lifecycle diagram + Terser-specific production challenges: judge cost, tokenizer drift, silent over-compression, latency budget, training/serving skew | `CPU` | `docs/decisions/ADR-0010-mlops.md` | ✅ |
 | 11.1.2 | Full DVC pipeline | `collect → casualise → candidates → respond → judge → label → features → split → stratify` | `CPU` | `dvc repro` end to end | ❌ |
 | 11.1.3 | Shared feature code | One `terser.features` used offline and online | `CPU` | Parity test: 100/100 prompts identical | ✅ |
 | 11.1.4 | Data validation | pandera schemas: nulls, token-ratio ranges, category balance | `CPU` | Fails on a corrupted fixture | ✅ |
@@ -799,11 +799,11 @@ quality?", on the untouched test split.
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 13.1 | README | One-paragraph pitch, architecture diagram (casual prompt → fast/quality path → gate → target LLM, with training loop), headline results table with CIs, `docker compose up` quickstart, links to report and benchmark. Start it now and update at every checkpoint | `CPU` | A reader understands the project in 60 seconds | ❌ |
-| 13.2 | Syllabus mapping doc | Unit 1–4 → phase / file / figure links | `CPU` | `docs/syllabus_map.md` | ❌ |
+| 13.2 | Syllabus mapping doc | Unit 1–4 → phase / file / figure links | `CPU` | `docs/syllabus_map.md` | ✅ |
 | 13.4 | Model cards | Gate, tagger, TextCNN, rewriter | `CPU` | Complete | ❌ |
 | 13.6 | Final report | Problem, related work (LLMLingua / LLMLingua-2, Selective Context), method, experiments, results, ablations, negative results (C1.4, C1.5), limitations (creative prompts, multi-turn context, tokenizer drift, judge dependence, synthetic prompts), future work | `CPU` | `docs/report.md` | ❌ |
 | 13.8 | Demo script | Live casual prompt → rewrite → side-by-side outputs + token counter | `CPU` `GPU` | Rehearsed; cached fallback if GPU unavailable | ❌ |
-| 13.9 | Viva prep | ID3 gain, bias–variance, ROC, backprop, SVM dual, AdaBoost weights, EM, Viterbi, K-means ⇔ EM, Bellman / Q-update, CNN parameters, LoRA rank | `CPU` | `docs/viva.md` | ❌ |
+| 13.9 | Viva prep | ID3 gain, bias–variance, ROC, backprop, SVM dual, AdaBoost weights, EM, Viterbi, K-means ⇔ EM, Bellman / Q-update, CNN parameters, LoRA rank | `CPU` | `docs/viva.md` | ✅ |
 
 ---
 
@@ -875,7 +875,7 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 | 4 | Convolution operation and CNNs | 8.1.2, 8.2.1 | ✅ |
 | 4 | CNN parameter calculation, max and avg pooling | 8.2.2, 8.2.3 | ❌ |
 | 4 | Hyperparameter tuning: Grid, Random, Bayesian optimisation | 3.6.4, 10.2, 10.5 | ❌ |
-| 4 | MLOps overview, ML lifecycle and production challenges | 0.3.4, 11.1.1 | ❌ |
+| 4 | MLOps overview, ML lifecycle and production challenges | 0.3.4, 11.1.1 | ✅ |
 | 4 | Data and feature pipelines | 2.1.7, 11.1 | ❌ |
 | 4 | Experiment tracking and model versioning | 0.2.4, 0.2.5, 11.2 | ❌ |
 | 4 | Model deployment and serving | 11.3 | ❌ |
