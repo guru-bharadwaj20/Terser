@@ -1,0 +1,157 @@
+schema: '2.0'
+stages:
+  collect:
+    cmd: python -m terser.data.collect --out data/interim/clean.jsonl 
+      --per-category 280 --seed 0 --min-words 3 --max-words 350 --stats 
+      reports/p2_collect_stats.json
+    deps:
+    - path: data/raw/dolly
+      hash: md5
+      md5: 8ff7997554b300f0f2aded6773456886.dir
+      size: 13085719
+      nfiles: 2
+    - path: data/raw/gsm8k
+      hash: md5
+      md5: 6f4b5d451f3257f413d7ecf133690564.dir
+      size: 2726160
+      nfiles: 3
+    - path: data/raw/humaneval
+      hash: md5
+      md5: 2f9a15d41ecafdc9d0498af50dc4d597.dir
+      size: 84302
+      nfiles: 2
+    - path: data/raw/mbpp
+      hash: md5
+      md5: 7819743513f2be013c8efe8c09ec16ac.dir
+      size: 236959
+      nfiles: 5
+    - path: data/raw/oasst1
+      hash: md5
+      md5: 67211e90d1ba47a508eb85d1c9bdefa5.dir
+      size: 41597015
+      nfiles: 3
+    - path: src/terser/data/collect.py
+      hash: md5
+      md5: f6dd2f96d29dbd5c9e062670f2ca05c3
+      size: 6612
+    - path: src/terser/data/pii.py
+      hash: md5
+      md5: 5af62892be5c8604341d925ddc4cf490
+      size: 44804
+    - path: src/terser/data/sources.py
+      hash: md5
+      md5: d054862db063cd17717841be29df6173
+      size: 19158
+    params:
+      params.yaml:
+        collect:
+          per_category: 280
+          min_words: 3
+          max_words: 350
+        seed: 0
+    outs:
+    - path: data/interim/clean.jsonl
+      hash: md5
+      md5: 261be9580ca536736951c88e7f585236
+      size: 2015817
+    - path: reports/p2_collect_stats.json
+      hash: md5
+      md5: 2039173f4e1b1766b383389caa1b08dc
+      size: 238
+  casualise:
+    cmd: python -m terser.data.casualise --in data/interim/clean.jsonl --out 
+      data/interim/casual.jsonl --rejected data/interim/casual_rejected.jsonl 
+      --model Qwen/Qwen2.5-32B-Instruct-AWQ --workers 32 --max-ratio 4.0 
+      --temperature 0.8 --stats reports/p2_casualise_stats.json
+    deps:
+    - path: data/interim/clean.jsonl
+      hash: md5
+      md5: 261be9580ca536736951c88e7f585236
+      size: 2015817
+    - path: src/terser/data/casualise.py
+      hash: md5
+      md5: b38a9827522d6e7106d51c19346655f3
+      size: 17506
+    - path: src/terser/data/prompts/casualise_check_v1.txt
+      hash: md5
+      md5: 1a7822dd351306db663d35865db3acfb
+      size: 930
+    - path: src/terser/data/prompts/casualise_v1.txt
+      hash: md5
+      md5: 77987fa3ca70ebcb2cb10d753158f483
+      size: 2391
+    params:
+      params.yaml:
+        casualise.max_ratio: 4.0
+        casualise.model: Qwen/Qwen2.5-32B-Instruct-AWQ
+        casualise.temperature: 0.8
+    outs:
+    - path: data/interim/casual.jsonl
+      hash: md5
+      md5: 11a3c5f1ae04f998419714002a801b78
+      size: 16682299
+    - path: data/interim/casual_rejected.jsonl
+      hash: md5
+      md5: 5e589872c96158e7eb2b7218ae363d32
+      size: 3093268
+    - path: reports/p2_casualise_stats.json
+      hash: md5
+      md5: 8ef7f0bd8bd3a50ddc0a75fd6b72fda1
+      size: 655
+  dedupe:
+    cmd: python -m terser.data.dedupe --in data/interim/casual.jsonl --out 
+      data/interim/casual_dedup.jsonl --report reports/p2_duplicates.md 
+      --threshold 0.8 --seed 0 --source-priority 
+      humaneval,mbpp,gsm8k,dolly,oasst1
+    deps:
+    - path: data/interim/casual.jsonl
+      hash: md5
+      md5: 11a3c5f1ae04f998419714002a801b78
+      size: 16682299
+    - path: src/terser/data/dedupe.py
+      hash: md5
+      md5: 6341fcdfdbaa800f41b888055ba125fa
+      size: 23264
+    params:
+      params.yaml:
+        dedupe:
+          threshold: 0.8
+          source_priority: humaneval,mbpp,gsm8k,dolly,oasst1
+        seed: 0
+    outs:
+    - path: data/interim/casual_dedup.jsonl
+      hash: md5
+      md5: c501bd42b43b7c690ce649a3967f9d59
+      size: 16553337
+    - path: reports/p2_duplicates.md
+      hash: md5
+      md5: 0d4a10e0742a3c9a12526b5e15572f51
+      size: 939
+  split:
+    cmd: python -m terser.data.splits --in data/interim/casual_dedup.jsonl 
+      --out-dir data/processed/splits --seed 0 --train-frac 0.7 --val-frac 0.15 
+      --expect-test-sha256 
+      b4b264a80bcf8b1c415643b5f54156d214841e77088b75ae8b148bf2c9e106c7 --freeze
+    deps:
+    - path: data/interim/casual_dedup.jsonl
+      hash: md5
+      md5: c501bd42b43b7c690ce649a3967f9d59
+      size: 16553337
+    - path: src/terser/data/splits.py
+      hash: md5
+      md5: f351fbe37ac4a6923749cd1ee04e6188
+      size: 18121
+    params:
+      params.yaml:
+        seed: 0
+        split:
+          train_frac: 0.7
+          val_frac: 0.15
+          test_sha256: 
+            b4b264a80bcf8b1c415643b5f54156d214841e77088b75ae8b148bf2c9e106c7
+    outs:
+    - path: data/processed/splits
+      hash: md5
+      md5: d14a09789965490c9a919d1c81a4921c.dir
+      size: 16559882
+      nfiles: 5
