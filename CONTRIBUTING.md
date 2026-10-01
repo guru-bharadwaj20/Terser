@@ -297,7 +297,7 @@ downstream can be measured without it.
 | 2.1.1 | Source datasets | Permissively licensed instruction sets (e.g. Dolly, OpenAssistant), HumanEval/MBPP prompts, GSM8K problems | `CPU` | `data/SOURCES.md` + one data card per source | ✅ |
 | 2.1.2 | Licence audit | Research use and redistribution terms; unknown ⇒ non-redistributable | `CPU` | `reports/license_audit.md` | ✅ |
 | 2.1.3 | PII scrubbing | PII detector over all text before `data/interim/` | `CPU` | Scrub report; 0 detected PII in a 500-row manual sample | ❌ |
-| 2.1.4 | Casualisation | LLM rewrites clean instructions in 5 styles: rambling, hedging, texting, over-polite, repetitive; clean version kept as reference | `LLM` | ≥ 6,000 casual prompts | ❌ |
+| 2.1.4 | Casualisation | LLM rewrites clean instructions in 5 styles: rambling, hedging, texting, over-polite, repetitive; clean version kept as reference | `LLM` | ≥ 6,000 casual prompts | ✅ |
 | 2.1.5 | Deduplication | MinHash, Jaccard ≥ 0.8 removed; paraphrase groups kept whole | `CPU` | Duplicate report | ✅ |
 | 2.1.6 | **Source-grouped splits** | Train 70 / val 15 / test 15 by source prompt; test frozen end of week 4 and hash-locked | `CPU` | Automated test: 0 source prompts shared across splits | ✅ |
 | 2.1.7 | DVC stages | `collect → casualise → dedupe → split` | `CPU` | `dvc repro` rebuilds from cache | ❌ |

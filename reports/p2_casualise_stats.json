@@ -1,0 +1,34 @@
+{
+  "accepted": 7108,
+  "rejected": 1292,
+  "by_category": {
+    "code": 1283,
+    "creative": 1062,
+    "explain": 1108,
+    "fact": 1233,
+    "reason": 1185,
+    "transform": 1237
+  },
+  "by_style": {
+    "hedging": 1374,
+    "over_polite": 1614,
+    "rambling": 1113,
+    "repetitive": 1498,
+    "texting": 1509
+  },
+  "rejection_reasons": {
+    "added_requirements": 905,
+    "number_changed": 205,
+    "missing_requirements": 136,
+    "quoted_span_changed": 28,
+    "not_casual": 16,
+    "different_task": 2
+  },
+  "rejected_by_style": {
+    "hedging": 306,
+    "over_polite": 66,
+    "rambling": 567,
+    "repetitive": 182,
+    "texting": 171
+  }
+}
