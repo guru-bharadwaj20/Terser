@@ -117,3 +117,14 @@ stages:
       - candidates.model
     outs:
       - data/interim/candidates.jsonl
+
+  token_counts:
+    cmd: >-
+      python -m terser.data.token_counts --prompts data/interim/label_prompts.jsonl
+      --candidates data/interim/candidates.jsonl --out data/interim/token_counts.parquet
+    deps:
+      - data/interim/label_prompts.jsonl
+      - data/interim/candidates.jsonl
+      - src/terser/data/token_counts.py
+    outs:
+      - data/interim/token_counts.parquet
