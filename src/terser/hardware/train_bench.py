@@ -61,7 +61,7 @@ def lora_target_modules() -> list[str]:
 def run_name(model: str, mode: str, weights_dtype: str) -> str:
     """``7-trainbench-<model>-<variant>-0`` following the repo's run-name pattern."""
     short = model.split("/")[-1].lower().replace("-instruct", "").replace("-", "")
-    variant = "lora-r16" if mode == "lora" else f"full-{weights_dtype}"
+    variant = "lora_r16" if mode == "lora" else f"full_{weights_dtype}"
     return f"7-trainbench-{short}-{variant}-0"
 
 
