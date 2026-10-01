@@ -1,0 +1,306 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Terser",
+    "description": "Rewrite casual prompts into token-efficient prompts for a target LLM.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/rewrite": {
+      "post": {
+        "summary": "Rewrite a prompt",
+        "operationId": "rewrite_rewrite_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RewriteIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RewriteOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "summary": "Prometheus metrics",
+        "operationId": "prom_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/healthz": {
+      "get": {
+        "summary": "Liveness and path availability",
+        "operationId": "healthz_healthz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Healthz Healthz Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "RewriteIn": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "maxLength": 32000,
+            "minLength": 1,
+            "title": "Prompt",
+            "description": "The casual prompt"
+          },
+          "target": {
+            "type": "string",
+            "title": "Target",
+            "description": "Target model; selects the tokenizer and price",
+            "default": "gpt-4o"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "fast",
+              "quality"
+            ],
+            "title": "Mode",
+            "description": "fast = CPU span path; quality = generative rewriter with fallback",
+            "default": "fast"
+          },
+          "consent_raw_text": {
+            "type": "boolean",
+            "title": "Consent Raw Text",
+            "description": "Allow raw prompt/rewrite text in logs (hashes only otherwise)",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "title": "RewriteIn",
+        "description": "``POST /rewrite`` request body.",
+        "examples": [
+          {
+            "mode": "fast",
+            "prompt": "hey so um, could you maybe write a Python function that checks if a string is a palindrome? It should ignore case. Thanks so much!!",
+            "target": "gpt-4o"
+          }
+        ]
+      },
+      "RewriteOut": {
+        "properties": {
+          "rewrite": {
+            "type": "string",
+            "title": "Rewrite"
+          },
+          "tokens_before": {
+            "type": "integer",
+            "title": "Tokens Before"
+          },
+          "tokens_after": {
+            "type": "integer",
+            "title": "Tokens After"
+          },
+          "gate_score": {
+            "type": "number",
+            "title": "Gate Score",
+            "description": "Gate P(degraded) of the candidate rewrite"
+          },
+          "fallback_used": {
+            "type": "boolean",
+            "title": "Fallback Used"
+          },
+          "path": {
+            "type": "string",
+            "enum": [
+              "fast",
+              "quality",
+              "original"
+            ],
+            "title": "Path"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "fast",
+              "quality"
+            ],
+            "title": "Mode"
+          },
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "gate_rejected": {
+            "type": "boolean",
+            "title": "Gate Rejected"
+          },
+          "fallback_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "timeout",
+                  "error",
+                  "unavailable",
+                  "fast_error"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fallback Reason"
+          },
+          "cached": {
+            "type": "boolean",
+            "title": "Cached"
+          },
+          "net_savings_usd": {
+            "type": "number",
+            "title": "Net Savings Usd"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "latency_ms": {
+            "type": "number",
+            "title": "Latency Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rewrite",
+          "tokens_before",
+          "tokens_after",
+          "gate_score",
+          "fallback_used",
+          "path",
+          "mode",
+          "target",
+          "gate_rejected",
+          "fallback_reason",
+          "cached",
+          "net_savings_usd",
+          "request_id",
+          "latency_ms"
+        ],
+        "title": "RewriteOut",
+        "description": "``POST /rewrite`` response body.",
+        "examples": [
+          {
+            "cached": false,
+            "fallback_used": false,
+            "gate_rejected": false,
+            "gate_score": 0.0,
+            "latency_ms": 3.1,
+            "mode": "fast",
+            "net_savings_usd": 2.75e-05,
+            "path": "fast",
+            "request_id": "3f2b0c9e1d4a4b7f8e6a5c2d1b0a9f8e",
+            "rewrite": "Write a Python function that checks if a string is a palindrome. It should ignore case.",
+            "target": "gpt-4o",
+            "tokens_after": 18,
+            "tokens_before": 29
+          }
+        ]
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
