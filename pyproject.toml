@@ -51,6 +51,8 @@ serve = ["fastapi>=0.110", "uvicorn", "prometheus-client", "onnxruntime", "skl2o
 mlops = ["pandera>=0.20"]
 # Orchestration (rows 11.6.x); flows still run as plain callables without it.
 orchestrate = ["prefect>=3"]
+# LLMLingua-2 candidate baseline (row 2.2.1).
+compress = ["llmlingua>=0.2.2"]
 # Installed only on the RTX 4500 Ada machine (Phase 7).
 gpu = ["torch", "transformers", "peft", "trl", "vllm", "bitsandbytes", "accelerate"]
 

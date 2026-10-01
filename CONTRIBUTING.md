@@ -307,7 +307,7 @@ downstream can be measured without it.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 2.2.1 | Candidate generation | 6 per prompt: 3 rewrites from Qwen2.5-32B-Instruct-AWQ at low/medium/high aggressiveness, 2 operator stacks, 1 LLMLingua-2 baseline | `GPU` `LLM` `CPU` | `candidates` stage output | ❌ |
+| 2.2.1 | Candidate generation | 6 per prompt: 3 rewrites from Qwen2.5-32B-Instruct-AWQ at low/medium/high aggressiveness, 2 operator stacks, 1 LLMLingua-2 baseline | `GPU` `LLM` `CPU` | `candidates` stage output | ✅ |
 | 2.2.2 | Token counts | Every prompt and candidate on every target tokenizer | `CPU` | Counts table, 0 missing | ❌ |
 | 2.2.3 | Target outputs | Llama-3.1-8B-Instruct and Qwen2.5-7B-Instruct on vLLM bf16, temperature 0 (creative: n = 3 samples) | `GPU` `LLM` | `respond` stage output | ❌ |
 | 2.2.4 | Pipeline smoke run (pre-GPU) | `respond → judge → label` on 50 prompts with Qwen2.5-0.5B/1.5B via Ollama on CPU, through the same `terser.llm` client | `CPU` `LLM` | Stages run end to end; every output tagged `stand_in: true` and excluded from labels | ✅ |

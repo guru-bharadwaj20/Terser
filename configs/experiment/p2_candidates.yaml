@@ -42,3 +42,4 @@ params:
   llmlingua_cache_dir: ${paths.cache_dir}/llmlingua2
   limit: null                   # first N prompts; null = all
   budget_phase: phase2
+  workers: 1                    # concurrent LLM requests; GPU runs use 32 so vLLM can batch

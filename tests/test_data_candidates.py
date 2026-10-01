@@ -430,3 +430,17 @@ def test_llmlingua2_real_model_compresses(tmp_path: Path) -> None:
     out = comp(text)
     assert out and len(out.split()) < len(text.split())
     assert "@" in comp.generator
+
+
+def test_concurrent_workers_match_sequential_output(tmp_path: Path) -> None:
+    seq_dir, par_dir = tmp_path / "seq", tmp_path / "par"
+    seq_dir.mkdir()
+    par_dir.mkdir()
+    seq = make_settings(seq_dir)
+    par = make_settings(par_dir, workers=4)
+    run(seq, make_client(seq_dir, FakeRewriter()))
+    fake = FakeRewriter()
+    run(par, make_client(par_dir, fake))
+    assert seq.output_path.read_text() == par.output_path.read_text()
+    with pytest.raises(ValueError):
+        make_settings(tmp_path, workers=0)
