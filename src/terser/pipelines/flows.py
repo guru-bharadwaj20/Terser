@@ -31,7 +31,7 @@ import subprocess
 import sys
 from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 import yaml
 
@@ -63,8 +63,8 @@ except ImportError:  # pragma: no cover
 def _flow(name: str) -> Callable[[F], F]:
     def deco(fn: F) -> F:
         if HAVE_PREFECT:
-            return _pflow(name=name, log_prints=True)(fn)  # type: ignore[return-value]
-        fn.fn = fn  # type: ignore[attr-defined]
+            return cast(F, _pflow(name=name, log_prints=True)(fn))
+        setattr(fn, "fn", fn)  # noqa: B010 - mirror Prefect's .fn on the plain function
         return fn
 
     return deco
@@ -73,10 +73,8 @@ def _flow(name: str) -> Callable[[F], F]:
 def _task(retries: int = 0, retry_delay_seconds: float = 0) -> Callable[[F], F]:
     def deco(fn: F) -> F:
         if HAVE_PREFECT:
-            return _ptask(  # type: ignore[return-value]
-                retries=retries, retry_delay_seconds=retry_delay_seconds
-            )(fn)
-        fn.fn = fn  # type: ignore[attr-defined]
+            return cast(F, _ptask(retries=retries, retry_delay_seconds=retry_delay_seconds)(fn))
+        setattr(fn, "fn", fn)  # noqa: B010 - mirror Prefect's .fn on the plain function
         return fn
 
     return deco
