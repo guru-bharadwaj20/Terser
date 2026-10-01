@@ -67,10 +67,16 @@ Guru Bharadwaj's workstation, connected 2026-10-01. Work runs locally inside WSL
 | CPU / RAM (visible to WSL) | 32 threads · 62 GB |
 | Disk free (WSL root) | ~940 GB of 1007 GB |
 | Python | 3.12.3, venv at `~/Terser/.venv`, `pip install -e ".[dev,gpu]"` |
+| GPU | NVIDIA RTX 4500 Ada Generation, 24570 MiB (23.99 GiB to CUDA), compute capability 8.9 |
+| Driver | 596.71 (Windows host) · 595.83.02 (`nvidia-smi` inside WSL) |
+| CUDA | 13.2 (driver API, `nvidia-smi`) · torch 2.13.0+cu130 built against CUDA 13.0, which the 13.2 driver runs |
 
 Row 7.1 (access): repository cloned at `~/Terser`; `pytest -m "not gpu and not api" -q` on
 2026-10-01 → **2224 passed, 4 skipped, 1 deselected** (46 s). `.env` is not needed for any row run
 here (no hosted API keys exist).
+
+Row 7.2 (driver + CUDA): `nvidia-smi` on 2026-10-01 shows the 24 GB card; `torch.cuda.is_available()` is
+`True` with the pinned torch build, so driver and runtime are compatible.
 
 Consequences of the profile:
 
