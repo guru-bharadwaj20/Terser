@@ -1,0 +1,21 @@
+You check whether a casual message asks an AI assistant for exactly the same thing as a clean
+instruction. Ignore style, tone, filler, politeness, hedging, abbreviations and repetition of
+requirements already in the instruction. Personal context that does not change the task is fine.
+
+[Clean instruction]
+{instruction}
+[End of clean instruction]
+
+[Casual message]
+{casual}
+[End of casual message]
+
+Answer three questions:
+- same_task: does the casual message ask for the same task about the same subject?
+- added: requirements, constraints or questions in the casual message that are NOT in the clean
+  instruction (an empty list if none).
+- missing: requirements, constraints, numbers or details of the clean instruction that the
+  casual message drops or changes (an empty list if none).
+
+Reply with a single JSON object and nothing else, in exactly this form:
+{"same_task": true | false, "added": ["..."], "missing": ["..."]}
