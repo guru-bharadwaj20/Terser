@@ -358,7 +358,7 @@ bias–variance and overfitting.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 3.1.1 | Alignment labels | Token-level KEEP/DROP/REPLACE from diff-aligning each prompt with its oracle rewrite | `CPU` | `features/alignment.py` + tests on 20 hand-aligned pairs | ❌ |
+| 3.1.1 | Alignment labels | Token-level KEEP/DROP/REPLACE from diff-aligning each prompt with its oracle rewrite | `CPU` | `features/alignment.py` + tests on 20 hand-aligned pairs | ✅ |
 | 3.1.2 | Span features | Token cost on T, self-information under GPT-2 small, stopword ratio, relative position, POS, filler-lexicon hit, negation / number / constraint keyword flags | `CPU` | `features/span.py`; feature table in DVC | ❌ |
 | 3.1.3 | Pair features | Token ratio, max self-information removed, # negations / numbers / constraint keywords removed, embedding cosine, category one-hot | `CPU` | `features/pair.py`; feature table in DVC | ❌ |
 | 3.1.4 | Continuous-value handling | Standardisation for LR/KNN; C4.5 threshold search for trees; equal-frequency bins for ID3 | `CPU` | Documented per model | ❌ |
