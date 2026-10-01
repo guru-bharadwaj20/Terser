@@ -676,11 +676,11 @@ for the gate and the rewriter.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 10.1 | HPO module | `terser.hpo` wrapping grid / random / Optuna TPE / GP samplers; MLflow parent-child runs | `CPU` | Module + tests | ❌ |
+| 10.1 | HPO module | `terser.hpo` wrapping grid / random / Optuna TPE / GP samplers; MLflow parent-child runs | `CPU` | Module + tests | ✅ |
 | 10.2 | Method study | GBM quality gate: 60-point grid vs random, TPE and GP at 60 trials × 5 repeats. Random and TPE also on the Phase 4 MLP (depth 1–3, width {64..512}, dropout, lr, weight decay) | `CPU` | Best-so-far curves logged to MLflow | ❌ |
 | 10.5 | Method comparison | Grid vs Random vs Bayesian at equal budget | `CPU` | `reports/figures/p10_hpo_methods.png` + report | ❌ |
 | 10.7 | Rewriter LoRA tuning | Rank, α, lr, warmup, epochs; objective = savings s.t. preservation ≥ 0.92; median pruner | `GPU` | Tuned model registered | ❌ |
-| 10.8 | Test-set isolation audit | Data-access logs show HPO touched only train/val | `CPU` | Automated check green | ❌ |
+| 10.8 | Test-set isolation audit | Data-access logs show HPO touched only train/val | `CPU` | Automated check green | ✅ |
 
 ### Checkpoint C10 — Tuning
 
