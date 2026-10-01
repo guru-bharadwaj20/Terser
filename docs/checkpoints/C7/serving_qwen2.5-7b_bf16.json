@@ -1,0 +1,25 @@
+{
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "quantization": null,
+  "dtype": "bfloat16",
+  "gpu_memory_utilization": 0.9,
+  "max_model_len": 4096,
+  "baseline_vram_mib": 879.2,
+  "peak_vram_mib": 22172.2,
+  "load_seconds": 63.5,
+  "batches": [
+    {
+      "batch_size": 1,
+      "output_tokens": 256,
+      "seconds": 10.617881365999892,
+      "tokens_per_s": 24.11
+    },
+    {
+      "batch_size": 16,
+      "output_tokens": 4096,
+      "seconds": 10.886800701000539,
+      "tokens_per_s": 376.24
+    }
+  ],
+  "sample_text": ""
+}

@@ -49,6 +49,7 @@ class ServingResult:
     baseline_vram_mib: float
     peak_vram_mib: float
     load_seconds: float
+    engine_args: dict[str, int] = field(default_factory=dict)
     batches: list[BatchResult] = field(default_factory=list)
     sample_text: str = ""
 
@@ -121,6 +122,14 @@ def run(args: argparse.Namespace) -> ServingResult:
     os.environ.setdefault("VLLM_USE_FLASHINFER_SAMPLER", "0")
     from vllm import LLM, SamplingParams
 
+    engine_args = {
+        k: v
+        for k, v in (
+            ("max_num_batched_tokens", args.max_num_batched_tokens),
+            ("max_num_seqs", args.max_num_seqs),
+        )
+        if v is not None
+    }
     with PeakVramSampler() as sampler:
         baseline = sampler.used_mib()
         start = time.perf_counter()
@@ -131,6 +140,7 @@ def run(args: argparse.Namespace) -> ServingResult:
             gpu_memory_utilization=args.gpu_memory_utilization,
             max_model_len=args.max_model_len,
             seed=0,
+            **engine_args,
         )
         load_seconds = time.perf_counter() - start
         result = ServingResult(
@@ -142,6 +152,7 @@ def run(args: argparse.Namespace) -> ServingResult:
             baseline_vram_mib=round(baseline, 1),
             peak_vram_mib=0.0,
             load_seconds=round(load_seconds, 1),
+            engine_args=engine_args,
         )
         if args.smoke:
             params = SamplingParams(temperature=0.0, max_tokens=32, ignore_eos=True)
@@ -176,6 +187,7 @@ def _log_mlflow(result: ServingResult, smoke: bool) -> None:
             "dtype": result.dtype,
             "gpu_memory_utilization": result.gpu_memory_utilization,
             "max_model_len": result.max_model_len,
+            **result.engine_args,
         },
     ):
         mlflow.log_metric("peak_vram_mib", result.peak_vram_mib)
@@ -198,6 +210,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dtype", default="bfloat16")
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.90)
     parser.add_argument("--max-model-len", type=int, default=4096)
+    parser.add_argument("--max-num-batched-tokens", type=int, default=None)
+    parser.add_argument("--max-num-seqs", type=int, default=None)
     parser.add_argument("--batch-sizes", type=int, nargs="+", default=[1, 16])
     parser.add_argument("--max-tokens", type=int, default=256)
     parser.add_argument("--smoke", action="store_true", help="row 7.5: generate 32 tokens")

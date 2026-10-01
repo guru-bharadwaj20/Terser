@@ -1,0 +1,29 @@
+{
+  "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+  "quantization": "awq_marlin",
+  "dtype": "float16",
+  "gpu_memory_utilization": 0.9,
+  "max_model_len": 4096,
+  "baseline_vram_mib": 978.3,
+  "peak_vram_mib": 23661.7,
+  "load_seconds": 74.8,
+  "engine_args": {
+    "max_num_batched_tokens": 2048,
+    "max_num_seqs": 64
+  },
+  "batches": [
+    {
+      "batch_size": 1,
+      "output_tokens": 256,
+      "seconds": 13.860962157999893,
+      "tokens_per_s": 18.47
+    },
+    {
+      "batch_size": 16,
+      "output_tokens": 4096,
+      "seconds": 14.570122105999872,
+      "tokens_per_s": 281.12
+    }
+  ],
+  "sample_text": ""
+}
