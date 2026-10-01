@@ -465,7 +465,7 @@ implementations verified against libraries, plus controlled activation and optim
 | 4.4.1 | Margin and primal | Margin = 2/‖w‖; hard- and soft-margin primal | `CPU` | `docs/derivations/svm.md` §1–2 | ✅ |
 | 4.4.2 | Lagrangian dual | Lagrangian, KKT conditions, dual problem, recovering w and b from support vectors | `CPU` | `docs/derivations/svm.md` §3–4 | ✅ |
 | 4.4.3 | Linear kernel derivation | K(x, z) = xᵀz substituted into the dual | `CPU` | `docs/derivations/svm.md` §5 | ✅ |
-| 4.4.4 | **Dual solver from scratch** | QP via `cvxopt` on span features | `CPU` | Same support-vector set as scikit-learn; ‖w − w_sk‖/‖w_sk‖ **< 1e-3** | ❌ |
+| 4.4.4 | **Dual solver from scratch** | QP via `cvxopt` on span features | `CPU` | Same support-vector set as scikit-learn; ‖w − w_sk‖/‖w_sk‖ **< 1e-3** | ✅ |
 | 4.4.5 | Hard margin | Linearly separable filler subset | `CPU` | Support vectors plotted | ❌ |
 | 4.4.6 | Soft margin | C ∈ {0.01, 0.1, 1, 10, 100}: margin width, # support vectors, val metrics | `CPU` | Table + figure | ❌ |
 | 4.4.7 | Polynomial kernel | Degree 2, 3 × coef0 × C vs linear | `CPU` | Table: AUC, time, # SVs | ❌ |
@@ -503,7 +503,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 5.2.1 | Bayes theorem | P(filler \| phrase, context) worked from corpus counts | `CPU` | `docs/derivations/bayes.md` | ❌ |
+| 5.2.1 | Bayes theorem | P(filler \| phrase, context) worked from corpus counts | `CPU` | `docs/derivations/bayes.md` | ✅ |
 | 5.2.3 | Naive Bayes filler detector | Multinomial NB on 1–3-grams: MLE parameters with Laplace smoothing (and why smoothing is MAP); vs LR on the same features | `CPU` | PR curve + table | ❌ |
 | 5.2.4 | Bayes optimal classifier | Phase 1 hypotheses as H; P(h \| D) from validation likelihood; posterior-weighted vote vs MAP hypothesis | `CPU` | `reports/p5_bayes_optimal.md` | ❌ |
 | 5.2.5 | EM from scratch | E-step responsibilities, M-step means/variances/weights; log-likelihood monotone | `CPU` | Test asserts non-decreasing log-likelihood; matches scikit-learn GMM | ✅ |
@@ -513,8 +513,8 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 5.3.1 | Model definition | Hidden states {KEEP, DROP, REPLACE}; observations = discretised token class (filler-lexicon id × POS × cost bucket) | `CPU` | `models/classical/hmm.py` | ❌ |
-| 5.3.2 | Supervised MLE | Initial, transition, emission matrices from alignment labels with smoothing | `CPU` | Rows sum to 1 (test) | ❌ |
+| 5.3.1 | Model definition | Hidden states {KEEP, DROP, REPLACE}; observations = discretised token class (filler-lexicon id × POS × cost bucket) | `CPU` | `models/classical/hmm.py` | ✅ |
+| 5.3.2 | Supervised MLE | Initial, transition, emission matrices from alignment labels with smoothing | `CPU` | Rows sum to 1 (test) | ✅ |
 | 5.3.3 | Forward algorithm | Sequence likelihood in log space | `CPU` | Matches brute-force enumeration on length-5 sequences | ✅ |
 | 5.3.4 | Viterbi decoding | Most likely tag sequence → compressed prompt | `CPU` | Matches brute force on length-5 sequences | ✅ |
 | 5.3.5 | Baum-Welch | EM on unlabelled casual prompts from supervised initialisation | `CPU` | F1 before vs after | ❌ |
