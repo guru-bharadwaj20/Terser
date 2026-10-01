@@ -380,7 +380,7 @@ bias–variance and overfitting.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 3.3.1 | **ID3 from scratch** | Entropy, information gain, recursive split on discretised span features | `CPU` | Matches a hand-computed toy example; within 2 F1 of scikit-learn `criterion="entropy"` at equal depth | ❌ |
+| 3.3.1 | **ID3 from scratch** | Entropy, information gain, recursive split on discretised span features | `CPU` | Matches a hand-computed toy example; within 2 F1 of scikit-learn `criterion="entropy"` when both trees are grown to full depth (equal-depth multiway trees have more capacity than binary ones) | ✅ |
 | 3.3.2 | Continuous values | C4.5-style threshold search on midpoints between class changes | `CPU` | Test on a 1-D separable fixture | ✅ |
 | 3.3.3 | Overfitting study | Train vs val F1 for depth 1–30 and min-samples-leaf sweep | `CPU` | `reports/figures/p3_tree_overfit.png` | ❌ |
 | 3.3.4 | Overfitting solutions | Pre-pruning, **reduced-error pruning**, **rule post-pruning**, cost-complexity pruning | `CPU` | Comparison table: leaves, val F1, train–val gap | ❌ |
@@ -615,7 +615,7 @@ together with the quality gate and fallback, reach the main quality/savings gate
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 8.3.1 | SFT data | (casual prompt, oracle preserved rewrite) from train split; one target-agnostic rewriter (C1.5: tokenizers agree) | `CPU` | HF dataset in DVC | ❌ |
-| 8.3.2 | Tiny-config smoke test | Full training loop on a tiny model on CPU | `CPU` | CI test passes; GPU jobs queued | ❌ |
+| 8.3.2 | Tiny-config smoke test | Full training loop on a tiny model on CPU | `CPU` | CI test passes; GPU jobs queued | ✅ |
 | 8.3.3 | Rung 1: Qwen2.5-0.5B full FT | bf16, AdamW, grad checkpointing | `GPU` | Model registered; val report | ❌ |
 | 8.3.4 | Rung 2: Qwen2.5-1.5B LoRA | r = 16, α = 32, bf16. Escalate to 3B LoRA, then 7B QLoRA (NF4), only if the previous rung fails C8.3 | `GPU` | Same, per rung trained | ❌ |
 | 8.3.7 | Decoding safeguards | Never longer than input on T; fall back to original if longer | `CPU` | Property test | ✅ |
@@ -841,7 +841,7 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 | 1 | ROC, AUC | 3.2.2, 3.2.3 | ✅ |
 | 1 | Bias–variance decomposition and trade-off | 3.6.1 | ❌ |
 | 1 | Cross-validation strategies | 3.2.4–3.2.7 | ❌ |
-| 1 | Decision trees: ID3 | 3.3.1 | ❌ |
+| 1 | Decision trees: ID3 | 3.3.1 | ✅ |
 | 1 | Decision boundary for decision trees (x–y axis) | 3.3.5 | ❌ |
 | 1 | Hypothesis search and inductive bias in trees | 3.3.6 | ❌ |
 | 1 | Overfitting and solutions | 3.3.3, 3.3.4 | ❌ |
