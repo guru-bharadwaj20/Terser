@@ -359,3 +359,42 @@ def test_with_real_operators_if_available(tmp_path: Path, settings: PilotSetting
     assert summary.n_pairs_considered == 9
     for rec in read_jsonl(settings.smoke_dir / "labels.jsonl"):
         assert rec["rewrite"] != rec["original"]
+
+
+def test_parallel_workers_match_sequential(tmp_path: Path, settings: PilotSettings) -> None:
+    seq_fake, par_fake = FakeLLM(), FakeLLM()
+    (tmp_path / "seq").mkdir()
+    (tmp_path / "par").mkdir()
+    seq = run_pilot(settings, make_client(tmp_path / "seq", seq_fake), apply_ops=fake_apply_ops)
+    expected = read_jsonl(settings.smoke_dir / "labels.jsonl")
+    expected_csv = (settings.smoke_dir / "labels_review.csv").read_text(encoding="utf-8")
+
+    par = run_pilot(
+        replace(settings, workers=4),
+        make_client(tmp_path / "par", par_fake),
+        apply_ops=fake_apply_ops,
+    )
+    assert read_jsonl(settings.smoke_dir / "labels.jsonl") == expected
+    assert (settings.smoke_dir / "labels_review.csv").read_text(encoding="utf-8") == expected_csv
+    # Each unique target text is generated exactly once, as in the sequential run.
+    assert sorted(par_fake.target_calls) == sorted(seq_fake.target_calls)
+    assert len(par_fake.judge_calls) == len(seq_fake.judge_calls)
+    assert par.n_items == seq.n_items and par.labels == seq.labels
+    assert par.generated_tokens == seq.generated_tokens
+
+
+def test_parallel_respond_then_judge(tmp_path: Path, settings: PilotSettings) -> None:
+    fake = FakeLLM()
+    fast = replace(settings, workers=3)
+    run_pilot(replace(fast, stage="respond"), make_client(tmp_path, fake), apply_ops=fake_apply_ops)
+    assert len(fake.target_calls) == 6 and fake.judge_calls == []
+    summary = run_pilot(
+        replace(fast, stage="judge"), make_client(tmp_path, fake), apply_ops=fake_apply_ops
+    )
+    assert len(fake.target_calls) == 6
+    assert summary.n_items == 13 and len(read_jsonl(settings.smoke_dir / "labels.jsonl")) == 13
+
+
+def test_workers_must_be_positive(settings: PilotSettings) -> None:
+    with pytest.raises(ValueError, match="workers"):
+        replace(settings, workers=0)

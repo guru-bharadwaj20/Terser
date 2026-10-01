@@ -29,9 +29,10 @@ Findings:
   cache. That covers 5,968 tokens, about 1.5 full-length sequences or about 16 short judge calls at
   once. Judge throughput is therefore KV-bound. Every `vllm serve` of the 32B judge on a 24 GB card
   needs `--max-num-batched-tokens 2048` (or lower).
-- The 32B judge's net peak (22.15 GiB) is just over the 22 GB single-job ceiling of row 7.10, set
-  by `gpu_memory_utilization=0.90` of 23.99 GiB plus the parent process's CUDA context. The judge
-  has the card to itself (exclusive slot), so this is a bookkeeping issue for 7.10 rather than a
+- The 32B judge's net peak (22.15 GiB) is just over the 22 GB single-job ceiling
+  (`max_vram_gb` in `configs/hardware/rtx4500ada.yaml`). The overshoot comes from
+  `gpu_memory_utilization=0.90` of 23.99 GiB plus the parent process's CUDA context. The judge has
+  the card to itself (exclusive slot), so this is a bookkeeping issue for C7.4 rather than a
   blocker. It is recorded here, not resolved.
 - The 7B target leaves 5.5 GiB of KV cache (25 concurrent full-length sequences), which is ample
   for pilot labelling.
