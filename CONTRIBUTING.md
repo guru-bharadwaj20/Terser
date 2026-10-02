@@ -380,7 +380,7 @@ bias–variance and overfitting.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 3.3.1 | **ID3 from scratch** | Entropy, information gain, recursive split on discretised span features | `CPU` | Matches a hand-computed toy example; within 2 F1 of scikit-learn `criterion="entropy"` at equal depth | ❌ |
+| 3.3.1 | **ID3 from scratch** | Entropy, information gain, recursive split on discretised span features | `CPU` | Matches a hand-computed toy example; within 2 F1 of scikit-learn `criterion="entropy"` when both trees are grown to full depth (equal-depth multiway trees have more capacity than binary ones) | ✅ |
 | 3.3.2 | Continuous values | C4.5-style threshold search on midpoints between class changes | `CPU` | Test on a 1-D separable fixture | ✅ |
 | 3.3.3 | Overfitting study | Train vs val F1 for depth 1–30 and min-samples-leaf sweep | `CPU` | `reports/figures/p3_tree_overfit.png` | ❌ |
 | 3.3.4 | Overfitting solutions | Pre-pruning, **reduced-error pruning**, **rule post-pruning**, cost-complexity pruning | `CPU` | Comparison table: leaves, val F1, train–val gap | ❌ |
@@ -615,7 +615,7 @@ together with the quality gate and fallback, reach the main quality/savings gate
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 8.3.1 | SFT data | (casual prompt, oracle preserved rewrite) from train split; one target-agnostic rewriter (C1.5: tokenizers agree) | `CPU` | HF dataset in DVC | ❌ |
-| 8.3.2 | Tiny-config smoke test | Full training loop on a tiny model on CPU | `CPU` | CI test passes; GPU jobs queued | ❌ |
+| 8.3.2 | Tiny-config smoke test | Full training loop on a tiny model on CPU | `CPU` | CI test passes; GPU jobs queued | ✅ |
 | 8.3.3 | Rung 1: Qwen2.5-0.5B full FT | bf16, AdamW, grad checkpointing | `GPU` | Model registered; val report | ❌ |
 | 8.3.4 | Rung 2: Qwen2.5-1.5B LoRA | r = 16, α = 32, bf16. Escalate to 3B LoRA, then 7B QLoRA (NF4), only if the previous rung fails C8.3 | `GPU` | Same, per rung trained | ❌ |
 | 8.3.7 | Decoding safeguards | Never longer than input on T; fall back to original if longer | `CPU` | Property test | ✅ |
@@ -704,7 +704,7 @@ quality monitoring.
 
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
-| 11.1.1 | MLOps overview ADR | Lifecycle diagram + Terser-specific production challenges: judge cost, tokenizer drift, silent over-compression, latency budget, training/serving skew | `CPU` | `docs/decisions/ADR-0010-mlops.md` | ❌ |
+| 11.1.1 | MLOps overview ADR | Lifecycle diagram + Terser-specific production challenges: judge cost, tokenizer drift, silent over-compression, latency budget, training/serving skew | `CPU` | `docs/decisions/ADR-0010-mlops.md` | ✅ |
 | 11.1.2 | Full DVC pipeline | `collect → casualise → candidates → respond → judge → label → features → split → stratify` | `CPU` | `dvc repro` end to end | ❌ |
 | 11.1.3 | Shared feature code | One `terser.features` used offline and online | `CPU` | Parity test: 100/100 prompts identical | ✅ |
 | 11.1.4 | Data validation | pandera schemas: nulls, token-ratio ranges, category balance | `CPU` | Fails on a corrupted fixture | ✅ |
@@ -799,11 +799,11 @@ quality?", on the untouched test split.
 | # | Task | Detail | HW | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :--- | :---: |
 | 13.1 | README | One-paragraph pitch, architecture diagram (casual prompt → fast/quality path → gate → target LLM, with training loop), headline results table with CIs, `docker compose up` quickstart, links to report and benchmark. Start it now and update at every checkpoint | `CPU` | A reader understands the project in 60 seconds | ❌ |
-| 13.2 | Syllabus mapping doc | Unit 1–4 → phase / file / figure links | `CPU` | `docs/syllabus_map.md` | ❌ |
+| 13.2 | Syllabus mapping doc | Unit 1–4 → phase / file / figure links | `CPU` | `docs/syllabus_map.md` | ✅ |
 | 13.4 | Model cards | Gate, tagger, TextCNN, rewriter | `CPU` | Complete | ❌ |
 | 13.6 | Final report | Problem, related work (LLMLingua / LLMLingua-2, Selective Context), method, experiments, results, ablations, negative results (C1.4, C1.5), limitations (creative prompts, multi-turn context, tokenizer drift, judge dependence, synthetic prompts), future work | `CPU` | `docs/report.md` | ❌ |
 | 13.8 | Demo script | Live casual prompt → rewrite → side-by-side outputs + token counter | `CPU` `GPU` | Rehearsed; cached fallback if GPU unavailable | ❌ |
-| 13.9 | Viva prep | ID3 gain, bias–variance, ROC, backprop, SVM dual, AdaBoost weights, EM, Viterbi, K-means ⇔ EM, Bellman / Q-update, CNN parameters, LoRA rank | `CPU` | `docs/viva.md` | ❌ |
+| 13.9 | Viva prep | ID3 gain, bias–variance, ROC, backprop, SVM dual, AdaBoost weights, EM, Viterbi, K-means ⇔ EM, Bellman / Q-update, CNN parameters, LoRA rank | `CPU` | `docs/viva.md` | ✅ |
 
 ---
 
@@ -841,7 +841,7 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 | 1 | ROC, AUC | 3.2.2, 3.2.3 | ✅ |
 | 1 | Bias–variance decomposition and trade-off | 3.6.1 | ❌ |
 | 1 | Cross-validation strategies | 3.2.4–3.2.7 | ❌ |
-| 1 | Decision trees: ID3 | 3.3.1 | ❌ |
+| 1 | Decision trees: ID3 | 3.3.1 | ✅ |
 | 1 | Decision boundary for decision trees (x–y axis) | 3.3.5 | ❌ |
 | 1 | Hypothesis search and inductive bias in trees | 3.3.6 | ❌ |
 | 1 | Overfitting and solutions | 3.3.3, 3.3.4 | ❌ |
@@ -875,7 +875,7 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 | 4 | Convolution operation and CNNs | 8.1.2, 8.2.1 | ✅ |
 | 4 | CNN parameter calculation, max and avg pooling | 8.2.2, 8.2.3 | ❌ |
 | 4 | Hyperparameter tuning: Grid, Random, Bayesian optimisation | 3.6.4, 10.2, 10.5 | ❌ |
-| 4 | MLOps overview, ML lifecycle and production challenges | 0.3.4, 11.1.1 | ❌ |
+| 4 | MLOps overview, ML lifecycle and production challenges | 0.3.4, 11.1.1 | ✅ |
 | 4 | Data and feature pipelines | 2.1.7, 11.1 | ❌ |
 | 4 | Experiment tracking and model versioning | 0.2.4, 0.2.5, 11.2 | ❌ |
 | 4 | Model deployment and serving | 11.3 | ❌ |
