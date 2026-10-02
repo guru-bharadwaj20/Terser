@@ -115,7 +115,8 @@ def load_task_references(
         for row in read_rows(SOURCES["mbpp"], raw_dir):
             sid = f"mbpp:{int(row['task_id'])}"
             if sid in need_code:
-                tests = [str(t) for t in row.get("test_list") or []]
+                raw_tests = row.get("test_list")
+                tests = [] if raw_tests is None else [str(t) for t in raw_tests]
                 setup = str(row.get("test_setup_code") or "")
                 if tests:
                     refs[sid] = CodeTests.mbpp(tests, setup)
