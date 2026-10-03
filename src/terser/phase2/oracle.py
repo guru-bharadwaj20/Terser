@@ -234,6 +234,9 @@ def validate_candidates(df: pd.DataFrame) -> pd.DataFrame:
 def validate_token_counts(df: pd.DataFrame) -> pd.DataFrame:
     """Validate the token-count table: unique keys, integer ``tokens >= 0``, originals ``> 0``.
 
+    The token-count stage (:mod:`terser.data.token_counts`) ids originals ``<prompt_id>:original``;
+    those are normalised to ``ORIGINAL_ID``.
+
     Raises:
         Phase2InputError: On any schema problem.
     """
@@ -241,6 +244,8 @@ def validate_token_counts(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
     for col in ("prompt_id", "candidate_id", "target"):
         out[col] = out[col].astype(str)
+    stage_orig = out["candidate_id"] == out["prompt_id"] + ":" + ORIGINAL_ID
+    out.loc[stage_orig, "candidate_id"] = ORIGINAL_ID
     _require_keys(out, ("prompt_id", "candidate_id", "target"), "token_counts")
     tokens = pd.to_numeric(out["tokens"], errors="coerce")
     if tokens.isna().any() or (tokens % 1 != 0).any() or (tokens < 0).any():
@@ -290,9 +295,14 @@ def validate_labels(
 def validate_prompts(df: pd.DataFrame) -> pd.DataFrame:
     """Validate the prompts table (``prompt_id`` unique, ``category`` present; ``style`` optional).
 
+    A casualised-prompt table (``label_prompts.jsonl``) keys prompts by ``id``; that column is
+    used as ``prompt_id`` when ``prompt_id`` itself is absent.
+
     Raises:
         Phase2InputError: On missing columns or duplicate/empty keys.
     """
+    if "prompt_id" not in df.columns and "id" in df.columns:
+        df = df.rename(columns={"id": "prompt_id"})
     _require(df, PROMPT_COLUMNS, "prompts")
     cols = ["prompt_id", "category"] + (["style"] if "style" in df.columns else [])
     out = df[cols].copy()

@@ -6,6 +6,7 @@ Counts are never approximated: each target uses its real tokenizer.
 * ``qwen2.5``   -> Hugging Face ``Qwen/Qwen2.5-7B-Instruct`` tokenizer
 * ``llama-3.1`` -> official ``meta-llama/Llama-3.1-8B-Instruct`` when ``HF_TOKEN`` grants access,
   otherwise the ungated mirror ``unsloth/Meta-Llama-3.1-8B-Instruct`` (identical files)
+* ``phi3.5``    -> Hugging Face ``microsoft/Phi-3.5-mini-instruct`` tokenizer (ADR-0011)
 * ``claude``    -> Anthropic token-counting endpoint (needs ``ANTHROPIC_API_KEY``); model from
   ``TERSER_CLAUDE_MODEL`` (default ``claude-sonnet-5``)
 
@@ -51,6 +52,7 @@ TARGETS: dict[str, Target] = {
     "gpt-4o": Target("gpt-4o", "tiktoken", "o200k_base"),
     "qwen2.5": Target("qwen2.5", "hf", "Qwen/Qwen2.5-7B-Instruct"),
     "llama-3.1": Target("llama-3.1", "hf", LLAMA_MIRROR),
+    "phi3.5": Target("phi3.5", "hf", "microsoft/Phi-3.5-mini-instruct"),
     "claude": Target("claude", "anthropic", DEFAULT_CLAUDE_MODEL),
 }
 
