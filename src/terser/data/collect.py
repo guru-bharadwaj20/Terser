@@ -3,9 +3,9 @@
 First stage of ``collect -> casualise -> dedupe -> split``. Reads the normalised records of the
 downloaded sources (row 2.1.1, :func:`terser.data.sources.iter_records`), keeps records whose
 ``category_hint`` is one of the six categories, drops records outside a word-count window, runs
-the PII scrubber (row 2.1.3, :func:`terser.data.pii.scrub`) over the instruction and its input,
-and selects ``per_category`` records per category in a seeded hash order. Records that the
-scrubber drops or flags for review are excluded, so nothing unscrubbed reaches ``data/interim/``.
+the strict PII scrubber (row 2.1.3) over every emitted string, including the reference answer,
+and selects ``per_category`` records per category in a seeded hash order. All detected spans
+are replaced with typed placeholders before ``data/interim/``.
 
 Output record (``data/interim/clean.jsonl``)::
 
@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Any
 
 from terser.data.categories import Category
-from terser.data.pii import RowStatus, scrub
+from terser.data.pii import scrub_record
 from terser.data.sources import DEFAULT_RAW_DIR, SOURCES, iter_records
 
 __all__ = ["clean_text", "collect", "main", "select_balanced"]
@@ -75,8 +75,8 @@ def collect(
 ) -> tuple[list[dict[str, Any]], Counter[str]]:
     """Filter, scrub and balance normalised source records; return ``(records, counts)``.
 
-    ``counts`` tallies why records were excluded (``no_category``, ``length``, ``pii_dropped``,
-    ``pii_flagged``) and how many were kept per category (``kept:<category>``).
+    ``counts`` tallies exclusions (``no_category``, ``length``), entities across eligible rows
+    (``pii:<type>``) and selected rows per category (``kept:<category>``).
     """
     counts: Counter[str] = Counter()
     eligible: list[dict[str, Any]] = []
@@ -91,17 +91,7 @@ def collect(
         if not min_words <= words <= max_words:
             counts["length"] += 1
             continue
-        results = [scrub(instruction)] + ([scrub(input_text)] if input_text else [])
-        if any(r.status is RowStatus.DROPPED for r in results):
-            counts["pii_dropped"] += 1
-            continue
-        if any(r.status is RowStatus.FLAGGED for r in results):
-            counts["pii_flagged"] += 1
-            continue
-        instruction = str(results[0].scrubbed)
-        input_text = str(results[1].scrubbed) if input_text else None
-        redacted = any(r.status is RowStatus.REDACTED for r in results)
-        eligible.append(
+        row, results = scrub_record(
             {
                 "id": str(rec["source_id"]),
                 "source_id": str(rec["source_id"]),
@@ -109,11 +99,14 @@ def collect(
                 "category": str(cat),
                 "instruction": instruction,
                 "input": input_text,
-                "clean": clean_text(instruction, input_text),
                 "reference": rec.get("reference"),
-                "pii_status": "redacted" if redacted else "clean",
             }
         )
+        for result in results:
+            counts.update({f"pii:{kind}": count for kind, count in result.counts.items()})
+        row["clean"] = clean_text(row["instruction"], row["input"])
+        row["pii_status"] = "redacted" if any(r.counts for r in results) else "clean"
+        eligible.append(row)
     selected = select_balanced(eligible, per_category, seed)
     for rec in selected:
         counts[f"kept:{rec['category']}"] += 1
