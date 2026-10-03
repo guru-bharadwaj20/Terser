@@ -16,10 +16,6 @@
 | :---: | :--- |
 | ✅ | Done: implemented, tested, and committed |
 | ❌ | Not done: pending or in progress |
-| `CPU` | Runs on the dev laptop. Start immediately |
-| `LLM` | Needs text generation from a **local open-source model** behind an OpenAI-compatible server (`terser.llm` provider `local`). No paid APIs. Results that feed labels, metrics or reports come only from GPU-served models (vLLM on the RTX 4500 Ada); on the CPU laptop these rows may only be smoke-tested with tiny models |
-| `GPU` | Needs a **24 GB Ada-class card**: one of Vivian's RTX 4090 workers (`worker-1`, `worker-2`), or the RTX 4500 Ada once it is connected. Write the code, smoke-test on CPU with a tiny config, and queue the job |
-| `CPU→GPU` | Runs at reduced scale on CPU now, re-run at full scale once the GPU is connected |
 | 🚧 | **Hard gate**: failing it blocks every dependent phase, with no conditional pass |
 
 **Status rule:** a row flips from ❌ to ✅ only when its *Definition of Done* is satisfied **and**
@@ -38,22 +34,22 @@ checkpoint.
 
 ## Table of Contents
 
-| # | Phase | Theme | Syllabus Unit | Weeks | Compute |
+| # | Phase | Theme | Syllabus Unit | Weeks | Owner |
 | :---: | :--- | :--- | :--- | :---: | :--- |
-| 0 | Foundations and Repository Scaffolding | Infra | Unit 4 (MLOps basics) | 1 | `CPU` |
-| 1 | Problem Framing and Concept Learning | Framing | Unit 1 | 2–3 | `CPU` `LLM` |
-| 2 | Data Generation Pipeline and Judge Validation | Data | — | 3–6 | `LLM` `CPU→GPU` |
-| 3 | Metrics, Cross-Validation, Decision Trees, Logistic Regression, KNN | Modeling | Unit 1 | 6–8 | `CPU` |
-| 4 | Artificial Neural Networks and SVMs | Modeling | Unit 2 | 8–10 | `CPU` |
-| 5 | Boosting, Bayesian Learning, GMM+EM, HMM | Modeling | Unit 3 | 10–12 | `CPU` `LLM` |
-| 6 | Unsupervised Structure of Prompts | Modeling | Unit 4 | 12–13 | `CPU` |
-| 7 | GPU Onboarding (RTX 4090 workers) | Infra | — | 3–4 | `GPU` |
-| 8 | Deep Learning: CNN Span Scorer and Generative Rewriter | Deep Learning | Unit 4 | 14–17 | `GPU` `LLM` |
-| 9 | Reinforcement Learning: Tabular Q-Learning over Operators | RL | Unit 4 | 17–18 | `CPU` `LLM` |
-| 10 | Hyperparameter Optimisation | Tuning | Unit 4 | 18–20 | `CPU` `GPU` |
-| 11 | MLOps: Pipelines, Serving, CI/CD/CT, Monitoring | MLOps | Unit 4 | 20–23 | `CPU` `GPU` |
-| 12 | Final Evaluation, Ablations and Benchmark Release | Science | All | 24 | all |
-| 13 | Documentation, Report and Viva Preparation | Delivery | All | 23–24 | `CPU` |
+| 0 | Foundations and Repository Scaffolding | Infra | Unit 4 (MLOps basics) | 1 | Guru |
+| 1 | Problem Framing and Concept Learning | Framing | Unit 1 | 2–3 | Guru |
+| 2 | Data Generation Pipeline and Judge Validation | Data | — | 3–6 | Vivian |
+| 3 | Metrics, Cross-Validation, Decision Trees, Logistic Regression, KNN | Modeling | Unit 1 | 6–8 | Vivian |
+| 4 | Artificial Neural Networks and SVMs | Modeling | Unit 2 | 8–10 | Vivian |
+| 5 | Boosting, Bayesian Learning, GMM+EM, HMM | Modeling | Unit 3 | 10–12 | Vivian |
+| 6 | Unsupervised Structure of Prompts | Modeling | Unit 4 | 12–13 | Vivian |
+| 7 | GPU Onboarding (RTX 4090 workers) | Infra | — | 3–4 | Vivian |
+| 8 | Deep Learning: CNN Span Scorer and Generative Rewriter | Deep Learning | Unit 4 | 14–17 | Vivian |
+| 9 | Reinforcement Learning: Tabular Q-Learning over Operators | RL | Unit 4 | 17–18 | Vivian |
+| 10 | Hyperparameter Optimisation | Tuning | Unit 4 | 18–20 | Vivian |
+| 11 | MLOps: Pipelines, Serving, CI/CD/CT, Monitoring | MLOps | Unit 4 | 20–23 | Vivian |
+| 12 | Final Evaluation, Ablations and Benchmark Release | Science | All | 24 | Vivian |
+| 13 | Documentation, Report and Viva Preparation | Delivery | All | 23–24 | Guru |
 
 Supporting sections: [Compute Allocation](#compute-allocation-cpu-local-open-models-and-the-rtx-4500-ada) ·
 [Timeline](#timeline) · [Cross-Phase Dependency Map](#cross-phase-dependency-map) ·
@@ -175,40 +171,40 @@ and comparable, and runs on CPU today and on the RTX 4500 Ada later without code
 
 ### 0.1 Environment
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 0.1.1 | Python environment | Python ≥ 3.11 venv, `pyproject.toml` with extras `dev` (CPU) and `gpu` (torch CUDA, vllm, peft, trl, bitsandbytes) | `CPU` | `pip install -e ".[dev]"` reproduces from scratch | ✅ |
-| 0.1.2 | Core stack | numpy, pandas, scipy, scikit-learn, lightgbm, cvxopt, matplotlib | `CPU` | Import smoke test passes | ✅ |
-| 0.1.3 | Tokenizer stack | `tiktoken` (`o200k_base`), HF `tokenizers` (Qwen2.5, Llama-3.1 via ungated mirror), optional Anthropic token counting | `CPU` | All four targets count a fixture string | ✅ |
-| 0.1.4 | Determinism harness | `set_seed()` for random / numpy / torch / CUDA, `PYTHONHASHSEED` | `CPU` | Two runs of a dummy experiment give identical metrics | ✅ |
-| 0.1.5 | Device abstraction | `terser.hardware.get_device(cfg)` with `device: auto`, no hard-coded `"cuda"` | `CPU` | `hardware=rtx4500ada` on CPU fails with a clear message; `auto` falls back to CPU | ✅ |
-| 0.1.6 | Hardware profile doc | VRAM budget table above, GPU queue rules | `CPU` | `docs/hardware.md` written | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 0.1.1 | Python environment | Python ≥ 3.11 venv, `pyproject.toml` with extras `dev` (CPU) and `gpu` (torch CUDA, vllm, peft, trl, bitsandbytes) | `pip install -e ".[dev]"` reproduces from scratch | ✅ |
+| 0.1.2 | Core stack | numpy, pandas, scipy, scikit-learn, lightgbm, cvxopt, matplotlib | Import smoke test passes | ✅ |
+| 0.1.3 | Tokenizer stack | `tiktoken` (`o200k_base`), HF `tokenizers` (Qwen2.5, Llama-3.1 via ungated mirror), optional Anthropic token counting | All four targets count a fixture string | ✅ |
+| 0.1.4 | Determinism harness | `set_seed()` for random / numpy / torch / CUDA, `PYTHONHASHSEED` | Two runs of a dummy experiment give identical metrics | ✅ |
+| 0.1.5 | Device abstraction | `terser.hardware.get_device(cfg)` with `device: auto`, no hard-coded `"cuda"` | `hardware=rtx4500ada` on CPU fails with a clear message; `auto` falls back to CPU | ✅ |
+| 0.1.6 | Hardware profile doc | VRAM budget table above, GPU queue rules | `docs/hardware.md` written | ✅ |
 
 ### 0.2 Repository Layout
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 0.2.1 | Directory tree | `configs/ data/{raw,interim,processed,gold}/ docs/{decisions,checkpoints,derivations}/ notebooks/ src/terser/ gpu_queue/ tests/ reports/` | `CPU` | Tree created with `__init__.py` | ✅ |
-| 0.2.2 | Package modules | `src/terser/{tokenizers,operators,concept,data,judge,features,models/{classical,neural,ensembles,clustering,rewriter,rl},eval,hpo,serving,monitoring,pipelines}` | `CPU` | Each imports cleanly | ✅ |
-| 0.2.3 | Config system | Hydra configs incl. `configs/hardware/{cpu,rtx4500ada}.yaml`; no hard-coded paths or hyperparameters | `CPU` | Every script runs `python -m terser.x experiment=...` | ✅ |
-| 0.2.4 | Experiment tracking | Local MLflow server + Model Registry; tags `phase`, `task`, `hardware`, `data_hash`, `git_sha` | `CPU` | Dummy run visible with params, metrics, artifacts | ✅ |
-| 0.2.5 | Data versioning | DVC initialised with a local remote | `CPU` | `dvc status` clean | ✅ |
-| 0.2.6 | Task runner | `tasks.ps1` (Windows) + `Makefile` mirror: `data`, `train-classical`, `eval`, `test` | `CPU` | All targets execute | ✅ |
-| 0.2.7 | Pre-commit | black, ruff, mypy, nbstripout | `CPU` | Hook blocks a bad commit | ✅ |
-| 0.2.8 | Test scaffold | pytest with markers `gpu`, `api`, `slow`; fixtures of 20 casual prompts | `CPU` | `pytest -m "not gpu and not api"` green | ✅ |
-| 0.2.9 | CI | GitHub Actions: lint, types, CPU tests | `CPU` | CI green on a PR | ✅ |
-| 0.2.10 | GPU queue | `gpu_queue/` schema + validator + `python -m terser.gpu_queue {validate,dry-run,run}` | `CPU` | Dry-run orders two sample jobs correctly | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 0.2.1 | Directory tree | `configs/ data/{raw,interim,processed,gold}/ docs/{decisions,checkpoints,derivations}/ notebooks/ src/terser/ gpu_queue/ tests/ reports/` | Tree created with `__init__.py` | ✅ |
+| 0.2.2 | Package modules | `src/terser/{tokenizers,operators,concept,data,judge,features,models/{classical,neural,ensembles,clustering,rewriter,rl},eval,hpo,serving,monitoring,pipelines}` | Each imports cleanly | ✅ |
+| 0.2.3 | Config system | Hydra configs incl. `configs/hardware/{cpu,rtx4500ada}.yaml`; no hard-coded paths or hyperparameters | Every script runs `python -m terser.x experiment=...` | ✅ |
+| 0.2.4 | Experiment tracking | Local MLflow server + Model Registry; tags `phase`, `task`, `hardware`, `data_hash`, `git_sha` | Dummy run visible with params, metrics, artifacts | ✅ |
+| 0.2.5 | Data versioning | DVC initialised with a local remote | `dvc status` clean | ✅ |
+| 0.2.6 | Task runner | `tasks.ps1` (Windows) + `Makefile` mirror: `data`, `train-classical`, `eval`, `test` | All targets execute | ✅ |
+| 0.2.7 | Pre-commit | black, ruff, mypy, nbstripout | Hook blocks a bad commit | ✅ |
+| 0.2.8 | Test scaffold | pytest with markers `gpu`, `api`, `slow`; fixtures of 20 casual prompts | `pytest -m "not gpu and not api"` green | ✅ |
+| 0.2.9 | CI | GitHub Actions: lint, types, CPU tests | CI green on a PR | ✅ |
+| 0.2.10 | GPU queue | `gpu_queue/` schema + validator + `python -m terser.gpu_queue {validate,dry-run,run}` | Dry-run orders two sample jobs correctly | ✅ |
 
 ### 0.3 Project Governance
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 0.3.1 | Data card template | Source, licence, size, PII notes, bias notes | `CPU` | `docs/data_cards/_template.md` | ✅ |
-| 0.3.2 | Model card template | Intended use, targets supported, metrics per category, limits | `CPU` | `docs/model_cards/_template.md` | ✅ |
-| 0.3.3 | Naming convention | Runs `<phase>-<task>-<model>-<variant>-<seed>`; branches `phase<N>/<topic>` | `CPU` | `docs/conventions.md` | ✅ |
-| 0.3.4 | ML lifecycle ADR | data → label → train → evaluate → register → deploy → monitor → retrain | `CPU` | `docs/decisions/ADR-0001-ml-lifecycle.md` | ✅ |
-| 0.3.5 | Risk register | See [Risk Register](#risk-register) | `CPU` | `docs/risks.md` with mitigations | ✅ |
-| 0.3.6 | LLM budget guard | `configs/budget.yaml` per phase; client refuses calls past cap (token caps bound local compute; USD caps only for priced providers); local OpenAI-compatible provider; disk cache keyed by model+params+prompt hash | `CPU` `LLM` | Test: cap reached ⇒ call refused; cached call costs 0 | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 0.3.1 | Data card template | Source, licence, size, PII notes, bias notes | `docs/data_cards/_template.md` | ✅ |
+| 0.3.2 | Model card template | Intended use, targets supported, metrics per category, limits | `docs/model_cards/_template.md` | ✅ |
+| 0.3.3 | Naming convention | Runs `<phase>-<task>-<model>-<variant>-<seed>`; branches `phase<N>/<topic>` | `docs/conventions.md` | ✅ |
+| 0.3.4 | ML lifecycle ADR | data → label → train → evaluate → register → deploy → monitor → retrain | `docs/decisions/ADR-0001-ml-lifecycle.md` | ✅ |
+| 0.3.5 | Risk register | See [Risk Register](#risk-register) | `docs/risks.md` with mitigations | ✅ |
+| 0.3.6 | LLM budget guard | `configs/budget.yaml` per phase; client refuses calls past cap (token caps bound local compute; USD caps only for priced providers); local OpenAI-compatible provider; disk cache keyed by model+params+prompt hash | Test: cap reached ⇒ call refused; cached call costs 0 | ✅ |
 
 ### Checkpoint C0 — Foundations Ready
 
@@ -230,46 +226,46 @@ statistical model.
 
 ### 1.1 Machine Learning Framing
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 1.1.1 | Sub-problem taxonomy | Quality gate (binary classification) · span tagger (sequence labelling KEEP/DROP/REPLACE) · savings predictor (regression) · intent discovery (clustering) · rewriter (conditional generation) · rewrite policy (RL) | `CPU` | `docs/decisions/ADR-0002-problem-framing.md` reviewed | ❌ |
-| 1.1.2 | Task categories | `code`, `fact`, `reason`, `explain`, `creative`, `transform`, each with its quality measure (unit tests / EM-F1 / answer accuracy / rubric judge / pairwise judge / rubric + constraint checklist) | `CPU` | Category spec in `docs/categories.md` | ✅ |
-| 1.1.3 | Positive-class convention | Quality gate positive = **degraded**, so sensitivity = catching degradations, specificity = not rejecting good rewrites | `CPU` | Recorded in ADR-0002 and used by `terser.eval` | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 1.1.1 | Sub-problem taxonomy | Quality gate (binary classification) · span tagger (sequence labelling KEEP/DROP/REPLACE) · savings predictor (regression) · intent discovery (clustering) · rewriter (conditional generation) · rewrite policy (RL) | `docs/decisions/ADR-0002-problem-framing.md` reviewed | ❌ |
+| 1.1.2 | Task categories | `code`, `fact`, `reason`, `explain`, `creative`, `transform`, each with its quality measure (unit tests / EM-F1 / answer accuracy / rubric judge / pairwise judge / rubric + constraint checklist) | Category spec in `docs/categories.md` | ✅ |
+| 1.1.3 | Positive-class convention | Quality gate positive = **degraded**, so sensitivity = catching degradations, specificity = not rejecting good rewrites | Recorded in ADR-0002 and used by `terser.eval` | ✅ |
 
 ### 1.2 Rewrite Operators (the hypothesis-space building blocks)
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 1.2.1 | `F` drop filler | "hey so um, basically" → "" (conservative: "like" as comparison kept) | `CPU` | Unit tests incl. no-op on efficient prompts | ✅ |
-| 1.2.2 | `H` drop hedging / politeness | "could you maybe please", "thanks in advance" → "" | `CPU` | Same | ✅ |
-| 1.2.3 | `D` deduplicate restated requirements | "keep it short… keep it brief" → one sentence; never touches code blocks | `CPU` | Same | ✅ |
-| 1.2.4 | `I` imperative conversion | "I was wondering if you could explain" → "Explain" | `CPU` | Same | ✅ |
-| 1.2.5 | `L` list-ify constraints | ≥ 3 constraint sentences → bullet list | `CPU` | Same | ✅ |
-| 1.2.6 | `C` compress meta-talk | "I'm going to give you some text and I want you to" → "" | `CPU` | Same | ✅ |
-| 1.2.7 | `S` tokenizer-aware substitution | Phrase table ("in order to" → "to"); picks the alternative that is cheapest **on target T's tokenizer in context** | `CPU` | Test shows `S` choosing differently for two tokenizers on at least one fixture, or documents that it never does | ✅ |
-| 1.2.8 | Canonical application order | `C H F I D S L`; `apply_ops(text, codes, target)` is order-independent in its input | `CPU` | Property test | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 1.2.1 | `F` drop filler | "hey so um, basically" → "" (conservative: "like" as comparison kept) | Unit tests incl. no-op on efficient prompts | ✅ |
+| 1.2.2 | `H` drop hedging / politeness | "could you maybe please", "thanks in advance" → "" | Same | ✅ |
+| 1.2.3 | `D` deduplicate restated requirements | "keep it short… keep it brief" → one sentence; never touches code blocks | Same | ✅ |
+| 1.2.4 | `I` imperative conversion | "I was wondering if you could explain" → "Explain" | Same | ✅ |
+| 1.2.5 | `L` list-ify constraints | ≥ 3 constraint sentences → bullet list | Same | ✅ |
+| 1.2.6 | `C` compress meta-talk | "I'm going to give you some text and I want you to" → "" | Same | ✅ |
+| 1.2.7 | `S` tokenizer-aware substitution | Phrase table ("in order to" → "to"); picks the alternative that is cheapest **on target T's tokenizer in context** | Test shows `S` choosing differently for two tokenizers on at least one fixture, or documents that it never does | ✅ |
+| 1.2.8 | Canonical application order | `C H F I D S L`; `apply_ops(text, codes, target)` is order-independent in its input | Property test | ✅ |
 
 ### 1.3 Concept Learning
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 1.3.1 | Instance representation | Discrete attributes: `length{short,medium,long}`, `has_constraints`, `has_payload`, `tone_cue`, `filler_density{low,high}` + operator flags `op_F … op_S` | `CPU` | `terser.concept.attributes` with tests | ✅ |
-| 1.3.2 | Hypotheses | Conjunctive constraint vectors with `?` (any) and `∅` (none), e.g. `<long, ?, no, no, high, op_F=yes, …>` ⇒ "preserved" | `CPU` | Documented in `docs/derivations/concept_learning.md` | ✅ |
-| 1.3.3 | Find-S | Most specific hypothesis covering all positives | `CPU` | Reproduces Mitchell's EnjoySport result `<Sunny, Warm, ?, Strong, ?, ?>` | ✅ |
-| 1.3.4 | Candidate-Elimination | S and G boundaries; collapse detection that reports the offending example and the examples it conflicts with | `CPU` | Reproduces EnjoySport S/G; version space of size 6 | ✅ |
-| 1.3.5 | Version space enumeration | All hypotheses between S and G | `CPU` | Enumerator matches brute force on a 5-attribute toy space | ✅ |
-| 1.3.6 | Pilot labels | **150 prompts (25/category)** × operator subsets (7 singletons + `FHC`, `FHCI`, `FHCID`, `FHCIDS`, all) → target output → position-swapped pilot judge → human review of every label | `LLM` | `data/pilot/labels.jsonl` + human-reviewed CSV | ❌ |
-| 1.3.7 | Version space per category | Run Candidate-Elimination for each of the 6 categories on 1.3.6 | `CPU` | `reports/p1_version_spaces.md` with S, G, size or collapse diagnosis | ❌ |
-| 1.3.8 | Inductive bias write-up | What the conjunctive language cannot express (e.g. "drop hedging *unless* tone matters in creative prompts") and why this motivates Phases 3–5 | `CPU` | Section in `reports/p1_version_spaces.md` | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 1.3.1 | Instance representation | Discrete attributes: `length{short,medium,long}`, `has_constraints`, `has_payload`, `tone_cue`, `filler_density{low,high}` + operator flags `op_F … op_S` | `terser.concept.attributes` with tests | ✅ |
+| 1.3.2 | Hypotheses | Conjunctive constraint vectors with `?` (any) and `∅` (none), e.g. `<long, ?, no, no, high, op_F=yes, …>` ⇒ "preserved" | Documented in `docs/derivations/concept_learning.md` | ✅ |
+| 1.3.3 | Find-S | Most specific hypothesis covering all positives | Reproduces Mitchell's EnjoySport result `<Sunny, Warm, ?, Strong, ?, ?>` | ✅ |
+| 1.3.4 | Candidate-Elimination | S and G boundaries; collapse detection that reports the offending example and the examples it conflicts with | Reproduces EnjoySport S/G; version space of size 6 | ✅ |
+| 1.3.5 | Version space enumeration | All hypotheses between S and G | Enumerator matches brute force on a 5-attribute toy space | ✅ |
+| 1.3.6 | Pilot labels | **150 prompts (25/category)** × operator subsets (7 singletons + `FHC`, `FHCI`, `FHCID`, `FHCIDS`, all) → target output → position-swapped pilot judge → human review of every label | `data/pilot/labels.jsonl` + human-reviewed CSV | ❌ |
+| 1.3.7 | Version space per category | Run Candidate-Elimination for each of the 6 categories on 1.3.6 | `reports/p1_version_spaces.md` with S, G, size or collapse diagnosis | ❌ |
+| 1.3.8 | Inductive bias write-up | What the conjunctive language cannot express (e.g. "drop hedging *unless* tone matters in creative prompts") and why this motivates Phases 3–5 | Section in `reports/p1_version_spaces.md` | ✅ |
 
 ### 1.4 Pilot Tokenizer Economics
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 1.4.1 | Pilot prompt set | **500 casual prompts**: hand-written seeds plus casualisation of clean instructions (Qwen2.5 on vLLM; before the GPU, hand-written seeds only), balanced across categories | `CPU` `LLM` | `data/pilot/prompts.jsonl` + data card | ✅ |
-| 1.4.2 | Per-operator savings | Δtokens % for each operator and operator stack on gpt-4o (tokenizer only), qwen2.5, llama-3.1 | `CPU` | `reports/p1_tokenizer_study.{csv,md}` | ✅ |
-| 1.4.3 | Operator applicability | Share of prompts each operator changes, per category | `CPU` | Table in report | ✅ |
-| 1.4.4 | Cross-tokenizer agreement | Spearman ρ of per-(prompt, operator) savings for every tokenizer pair | `CPU` | Table in report | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 1.4.1 | Pilot prompt set | **500 casual prompts**: hand-written seeds plus casualisation of clean instructions (Qwen2.5 on vLLM; before the GPU, hand-written seeds only), balanced across categories | `data/pilot/prompts.jsonl` + data card | ✅ |
+| 1.4.2 | Per-operator savings | Δtokens % for each operator and operator stack on gpt-4o (tokenizer only), qwen2.5, llama-3.1 | `reports/p1_tokenizer_study.{csv,md}` | ✅ |
+| 1.4.3 | Operator applicability | Share of prompts each operator changes, per category | Table in report | ✅ |
+| 1.4.4 | Cross-tokenizer agreement | Spearman ρ of per-(prompt, operator) savings for every tokenizer pair | Table in report | ✅ |
 
 ### Checkpoint C1 — Framing and Operators
 
@@ -292,44 +288,44 @@ downstream can be measured without it.
 
 ### 2.1 Prompt Collection
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 2.1.1 | Source datasets | Permissively licensed instruction sets (e.g. Dolly, OpenAssistant), HumanEval/MBPP prompts, GSM8K problems | `CPU` | `data/SOURCES.md` + one data card per source | ✅ |
-| 2.1.2 | Licence audit | Research use and redistribution terms; unknown ⇒ non-redistributable | `CPU` | `reports/license_audit.md` | ✅ |
-| 2.1.3 | PII scrubbing | PII detector over all text before `data/interim/` | `CPU` | Scrub report; 0 detected PII in a 500-row manual sample | ❌ |
-| 2.1.4 | Casualisation | LLM rewrites clean instructions in 5 styles: rambling, hedging, texting, over-polite, repetitive; clean version kept as reference | `LLM` | ≥ 6,000 casual prompts | ✅ |
-| 2.1.5 | Deduplication | MinHash, Jaccard ≥ 0.8 removed; paraphrase groups kept whole | `CPU` | Duplicate report | ✅ |
-| 2.1.6 | **Source-grouped splits** | Train 70 / val 15 / test 15 by source prompt; test frozen end of week 4 and hash-locked | `CPU` | Automated test: 0 source prompts shared across splits | ✅ |
-| 2.1.7 | DVC stages | `collect → casualise → dedupe → split` | `CPU` | `dvc repro` rebuilds from cache | ✅ |
-| 2.1.8 | **Real-prompt slice** | ~1,000 first-turn user prompts from a licence-audited public chat log (e.g. WildChat), PII-scrubbed, category-tagged. Never casualised and never used for training: headroom (2.4.2) and final test (12.3) only. Guards against rewriters that merely undo the verbosity 2.1.4 injected | `CPU` | Data card + licence row; frozen with the test split | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 2.1.1 | Source datasets | Permissively licensed instruction sets (e.g. Dolly, OpenAssistant), HumanEval/MBPP prompts, GSM8K problems | `data/SOURCES.md` + one data card per source | ✅ |
+| 2.1.2 | Licence audit | Research use and redistribution terms; unknown ⇒ non-redistributable | `reports/license_audit.md` | ✅ |
+| 2.1.3 | PII scrubbing | PII detector over all text before `data/interim/` | Scrub report; 0 detected PII in a 500-row manual sample | ❌ |
+| 2.1.4 | Casualisation | LLM rewrites clean instructions in 5 styles: rambling, hedging, texting, over-polite, repetitive; clean version kept as reference | ≥ 6,000 casual prompts | ✅ |
+| 2.1.5 | Deduplication | MinHash, Jaccard ≥ 0.8 removed; paraphrase groups kept whole | Duplicate report | ✅ |
+| 2.1.6 | **Source-grouped splits** | Train 70 / val 15 / test 15 by source prompt; test frozen end of week 4 and hash-locked | Automated test: 0 source prompts shared across splits | ✅ |
+| 2.1.7 | DVC stages | `collect → casualise → dedupe → split` | `dvc repro` rebuilds from cache | ✅ |
+| 2.1.8 | **Real-prompt slice** | ~1,000 first-turn user prompts from a licence-audited public chat log (e.g. WildChat), PII-scrubbed, category-tagged. Never casualised and never used for training: headroom (2.4.2) and final test (12.3) only. Guards against rewriters that merely undo the verbosity 2.1.4 injected | Data card + licence row; frozen with the test split | ✅ |
 
 ### 2.2 Candidates and Target Outputs
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 2.2.1 | Candidate generation | 6 per prompt: 3 rewrites from Qwen2.5-32B-Instruct-AWQ at low/medium/high aggressiveness, 2 operator stacks, 1 LLMLingua-2 baseline | `GPU` `LLM` `CPU` | `candidates` stage output | ✅ |
-| 2.2.2 | Token counts | Every prompt and candidate on every target tokenizer | `CPU` | Counts table, 0 missing | ✅ |
-| 2.2.3 | Target outputs | Llama-3.1-8B-Instruct and Qwen2.5-7B-Instruct on vLLM bf16, temperature 0 (creative: n = 3 samples) | `GPU` `LLM` | `respond` stage output | ❌ |
-| 2.2.4 | Pipeline smoke run (pre-GPU) | `respond → judge → label` on 50 prompts with Qwen2.5-0.5B/1.5B via Ollama on CPU, through the same `terser.llm` client | `CPU` `LLM` | Stages run end to end; every output tagged `stand_in: true` and excluded from labels | ✅ |
-| 2.2.5 | Judge self-preference control | Second judge Llama-3.1-8B-Instruct on 1,000 pairs; compare verdict agreement separately for Qwen-target and Llama-target outputs | `GPU` `LLM` | Report: agreement gap between target families ≤ 5 pp, or mitigation documented | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 2.2.1 | Candidate generation | 6 per prompt: 3 rewrites from Qwen2.5-32B-Instruct-AWQ at low/medium/high aggressiveness, 2 operator stacks, 1 LLMLingua-2 baseline | `candidates` stage output | ✅ |
+| 2.2.2 | Token counts | Every prompt and candidate on every target tokenizer | Counts table, 0 missing | ✅ |
+| 2.2.3 | Target outputs | Qwen2.5-7B-Instruct and Phi-3.5-mini-instruct ([ADR-0011](docs/decisions/ADR-0011-second-family-phi35.md)) on vLLM bf16, temperature 0 (creative: n = 3 samples) | `respond` stage output | ✅ |
+| 2.2.4 | Pipeline smoke run (pre-GPU) | `respond → judge → label` on 50 prompts with Qwen2.5-0.5B/1.5B via Ollama on CPU, through the same `terser.llm` client | Stages run end to end; every output tagged `stand_in: true` and excluded from labels | ✅ |
+| 2.2.5 | Judge self-preference control | Second judge Llama-3.1-8B-Instruct on 1,000 pairs; compare verdict agreement separately for Qwen-target and Llama-target outputs | Report: agreement gap between target families ≤ 5 pp, or mitigation documented | ❌ |
 
 ### 2.3 Quality Judging
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 2.3.1 | Task metrics | `code`: unit-test pass rate · `fact`: EM / token F1 · `reason`: final-answer accuracy | `CPU` | `terser.judge.metrics` with tests | ✅ |
-| 2.3.2 | Rubrics | Per-category YAML: coverage, correctness, depth, constraint adherence, tone | `CPU` | `src/terser/judge/rubrics/*.yaml` | ✅ |
-| 2.3.3 | Pairwise judge with position swap | Qwen2.5-32B-Instruct-AWQ (fallback 14B-AWQ) on vLLM judges (original-output, rewrite-output) in both A/B orders | `GPU` `LLM` | `judge` stage output | ❌ |
-| 2.3.4 | Label definition | `preserved` iff task metric not worse **and** judge says tie-or-rewrite-better in **both** orders | `CPU` | `label` stage + tests | ✅ |
-| 2.3.5 | Human annotation | 2 annotators label **300 pairs** (50/category), blind to which is the rewrite | `CPU` | `data/gold/human_300.jsonl` + guideline doc | ❌ |
-| 2.3.6 | Agreement analysis | Human–human κ, judge–human κ per category, position-bias rate | `CPU` | `reports/p2_judge_validation.md` | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 2.3.1 | Task metrics | `code`: unit-test pass rate · `fact`: EM / token F1 · `reason`: final-answer accuracy | `terser.judge.metrics` with tests | ✅ |
+| 2.3.2 | Rubrics | Per-category YAML: coverage, correctness, depth, constraint adherence, tone | `src/terser/judge/rubrics/*.yaml` | ✅ |
+| 2.3.3 | Pairwise judge with position swap | Qwen2.5-32B-Instruct-AWQ (fallback 14B-AWQ) on vLLM judges (original-output, rewrite-output) in both A/B orders | `judge` stage output | ❌ |
+| 2.3.4 | Label definition | `preserved` iff task metric not worse **and** judge says tie-or-rewrite-better in **both** orders | `label` stage + tests | ✅ |
+| 2.3.5 | Human annotation | 2 annotators label **300 pairs** (50/category), blind to which is the rewrite | `data/gold/human_300.jsonl` + guideline doc | ❌ |
+| 2.3.6 | Agreement analysis | Human–human κ, judge–human κ per category, position-bias rate | `reports/p2_judge_validation.md` | ❌ |
 
 ### 2.4 Headroom and Cost
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 2.4.1 | Oracle rewrite | Shortest candidate still `preserved`, per prompt and target | `CPU` | `oracle` table | ❌ |
-| 2.4.2 | Headroom report | Oracle savings per target × category; degraded share among candidates | `CPU` | `reports/p2_headroom.md` | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 2.4.1 | Oracle rewrite | Shortest candidate still `preserved`, per prompt and target | `oracle` table | ❌ |
+| 2.4.2 | Headroom report | Oracle savings per target × category; degraded share among candidates | `reports/p2_headroom.md` | ❌ |
 
 ### Checkpoint C2 — Dataset, Judge, Headroom
 
@@ -356,64 +352,64 @@ bias–variance and overfitting.
 
 ### 3.1 Features
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 3.1.1 | Alignment labels | Token-level KEEP/DROP/REPLACE from diff-aligning each prompt with its oracle rewrite | `CPU` | `features/alignment.py` + tests on 20 hand-aligned pairs | ✅ |
-| 3.1.2 | Span features | Token cost on T, self-information under GPT-2 small, stopword ratio, relative position, POS, filler-lexicon hit, negation / number / constraint keyword flags | `CPU` | `features/span.py`; feature table in DVC | ❌ |
-| 3.1.3 | Pair features | Token ratio, max self-information removed, # negations / numbers / constraint keywords removed, embedding cosine, category one-hot | `CPU` | `features/pair.py`; feature table in DVC | ❌ |
-| 3.1.4 | Continuous-value handling | Standardisation for LR/KNN; C4.5 threshold search for trees; equal-frequency bins for ID3 | `CPU` | Documented per model | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 3.1.1 | Alignment labels | Token-level KEEP/DROP/REPLACE from diff-aligning each prompt with its oracle rewrite | `features/alignment.py` + tests on 20 hand-aligned pairs | ✅ |
+| 3.1.2 | Span features | Token cost on T, self-information under GPT-2 small, stopword ratio, relative position, POS, filler-lexicon hit, negation / number / constraint keyword flags | `features/span.py`; feature table in DVC | ❌ |
+| 3.1.3 | Pair features | Token ratio, max self-information removed, # negations / numbers / constraint keywords removed, embedding cosine, category one-hot | `features/pair.py`; feature table in DVC | ❌ |
+| 3.1.4 | Continuous-value handling | Standardisation for LR/KNN; C4.5 threshold search for trees; equal-frequency bins for ID3 | Documented per model | ✅ |
 
 ### 3.2 Evaluation Backbone
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 3.2.1 | Metric suite | Accuracy, Precision, Recall, **Sensitivity**, **Specificity**, F1, confusion matrix, per-category breakdown | `CPU` | `eval/metrics.py`, matches scikit-learn to 1e-9 | ✅ |
-| 3.2.2 | ROC / AUC | ROC curves, AUC; PR curves and AP (degraded is the minority) | `CPU` | `eval/curves.py` + figure template | ✅ |
-| 3.2.3 | Threshold rule | Maximise specificity subject to **sensitivity ≥ 0.95** | `CPU` | `eval/threshold.py` + test | ✅ |
-| 3.2.4 | **Grouped stratified k-fold** | `StratifiedGroupKFold(k=5)`, group = source prompt, stratify = category × label | `CPU` | `eval/cv.py`; out-of-fold predictions as the shared unit | ✅ |
-| 3.2.5 | Leakage demonstration | Naive KFold vs grouped CV on the same model | `CPU` | Gap recorded in `reports/p3_cv_leakage.md` | ❌ |
-| 3.2.6 | Nested CV | Outer 5 / inner 3 for unbiased estimates while tuning | `CPU` | Used by 3.6 | ✅ |
-| 3.2.7 | Leave-one-category-out | Generalisation to unseen task types | `CPU` | Per-category table | ❌ |
-| 3.2.8 | Statistical comparison | McNemar on shared out-of-fold predictions; bootstrap CIs | `CPU` | `eval/significance.py` | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 3.2.1 | Metric suite | Accuracy, Precision, Recall, **Sensitivity**, **Specificity**, F1, confusion matrix, per-category breakdown | `eval/metrics.py`, matches scikit-learn to 1e-9 | ✅ |
+| 3.2.2 | ROC / AUC | ROC curves, AUC; PR curves and AP (degraded is the minority) | `eval/curves.py` + figure template | ✅ |
+| 3.2.3 | Threshold rule | Maximise specificity subject to **sensitivity ≥ 0.95** | `eval/threshold.py` + test | ✅ |
+| 3.2.4 | **Grouped stratified k-fold** | `StratifiedGroupKFold(k=5)`, group = source prompt, stratify = category × label | `eval/cv.py`; out-of-fold predictions as the shared unit | ✅ |
+| 3.2.5 | Leakage demonstration | Naive KFold vs grouped CV on the same model | Gap recorded in `reports/p3_cv_leakage.md` | ❌ |
+| 3.2.6 | Nested CV | Outer 5 / inner 3 for unbiased estimates while tuning | Used by 3.6 | ✅ |
+| 3.2.7 | Leave-one-category-out | Generalisation to unseen task types | Per-category table | ❌ |
+| 3.2.8 | Statistical comparison | McNemar on shared out-of-fold predictions; bootstrap CIs | `eval/significance.py` | ✅ |
 
 ### 3.3 Decision Trees
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 3.3.1 | **ID3 from scratch** | Entropy, information gain, recursive split on discretised span features | `CPU` | Matches a hand-computed toy example; within 2 F1 of scikit-learn `criterion="entropy"` when both trees are grown to full depth (equal-depth multiway trees have more capacity than binary ones) | ✅ |
-| 3.3.2 | Continuous values | C4.5-style threshold search on midpoints between class changes | `CPU` | Test on a 1-D separable fixture | ✅ |
-| 3.3.3 | Overfitting study | Train vs val F1 for depth 1–30 and min-samples-leaf sweep | `CPU` | `reports/figures/p3_tree_overfit.png` | ❌ |
-| 3.3.4 | Overfitting solutions | Pre-pruning, **reduced-error pruning**, **rule post-pruning**, cost-complexity pruning | `CPU` | Comparison table: leaves, val F1, train–val gap | ❌ |
-| 3.3.5 | Decision boundary (x–y) | Axis-aligned regions on `self_information` vs `token_cost` | `CPU` | `reports/figures/p3_tree_boundary.png` | ❌ |
-| 3.3.6 | Hypothesis search and inductive bias | Greedy information-gain search (preference bias for short trees) vs Phase 1 conjunctive restriction bias | `CPU` | `reports/p3_tree_bias.md` | ❌ |
-| 3.3.7 | Rule export | Pruned tree as human-readable rules ("drop is unsafe when a negation is removed and…") | `CPU` | `reports/p3_tree_rules.md` | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 3.3.1 | **ID3 from scratch** | Entropy, information gain, recursive split on discretised span features | Matches a hand-computed toy example; within 2 F1 of scikit-learn `criterion="entropy"` when both trees are grown to full depth (equal-depth multiway trees have more capacity than binary ones) | ✅ |
+| 3.3.2 | Continuous values | C4.5-style threshold search on midpoints between class changes | Test on a 1-D separable fixture | ✅ |
+| 3.3.3 | Overfitting study | Train vs val F1 for depth 1–30 and min-samples-leaf sweep | `reports/figures/p3_tree_overfit.png` | ❌ |
+| 3.3.4 | Overfitting solutions | Pre-pruning, **reduced-error pruning**, **rule post-pruning**, cost-complexity pruning | Comparison table: leaves, val F1, train–val gap | ❌ |
+| 3.3.5 | Decision boundary (x–y) | Axis-aligned regions on `self_information` vs `token_cost` | `reports/figures/p3_tree_boundary.png` | ❌ |
+| 3.3.6 | Hypothesis search and inductive bias | Greedy information-gain search (preference bias for short trees) vs Phase 1 conjunctive restriction bias | `reports/p3_tree_bias.md` | ❌ |
+| 3.3.7 | Rule export | Pruned tree as human-readable rules ("drop is unsafe when a negation is removed and…") | `reports/p3_tree_rules.md` | ❌ |
 
 ### 3.4 Logistic Regression
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 3.4.1 | From-scratch batch GD | Sigmoid, log-loss, gradient | `CPU` | Coefficients within 1e-3 of scikit-learn | ✅ |
-| 3.4.2 | Regularisation | L1 / L2 / elastic-net, C sweep | `CPU` | Grid results table | ❌ |
-| 3.4.3 | Calibration | Reliability diagram, Brier score, ECE | `CPU` | `reports/figures/p3_lr_calibration.png` | ❌ |
-| 3.4.5 | Coefficient interpretation | Odds ratios on standardised features | `CPU` | `reports/p3_lr_coefficients.md` | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 3.4.1 | From-scratch batch GD | Sigmoid, log-loss, gradient | Coefficients within 1e-3 of scikit-learn | ✅ |
+| 3.4.2 | Regularisation | L1 / L2 / elastic-net, C sweep | Grid results table | ❌ |
+| 3.4.3 | Calibration | Reliability diagram, Brier score, ECE | `reports/figures/p3_lr_calibration.png` | ❌ |
+| 3.4.5 | Coefficient interpretation | Odds ratios on standardised features | `reports/p3_lr_coefficients.md` | ❌ |
 
 ### 3.5 K-Nearest Neighbours
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 3.5.1 | KNN classification | Quality gate; k ∈ {1,3,5,7,11,15,25}; Euclidean / Manhattan / cosine; uniform / distance weighting | `CPU` | Grid table under 3.2.4 protocol | ❌ |
-| 3.5.2 | **KNN regression** | Predict a prompt's achievable savings % from its k nearest training prompts | `CPU` | MAE, R² table | ❌ |
-| 3.5.3 | KNN (and LR) decision boundary | k = 1, 5, 25 on 2-D PCA refit inside each fold; LR's linear boundary on the same plane as 3.3.5 | `CPU` | `reports/figures/p3_knn_boundaries.png` | ❌ |
-| 3.5.4 | "Skip short prompts" rule | Use 3.5.2 to skip rewriting when predicted savings < overhead | `CPU` | Rule + expected net-savings curve | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 3.5.1 | KNN classification | Quality gate; k ∈ {1,3,5,7,11,15,25}; Euclidean / Manhattan / cosine; uniform / distance weighting | Grid table under 3.2.4 protocol | ❌ |
+| 3.5.2 | **KNN regression** | Predict a prompt's achievable savings % from its k nearest training prompts | MAE, R² table | ❌ |
+| 3.5.3 | KNN (and LR) decision boundary | k = 1, 5, 25 on 2-D PCA refit inside each fold; LR's linear boundary on the same plane as 3.3.5 | `reports/figures/p3_knn_boundaries.png` | ❌ |
+| 3.5.4 | "Skip short prompts" rule | Use 3.5.2 to skip rewriting when predicted savings < overhead | Rule + expected net-savings curve | ❌ |
 
 ### 3.6 Bias–Variance and Grid Search
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 3.6.1 | **Bias–variance decomposition and trade-off** | 200 bootstrap resamples; squared loss (KNN regression), 0-1 loss decomposition (classifiers); tree depth ∈ {2,4,8,16,∞}, k ∈ {1,3,5,15,51}; identify and explain the minimum-error point | `CPU` | `reports/figures/p3_bias_variance.png` + `reports/p3_bias_variance.md` | ❌ |
-| 3.6.3 | Learning curves | Train size 10% → 100% for all three models | `CPU` | Figure + diagnosis (high bias vs high variance) | ❌ |
-| 3.6.4 | Grid search | Tree depth × min-samples; KNN k × metric × weighting; LR penalty × C, inside nested CV | `CPU` | Best params recorded in `configs/` | ❌ |
-| 3.6.5 | Baselines | Majority class, stratified random, "always preserved" | `CPU` | Baseline row in every table | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 3.6.1 | **Bias–variance decomposition and trade-off** | 200 bootstrap resamples; squared loss (KNN regression), 0-1 loss decomposition (classifiers); tree depth ∈ {2,4,8,16,∞}, k ∈ {1,3,5,15,51}; identify and explain the minimum-error point | `reports/figures/p3_bias_variance.png` + `reports/p3_bias_variance.md` | ❌ |
+| 3.6.3 | Learning curves | Train size 10% → 100% for all three models | Figure + diagnosis (high bias vs high variance) | ❌ |
+| 3.6.4 | Grid search | Tree depth × min-samples; KNN k × metric × weighting; LR penalty × C, inside nested CV | Best params recorded in `configs/` | ❌ |
+| 3.6.5 | Baselines | Majority class, stratified random, "always preserved" | Baseline row in every table | ❌ |
 
 ### Checkpoint C3 — Evaluation Backbone and Classical Baselines
 
@@ -437,39 +433,39 @@ implementations verified against libraries, plus controlled activation and optim
 
 ### 4.1 Perceptron and Multi-Layer Networks
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 4.1.1 | Perceptron from scratch | Step activation; filler vs non-filler spans | `CPU` | Converges on the linearly separable subset; fails to converge on the full set (logged) | ❌ |
-| 4.1.2 | Pair embedding input | `[e_o, e_r, \|e_o − e_r\|, e_o ⊙ e_r]` from 384-d bge-small ⇒ **1536-d** | `CPU` | Cached `data/features/pair_emb.npy` + id index | ❌ |
-| 4.1.3 | NumPy MLP with backprop | Forward, backward, update; no autograd | `CPU` | Gradient check vs finite differences, relative error **< 1e-6**; matches `torch.autograd` | ✅ |
-| 4.1.4 | PyTorch MLP quality gate | 1536 → 256 → 64 → 1 | `CPU` | Scored under the 3.2.4 protocol | ❌ |
-| 4.1.5 | Parameter calculation | 1536×256+256 = 393,472 · 256×64+64 = 16,448 · 64×1+1 = 65 · **total 409,985** | `CPU` | Equals `sum(p.numel())` in a test | ✅ |
-| 4.1.7 | Backprop derivation | Chain rule through sigmoid output + BCE; hidden-layer recursion | `CPU` | `docs/derivations/backprop.md` | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 4.1.1 | Perceptron from scratch | Step activation; filler vs non-filler spans | Converges on the linearly separable subset; fails to converge on the full set (logged) | ❌ |
+| 4.1.2 | Pair embedding input | `[e_o, e_r, \|e_o − e_r\|, e_o ⊙ e_r]` from 384-d bge-small ⇒ **1536-d** | Cached `data/features/pair_emb.npy` + id index | ❌ |
+| 4.1.3 | NumPy MLP with backprop | Forward, backward, update; no autograd | Gradient check vs finite differences, relative error **< 1e-6**; matches `torch.autograd` | ✅ |
+| 4.1.4 | PyTorch MLP quality gate | 1536 → 256 → 64 → 1 | Scored under the 3.2.4 protocol | ❌ |
+| 4.1.5 | Parameter calculation | 1536×256+256 = 393,472 · 256×64+64 = 16,448 · 64×1+1 = 65 · **total 409,985** | Equals `sum(p.numel())` in a test | ✅ |
+| 4.1.7 | Backprop derivation | Chain rule through sigmoid output + BCE; hidden-layer recursion | `docs/derivations/backprop.md` | ✅ |
 
 ### 4.2 Activation Functions
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 4.2.1 | Activation study | Step (straight-through estimator), sigmoid (+ saturated-unit fraction), tanh, ReLU (+ dead-unit fraction): val AUC, epochs to plateau, per-layer gradient norm; 5 seeds each; mechanism tied to observed behaviour | `CPU` | `reports/p4_activations.md` | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 4.2.1 | Activation study | Step (straight-through estimator), sigmoid (+ saturated-unit fraction), tanh, ReLU (+ dead-unit fraction): val AUC, epochs to plateau, per-layer gradient norm; 5 seeds each; mechanism tied to observed behaviour | `reports/p4_activations.md` | ❌ |
 
 ### 4.3 Optimizers
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 4.3.1 | Optimizer study | Full-batch GD, SGD (mini-batch 64), SGD + Momentum (β ∈ {0.9, 0.99}), Adagrad, Adam (β₁ 0.9, β₂ 0.999), each over a small lr grid, at **equal gradient-evaluation budget**, 5 seeds; convergence speed vs generalisation tied to each update rule | `CPU` | `reports/figures/p4_optimizers.png` + `reports/p4_optimizers.md` | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 4.3.1 | Optimizer study | Full-batch GD, SGD (mini-batch 64), SGD + Momentum (β ∈ {0.9, 0.99}), Adagrad, Adam (β₁ 0.9, β₂ 0.999), each over a small lr grid, at **equal gradient-evaluation budget**, 5 seeds; convergence speed vs generalisation tied to each update rule | `reports/figures/p4_optimizers.png` + `reports/p4_optimizers.md` | ❌ |
 
 ### 4.4 Support Vector Machines
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 4.4.1 | Margin and primal | Margin = 2/‖w‖; hard- and soft-margin primal | `CPU` | `docs/derivations/svm.md` §1–2 | ✅ |
-| 4.4.2 | Lagrangian dual | Lagrangian, KKT conditions, dual problem, recovering w and b from support vectors | `CPU` | `docs/derivations/svm.md` §3–4 | ✅ |
-| 4.4.3 | Linear kernel derivation | K(x, z) = xᵀz substituted into the dual | `CPU` | `docs/derivations/svm.md` §5 | ✅ |
-| 4.4.4 | **Dual solver from scratch** | QP via `cvxopt` on span features | `CPU` | Same support-vector set as scikit-learn; ‖w − w_sk‖/‖w_sk‖ **< 1e-3** | ✅ |
-| 4.4.5 | Hard margin | Linearly separable filler subset | `CPU` | Support vectors plotted | ❌ |
-| 4.4.6 | Soft margin | C ∈ {0.01, 0.1, 1, 10, 100}: margin width, # support vectors, val metrics | `CPU` | Table + figure | ❌ |
-| 4.4.7 | Polynomial kernel | Degree 2, 3 × coef0 × C vs linear | `CPU` | Table: AUC, time, # SVs | ❌ |
-| 4.4.8 | Decision surfaces | Linear vs polynomial on the Phase 3 2-D plane | `CPU` | `reports/figures/p4_svm_surfaces.png` | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 4.4.1 | Margin and primal | Margin = 2/‖w‖; hard- and soft-margin primal | `docs/derivations/svm.md` §1–2 | ✅ |
+| 4.4.2 | Lagrangian dual | Lagrangian, KKT conditions, dual problem, recovering w and b from support vectors | `docs/derivations/svm.md` §3–4 | ✅ |
+| 4.4.3 | Linear kernel derivation | K(x, z) = xᵀz substituted into the dual | `docs/derivations/svm.md` §5 | ✅ |
+| 4.4.4 | **Dual solver from scratch** | QP via `cvxopt` on span features | Same support-vector set as scikit-learn; ‖w − w_sk‖/‖w_sk‖ **< 1e-3** | ✅ |
+| 4.4.5 | Hard margin | Linearly separable filler subset | Support vectors plotted | ❌ |
+| 4.4.6 | Soft margin | C ∈ {0.01, 0.1, 1, 10, 100}: margin width, # support vectors, val metrics | Table + figure | ❌ |
+| 4.4.7 | Polynomial kernel | Degree 2, 3 × coef0 × C vs linear | Table: AUC, time, # SVs | ❌ |
+| 4.4.8 | Decision surfaces | Linear vs polynomial on the Phase 3 2-D plane | `reports/figures/p4_svm_surfaces.png` | ❌ |
 
 ### Checkpoint C4 — Neural and Margin Models
 
@@ -491,34 +487,34 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 
 ### 5.1 Ensembles
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 5.1.1 | Combining weak learners | AdaBoost with depth-1 stumps from scratch; which pairs get the largest weights | `CPU` | Matches scikit-learn within 0.01 AUC; training error vs rounds plot; hard-example note | ❌ |
-| 5.1.3 | Random Forest | n_estimators × max_features × bootstrap | `CPU` | Table; OOB vs CV comparison | ❌ |
-| 5.1.5 | Gradient Boosting | LightGBM: lr × n_estimators × max_depth with early stopping on grouped validation | `CPU` | Table | ❌ |
-| 5.1.6 | Feature importance | Permutation importance + SHAP per task category: what makes a rewrite unsafe | `CPU` | Top-10 features + `reports/figures/p5_shap.png` | ❌ |
-| 5.1.7 | Feature feedback | ≥ 1 importance finding turned into a new feature or operator rule | `CPU` | PR linked | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 5.1.1 | Combining weak learners | AdaBoost with depth-1 stumps from scratch; which pairs get the largest weights | Matches scikit-learn within 0.01 AUC; training error vs rounds plot; hard-example note | ❌ |
+| 5.1.3 | Random Forest | n_estimators × max_features × bootstrap | Table; OOB vs CV comparison | ❌ |
+| 5.1.5 | Gradient Boosting | LightGBM: lr × n_estimators × max_depth with early stopping on grouped validation | Table | ❌ |
+| 5.1.6 | Feature importance | Permutation importance + SHAP per task category: what makes a rewrite unsafe | Top-10 features + `reports/figures/p5_shap.png` | ❌ |
+| 5.1.7 | Feature feedback | ≥ 1 importance finding turned into a new feature or operator rule | PR linked | ❌ |
 
 ### 5.2 Bayesian Learning
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 5.2.1 | Bayes theorem | P(filler \| phrase, context) worked from corpus counts | `CPU` | `docs/derivations/bayes.md` | ✅ |
-| 5.2.3 | Naive Bayes filler detector | Multinomial NB on 1–3-grams: MLE parameters with Laplace smoothing (and why smoothing is MAP); vs LR on the same features | `CPU` | PR curve + table | ❌ |
-| 5.2.4 | Bayes optimal classifier | Phase 1 hypotheses as H; P(h \| D) from validation likelihood; posterior-weighted vote vs MAP hypothesis | `CPU` | `reports/p5_bayes_optimal.md` | ❌ |
-| 5.2.5 | EM from scratch | E-step responsibilities, M-step means/variances/weights; log-likelihood monotone | `CPU` | Test asserts non-decreasing log-likelihood; matches scikit-learn GMM | ✅ |
-| 5.2.6 | GMM on judge score deltas | 2-component GMM on (rewrite score − original score): unsupervised preserved/degraded split vs threshold labels | `CPU` | ARI reported; judge-threshold review issue opened if low | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 5.2.1 | Bayes theorem | P(filler \| phrase, context) worked from corpus counts | `docs/derivations/bayes.md` | ✅ |
+| 5.2.3 | Naive Bayes filler detector | Multinomial NB on 1–3-grams: MLE parameters with Laplace smoothing (and why smoothing is MAP); vs LR on the same features | PR curve + table | ❌ |
+| 5.2.4 | Bayes optimal classifier | Phase 1 hypotheses as H; P(h \| D) from validation likelihood; posterior-weighted vote vs MAP hypothesis | `reports/p5_bayes_optimal.md` | ❌ |
+| 5.2.5 | EM from scratch | E-step responsibilities, M-step means/variances/weights; log-likelihood monotone | Test asserts non-decreasing log-likelihood; matches scikit-learn GMM | ✅ |
+| 5.2.6 | GMM on judge score deltas | 2-component GMM on (rewrite score − original score): unsupervised preserved/degraded split vs threshold labels | ARI reported; judge-threshold review issue opened if low | ❌ |
 
 ### 5.3 Hidden Markov Model Span Tagger
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 5.3.1 | Model definition | Hidden states {KEEP, DROP, REPLACE}; observations = discretised token class (filler-lexicon id × POS × cost bucket) | `CPU` | `models/classical/hmm.py` | ✅ |
-| 5.3.2 | Supervised MLE | Initial, transition, emission matrices from alignment labels with smoothing | `CPU` | Rows sum to 1 (test) | ✅ |
-| 5.3.3 | Forward algorithm | Sequence likelihood in log space | `CPU` | Matches brute-force enumeration on length-5 sequences | ✅ |
-| 5.3.4 | Viterbi decoding | Most likely tag sequence → compressed prompt | `CPU` | Matches brute force on length-5 sequences | ✅ |
-| 5.3.5 | Baum-Welch | EM on unlabelled casual prompts from supervised initialisation | `CPU` | F1 before vs after | ❌ |
-| 5.3.6 | End-to-end HMM compressor | Viterbi tags → rewrite → Phase 2 judge on **500 val prompts** | `LLM` | `reports/p5_hmm_compressor.md` | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 5.3.1 | Model definition | Hidden states {KEEP, DROP, REPLACE}; observations = discretised token class (filler-lexicon id × POS × cost bucket) | `models/classical/hmm.py` | ✅ |
+| 5.3.2 | Supervised MLE | Initial, transition, emission matrices from alignment labels with smoothing | Rows sum to 1 (test) | ✅ |
+| 5.3.3 | Forward algorithm | Sequence likelihood in log space | Matches brute-force enumeration on length-5 sequences | ✅ |
+| 5.3.4 | Viterbi decoding | Most likely tag sequence → compressed prompt | Matches brute force on length-5 sequences | ✅ |
+| 5.3.5 | Baum-Welch | EM on unlabelled casual prompts from supervised initialisation | F1 before vs after | ❌ |
+| 5.3.6 | End-to-end HMM compressor | Viterbi tags → rewrite → Phase 2 judge on **500 val prompts** | `reports/p5_hmm_compressor.md` | ❌ |
 
 ### Checkpoint C5 — Ensembles, Bayes, HMM
 
@@ -539,17 +535,17 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 dangerous, and use them to stratify training and evaluation.
 **Weeks:** 12–13 · **Depends on:** 2, 5 · **Unlocks:** 8, 11, 12
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 6.1 | Prompt embeddings | bge-small 384-d for all train prompts | `CPU` | Cached matrix + id index; raises on missing id | ❌ |
-| 6.2 | K-means | k-means++, k ∈ 4..30; elbow + silhouette | `CPU` | `reports/figures/p6_kmeans_k.png` | ❌ |
-| 6.3 | Bisecting K-means | Same k range; SSE and cluster-size balance vs K-means | `CPU` | Comparison table | ❌ |
-| 6.4 | Hierarchical vs non-hierarchical | Written comparison of assumptions, cost, output | `CPU` | `reports/p6_clustering.md` §1 | ✅ |
-| 6.5 | Agglomerative clustering | Ward / average / complete linkage on a 2,000-prompt sample | `CPU` | Dendrograms | ❌ |
-| 6.6 | Divisive clustering | Top-down recursive bisection; tree compared with 6.5 | `CPU` | Figure + cophenetic correlation | ❌ |
-| 6.7 | **K-means as a special case of EM** | GMM-EM with shared spherical covariance σ²I; anneal σ → 0; responsibilities become hard | `CPU` | `docs/derivations/kmeans_em.md` + assignment agreement vs K-means | ✅ |
-| 6.8 | Clusters vs categories | ARI, NMI, contingency table against the 6 hand-defined categories | `CPU` | Table | ❌ |
-| 6.9 | Per-cluster risk | Oracle savings and degradation rate per cluster; high-risk clusters become eval slices in 12.3 | `CPU` | `reports/p6_cluster_risk.md` | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 6.1 | Prompt embeddings | bge-small 384-d for all train prompts | Cached matrix + id index; raises on missing id | ❌ |
+| 6.2 | K-means | k-means++, k ∈ 4..30; elbow + silhouette | `reports/figures/p6_kmeans_k.png` | ❌ |
+| 6.3 | Bisecting K-means | Same k range; SSE and cluster-size balance vs K-means | Comparison table | ❌ |
+| 6.4 | Hierarchical vs non-hierarchical | Written comparison of assumptions, cost, output | `reports/p6_clustering.md` §1 | ✅ |
+| 6.5 | Agglomerative clustering | Ward / average / complete linkage on a 2,000-prompt sample | Dendrograms | ❌ |
+| 6.6 | Divisive clustering | Top-down recursive bisection; tree compared with 6.5 | Figure + cophenetic correlation | ❌ |
+| 6.7 | **K-means as a special case of EM** | GMM-EM with shared spherical covariance σ²I; anneal σ → 0; responsibilities become hard | `docs/derivations/kmeans_em.md` + assignment agreement vs K-means | ✅ |
+| 6.8 | Clusters vs categories | ARI, NMI, contingency table against the 6 hand-defined categories | Table | ❌ |
+| 6.9 | Per-cluster risk | Oracle savings and degradation rate per cluster; high-risk clusters become eval slices in 12.3 | `reports/p6_cluster_risk.md` | ❌ |
 
 ### Checkpoint C6 — Structure Discovered and Used
 
@@ -567,16 +563,16 @@ dangerous, and use them to stratify training and evaluation.
 before any queued GPU job runs. The RTX 4500 Ada, if connected later, repeats 7.2–7.4 only.
 **Weeks:** 3–4 · **Depends on:** 0 · **Unlocks:** all LLM rows of 1–2, 8, 10 (rewriter), 11 (quality path)
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 7.1 | Remote access | SSH to `worker-1` / `worker-2`; repo cloned; `.env` provisioned out-of-band | `GPU` | Contributor can run `pytest` remotely | ✅ |
-| 7.2 | Driver + CUDA | Driver and CUDA runtime compatible with the pinned PyTorch build on each worker | `GPU` | `nvidia-smi` shows a 24 GB card; versions recorded in `docs/hardware.md` | ✅ |
-| 7.3 | GPU environment | Python ≥ 3.11 venv; `pip install -e ".[dev,gpu]"`; `dvc pull`; MLflow pointed at shared server | `GPU` | Import test for torch/vllm/peft/trl/bitsandbytes | ✅ |
-| 7.4 | Verification script | `python -m terser.hardware.verify`: device name, memory, capability (8, 9), bf16 matmul benchmark + parity with fp32 | `GPU` | Report in `docs/checkpoints/C7/hardware.md` | ✅ |
-| 7.5 | vLLM smoke test | Qwen2.5-0.5B-Instruct generates 32 tokens | `GPU` | Logged | ✅ |
-| 7.6 | Serving measurement | Llama-3.1-8B-Instruct bf16 and Qwen2.5-32B-AWQ, `gpu_memory_utilization=0.90`, max len 4096: peak VRAM, tokens/s at batch 1 and 16 | `GPU` | VRAM table updated | ✅ |
-| 7.7 | Training measurement | Qwen2.5-0.5B full FT and 1.5B LoRA, seq 1024, micro-batch 4, grad checkpointing: peak VRAM, step time | `GPU` | VRAM table updated | ✅ |
-| 7.9 | GPU test suite | All `@pytest.mark.gpu` tests | `GPU` | Green | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 7.1 | Remote access | SSH to `worker-1` / `worker-2`; repo cloned; `.env` provisioned out-of-band | Contributor can run `pytest` remotely | ✅ |
+| 7.2 | Driver + CUDA | Driver and CUDA runtime compatible with the pinned PyTorch build on each worker | `nvidia-smi` shows a 24 GB card; versions recorded in `docs/hardware.md` | ✅ |
+| 7.3 | GPU environment | Python ≥ 3.11 venv; `pip install -e ".[dev,gpu]"`; `dvc pull`; MLflow pointed at shared server | Import test for torch/vllm/peft/trl/bitsandbytes | ✅ |
+| 7.4 | Verification script | `python -m terser.hardware.verify`: device name, memory, capability (8, 9), bf16 matmul benchmark + parity with fp32 | Report in `docs/checkpoints/C7/hardware.md` | ✅ |
+| 7.5 | vLLM smoke test | Qwen2.5-0.5B-Instruct generates 32 tokens | Logged | ✅ |
+| 7.6 | Serving measurement | Llama-3.1-8B-Instruct bf16 and Qwen2.5-32B-AWQ, `gpu_memory_utilization=0.90`, max len 4096: peak VRAM, tokens/s at batch 1 and 16 | VRAM table updated | ✅ |
+| 7.7 | Training measurement | Qwen2.5-0.5B full FT and 1.5B LoRA, seq 1024, micro-batch 4, grad checkpointing: peak VRAM, step time | VRAM table updated | ✅ |
+| 7.9 | GPU test suite | All `@pytest.mark.gpu` tests | Green | ✅ |
 
 ### Checkpoint C7 — GPU Ready 🚧
 
@@ -596,32 +592,32 @@ together with the quality gate and fallback, reach the main quality/savings gate
 
 ### 8.1 Deep Learning Foundations
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 8.1.1 | Introduction write-up | Representation learning; why learned features beat Phase 3 hand features for span importance; decoder-only transformer overview | `CPU` | `docs/derivations/deep_learning_intro.md` | ✅ |
-| 8.1.2 | Convolution operation | Manual 1-D convolution (kernel, stride, padding, output length) | `CPU` | Equals `nn.Conv1d` on fixture input (test) | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 8.1.1 | Introduction write-up | Representation learning; why learned features beat Phase 3 hand features for span importance; decoder-only transformer overview | `docs/derivations/deep_learning_intro.md` | ✅ |
+| 8.1.2 | Convolution operation | Manual 1-D convolution (kernel, stride, padding, output length) | Equals `nn.Conv1d` on fixture input (test) | ✅ |
 
 ### 8.2 TextCNN Span Scorer
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 8.2.1 | Architecture | Token embeddings (d = 384) → parallel Conv1d k = 3 and k = 5, 128 filters each, 'same' padding → per-token KEEP head + pooled prompt-compressibility head | `CPU→GPU` | `models/neural/textcnn.py` | ✅ |
-| 8.2.2 | **Parameter calculation** | Conv k=3: 384×3×128+128 = 147,584 · Conv k=5: 384×5×128+128 = 245,888 · token head 256+1 = 257 · prompt head 256+1 = 257 · **total 393,986** | `CPU` | Equals `sum(p.numel())` in a test; derivation in docs | ✅ |
-| 8.2.3 | **Max vs average pooling** | Prompt head on global max, global avg, and concatenated (head becomes 512+1 = 513 params); 3 seeds each | `CPU→GPU` | Table + interpretation ("any droppable region" vs "how much is droppable") | ❌ |
-| 8.2.4 | Comparison | TextCNN vs HMM vs GBM span taggers on identical folds | `CPU→GPU` | McNemar + table | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 8.2.1 | Architecture | Token embeddings (d = 384) → parallel Conv1d k = 3 and k = 5, 128 filters each, 'same' padding → per-token KEEP head + pooled prompt-compressibility head | `models/neural/textcnn.py` | ✅ |
+| 8.2.2 | **Parameter calculation** | Conv k=3: 384×3×128+128 = 147,584 · Conv k=5: 384×5×128+128 = 245,888 · token head 256+1 = 257 · prompt head 256+1 = 257 · **total 393,986** | Equals `sum(p.numel())` in a test; derivation in docs | ✅ |
+| 8.2.3 | **Max vs average pooling** | Prompt head on global max, global avg, and concatenated (head becomes 512+1 = 513 params); 3 seeds each | Table + interpretation ("any droppable region" vs "how much is droppable") | ❌ |
+| 8.2.4 | Comparison | TextCNN vs HMM vs GBM span taggers on identical folds | McNemar + table | ❌ |
 
 ### 8.3 Generative Rewriter (Supervised Fine-Tuning)
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 8.3.1 | SFT data | (casual prompt, oracle preserved rewrite) from train split; one target-agnostic rewriter (C1.5: tokenizers agree) | `CPU` | HF dataset in DVC | ❌ |
-| 8.3.2 | Tiny-config smoke test | Full training loop on a tiny model on CPU | `CPU` | CI test passes; GPU jobs queued | ✅ |
-| 8.3.3 | Rung 1: Qwen2.5-0.5B full FT | bf16, AdamW, grad checkpointing | `GPU` | Model registered; val report | ❌ |
-| 8.3.4 | Rung 2: Qwen2.5-1.5B LoRA | r = 16, α = 32, bf16. Escalate to 3B LoRA, then 7B QLoRA (NF4), only if the previous rung fails C8.3 | `GPU` | Same, per rung trained | ❌ |
-| 8.3.7 | Decoding safeguards | Never longer than input on T; fall back to original if longer | `CPU` | Property test | ✅ |
-| 8.3.8 | Inference-time quality gate | Champion gate rejects risky rewrites ⇒ lighter rewrite or original | `CPU` | Integration test | ✅ |
-| 8.3.9 | Baselines | Original · best operator · HMM compressor · LLMLingua-2 · zero-shot Qwen2.5-32B-Instruct-AWQ "rewrite concisely" | `LLM` `GPU` | Same val table | ❌ |
-| 8.3.10 | Failure analysis | 100 degraded cases hand-categorised: dropped constraint / tone / example / changed meaning / other | `CPU` | `reports/p8_failures.md` | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 8.3.1 | SFT data | (casual prompt, oracle preserved rewrite) from train split; one target-agnostic rewriter (C1.5: tokenizers agree) | HF dataset in DVC | ❌ |
+| 8.3.2 | Tiny-config smoke test | Full training loop on a tiny model on CPU | CI test passes; GPU jobs queued | ✅ |
+| 8.3.3 | Rung 1: Qwen2.5-0.5B full FT | bf16, AdamW, grad checkpointing | Model registered; val report | ❌ |
+| 8.3.4 | Rung 2: Qwen2.5-1.5B LoRA | r = 16, α = 32, bf16. Escalate to 3B LoRA, then 7B QLoRA (NF4), only if the previous rung fails C8.3 | Same, per rung trained | ❌ |
+| 8.3.7 | Decoding safeguards | Never longer than input on T; fall back to original if longer | Property test | ✅ |
+| 8.3.8 | Inference-time quality gate | Champion gate rejects risky rewrites ⇒ lighter rewrite or original | Integration test | ✅ |
+| 8.3.9 | Baselines | Original · best operator · HMM compressor · LLMLingua-2 · zero-shot Qwen2.5-32B-Instruct-AWQ "rewrite concisely" | Same val table | ❌ |
+| 8.3.10 | Failure analysis | 100 degraded cases hand-categorised: dropped constraint / tone / example / changed meaning / other | `reports/p8_failures.md` | ❌ |
 
 ### Checkpoint C8 — Deep Learning
 
@@ -644,20 +640,20 @@ neural rewriter is a [stretch goal](#stretch-goals-never-block-a-checkpoint).
 
 ### 9.1 MDP Formulation
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 9.1.1 | RL derivation | Agent = rewriter, environment = draft + tokenizer + gate; policy π(a \| s), V^π, Q^π; Bellman expectation and optimality forms; Q-learning update derived from optimality | `CPU` | `docs/derivations/rl.md` | ✅ |
-| 9.1.2 | Environment | States (remaining filler bucket, constraint count, length bucket, category, ops applied); actions `F H D I L C S` or `STOP` | `CPU` | `rl/env.py` with tests | ✅ |
-| 9.1.4 | Rewards | On `STOP`: Δtokens% − λ·1[degraded] (λ = 100); per step −0.01 | `CPU` | Reward unit tests | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 9.1.1 | RL derivation | Agent = rewriter, environment = draft + tokenizer + gate; policy π(a \| s), V^π, Q^π; Bellman expectation and optimality forms; Q-learning update derived from optimality | `docs/derivations/rl.md` | ✅ |
+| 9.1.2 | Environment | States (remaining filler bucket, constraint count, length bucket, category, ops applied); actions `F H D I L C S` or `STOP` | `rl/env.py` with tests | ✅ |
+| 9.1.4 | Rewards | On `STOP`: Δtokens% − λ·1[degraded] (λ = 100); per step −0.01 | Reward unit tests | ✅ |
 
 ### 9.2 Tabular Q-Learning
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 9.2.1 | Q-learning from scratch | ε-greedy; quality gate as cheap reward model (no LLM calls during learning) | `CPU` | Learning curve | ❌ |
-| 9.2.2 | Hyperparameter sweep | α ∈ {0.05, 0.1, 0.3}, γ ∈ {0.9, 0.99}, ε schedule | `CPU` | Table | ❌ |
-| 9.2.3 | Learned policy | Greedy operator order per category | `CPU` | `reports/p9_policy.md` | ❌ |
-| 9.2.4 | Judge verification | Greedy policy on 300 val prompts with the real judge | `LLM` | Savings and preservation table | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 9.2.1 | Q-learning from scratch | ε-greedy; quality gate as cheap reward model (no LLM calls during learning) | Learning curve | ❌ |
+| 9.2.2 | Hyperparameter sweep | α ∈ {0.05, 0.1, 0.3}, γ ∈ {0.9, 0.99}, ε schedule | Table | ❌ |
+| 9.2.3 | Learned policy | Greedy operator order per category | `reports/p9_policy.md` | ❌ |
+| 9.2.4 | Judge verification | Greedy policy on 300 val prompts with the real judge | Savings and preservation table | ❌ |
 
 ### Checkpoint C9 — Reinforcement Learning
 
@@ -674,13 +670,13 @@ neural rewriter is a [stretch goal](#stretch-goals-never-block-a-checkpoint).
 for the gate and the rewriter.
 **Weeks:** 18–20 (grid search already used in Phase 3) · **Depends on:** 3, 4, 5, 8 · **Unlocks:** 11, 12
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 10.1 | HPO module | `terser.hpo` wrapping grid / random / Optuna TPE / GP samplers; MLflow parent-child runs | `CPU` | Module + tests | ✅ |
-| 10.2 | Method study | GBM quality gate: 60-point grid vs random, TPE and GP at 60 trials × 5 repeats. Random and TPE also on the Phase 4 MLP (depth 1–3, width {64..512}, dropout, lr, weight decay) | `CPU` | Best-so-far curves logged to MLflow | ❌ |
-| 10.5 | Method comparison | Grid vs Random vs Bayesian at equal budget | `CPU` | `reports/figures/p10_hpo_methods.png` + report | ❌ |
-| 10.7 | Rewriter LoRA tuning | Rank, α, lr, warmup, epochs; objective = savings s.t. preservation ≥ 0.92; median pruner | `GPU` | Tuned model registered | ❌ |
-| 10.8 | Test-set isolation audit | Data-access logs show HPO touched only train/val | `CPU` | Automated check green | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 10.1 | HPO module | `terser.hpo` wrapping grid / random / Optuna TPE / GP samplers; MLflow parent-child runs | Module + tests | ✅ |
+| 10.2 | Method study | GBM quality gate: 60-point grid vs random, TPE and GP at 60 trials × 5 repeats. Random and TPE also on the Phase 4 MLP (depth 1–3, width {64..512}, dropout, lr, weight decay) | Best-so-far curves logged to MLflow | ❌ |
+| 10.5 | Method comparison | Grid vs Random vs Bayesian at equal budget | `reports/figures/p10_hpo_methods.png` + report | ❌ |
+| 10.7 | Rewriter LoRA tuning | Rank, α, lr, warmup, epochs; objective = savings s.t. preservation ≥ 0.92; median pruner | Tuned model registered | ❌ |
+| 10.8 | Test-set isolation audit | Data-access logs show HPO touched only train/val | Automated check green | ✅ |
 
 ### Checkpoint C10 — Tuning
 
@@ -702,58 +698,58 @@ quality monitoring.
 
 ### 11.1 Lifecycle, Data and Feature Pipelines
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 11.1.1 | MLOps overview ADR | Lifecycle diagram + Terser-specific production challenges: judge cost, tokenizer drift, silent over-compression, latency budget, training/serving skew | `CPU` | `docs/decisions/ADR-0010-mlops.md` | ✅ |
-| 11.1.2 | Full DVC pipeline | `collect → casualise → candidates → respond → judge → label → features → split → stratify` | `CPU` | `dvc repro` end to end | ❌ |
-| 11.1.3 | Shared feature code | One `terser.features` used offline and online | `CPU` | Parity test: 100/100 prompts identical | ✅ |
-| 11.1.4 | Data validation | pandera schemas: nulls, token-ratio ranges, category balance | `CPU` | Fails on a corrupted fixture | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 11.1.1 | MLOps overview ADR | Lifecycle diagram + Terser-specific production challenges: judge cost, tokenizer drift, silent over-compression, latency budget, training/serving skew | `docs/decisions/ADR-0010-mlops.md` | ✅ |
+| 11.1.2 | Full DVC pipeline | `collect → casualise → candidates → respond → judge → label → features → split → stratify` | `dvc repro` end to end | ❌ |
+| 11.1.3 | Shared feature code | One `terser.features` used offline and online | Parity test: 100/100 prompts identical | ✅ |
+| 11.1.4 | Data validation | pandera schemas: nulls, token-ratio ranges, category balance | Fails on a corrupted fixture | ✅ |
 
 ### 11.2 Experiment Tracking and Model Versioning
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 11.2.2 | Model registry | Stages `None → Staging → Production → Archived` for gate, tagger, rewriter | `CPU` | Registry populated | ❌ |
-| 11.2.3 | Lineage | Each version records git SHA, DVC hash, config, checkpoint IDs passed | `CPU` | Any production model traceable | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 11.2.2 | Model registry | Stages `None → Staging → Production → Archived` for gate, tagger, rewriter | Registry populated | ❌ |
+| 11.2.3 | Lineage | Each version records git SHA, DVC hash, config, checkpoint IDs passed | Any production model traceable | ❌ |
 
 ### 11.3 Deployment, Serving and Inference Systems
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 11.3.1 | API | FastAPI `POST /rewrite {prompt, target, mode: fast\|quality}` → `{rewrite, tokens_before, tokens_after, gate_score, fallback_used}` | `CPU` | OpenAPI docs + request/response examples | ✅ |
-| 11.3.2 | Fast path | Span tagger + gate exported to ONNX Runtime | `CPU` | Runs with no GPU | ❌ |
-| 11.3.3 | Quality path | Rewriter on vLLM with continuous batching + gate + fallback | `GPU` | Endpoint live on a GPU worker | ❌ |
-| 11.3.4 | Caching | LRU keyed on normalised prompt hash + target | `CPU` | Warm-hit latency measured | ✅ |
-| 11.3.5 | Timeout fallback | Quality path over budget ⇒ fast-path result | `CPU` | Fault-injection test | ✅ |
-| 11.3.6 | Net-savings accounting | Per request: price_T × (tokens_before − tokens_after) − rewriter_cost | `CPU` | Logged per request | ✅ |
-| 11.3.7 | Containers | `terser-cpu` and `terser-gpu` (CUDA base) images; docker-compose | `CPU` `GPU` | `docker compose up` serves both paths | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 11.3.1 | API | FastAPI `POST /rewrite {prompt, target, mode: fast\|quality}` → `{rewrite, tokens_before, tokens_after, gate_score, fallback_used}` | OpenAPI docs + request/response examples | ✅ |
+| 11.3.2 | Fast path | Span tagger + gate exported to ONNX Runtime | Runs with no GPU | ❌ |
+| 11.3.3 | Quality path | Rewriter on vLLM with continuous batching + gate + fallback | Endpoint live on a GPU worker | ❌ |
+| 11.3.4 | Caching | LRU keyed on normalised prompt hash + target | Warm-hit latency measured | ✅ |
+| 11.3.5 | Timeout fallback | Quality path over budget ⇒ fast-path result | Fault-injection test | ✅ |
+| 11.3.6 | Net-savings accounting | Per request: price_T × (tokens_before − tokens_after) − rewriter_cost | Logged per request | ✅ |
+| 11.3.7 | Containers | `terser-cpu` and `terser-gpu` (CUDA base) images; docker-compose | `docker compose up` serves both paths | ❌ |
 
 ### 11.4 CI / CD / CT
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 11.4.1 | CI | Every PR: lint, types, unit tests, CPU smoke training, `dvc repro --dry`, feature parity | `CPU` | Median ≤ 15 min | ❌ |
-| 11.4.2 | CD | Tag `v*`: build + scan images → push to GHCR → start the container in CI → smoke + latency tests | `CPU` | Release images published by the workflow | ❌ |
-| 11.4.3 | CT | On drift alert or a new data batch: judge labels → retrain gate/tagger (CPU) → queue rewriter retrain (GPU) → evaluate → register as Staging if checkpoints pass | `CPU` `GPU` `LLM` | One full cycle completed | ❌ |
-| 11.4.4 | Promotion guard | CT refuses promotion when a synthetic regression is injected | `CPU` | Test green | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 11.4.1 | CI | Every PR: lint, types, unit tests, CPU smoke training, `dvc repro --dry`, feature parity | Median ≤ 15 min | ❌ |
+| 11.4.2 | CD | Tag `v*`: build + scan images → push to GHCR → start the container in CI → smoke + latency tests | Release images published by the workflow | ❌ |
+| 11.4.3 | CT | On drift alert or a new data batch: judge labels → retrain gate/tagger (CPU) → queue rewriter retrain (GPU) → evaluate → register as Staging if checkpoints pass | One full cycle completed | ❌ |
+| 11.4.4 | Promotion guard | CT refuses promotion when a synthetic regression is injected | Test green | ✅ |
 
 ### 11.5 Monitoring, Drift and Observability
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 11.5.1 | Metrics | Prometheus: RPS, p50/p95/p99 latency per path, fallback rate, gate rejections, tokens saved, net savings, GPU util / VRAM | `CPU` | Exposed at `/metrics` | ✅ |
-| 11.5.2 | Input drift | Evidently daily: embedding drift (PSI / MMD on PCA components), length and category distribution | `CPU` | Report generated | ❌ |
-| 11.5.3 | Tokenizer drift | Re-count fixture set with current tokenizer versions; alert on any change | `CPU` | Alert fires on a pinned-version swap | ✅ |
-| 11.5.4 | Quality canary | Nightly: a fixed 200-prompt canary set goes through the deployed service and the judge; rolling preservation | `LLM` | Metric on dashboard | ❌ |
-| 11.5.5 | Dashboard and alerts | Grafana; alert at rolling preservation < 92% | `CPU` | Dashboard live | ❌ |
-| 11.5.6 | Structured logging | Request IDs; hashes by default, raw text only if consented | `CPU` | Log schema doc | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 11.5.1 | Metrics | Prometheus: RPS, p50/p95/p99 latency per path, fallback rate, gate rejections, tokens saved, net savings, GPU util / VRAM | Exposed at `/metrics` | ✅ |
+| 11.5.2 | Input drift | Evidently daily: embedding drift (PSI / MMD on PCA components), length and category distribution | Report generated | ❌ |
+| 11.5.3 | Tokenizer drift | Re-count fixture set with current tokenizer versions; alert on any change | Alert fires on a pinned-version swap | ✅ |
+| 11.5.4 | Quality canary | Nightly: a fixed 200-prompt canary set goes through the deployed service and the judge; rolling preservation | Metric on dashboard | ❌ |
+| 11.5.5 | Dashboard and alerts | Grafana; alert at rolling preservation < 92% | Dashboard live | ❌ |
+| 11.5.6 | Structured logging | Request IDs; hashes by default, raw text only if consented | Log schema doc | ✅ |
 
 ### 11.6 ML Orchestration
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 11.6.1 | Prefect flows | `data_flow`, `train_classical_flow`, `train_rewriter_flow` (submits to `gpu_queue`), `evaluate_flow`, `promote_flow`, `drift_flow` | `CPU` | Flows registered | ❌ |
-| 11.6.2 | Reliability | Retries, cached LLM steps, failure notifications | `CPU` | Injected failure recovers | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 11.6.1 | Prefect flows | `data_flow`, `train_classical_flow`, `train_rewriter_flow` (submits to `gpu_queue`), `evaluate_flow`, `promote_flow`, `drift_flow` | Flows registered | ❌ |
+| 11.6.2 | Reliability | Retries, cached LLM steps, failure notifications | Injected failure recovers | ❌ |
 
 ### Checkpoint C11 — Production Readiness
 
@@ -775,19 +771,19 @@ quality monitoring.
 quality?", on the untouched test split.
 **Week:** 24 · **Depends on:** 8, 9, 10, 11 · **Unlocks:** 13
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 12.1 | Test-split unlock | Logged, one-time event | `CPU` | Access log entry | ❌ |
-| 12.2 | Master results table | Every system (original, best operator, Q-learning policy, HMM, GBM tagger+gate, TextCNN+gate, SFT rewriter, LLMLingua-2, zero-shot LLM) × savings × preservation × net savings × latency | `LLM` `GPU` | `reports/final_results.md` | ❌ |
-| 12.3 | Stratified reporting | Per target × category × high-risk cluster, and separately on the real-prompt slice (2.1.8) | `CPU` | Tables | ❌ |
-| 12.4 | Statistical rigour | 95% bootstrap CIs (1,000 resamples); ≥ 3 seeds; McNemar between top systems | `CPU` | Error bars on every headline number | ❌ |
-| 12.6 | **Ablation matrix** | Remove gate / fallback / HPO one at a time; generative rewriter vs operator-only | `LLM` `GPU` | 4-row ablation table | ❌ |
-| 12.7 | Net savings by prompt length | Savings minus rewriter cost across length percentiles | `CPU` | Figure | ❌ |
-| 12.8 | Error taxonomy | 200 degraded test cases categorised | `CPU` | `reports/final_errors.md` | ❌ |
-| 12.9 | Qualitative gallery | Best and worst casual → rewrite → output pairs | `CPU` | `reports/gallery.md` | ❌ |
-| 12.10 | Compute accounting | Generated tokens, GPU-hours, energy per phase; GPU-seconds per labelled pair (estimate vs actual) | `CPU` | Table | ❌ |
-| 12.11 | Benchmark release | Prompts, candidates, labels, rubrics, eval code (licence permitting) | `CPU` | Release tag + data card | ❌ |
-| 12.12 | Reproduction | Second contributor reproduces headline numbers from a fresh clone | all | Within CI bounds | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 12.1 | Test-split unlock | Logged, one-time event | Access log entry | ❌ |
+| 12.2 | Master results table | Every system (original, best operator, Q-learning policy, HMM, GBM tagger+gate, TextCNN+gate, SFT rewriter, LLMLingua-2, zero-shot LLM) × savings × preservation × net savings × latency | `reports/final_results.md` | ❌ |
+| 12.3 | Stratified reporting | Per target × category × high-risk cluster, and separately on the real-prompt slice (2.1.8) | Tables | ❌ |
+| 12.4 | Statistical rigour | 95% bootstrap CIs (1,000 resamples); ≥ 3 seeds; McNemar between top systems | Error bars on every headline number | ❌ |
+| 12.6 | **Ablation matrix** | Remove gate / fallback / HPO one at a time; generative rewriter vs operator-only | 4-row ablation table | ❌ |
+| 12.7 | Net savings by prompt length | Savings minus rewriter cost across length percentiles | Figure | ❌ |
+| 12.8 | Error taxonomy | 200 degraded test cases categorised | `reports/final_errors.md` | ❌ |
+| 12.9 | Qualitative gallery | Best and worst casual → rewrite → output pairs | `reports/gallery.md` | ❌ |
+| 12.10 | Compute accounting | Generated tokens, GPU-hours, energy per phase; GPU-seconds per labelled pair (estimate vs actual) | Table | ❌ |
+| 12.11 | Benchmark release | Prompts, candidates, labels, rubrics, eval code (licence permitting) | Release tag + data card | ❌ |
+| 12.12 | Reproduction | Second contributor reproduces headline numbers from a fresh clone | Within CI bounds | ❌ |
 
 ---
 
@@ -796,14 +792,14 @@ quality?", on the untouched test split.
 **Goal:** everything needed to understand, reproduce, present and defend the project.
 **Weeks:** 23–24 · **Depends on:** 12 · **Unlocks:** delivery
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 13.1 | README | One-paragraph pitch, architecture diagram (casual prompt → fast/quality path → gate → target LLM, with training loop), headline results table with CIs, `docker compose up` quickstart, links to report and benchmark. Start it now and update at every checkpoint | `CPU` | A reader understands the project in 60 seconds | ❌ |
-| 13.2 | Syllabus mapping doc | Unit 1–4 → phase / file / figure links | `CPU` | `docs/syllabus_map.md` | ✅ |
-| 13.4 | Model cards | Gate, tagger, TextCNN, rewriter | `CPU` | Complete | ❌ |
-| 13.6 | Final report | Problem, related work (LLMLingua / LLMLingua-2, Selective Context), method, experiments, results, ablations, negative results (C1.4, C1.5), limitations (creative prompts, multi-turn context, tokenizer drift, judge dependence, synthetic prompts), future work | `CPU` | `docs/report.md` | ❌ |
-| 13.8 | Demo script | Live casual prompt → rewrite → side-by-side outputs + token counter | `CPU` `GPU` | Rehearsed; cached fallback if GPU unavailable | ❌ |
-| 13.9 | Viva prep | ID3 gain, bias–variance, ROC, backprop, SVM dual, AdaBoost weights, EM, Viterbi, K-means ⇔ EM, Bellman / Q-update, CNN parameters, LoRA rank | `CPU` | `docs/viva.md` | ✅ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 13.1 | README | One-paragraph pitch, architecture diagram (casual prompt → fast/quality path → gate → target LLM, with training loop), headline results table with CIs, `docker compose up` quickstart, links to report and benchmark. Start it now and update at every checkpoint | A reader understands the project in 60 seconds | ❌ |
+| 13.2 | Syllabus mapping doc | Unit 1–4 → phase / file / figure links | `docs/syllabus_map.md` | ✅ |
+| 13.4 | Model cards | Gate, tagger, TextCNN, rewriter | Complete | ❌ |
+| 13.6 | Final report | Problem, related work (LLMLingua / LLMLingua-2, Selective Context), method, experiments, results, ablations, negative results (C1.4, C1.5), limitations (creative prompts, multi-turn context, tokenizer drift, judge dependence, synthetic prompts), future work | `docs/report.md` | ❌ |
+| 13.8 | Demo script | Live casual prompt → rewrite → side-by-side outputs + token counter | Rehearsed; cached fallback if GPU unavailable | ❌ |
+| 13.9 | Viva prep | ID3 gain, bias–variance, ROC, backprop, SVM dual, AdaBoost weights, EM, Viterbi, K-means ⇔ EM, Bellman / Q-update, CNN parameters, LoRA rank | `docs/viva.md` | ✅ |
 
 ---
 
@@ -913,25 +909,34 @@ which were not, and why.
 
 ## Overall Progress
 
-| Phase | Tasks | Checks | Done | Status |
-| :--- | :---: | :---: | :---: | :---: |
-| 0 — Foundations | 22 | 4 | 26 | ✅ |
-| 1 — Framing and Concept Learning | 23 | 5 | 22 | ❌ |
-| 2 — Data Pipeline and Judge | 21 | 9 | 13 | ❌ |
-| 3 — Metrics, Trees, LR, KNN | 31 | 7 | 10 | ❌ |
-| 4 — ANN and SVM | 16 | 5 | 7 | ❌ |
-| 5 — Boosting, Bayes, GMM, HMM | 16 | 6 | 6 | ❌ |
-| 6 — Clustering | 9 | 3 | 2 | ❌ |
-| 7 — GPU Onboarding | 8 | 3 | 9 | ❌ |
-| 8 — CNN and Rewriter | 14 | 5 | 6 | ❌ |
-| 9 — Reinforcement Learning | 7 | 2 | 3 | ❌ |
-| 10 — HPO | 5 | 4 | 2 | ❌ |
-| 11 — MLOps | 25 | 7 | 10 | ❌ |
-| 12 — Final Evaluation | 11 | — | 0 | ❌ |
-| 13 — Documentation | 6 | — | 0 | ❌ |
-| **Total** | **214** | **60** | **116** | ❌ |
+| Phase | Owner | Tasks | Checks | Done | Status |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| 0 — Foundations | Guru | 22 | 4 | 26 | ✅ |
+| 1 — Framing and Concept Learning | Guru | 23 | 5 | 22 | ❌ |
+| 2 — Data Pipeline and Judge | Vivian | 21 | 9 | 16 | ❌ |
+| 3 — Metrics, Trees, LR, KNN | Vivian | 31 | 7 | 11 | ❌ |
+| 4 — ANN and SVM | Vivian | 16 | 5 | 7 | ❌ |
+| 5 — Boosting, Bayes, GMM, HMM | Vivian | 16 | 6 | 6 | ❌ |
+| 6 — Clustering | Vivian | 9 | 3 | 2 | ❌ |
+| 7 — GPU Onboarding | Vivian | 8 | 3 | 9 | ❌ |
+| 8 — CNN and Rewriter | Vivian | 14 | 5 | 7 | ❌ |
+| 9 — Reinforcement Learning | Vivian | 7 | 2 | 3 | ❌ |
+| 10 — HPO | Vivian | 5 | 4 | 2 | ❌ |
+| 11 — MLOps | Vivian | 25 | 7 | 11 | ❌ |
+| 12 — Final Evaluation | Vivian | 11 | — | 0 | ❌ |
+| 13 — Documentation | Guru | 6 | — | 2 | ❌ |
+| **Total** | | **214** | **60** | **124** | ❌ |
 
 Stretch rows are not counted.
+
+### Owners
+
+| Owner | Hardware | Phases | Rows | Done | Remaining |
+| :--- | :--- | :--- | :---: | :---: | :---: |
+| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 74 | 140 |
+| Guru | 1 × RTX 4500 Ada (24 GB) | 0, 1, 13 | 60 | 50 | 10 |
+
+Each phase has one owner, who runs it end to end, including its checkpoint.
 
 ---
 
@@ -942,13 +947,13 @@ only if they work, so each ends in a report whether or not it succeeds.
 
 ### S-9.3 Policy Optimisation of the Neural Rewriter (GRPO)
 
-| # | Task | Detail | HW | Definition of Done | Status |
-| :---: | :--- | :--- | :--- | :--- | :---: |
-| 9.3.1 | GRPO setup | Start from C8.3 model; LoRA; group size 4–8; KL penalty to SFT reference | `GPU` | Tiny CPU smoke test + queued job | ❌ |
-| 9.3.2 | Reward | `tokens_saved_pct × gate_pass` | `GPU` | Reward logged per step | ❌ |
-| 9.3.3 | Reward-hacking audits | Every N steps sample rewrites → 32B judge in a time-shared vLLM slot, never colocated with training | `LLM` | Audit log | ❌ |
-| 9.3.4 | Degenerate-output monitor | Empty / truncated / non-natural-language rate | `GPU` | Metric logged | ❌ |
-| 9.3.5 | RL vs SFT comparison | Same val table as C8.3 | `GPU` `LLM` | `reports/p9_rl_vs_sft.md` | ❌ |
+| # | Task | Detail | Definition of Done | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 9.3.1 | GRPO setup | Start from C8.3 model; LoRA; group size 4–8; KL penalty to SFT reference | Tiny CPU smoke test + queued job | ❌ |
+| 9.3.2 | Reward | `tokens_saved_pct × gate_pass` | Reward logged per step | ❌ |
+| 9.3.3 | Reward-hacking audits | Every N steps sample rewrites → 32B judge in a time-shared vLLM slot, never colocated with training | Audit log | ❌ |
+| 9.3.4 | Degenerate-output monitor | Empty / truncated / non-natural-language rate | Metric logged | ❌ |
+| 9.3.5 | RL vs SFT comparison | Same val table as C8.3 | `reports/p9_rl_vs_sft.md` | ❌ |
 
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
