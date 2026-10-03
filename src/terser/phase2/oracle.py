@@ -290,9 +290,14 @@ def validate_labels(
 def validate_prompts(df: pd.DataFrame) -> pd.DataFrame:
     """Validate the prompts table (``prompt_id`` unique, ``category`` present; ``style`` optional).
 
+    A casualised-prompt table (``label_prompts.jsonl``) keys prompts by ``id``; that column is
+    used as ``prompt_id`` when ``prompt_id`` itself is absent.
+
     Raises:
         Phase2InputError: On missing columns or duplicate/empty keys.
     """
+    if "prompt_id" not in df.columns and "id" in df.columns:
+        df = df.rename(columns={"id": "prompt_id"})
     _require(df, PROMPT_COLUMNS, "prompts")
     cols = ["prompt_id", "category"] + (["style"] if "style" in df.columns else [])
     out = df[cols].copy()
