@@ -1,0 +1,6 @@
+outs:
+- md5: 64c062cc02287462965b805ec811e76b.dir
+  size: 37545731
+  nfiles: 1162
+  hash: md5
+  path: p2_smoke_20261003
