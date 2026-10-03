@@ -25,24 +25,28 @@ per-entity :class:`Action` policy and returns a :class:`ScrubResult`.
 
 Batch usage::
 
-    python -m terser.data.pii scan --in data/pilot/prompts.jsonl --field prompt \\
-        --out scrubbed.jsonl --report reports/p2_pii_pilot.md \\
-        --sample reports/p2_pii_pilot_sample.csv --sample-size 500 --seed 0
+    python -m terser.data.pii --in data/pilot/prompts.jsonl --text-field prompt \\
+        --out /tmp/scrubbed.jsonl --report /tmp/p2_pii_pilot.md --seed 0
+
+The direct CLI uses strict typed redaction on every string value, without demonstration-value
+exemptions. The legacy ``scan`` subcommand retains configurable audit policies. NER is opt-in.
 """
 
 from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import ipaddress
 import json
 import math
 import random
 import re
+import subprocess
 import sys
 from collections import Counter
 from collections.abc import Callable, Iterable, Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import StrEnum
 from pathlib import Path
 from typing import Any
@@ -56,6 +60,9 @@ __all__ = [
     "RowStatus",
     "ScrubResult",
     "detect_regex",
+    "detect_strict",
+    "scrub_text",
+    "scrub_record",
     "luhn_valid",
     "iban_valid",
     "main",
@@ -192,6 +199,11 @@ class ScrubResult:
     backend: str
     detections: tuple[tuple[Detection, Action], ...]
     suppressed: tuple[Detection, ...] = field(default=())
+
+    @property
+    def counts(self) -> dict[str, int]:
+        """Counts of non-overlapping active entities, without matched values."""
+        return dict(Counter(d.entity_type.value for d, _ in self.detections))
 
     def detections_json(self) -> list[dict[str, Any]]:
         """Active detections as JSON-safe dicts (no matched text)."""
@@ -393,7 +405,7 @@ _API_KEYS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("github_token", re.compile(r"(?<!\w)gh[pousr]_[A-Za-z0-9]{36,255}(?!\w)")),
     ("github_pat", re.compile(r"(?<!\w)github_pat_[A-Za-z0-9_]{22,255}(?!\w)")),
     ("slack_token", re.compile(r"(?<!\w)xox[abposr]-[A-Za-z0-9-]{10,}(?!\w)")),
-    ("openai_anthropic_key", re.compile(r"(?<!\w)sk-(?:ant-|proj-)?[A-Za-z0-9_-]{20,}(?!\w)")),
+    ("prefixed_secret_key", re.compile(r"(?<!\w)sk-(?:ant-|proj-)?[A-Za-z0-9_-]{20,}(?!\w)")),
     ("google_api_key", re.compile(r"(?<!\w)AIza[0-9A-Za-z_-]{35}(?!\w)")),
     ("stripe_key", re.compile(r"(?<!\w)[rs]k_live_[0-9A-Za-z]{16,}(?!\w)")),
     ("jwt", re.compile(r"(?<!\w)eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}")),
@@ -569,10 +581,13 @@ def _detect_secrets(text: str, out: list[Detection]) -> None:
         reason = None
         if _looks_placeholder(value):
             reason = "placeholder_credential"
-        elif not quoted and (
-            re.fullmatch(r"[A-Za-z_]+", value)  # api_key = get_key / token = tokenizer
-            or re.fullmatch(r"[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+", value)  # os.environ
-            or text[end : end + 1] in {"(", "["}  # a call or subscript, not a literal
+        elif (
+            not quoted
+            and (
+                re.fullmatch(r"[A-Za-z_]+", value)  # api_key = get_key / token = tokenizer
+                or re.fullmatch(r"[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+", value)  # os.environ
+                or text[end : end + 1] in {"(", "["}  # a call or subscript, not a literal
+            )
         ):
             reason = "identifier_not_secret"
         _emit(out, start, end, EntityType.SECRET, 0.85, text, reason)
@@ -581,7 +596,7 @@ def _detect_secrets(text: str, out: list[Detection]) -> None:
         has_classes = all(
             any(pred(c) for c in tok) for pred in (str.islower, str.isupper, str.isdigit)
         )
-        if not has_classes or re.fullmatch(r"[0-9a-fA-F]+", tok):
+        if not has_classes or re.fullmatch(r"(?:0[xX])?[0-9a-fA-F]+", tok):
             continue  # hex digests (git SHAs, checksums) are not secrets
         if "/" in tok and re.fullmatch(r"[A-Za-z0-9_./-]+", tok) and tok.count("/") >= 2:
             continue  # file paths
@@ -767,11 +782,11 @@ class _PresidioDetector:
         return sorted(out, key=lambda d: (d.start, -d.end))
 
 
-def make_detector(backend: str = "auto") -> tuple[Detector, str]:
+def make_detector(backend: str = "regex") -> tuple[Detector, str]:
     """Build a detector.
 
     Args:
-        backend: ``"regex"``, ``"presidio"`` (raises if unavailable) or ``"auto"`` (Presidio
+        backend: ``"regex"``, ``"presidio"`` (falls back if unavailable) or ``"auto"`` (Presidio
             when installed, else regex).
 
     Returns:
@@ -782,10 +797,11 @@ def make_detector(backend: str = "auto") -> tuple[Detector, str]:
     if backend == "regex" or (backend == "auto" and not presidio_available()):
         return detect_regex, "regex"
     if not presidio_available():
-        raise RuntimeError(
-            "presidio backend requested but presidio-analyzer / en_core_web_sm are not installed"
-        )
-    return _PresidioDetector(), "presidio"
+        return detect_regex, "regex"
+    try:
+        return _PresidioDetector(), "presidio"
+    except (ImportError, OSError, RuntimeError, ValueError):
+        return detect_regex, "regex"
 
 
 # --------------------------------------------------------------------------------------------
@@ -859,6 +875,131 @@ def scrub(
     return ScrubResult(text, scrubbed, status, backend, tuple(active), suppressed)
 
 
+# Strict ingestion deliberately redacts demonstration values too. The legacy policy API
+# remains available for audits, but is not suitable for publishing text without review.
+_NON_PII_REASONS = {
+    "version_string",
+    "identifier_not_secret",
+    "git_ssh_remote",
+    "no_private_context",
+    "overlaps_regex_detection",
+}
+_STRICT_IPV6 = re.compile(r"(?<![\w:])[0-9A-Fa-f:.]*:[0-9A-Fa-f:.]+(?:%[\w]+)?(?![\w:])")
+_STRICT_STREET = re.compile(_STREET.pattern, re.IGNORECASE)
+_STRICT_IBAN = re.compile(_IBAN.pattern, re.IGNORECASE)
+_URL = re.compile(r"\b[a-z][a-z0-9+.-]*://[^\s<>\"']+", re.IGNORECASE)
+_URL_TOKEN = re.compile(
+    r"[?&#](?:access_token|token|api[_-]?key|apikey|key|secret|client_secret|password|"
+    r"passwd|pwd|auth|sig|signature|session|sessionid)=([^&#\s]+)",
+    re.IGNORECASE,
+)
+
+
+def detect_strict(text: str, detector: Detector = detect_regex) -> list[Detection]:
+    """Detect ingestion PII without demonstration-value exemptions; keep code heuristics."""
+    found = [
+        replace(d, suppressed=None) if d.suppressed not in _NON_PII_REASONS else d
+        for d in detector(text)
+        if not (
+            d.entity_type is EntityType.STREET_ADDRESS
+            and re.search(
+                r"\b(?:across|the|over|under|along|on|from|near|of)\b", d.text, re.IGNORECASE
+            )
+        )
+    ]
+    for pattern, kind in (
+        (_STRICT_IBAN, EntityType.IBAN),
+        (_STRICT_STREET, EntityType.STREET_ADDRESS),
+    ):
+        for match in pattern.finditer(text):
+            if kind is EntityType.IBAN and not iban_valid(match.group()):
+                continue
+            if kind is EntityType.STREET_ADDRESS and re.search(
+                r"\b(?:across|the|over|under|along|on|from|near|of)\b", match.group(), re.IGNORECASE
+            ):
+                continue
+            end = match.end()
+            if kind is EntityType.STREET_ADDRESS:
+                end = match.start() + len(match.group().rstrip("."))
+            # Prefer strict spans over legacy spans that include sentence punctuation.
+            _emit(found, match.start(), end, kind, 0.99, text)
+    for match in _CARD.finditer(text):
+        digits = _digits(match.group())
+        if 13 <= len(digits) <= 19 and digits[0] in "23456" and luhn_valid(digits):
+            if not any(
+                d.entity_type is EntityType.IBAN and d.start < match.end() and match.start() < d.end
+                for d in found
+            ):
+                _emit(found, match.start(), match.end(), EntityType.CREDIT_CARD, 0.95, text)
+    for match in re.finditer(
+        r"\b(?:call|phone|tel|mobile|cell|contact)\b[:.]?\s+(\d{10,15})(?!\w)",
+        text,
+        re.IGNORECASE,
+    ):
+        _emit(found, match.start(1), match.end(1), EntityType.PHONE, 0.85, text)
+    for match in _STRICT_IPV6.finditer(text):
+        value = match.group().rstrip(".")
+        try:
+            ipaddress.IPv6Address(value.split("%", 1)[0])
+        except ValueError:
+            continue
+        # Short C++ scope-like names have no unambiguous address cue.
+        unambiguous = value.startswith("::") or value.endswith("::") or value.count(":") >= 7
+        if not unambiguous and not re.search(r"[a-fA-F0-9]{3,4}", value):
+            continue
+        _emit(found, match.start(), match.start() + len(value), EntityType.IP_ADDRESS, 0.95, text)
+    for url in _URL.finditer(text):
+        userinfo = re.match(r"[a-z][a-z0-9+.-]*://([^@/\s?#]+)@", url.group(), re.IGNORECASE)
+        if userinfo:
+            _emit(
+                found,
+                url.start() + userinfo.start(1),
+                url.start() + userinfo.end(1),
+                EntityType.URL_CREDENTIAL,
+                1.0,
+                text,
+            )
+        for match in _URL_TOKEN.finditer(url.group()):
+            start = url.start() + match.start(1)
+            _emit(found, start, url.start() + match.end(1), EntityType.URL_CREDENTIAL, 0.98, text)
+    # Explicit arithmetic after a candidate is not a phone number.
+    return [
+        d
+        for d in found
+        if not (d.entity_type is EntityType.PHONE and re.match(r"\s*[+*/=]\s*\d", text[d.end :]))
+    ]
+
+
+def scrub_text(text: str, detector: Detector = detect_regex, backend: str = "regex") -> ScrubResult:
+    """Deterministic typed replacement for ingestion, including cards and ambiguous secrets."""
+    return scrub(
+        text,
+        lambda value: detect_strict(value, detector),
+        {kind: Action.REDACT for kind in EntityType},
+        backend,
+    )
+
+
+def scrub_record(
+    record: Mapping[str, Any], detector: Detector = detect_regex, backend: str = "regex"
+) -> tuple[dict[str, Any], list[ScrubResult]]:
+    """Scrub every string value recursively, leaving keys and non-text values unchanged."""
+    results: list[ScrubResult] = []
+
+    def visit(value: Any) -> Any:
+        if isinstance(value, str):
+            result = scrub_text(value, detector, backend)
+            results.append(result)
+            return result.scrubbed
+        if isinstance(value, dict):
+            return {key: visit(item) for key, item in value.items()}
+        if isinstance(value, list):
+            return [visit(item) for item in value]
+        return value
+
+    return visit(dict(record)), results
+
+
 # --------------------------------------------------------------------------------------------
 # Batch scan, report, review sample
 # --------------------------------------------------------------------------------------------
@@ -895,15 +1036,6 @@ def _record_id(rec: Mapping[str, Any], index: int) -> str:
     return str(rec.get("id", f"row-{index}"))
 
 
-def _masked_context(res: ScrubResult, det: Detection, width: int = 40) -> str:
-    """Context around a detection with the entity itself replaced by its placeholder."""
-    text = res.original
-    left = text[max(0, det.start - width) : det.start]
-    right = text[det.end : det.end + width]
-    snippet = f"{left}{det.entity_type.placeholder}{right}"
-    return snippet.replace("\n", " ").replace("|", "\\|").replace("`", "'")
-
-
 def render_report(
     records: Sequence[Mapping[str, Any]],
     results: Sequence[ScrubResult],
@@ -915,6 +1047,9 @@ def render_report(
     sample_size: int,
     seed: int,
     max_listed: int = 200,
+    input_hash: str = "unavailable",
+    git_sha: str = "unavailable",
+    git_dirty: bool = False,
 ) -> str:
     """Render the markdown scrub report (no raw PII: entities appear only as placeholders)."""
     status_counts = Counter(r.status for r in results)
@@ -932,6 +1067,12 @@ def render_report(
         "",
         f"- Source: `{source}` (field `{field_name}`)",
         f"- Backend: `{backend}`",
+        f"- Seed: {seed}",
+        f"- Git SHA: `{git_sha}`",
+        f"- Git dirty: {str(git_dirty).lower()}",
+        f"- Input SHA256: `{input_hash}`",
+        f"- Rows touched: {sum(r.status is not RowStatus.CLEAN for r in results)}",
+        "- Human review: pending; no 500-row review has been performed by this command.",
         f"- Records scanned: {len(results)}",
         f"- Actionable detections (redact / drop_row / flag_for_review): "
         f"{sum(type_action.values()) - n_ignored}",
@@ -946,12 +1087,30 @@ def render_report(
         lines.append(f"| {status.value} | {status_counts.get(status, 0)} |")
 
     lines += ["", "## Active detections by entity type and action", ""]
-    if type_action:
-        lines += ["| Entity type | Action | Count |", "| :--- | :--- | ---: |"]
-        for (etype, act), n in sorted(type_action.items()):
-            lines.append(f"| {etype} | {act} | {n} |")
-    else:
-        lines.append("None.")
+    lines += ["| Entity type | Action | Count |", "| :--- | :--- | ---: |"]
+    for kind in EntityType:
+        actions = [
+            (act, count) for (name, act), count in sorted(type_action.items()) if name == kind.value
+        ]
+        for act, count in actions or [(Action.REDACT.value, 0)]:
+            lines.append(f"| {kind.value} | {act} | {count} |")
+
+    lines += [
+        "",
+        "## Manual review",
+        "",
+        "Sample the scrubbed output with the command below (substitute local paths):",
+        "",
+        "```sh",
+        "python -m terser.data.pii sample --in <scrubbed.jsonl> --out <review.csv> "
+        "--text-field <field> --sample-size 500 --seed " + str(seed),
+        "```",
+        "",
+        "The sampler requires at least 500 rows and leaves reviewer columns blank.",
+        "Read every scrubbed field, including row_json, for all 500 rows; mark residual PII",
+        "as 0 or 1 and record reviewer, date, false positives and total residual PII here.",
+        "Pass requires 500 reviewed rows and zero residual PII. Keep 2.1.3 pending until then.",
+    ]
 
     lines += ["", "## Suppressed candidates (allowlist / context heuristic)", ""]
     if suppressed:
@@ -962,25 +1121,7 @@ def render_report(
         lines.append("None.")
 
     lines += ["", "## Actionable detections", ""]
-    listed = [
-        (_record_id(rec, i), res, d, a)
-        for i, (rec, res) in enumerate(zip(records, results, strict=True))
-        for d, a in res.detections
-        if a is not Action.IGNORE
-    ]
-    if listed:
-        lines += [
-            "| Record | Type | Action | Score | Backend | Context (entity masked) |",
-            "| :--- | :--- | :--- | ---: | :--- | :--- |",
-        ]
-        for rid, res, d, a in listed[:max_listed]:
-            ctx = _masked_context(res, d)
-            cells = [rid, d.entity_type.value, a.value, f"{d.score:.2f}", d.backend, ctx]
-            lines.append("| " + " | ".join(cells) + " |")
-        if len(listed) > max_listed:
-            lines.append(f"\n_{len(listed) - max_listed} further detections not listed._")
-    else:
-        lines.append("None.")
+    lines.append("See aggregate counts above; raw text and record identifiers are omitted.")
     return "\n".join(lines) + "\n"
 
 
@@ -1032,9 +1173,12 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
             if not line.strip():
                 continue
             try:
-                records.append(json.loads(line))
+                record = json.loads(line)
+                if not isinstance(record, dict):
+                    raise ValueError(f"{path}:{lineno}: expected a JSON object")
+                records.append(record)
             except json.JSONDecodeError as exc:
-                raise ValueError(f"{path}:{lineno}: invalid JSON: {exc}") from exc
+                raise ValueError(f"{path}:{lineno}: invalid JSON") from exc
     return records
 
 
@@ -1053,8 +1197,146 @@ def _load_policy(path: str | None) -> dict[str, str] | None:
     return {str(k): str(v) for k, v in data.items()}
 
 
+def _git_provenance() -> tuple[str, bool]:
+    """Read local revision metadata; git is optional outside a checkout."""
+    root = Path(__file__).resolve().parents[3]
+    try:
+        sha = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=root, check=True, capture_output=True, text=True
+        ).stdout.strip()
+        dirty = bool(
+            subprocess.run(
+                ["git", "status", "--porcelain"],
+                cwd=root,
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip()
+        )
+        return sha, dirty
+    except (OSError, subprocess.CalledProcessError):
+        return "unavailable", False
+
+
+def _distinct_paths(paths: Sequence[Path]) -> None:
+    resolved = [path.resolve() for path in paths]
+    if len(resolved) != len(set(resolved)):
+        raise ValueError("input, output and report paths must be distinct")
+
+
+def _strict_cli(argv: Sequence[str]) -> int:
+    parser = argparse.ArgumentParser(prog="python -m terser.data.pii")
+    parser.add_argument("--in", dest="inp", type=Path, required=True)
+    parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument("--text-field", default="prompt")
+    parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--backend", choices=("regex", "presidio"), default="regex")
+    args = parser.parse_args(argv)
+    _distinct_paths([args.inp, args.out, args.report])
+    records = _read_jsonl(args.inp)
+    detector, backend = make_detector(args.backend)
+    # Validate the selected field before writing any output. All other string values are scanned.
+    for i, record in enumerate(records):
+        if not isinstance(record.get(args.text_field), str):
+            raise ValueError(f"row {i + 1} lacks string field {args.text_field!r}")
+    output: list[dict[str, Any]] = []
+    results: list[ScrubResult] = []
+    for record in records:
+        row, field_results = scrub_record(record, detector, backend)
+        detections = tuple(item for result in field_results for item in result.detections)
+        suppressed = tuple(item for result in field_results for item in result.suppressed)
+        status = RowStatus.REDACTED if detections else RowStatus.CLEAN
+        result = ScrubResult("", str(row[args.text_field]), status, backend, detections, suppressed)
+        row["pii"] = {"status": status.value, "backend": backend, "counts": result.counts}
+        results.append(result)
+        output.append(row)
+    input_hash = hashlib.sha256(args.inp.read_bytes()).hexdigest()
+    sha, dirty = _git_provenance()
+    report = render_report(
+        records,
+        results,
+        source=args.inp.as_posix(),
+        field_name=args.text_field,
+        backend=backend,
+        sample_path=None,
+        sample_size=500,
+        seed=args.seed,
+        input_hash=input_hash,
+        git_sha=sha,
+        git_dirty=dirty,
+    )
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(
+        "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in output),
+        encoding="utf-8",
+        newline="\n",
+    )
+    args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(report, encoding="utf-8", newline="\n")
+    counts = Counter(d.entity_type.value for result in results for d, _ in result.detections)
+    print(
+        f"backend={backend} records={len(records)} "
+        f"rows_touched={sum(result.status is RowStatus.REDACTED for result in results)} "
+        f"seed={args.seed}"
+    )
+    print(
+        "counts="
+        + json.dumps({kind.value: counts[kind.value] for kind in EntityType}, sort_keys=True)
+    )
+    print(f"input_sha256={input_hash}")
+    print(f"git_sha={sha} git_dirty={str(dirty).lower()}")
+    print("human_review=pending")
+    return 0
+
+
+def _sample_cli(argv: Sequence[str]) -> int:
+    parser = argparse.ArgumentParser(prog="python -m terser.data.pii sample")
+    parser.add_argument("--in", dest="inp", type=Path, required=True)
+    parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--text-field", default="prompt")
+    parser.add_argument("--sample-size", type=int, default=500)
+    parser.add_argument("--seed", type=int, default=0)
+    args = parser.parse_args(argv)
+    _distinct_paths([args.inp, args.out])
+    records = _read_jsonl(args.inp)
+    if args.sample_size <= 0 or len(records) < args.sample_size:
+        raise ValueError(
+            f"sample requires at least {args.sample_size} rows and a positive sample size"
+        )
+    for i, record in enumerate(records):
+        if not isinstance(record.get(args.text_field), str):
+            raise ValueError(f"row {i + 1} lacks string field {args.text_field!r}")
+    indices = sample_indices(len(records), args.sample_size, args.seed)
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    with args.out.open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.writer(stream, lineterminator="\n")
+        writer.writerow(["id", "scrubbed", "row_json", "reviewer_pii_found", "reviewer_notes"])
+        for i in indices:
+            record = records[i]
+            writer.writerow(
+                [
+                    _record_id(record, i),
+                    record[args.text_field],
+                    json.dumps(record, ensure_ascii=False),
+                    "",
+                    "",
+                ]
+            )
+    print(
+        f"sample_rows={len(indices)} population={len(records)} seed={args.seed} "
+        "human_review=pending"
+    )
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """CLI entry point (``python -m terser.data.pii scan ...``)."""
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == "sample":
+        return _sample_cli(argv[1:])
+    if not argv or argv[0] != "scan":
+        return _strict_cli(argv)
     parser = argparse.ArgumentParser(prog="python -m terser.data.pii", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     scan = sub.add_parser("scan", help="scrub a JSONL file and write report + review sample")
@@ -1065,7 +1347,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     scan.add_argument("--sample", help="manual-review sample CSV path")
     scan.add_argument("--sample-size", type=int, default=500)
     scan.add_argument("--seed", type=int, default=0)
-    scan.add_argument("--backend", choices=("auto", "regex", "presidio"), default="auto")
+    scan.add_argument("--backend", choices=("auto", "regex", "presidio"), default="regex")
     scan.add_argument("--policy", help="JSON/YAML mapping entity type -> action (overrides)")
     args = parser.parse_args(argv)
 
