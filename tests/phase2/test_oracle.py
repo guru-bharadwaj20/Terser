@@ -247,3 +247,19 @@ def test_validate_prompts_accepts_id_column() -> None:
     out = validate_prompts(pd.DataFrame({"id": ["p1", "p2"], "category": ["Code", "fact"]}))
     assert out["prompt_id"].tolist() == ["p1", "p2"]
     assert out["category"].tolist() == ["code", "fact"]
+
+
+def test_validate_token_counts_normalises_stage_original_ids() -> None:
+    import pandas as pd
+
+    from terser.phase2.oracle import ORIGINAL_ID, validate_token_counts
+
+    df = pd.DataFrame(
+        {
+            "prompt_id": ["p1", "p1"],
+            "candidate_id": ["p1:original", "p1:c1"],
+            "target": ["qwen2.5", "qwen2.5"],
+            "tokens": [10, 7],
+        }
+    )
+    assert validate_token_counts(df)["candidate_id"].tolist() == [ORIGINAL_ID, "p1:c1"]
