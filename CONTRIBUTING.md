@@ -315,7 +315,7 @@ downstream can be measured without it.
 | :---: | :--- | :--- | :--- | :---: |
 | 2.3.1 | Task metrics | `code`: unit-test pass rate · `fact`: EM / token F1 · `reason`: final-answer accuracy | `terser.judge.metrics` with tests | ✅ |
 | 2.3.2 | Rubrics | Per-category YAML: coverage, correctness, depth, constraint adherence, tone | `src/terser/judge/rubrics/*.yaml` | ✅ |
-| 2.3.3 | Pairwise judge with position swap | Qwen2.5-32B-Instruct-AWQ (fallback 14B-AWQ) on vLLM judges (original-output, rewrite-output) in both A/B orders | `judge` stage output | ❌ |
+| 2.3.3 | Pairwise judge with position swap | Qwen2.5-32B-Instruct-AWQ (fallback 14B-AWQ) on vLLM judges (original-output, rewrite-output) in both A/B orders | `judge` stage output |✅ |
 | 2.3.4 | Label definition | `preserved` iff task metric not worse **and** judge says tie-or-rewrite-better in **both** orders | `label` stage + tests | ✅ |
 | 2.3.5 | Human annotation | 2 annotators label **300 pairs** (50/category), blind to which is the rewrite | `data/gold/human_300.jsonl` + guideline doc | ❌ |
 | 2.3.6 | Agreement analysis | Human–human κ, judge–human κ per category, position-bias rate | `reports/p2_judge_validation.md` | ❌ |
@@ -324,8 +324,8 @@ downstream can be measured without it.
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 2.4.1 | Oracle rewrite | Shortest candidate still `preserved`, per prompt and target | `oracle` table | ❌ |
-| 2.4.2 | Headroom report | Oracle savings per target × category; degraded share among candidates | `reports/p2_headroom.md` | ❌ |
+| 2.4.1 | Oracle rewrite | Shortest candidate still `preserved`, per prompt and target | `oracle` table |✅ |
+| 2.4.2 | Headroom report | Oracle savings per target × category; degraded share among candidates | `reports/p2_headroom.md` |✅ |
 
 ### Checkpoint C2 — Dataset, Judge, Headroom
 
@@ -337,8 +337,8 @@ downstream can be measured without it.
 | C2.4 🚧 | Judge–human agreement | κ **≥ 0.60** overall and **≥ 0.50** in every category | ❌ |
 | C2.5 🚧 | Judge as degradation detector | Sensitivity **≥ 0.85**, specificity **≥ 0.80** vs human labels | ❌ |
 | C2.6 | Position bias | A/B-order disagreement **≤ 10%** | ❌ |
-| C2.7 🚧 | **Go / no-go: oracle savings** | Median **≥ 25%** on ≥ 2 targets; ≥ 15% in ≥ 5 of 6 categories. Also reported (not gated) on the real-prompt slice 2.1.8. On failure: negative-result report and scope narrowing before continuing | ❌ |
-| C2.8 | Class balance | Degraded share among candidates between **15% and 60%** | ❌ |
+| C2.7 🚧 | **Go / no-go: oracle savings** | Median **≥ 25%** on ≥ 2 targets; ≥ 15% in ≥ 5 of 6 categories. Also reported (not gated) on the real-prompt slice 2.1.8. On failure: negative-result report and scope narrowing before continuing |✅ |
+| C2.8 | Class balance | Degraded share among candidates between **15% and 60%** |✅ |
 | C2.9 | Reproducibility | `dvc repro` gives an identical dataset hash from cached responses | ❌ |
 
 ---
