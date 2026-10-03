@@ -15,8 +15,8 @@ Pipeline (deterministic for a fixed revision and seed):
    mostly letters, and not a pasted log or forum dump.
    All user metadata (hashed IP, country, state, headers) is dropped at parse time.
 3. **Deduplicate** on whitespace- and case-normalised text.
-4. **PII-scrub** with :func:`terser.data.pii.scrub` (regex layer); rows the policy drops are
-   removed. This is on top of the authors' de-identification.
+4. **PII-scrub** with :func:`terser.data.pii.scrub_text` (strict typed redaction).
+   This is on top of the authors' de-identification.
 5. **Category-tag** with :func:`tag_category`, an ordered keyword rule set; prompts matching no
    rule are dropped. Tags are heuristic and marked ``category_source: "rules"``.
 6. **Sample** a category-balanced slice (quota per category, shortfalls redistributed) in
@@ -46,7 +46,7 @@ from pathlib import Path
 from typing import Any, Final
 
 from terser.data.categories import Category
-from terser.data.pii import scrub
+from terser.data.pii import scrub_text
 from terser.data.sources import MANIFEST_NAME, sha256_file, verify_manifest
 from terser.data.splits import freeze_test, verify_frozen
 
@@ -337,7 +337,7 @@ def build_records(rows: Iterable[Mapping[str, Any]], summary: SliceSummary) -> l
             summary.duplicates += 1
             continue
         seen.add(key)
-        result = scrub(rec["instruction"])
+        result = scrub_text(rec["instruction"])
         if result.scrubbed is None:
             summary.pii_dropped += 1
             continue
