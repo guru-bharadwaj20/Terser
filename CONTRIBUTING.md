@@ -307,7 +307,7 @@ downstream can be measured without it.
 | 2.2.2 | Token counts | Every prompt and candidate on every target tokenizer | Counts table, 0 missing | ✅ |
 | 2.2.3 | Target outputs | Qwen2.5-7B-Instruct and Phi-3.5-mini-instruct ([ADR-0011](docs/decisions/ADR-0011-second-family-phi35.md)) on vLLM bf16, temperature 0 (creative: n = 3 samples) | `respond` stage output | ✅ |
 | 2.2.4 | Pipeline smoke run (pre-GPU) | `respond → judge → label` on 50 prompts with Qwen2.5-0.5B/1.5B via Ollama on CPU, through the same `terser.llm` client | Stages run end to end; every output tagged `stand_in: true` and excluded from labels | ✅ |
-| 2.2.5 | Judge self-preference control | Second judge Llama-3.1-8B-Instruct on 1,000 pairs; compare verdict agreement separately for Qwen-target and Llama-target outputs | Report: agreement gap between target families ≤ 5 pp, or mitigation documented | ❌ |
+| 2.2.5 | Judge self-preference control | Second judge Llama-3.1-8B-Instruct on 1,000 pairs; compare verdict agreement separately for Qwen-target and Llama-target outputs | Report: agreement gap between target families ≤ 5 pp, or mitigation documented |✅ |
 
 ### 2.3 Quality Judging
 
