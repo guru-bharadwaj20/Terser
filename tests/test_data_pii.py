@@ -401,11 +401,10 @@ def test_make_detector_validates_backend() -> None:
         pii.make_detector("spacy")
 
 
-def test_presidio_backend_raises_when_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_presidio_backend_falls_back_when_missing(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(pii, "presidio_available", lambda: False)
     assert pii.make_detector("auto")[1] == "regex"
-    with pytest.raises(RuntimeError):
-        pii.make_detector("presidio")
+    assert pii.make_detector("presidio")[1] == "regex"
 
 
 # --------------------------------------------------------------------------------------------
