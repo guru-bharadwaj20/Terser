@@ -1,0 +1,61 @@
+Local DVC initial add (exit 255):
+ERROR: unexpected error - [Errno 30] Read-only file system: '/var/tmp/dvc'
+
+Having any troubles? Hit us up at https://dvc.org/support, we are always happy to help!
+
+DVC retry with DVC_SITE_CACHE_DIR=/tmp/terser-dvc-site-cache and autostage temporarily disabled (exit 0):
+
+To track the changes with git, run:
+
+	git add data/raw/p2_smoke_20261003.dvc data/interim/p2_smoke_20261003.dvc
+
+To enable auto staging, run:
+
+	dvc config core.autostage true
+
+Final DVC add after retaining the prior wrapper (exit 0):
+
+To track the changes with git, run:
+
+	git add data/raw/p2_smoke_20261003.dvc
+
+To enable auto staging, run:
+
+	dvc config core.autostage true
+
+DVC status of both pointers (exit 0):
+Data and pipelines are up to date.
+
+Initial local content audit (link check failed before handoff file existed):
+DVC_content_verified data/raw/p2_smoke_20261003 64c062cc02287462965b805ec811e76b.dir files 1162
+DVC_content_verified data/interim/p2_smoke_20261003 8fa2095930f65ac81fc2f01591cb9bc5.dir files 6
+cache_records 868
+real_call_ledger 868 completion_tokens 130313
+tracking_audit 9 runs, 5 finished, required tags and metrics present
+mlflow.db integrity ok
+mlflow_worker1.db integrity ok
+executed_source_and_both_wrapper_hashes_verified
+Traceback (most recent call last):
+  File "/tmp/p2_local_verify.py", line 41, in <module>
+    if '://' not in target and not target.startswith('#'):assert (path.parent/target.split('#')[0]).exists(),(path,target)
+                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+AssertionError: (PosixPath('/home/viviansobers/Documents/Terser/reports/p2_gpu_smoke.md'), 'p2_smoke_commit_handoff.md')
+
+Final local verification (exit 0):
+DVC_content_verified data/raw/p2_smoke_20261003 64c062cc02287462965b805ec811e76b.dir files 1162
+DVC_content_verified data/interim/p2_smoke_20261003 8fa2095930f65ac81fc2f01591cb9bc5.dir files 6
+cache_records 868
+real_call_ledger 868 completion_tokens 130313
+tracking_audit 9 runs, 5 finished, required tags and metrics present
+mlflow.db integrity ok
+mlflow_worker1.db integrity ok
+executed_source_and_both_wrapper_hashes_verified
+report_links_verified
+LOCAL VERIFICATION PASSED
+
+Final Git checks:
+branch: main
+staged files: none
+git diff --check: no output, exit 0
+tracked modification: docs/checkpoints/C7/serving.md
+No CONTRIBUTING or queue configuration diff.
