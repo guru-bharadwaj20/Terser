@@ -126,5 +126,6 @@ stages:
       - data/interim/label_prompts.jsonl
       - data/interim/candidates.jsonl
       - src/terser/data/token_counts.py
+      - src/terser/tokenizers/count.py
     outs:
       - data/interim/token_counts.parquet
