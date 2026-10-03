@@ -16,7 +16,7 @@ cache_dir: .cache/llm_responses/
 phases:
   phase0: {max_usd: 1, max_tokens: 200000, allow_unpriced: false}
   phase1: {max_usd: 25, max_tokens: 5000000, allow_unpriced: false}
-  phase2: {max_usd: 300, max_tokens: 60000000, allow_unpriced: false}
+  phase2: {max_usd: 300, max_tokens: 250000000, allow_unpriced: false}
   phase3: {max_usd: 0, max_tokens: 0, allow_unpriced: false}
   phase4: {max_usd: 0, max_tokens: 0, allow_unpriced: false}
   phase5: {max_usd: 30, max_tokens: 6000000, allow_unpriced: false}
