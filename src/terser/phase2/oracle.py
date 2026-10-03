@@ -234,6 +234,9 @@ def validate_candidates(df: pd.DataFrame) -> pd.DataFrame:
 def validate_token_counts(df: pd.DataFrame) -> pd.DataFrame:
     """Validate the token-count table: unique keys, integer ``tokens >= 0``, originals ``> 0``.
 
+    The token-count stage (:mod:`terser.data.token_counts`) ids originals ``<prompt_id>:original``;
+    those are normalised to ``ORIGINAL_ID``.
+
     Raises:
         Phase2InputError: On any schema problem.
     """
@@ -241,6 +244,8 @@ def validate_token_counts(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
     for col in ("prompt_id", "candidate_id", "target"):
         out[col] = out[col].astype(str)
+    stage_orig = out["candidate_id"] == out["prompt_id"] + ":" + ORIGINAL_ID
+    out.loc[stage_orig, "candidate_id"] = ORIGINAL_ID
     _require_keys(out, ("prompt_id", "candidate_id", "target"), "token_counts")
     tokens = pd.to_numeric(out["tokens"], errors="coerce")
     if tokens.isna().any() or (tokens % 1 != 0).any() or (tokens < 0).any():
