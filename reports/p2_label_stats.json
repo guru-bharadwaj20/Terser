@@ -1,0 +1,12 @@
+{
+  "records": 20986,
+  "judged_pairs": 17644,
+  "identical_pairs": 3342,
+  "calls": 41986,
+  "cached_calls": 24132,
+  "generated_tokens": 805371,
+  "raw_disagreements": 10432,
+  "raw_parsed": 23718,
+  "low_margin": 4874,
+  "wall_seconds": 13042.482818833001
+}
