@@ -227,8 +227,12 @@ stages:
       hash: md5
       md5: 7bddce591d39c335cc5eb88005f2bed7
       size: 10474
+    - path: src/terser/tokenizers/count.py
+      hash: md5
+      md5: e4770ddb1d8b2121826791aa451d7a63
+      size: 6816
     outs:
     - path: data/interim/token_counts.parquet
       hash: md5
-      md5: 5c5a6bba088a4784370af9f96bbf00e0
-      size: 230822
+      md5: b2fe3fd1dee0a5f61ba762ee03350f8d
+      size: 271448
