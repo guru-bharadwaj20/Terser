@@ -21,8 +21,12 @@ STRINGS = [
     if line
 ]
 SNAPSHOT = json.loads((FIXTURES / "tokenizer_counts.json").read_text(encoding="utf-8"))
-LOCAL_TARGETS = ["gpt-4o", "qwen2.5", "llama-3.1"]
-HF_REPOS = {"qwen2.5": "Qwen/Qwen2.5-7B-Instruct", "llama-3.1": tc.LLAMA_MIRROR}
+LOCAL_TARGETS = ["gpt-4o", "qwen2.5", "llama-3.1", "phi3.5"]
+HF_REPOS = {
+    "qwen2.5": "Qwen/Qwen2.5-7B-Instruct",
+    "llama-3.1": tc.LLAMA_MIRROR,
+    "phi3.5": "microsoft/Phi-3.5-mini-instruct",
+}
 
 
 def test_fixture_size() -> None:
