@@ -1,0 +1,20 @@
+{
+  "per_target": {
+    "Qwen/Qwen2.5-7B-Instruct": {
+      "pairs": 500,
+      "side_agreement": 0.468,
+      "label_agreement": 0.614,
+      "main_judge_tie_or_rewrite": 0.516
+    },
+    "microsoft/Phi-3.5-mini-instruct": {
+      "pairs": 500,
+      "side_agreement": 0.504,
+      "label_agreement": 0.662,
+      "main_judge_tie_or_rewrite": 0.492
+    }
+  },
+  "side_agreement_gap_pp": 3.599999999999998,
+  "label_agreement_gap_pp": 4.800000000000004,
+  "threshold_pp": 5.0,
+  "passes": true
+}
