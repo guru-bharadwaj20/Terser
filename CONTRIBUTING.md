@@ -545,7 +545,7 @@ dangerous, and use them to stratify training and evaluation.
 | 6.6 | Divisive clustering | Top-down recursive bisection; tree compared with 6.5 | Figure + cophenetic correlation | ✅ |
 | 6.7 | **K-means as a special case of EM** | GMM-EM with shared spherical covariance σ²I; anneal σ → 0; responsibilities become hard | `docs/derivations/kmeans_em.md` + assignment agreement vs K-means | ✅ |
 | 6.8 | Clusters vs categories | ARI, NMI, contingency table against the 6 hand-defined categories | Table | ✅ |
-| 6.9 | Per-cluster risk | Oracle savings and degradation rate per cluster; high-risk clusters become eval slices in 12.3 | `reports/p6_cluster_risk.md` | ❌ |
+| 6.9 | Per-cluster risk | Oracle savings and degradation rate per cluster; high-risk clusters become eval slices in 12.3 | `reports/p6_cluster_risk.md` | ✅ |
 
 ### Checkpoint C6 — Structure Discovered and Used
 
