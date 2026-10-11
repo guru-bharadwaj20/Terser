@@ -8,7 +8,8 @@ prompt on the base tokenizer.
 Entry point::
 
     python -m terser.models.rewriter.generate --base Qwen/Qwen2.5-0.5B-Instruct \
-        --model models/rewriter/sft-qwen0.5b-full --out data/interim/rewrites/sft-qwen0.5b-full.jsonl
+        --model models/rewriter/sft-qwen0.5b-full \
+        --out data/interim/rewrites/sft-qwen0.5b-full.val.jsonl
 """
 
 from __future__ import annotations
@@ -70,7 +71,9 @@ def main(argv: Sequence[str] | None = None) -> int:  # pragma: no cover - GPU on
             seqs = [tok(r["prompt"], add_special_tokens=False)["input_ids"] + [sep] for r in chunk]
             width = max(map(len, seqs))
             ids = torch.tensor([[pad] * (width - len(s)) + s for s in seqs], device="cuda")
-            mask = torch.tensor([[0] * (width - len(s)) + [1] * len(s) for s in seqs], device="cuda")
+            mask = torch.tensor(
+                [[0] * (width - len(s)) + [1] * len(s) for s in seqs], device="cuda"
+            )
             t0 = time.perf_counter()
             with torch.no_grad():
                 gen = model.generate(
