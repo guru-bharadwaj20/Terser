@@ -552,7 +552,7 @@ dangerous, and use them to stratify training and evaluation.
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
 | C6.1 | Clustering quality | Silhouette **≥ 0.10** at the chosen k | ❌ |
-| C6.2 | K-means ⇔ EM | Assignment agreement **≥ 98%** at the smallest σ | ❌ |
+| C6.2 | K-means ⇔ EM | Assignment agreement **≥ 98%** at the smallest σ | ✅ |
 | C6.3 | Actionable finding | ≥ 1 high-risk cluster (degradation rate ≥ 1.5× average) tracked as an eval slice | ❌ |
 
 ---
