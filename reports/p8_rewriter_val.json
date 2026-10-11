@@ -1,0 +1,44 @@
+{
+  "sft05": {
+    "n": 285,
+    "targets": [
+      "Qwen/Qwen2.5-7B-Instruct",
+      "microsoft/Phi-3.5-mini-instruct"
+    ],
+    "median_savings": 0.07581227436823101,
+    "oracle_median_savings": 0.09999999999999998,
+    "fell_back": 98,
+    "latency_s": 0.3337179620140345,
+    "preserved": 0.6736842105263158,
+    "preserved_by_category": {
+      "code": 0.7156862745098039,
+      "creative": 0.5319148936170213,
+      "explain": 0.6428571428571429,
+      "fact": 0.7454545454545455,
+      "reason": 0.71875,
+      "transform": 0.6632653061224489
+    },
+    "c8_3": false
+  },
+  "sft15": {
+    "n": 285,
+    "targets": [
+      "Qwen/Qwen2.5-7B-Instruct",
+      "microsoft/Phi-3.5-mini-instruct"
+    ],
+    "median_savings": 0.07581227436823101,
+    "oracle_median_savings": 0.09999999999999998,
+    "fell_back": 101,
+    "latency_s": 0.502591505456141,
+    "preserved": 0.6929824561403509,
+    "preserved_by_category": {
+      "code": 0.5882352941176471,
+      "creative": 0.6914893617021277,
+      "explain": 0.6285714285714286,
+      "fact": 0.6636363636363637,
+      "reason": 0.8229166666666666,
+      "transform": 0.7551020408163265
+    },
+    "c8_3": false
+  }
+}
