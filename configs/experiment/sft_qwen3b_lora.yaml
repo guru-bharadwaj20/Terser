@@ -1,0 +1,18 @@
+# Row 8.3.4 escalation (rung 3): Qwen2.5-3B LoRA r=16, alpha=32, bf16; rung 2 failed C8.3
+# (reports/p8_rewriter_val.md). 1000 steps (~3 epochs): 3000 steps drove rung 1/2 loss to ~0.
+name: sft_qwen3b_lora
+phase: 8
+row: "8.3.4"
+task: rewriter_sft
+params:
+  model: Qwen/Qwen2.5-3B-Instruct
+  lora: {r: 16, alpha: 32, dropout: 0.05}
+  grad_checkpointing: true
+  data: ${paths.data_dir}/processed/sft/train.jsonl
+  limit: null
+  max_len: 1024
+  steps: 1000
+  batch_size: 4
+  lr: 2.0e-4
+  output_dir: ${paths.root}/models/rewriter/sft-qwen3b-lora
+  save_weights: true
