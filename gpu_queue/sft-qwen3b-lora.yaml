@@ -1,0 +1,11 @@
+# Row 8.3.4 escalation: rewriter rung 3, only because rung 2 failed C8.3 (reports/p8_rewriter_val.md).
+id: sft-qwen3b-lora
+phase: 8
+depends_on: [C7.1, C2.3, sft-qwen1.5b-lora]
+command: python -m terser.models.rewriter.train experiment=sft_qwen3b_lora hardware=rtx4090
+est_vram_gb: 20
+est_hours: 3
+exclusive: true
+priority: 2
+cpu_smoke_test: tests/rewriter/test_train_tiny.py
+outputs: [models/rewriter/sft-qwen3b-lora/, mlruns/]
