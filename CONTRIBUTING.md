@@ -537,7 +537,7 @@ dangerous, and use them to stratify training and evaluation.
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 6.1 | Prompt embeddings | bge-small 384-d for all train prompts | Cached matrix + id index; raises on missing id | ❌ |
+| 6.1 | Prompt embeddings | bge-small 384-d for all train prompts | Cached matrix + id index; raises on missing id | ✅ |
 | 6.2 | K-means | k-means++, k ∈ 4..30; elbow + silhouette | `reports/figures/p6_kmeans_k.png` | ❌ |
 | 6.3 | Bisecting K-means | Same k range; SSE and cluster-size balance vs K-means | Comparison table | ❌ |
 | 6.4 | Hierarchical vs non-hierarchical | Written comparison of assumptions, cost, output | `reports/p6_clustering.md` §1 | ✅ |
