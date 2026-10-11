@@ -1,0 +1,6 @@
+outs:
+- md5: e08b491f1927387639e440b2d99c9580.dir
+  size: 7861229
+  nfiles: 7
+  hash: md5
+  path: rewrites
