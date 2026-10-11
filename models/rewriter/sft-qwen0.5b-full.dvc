@@ -1,0 +1,6 @@
+outs:
+- md5: db6457ff56acd778cba8b46edf69bd89.dir
+  size: 988176083
+  nfiles: 4
+  hash: md5
+  path: sft-qwen0.5b-full
