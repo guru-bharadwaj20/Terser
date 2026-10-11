@@ -539,7 +539,7 @@ dangerous, and use them to stratify training and evaluation.
 | :---: | :--- | :--- | :--- | :---: |
 | 6.1 | Prompt embeddings | bge-small 384-d for all train prompts | Cached matrix + id index; raises on missing id | ✅ |
 | 6.2 | K-means | k-means++, k ∈ 4..30; elbow + silhouette | `reports/figures/p6_kmeans_k.png` | ✅ |
-| 6.3 | Bisecting K-means | Same k range; SSE and cluster-size balance vs K-means | Comparison table | ❌ |
+| 6.3 | Bisecting K-means | Same k range; SSE and cluster-size balance vs K-means | Comparison table | ✅ |
 | 6.4 | Hierarchical vs non-hierarchical | Written comparison of assumptions, cost, output | `reports/p6_clustering.md` §1 | ✅ |
 | 6.5 | Agglomerative clustering | Ward / average / complete linkage on a 2,000-prompt sample | Dendrograms | ❌ |
 | 6.6 | Divisive clustering | Top-down recursive bisection; tree compared with 6.5 | Figure + cophenetic correlation | ❌ |
