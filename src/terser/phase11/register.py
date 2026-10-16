@@ -28,6 +28,7 @@ from pathlib import Path
 from typing import Any
 
 import mlflow
+from mlflow.pyfunc import PythonModel
 
 from terser.tracking.lineage import MODEL_NAMES, register_with_lineage, trace
 from terser.tracking.runs import promote, start_run
@@ -81,7 +82,7 @@ COMPONENTS: list[dict[str, Any]] = [
 ]
 
 
-class _Artifacts(mlflow.pyfunc.PythonModel):  # type: ignore[misc]
+class _Artifacts(PythonModel):
     """Registry wrapper: the version's files live under ``artifacts['weights']``; serving loads
     them with ONNX Runtime / vLLM, not through ``predict``."""
 

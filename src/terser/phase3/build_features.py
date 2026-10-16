@@ -115,7 +115,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     @cache
     def bits(toks: tuple[str, ...]) -> list[float]:
-        return surprisal(list(toks)) if toks else []
+        return list(surprisal(list(toks))) if toks else []
 
     def si(toks: Sequence[str]) -> list[float]:
         return bits(tuple(toks))

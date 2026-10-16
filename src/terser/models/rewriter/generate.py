@@ -33,6 +33,7 @@ def _load(base: str, model_dir: str) -> tuple[Any, Any]:  # pragma: no cover - G
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     tok = AutoTokenizer.from_pretrained(base)
+    model: Any
     if (Path(model_dir) / "adapter_config.json").exists():
         from peft import PeftModel
 

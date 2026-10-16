@@ -172,8 +172,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     if args.render_only:
-        out = json.loads((args.reports / "p6_results.json").read_text(encoding="utf-8"))
-        (args.reports / "p6_results.md").write_text(render_results(out), encoding="utf-8")
+        saved = json.loads((args.reports / "p6_results.json").read_text(encoding="utf-8"))
+        (args.reports / "p6_results.md").write_text(render_results(saved), encoding="utf-8")
         return 0
     cache = EmbeddingCache.load(args.embeddings, args.name)
     prompts = {r["id"]: r for r in _jsonl(args.split)}
