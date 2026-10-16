@@ -31,3 +31,17 @@ Frozen test split: `data/processed/splits/test.jsonl`, sha256
 - C2.1 ✅ ≥ 6,000 casual prompts (7,080), ≥ 800 per category (min 1,062), < 1% near-duplicates (0.00%).
 - C2.2 ✅ 0 source prompts shared across splits (checked inside the `split` stage and by `tests/test_data_splits.py`).
 - C2.9 stays open: it covers the full dataset including the `respond`/`judge`/`label` stages, which are not yet DVC stages.
+
+## Known stale stage: collect
+
+`dvc status` reports `collect` as changed: `src/terser/data/collect.py` was edited after the
+lock was written (2.1.3, commit `54616c1`, 2026-10-03: PII is now scrubbed at the collection
+boundary instead of the row being dropped), and `pii.py` has had formatting-only edits since.
+Re-running the current code gives a different `clean.jsonl` (md5 `6a7c9567…` vs the locked
+`261be958…`; 22,272 eligible rows instead of 22,248, because the 24 PII rows are now scrubbed
+and kept). Every downstream stage, the frozen test split (sha256 above) and all labels were
+built from the locked `clean.jsonl`, so `collect` is deliberately **not** re-run: `split` would
+fail its `--expect-test-sha256` check and every label would need regenerating. The locked
+dataset dropped all 24 PII-flagged rows, so it carries no unscrubbed PII.
+`dvc repro --dry --allow-missing` (CI) still passes. A future dataset version should re-run the
+whole pipeline from `collect` and re-freeze the test split.
