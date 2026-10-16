@@ -82,6 +82,8 @@ class _Artifacts(mlflow.pyfunc.PythonModel):  # type: ignore[misc]
     them with ONNX Runtime / vLLM, not through ``predict``."""
 
     def predict(self, context: Any, model_input: Any, params: Any = None) -> Any:
+        """Return the artifact path; the input is ignored (the model is a file bundle)."""
+        del model_input, params
         return context.artifacts["weights"]
 
 
