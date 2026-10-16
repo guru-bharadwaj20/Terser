@@ -10,7 +10,8 @@ through the stage aliases ``None -> Staging -> Production -> Archived``:
   until one passes C8.3 (the promotion guard, row 11.4.4, would refuse it).
 
 Each version carries the lineage tags of row 11.2.3 (git SHA, DVC data hash, config + sha256,
-checkpoints passed, source run). :func:`terser.tracking.lineage.trace` is run on every
+checkpoints passed, source run); metrics come from ``reports/p11_fast_path.json`` and
+``reports/p8_rewriter_val.json``. :func:`terser.tracking.lineage.trace` is run on every
 Production / Staging alias as the check. Output: ``reports/p11_registry.md``.
 
 CLI::
@@ -31,8 +32,11 @@ import mlflow
 from terser.tracking.lineage import MODEL_NAMES, register_with_lineage, trace
 from terser.tracking.runs import promote, start_run
 
-__all__ = ["main"]
+__all__ = ["COMPONENTS", "load_metrics", "main"]
 
+REWRITER_METRICS = {"median_savings": "median_savings", "preserved": "preserved"}
+# Each component's metrics: (json file, key or None, {logged name: field}). The files are
+# written by the runs that measured them (row 11.3.2 trainer, row 8.3.5 val report).
 COMPONENTS: list[dict[str, Any]] = [
     {
         "component": "gate",
@@ -40,7 +44,7 @@ COMPONENTS: list[dict[str, Any]] = [
         "config": {"model": "GradientBoostingClassifier", "n_estimators": 200, "max_depth": 3},
         "checkpoints": ["C3.1"],
         "stages": ["Staging", "Production"],
-        "metrics": {"grouped_auc": 0.760},
+        "metrics": ("reports/p11_fast_path.json", None, {"grouped_auc": "gate_auc"}),
     },
     {
         "component": "tagger",
@@ -48,7 +52,7 @@ COMPONENTS: list[dict[str, Any]] = [
         "config": {"model": "DecisionTreeClassifier", "max_depth": 10, "min_samples_leaf": 50},
         "checkpoints": [],
         "stages": ["Staging", "Production"],
-        "metrics": {"droppable_macro_f1": 0.631},
+        "metrics": ("reports/p11_fast_path.json", None, {"droppable_macro_f1": "tagger_macro_f1"}),
     },
     {
         "component": "rewriter",
@@ -56,7 +60,7 @@ COMPONENTS: list[dict[str, Any]] = [
         "config": {"experiment": "sft_qwen05b_full", "row": "8.3.3"},
         "checkpoints": [],
         "stages": ["Staging", "Archived"],
-        "metrics": {"median_savings": 0.076, "preserved": 0.674},
+        "metrics": ("reports/p8_rewriter_val.json", "sft05", REWRITER_METRICS),
     },
     {
         "component": "rewriter",
@@ -64,7 +68,7 @@ COMPONENTS: list[dict[str, Any]] = [
         "config": {"experiment": "sft_qwen15b_lora", "row": "8.3.4"},
         "checkpoints": [],
         "stages": ["Staging", "Archived"],
-        "metrics": {"median_savings": 0.076, "preserved": 0.693},
+        "metrics": ("reports/p8_rewriter_val.json", "sft15", REWRITER_METRICS),
     },
     {
         "component": "rewriter",
@@ -72,7 +76,7 @@ COMPONENTS: list[dict[str, Any]] = [
         "config": {"experiment": "sft_qwen3b_lora", "row": "8.3.4"},
         "checkpoints": [],
         "stages": ["Staging"],
-        "metrics": {"median_savings": 0.021, "preserved": 0.747},
+        "metrics": ("reports/p8_rewriter_val.json", "sft3b", REWRITER_METRICS),
     },
 ]
 
@@ -85,6 +89,14 @@ class _Artifacts(mlflow.pyfunc.PythonModel):  # type: ignore[misc]
         """Return the artifact path; the input is ignored (the model is a file bundle)."""
         del model_input, params
         return context.artifacts["weights"]
+
+
+def load_metrics(src: str, key: str | None, fields: dict[str, str]) -> dict[str, float]:
+    """Read ``fields`` (logged name -> json field) from ``src`` (under ``key`` if given)."""
+    d = json.loads(Path(src).read_text(encoding="utf-8"))
+    if key is not None:
+        d = d[key]
+    return {name: float(d[field]) for name, field in fields.items()}
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -102,7 +114,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             run_name=f"11-register-{c['component']}-{name.replace('.', '')}",
             params=c["config"],
         ) as run:
-            mlflow.log_metrics(c["metrics"])
+            mlflow.log_metrics(load_metrics(*c["metrics"]))
             # MLflow 3 registers logged models only, so the files ride as pyfunc artifacts.
             mlflow.pyfunc.log_model(
                 name="model", python_model=_Artifacts(), artifacts={"weights": str(p)}
