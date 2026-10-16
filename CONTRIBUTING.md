@@ -463,7 +463,7 @@ implementations verified against libraries, plus controlled activation and optim
 | 4.4.3 | Linear kernel derivation | K(x, z) = xᵀz substituted into the dual | `docs/derivations/svm.md` §5 | ✅ |
 | 4.4.4 | **Dual solver from scratch** | QP via `cvxopt` on span features | Same support-vector set as scikit-learn; ‖w − w_sk‖/‖w_sk‖ **< 1e-3** | ✅ |
 | 4.4.5 | Hard margin | Linearly separable filler subset | Support vectors plotted | ✅ |
-| 4.4.6 | Soft margin | C ∈ {0.01, 0.1, 1, 10, 100}: margin width, # support vectors, val metrics | Table + figure | ❌ |
+| 4.4.6 | Soft margin | C ∈ {0.01, 0.1, 1, 10, 100}: margin width, # support vectors, val metrics | Table + figure | ✅ |
 | 4.4.7 | Polynomial kernel | Degree 2, 3 × coef0 × C vs linear | Table: AUC, time, # SVs | ❌ |
 | 4.4.8 | Decision surfaces | Linear vs polynomial on the Phase 3 2-D plane | `reports/figures/p4_svm_surfaces.png` | ❌ |
 
