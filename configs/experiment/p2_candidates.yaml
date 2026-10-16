@@ -41,5 +41,6 @@ params:
   llmlingua_device: cpu
   llmlingua_cache_dir: ${paths.cache_dir}/llmlingua2
   limit: null                   # first N prompts; null = all
+  exclude_splits: []            # skip prompts whose `split` is listed, e.g. [test]
   budget_phase: phase2
   workers: 1                    # concurrent LLM requests; GPU runs use 32 so vLLM can batch

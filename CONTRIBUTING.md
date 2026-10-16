@@ -995,6 +995,10 @@ pre-commit install
 pytest -m "not gpu and not api"
 ```
 
+`bash scripts/ci_local.sh` runs the same checks as the CI workflow (ruff, black, mypy, DVC dry
+run, test-set audit, feature parity, tokenizer drift, CPU tests) when GitHub Actions is
+unavailable or before a push.
+
 On the RTX 4090 workers the system interpreter is Python 3.10, below this project's minimum.
 Create the environment with an explicit 3.11 or newer interpreter (`uv venv --python 3.11` on
 `worker-1`, `/usr/bin/python3.11 -m venv .venv` on `worker-2`).
@@ -1033,7 +1037,10 @@ Create the environment with an explicit 3.11 or newer interpreter (`uv venv --py
 
 ### Coding standards
 
-- Python ≥ 3.11, type hints throughout `src/`, `mypy --strict` clean; `black` + `ruff` via pre-commit.
+- Python ≥ 3.11, type hints throughout `src/`, `mypy src` clean (settings in `pyproject.toml`); `black` + `ruff` via pre-commit.
+- The formatter is **black** (line length 100); ruff is the linter only. `make format` runs
+  `ruff check --fix` then `black`. Do not run `ruff format`: its output differs from black's
+  on some constructs, and CI runs `black --check .`.
 - From-scratch implementations (ID3, LR, KNN, perceptron, backprop, SVM dual, AdaBoost, NB, EM/GMM,
   HMM forward/Viterbi/Baum-Welch, K-means, bisecting K-means, Q-learning) live in
   `src/terser/models/**/scratch_*.py`, each with a derivation link and a test against a library or
