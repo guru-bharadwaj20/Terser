@@ -446,13 +446,13 @@ implementations verified against libraries, plus controlled activation and optim
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 4.2.1 | Activation study | Step (straight-through estimator), sigmoid (+ saturated-unit fraction), tanh, ReLU (+ dead-unit fraction): val AUC, epochs to plateau, per-layer gradient norm; 5 seeds each; mechanism tied to observed behaviour | `reports/p4_activations.md` | ❌ |
+| 4.2.1 | Activation study | Step (straight-through estimator), sigmoid (+ saturated-unit fraction), tanh, ReLU (+ dead-unit fraction): val AUC, epochs to plateau, per-layer gradient norm; 5 seeds each; mechanism tied to observed behaviour | `reports/p4_activations.md` | ✅ |
 
 ### 4.3 Optimizers
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 4.3.1 | Optimizer study | Full-batch GD, SGD (mini-batch 64), SGD + Momentum (β ∈ {0.9, 0.99}), Adagrad, Adam (β₁ 0.9, β₂ 0.999), each over a small lr grid, at **equal gradient-evaluation budget**, 5 seeds; convergence speed vs generalisation tied to each update rule | `reports/figures/p4_optimizers.png` + `reports/p4_optimizers.md` | ❌ |
+| 4.3.1 | Optimizer study | Full-batch GD, SGD (mini-batch 64), SGD + Momentum (β ∈ {0.9, 0.99}), Adagrad, Adam (β₁ 0.9, β₂ 0.999), each over a small lr grid, at **equal gradient-evaluation budget**, 5 seeds; convergence speed vs generalisation tied to each update rule | `reports/figures/p4_optimizers.png` + `reports/p4_optimizers.md` | ✅ |
 
 ### 4.4 Support Vector Machines
 
@@ -462,9 +462,9 @@ implementations verified against libraries, plus controlled activation and optim
 | 4.4.2 | Lagrangian dual | Lagrangian, KKT conditions, dual problem, recovering w and b from support vectors | `docs/derivations/svm.md` §3–4 | ✅ |
 | 4.4.3 | Linear kernel derivation | K(x, z) = xᵀz substituted into the dual | `docs/derivations/svm.md` §5 | ✅ |
 | 4.4.4 | **Dual solver from scratch** | QP via `cvxopt` on span features | Same support-vector set as scikit-learn; ‖w − w_sk‖/‖w_sk‖ **< 1e-3** | ✅ |
-| 4.4.5 | Hard margin | Linearly separable filler subset | Support vectors plotted | ❌ |
-| 4.4.6 | Soft margin | C ∈ {0.01, 0.1, 1, 10, 100}: margin width, # support vectors, val metrics | Table + figure | ❌ |
-| 4.4.7 | Polynomial kernel | Degree 2, 3 × coef0 × C vs linear | Table: AUC, time, # SVs | ❌ |
+| 4.4.5 | Hard margin | Linearly separable filler subset | Support vectors plotted | ✅ |
+| 4.4.6 | Soft margin | C ∈ {0.01, 0.1, 1, 10, 100}: margin width, # support vectors, val metrics | Table + figure | ✅ |
+| 4.4.7 | Polynomial kernel | Degree 2, 3 × coef0 × C vs linear | Table: AUC, time, # SVs | ✅ |
 | 4.4.8 | Decision surfaces | Linear vs polynomial on the Phase 3 2-D plane | `reports/figures/p4_svm_surfaces.png` | ❌ |
 
 ### Checkpoint C4 — Neural and Margin Models
@@ -473,7 +473,7 @@ implementations verified against libraries, plus controlled activation and optim
 | :---: | :--- | :--- | :---: |
 | C4.1 | Backprop correctness | Relative gradient error **< 1e-6** on all layers | ✅ |
 | C4.2 | SVM dual correctness | Support-vector set equals scikit-learn's; weight error **< 1e-3** | ✅ |
-| C4.3 | Studies complete | 4 activations × 5 seeds; 5 optimizers × 5 seeds at equal budget; written interpretation | ❌ |
+| C4.3 | Studies complete | 4 activations × 5 seeds; 5 optimizers × 5 seeds at equal budget; written interpretation | ✅ |
 | C4.4 | Better quality gate | Best MLP/SVM ROC-AUC **≥ C3.3 best + 0.03**, or documented reason (classical model stays champion) | ❌ |
 | C4.5 | Worst category | AUC **≥ 0.70** in every category | ❌ |
 
