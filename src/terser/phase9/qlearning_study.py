@@ -34,7 +34,6 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-import terser.models.rl.env as rl_env
 from terser.features.alignment import tokenize
 from terser.features.embeddings import bge_small_encoder
 from terser.features.lexicons import is_constraint
@@ -42,6 +41,7 @@ from terser.features.pair import pair_features
 from terser.features.span import gpt2_surprisal
 from terser.models.rl.env import RewriteEnv
 from terser.models.rl.scratch_qlearning import QLearner
+from terser.operators.registry import apply_ops
 from terser.phase3.build_features import prompt_features
 from terser.tokenizers.count import count_tokens
 
@@ -117,9 +117,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         category_of[p["prompt"]] = p["category"]
         cons = sorted({t for t in tokenize(p["prompt"]) if is_constraint(t)})
         episodes.append((p["prompt"], p["category"], cons))
-    # Operators are deterministic in (text, op set): cache them for every learner.
-    rl_env.apply_ops = lru_cache(maxsize=None)(rl_env.apply_ops)
-    env = RewriteEnv(count=cost, gate=gate, target=args.target)
+    # Operators are deterministic in (text, op set): one cache shared by every learner.
+    env = RewriteEnv(
+        count=cost, gate=gate, target=args.target, apply=lru_cache(maxsize=None)(apply_ops)
+    )
 
     sweep = []
     learners: dict[tuple[float, float, float], QLearner] = {}
