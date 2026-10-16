@@ -435,7 +435,7 @@ implementations verified against libraries, plus controlled activation and optim
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 4.1.1 | Perceptron from scratch | Step activation; filler vs non-filler spans | Converges on the linearly separable subset; fails to converge on the full set (logged) | ❌ |
+| 4.1.1 | Perceptron from scratch | Step activation; filler vs non-filler spans | Converges on the linearly separable subset; fails to converge on the full set (logged) | ✅ |
 | 4.1.2 | Pair embedding input | `[e_o, e_r, \|e_o − e_r\|, e_o ⊙ e_r]` from 384-d bge-small ⇒ **1536-d** | Cached `data/features/pair_emb.npy` + id index | ✅ |
 | 4.1.3 | NumPy MLP with backprop | Forward, backward, update; no autograd | Gradient check vs finite differences, relative error **< 1e-6**; matches `torch.autograd` | ✅ |
 | 4.1.4 | PyTorch MLP quality gate | 1536 → 256 → 64 → 1 | Scored under the 3.2.4 protocol | ✅ |
