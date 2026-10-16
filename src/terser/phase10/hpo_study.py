@@ -8,7 +8,7 @@
   1-3, width 64-512, dropout, lr, weight decay).
 * ``report``: best-so-far curves (mean ± sd over repeats) in
   ``reports/figures/p10_hpo_methods.png`` and ``reports/p10_hpo.md``, with the untuned
-  baseline for C10.2.
+  baseline for C10.2; the same table as numbers in ``reports/p10_hpo.csv``.
 
 Every trial and best-so-far curve goes to MLflow (``terser.hpo.search.run_search(mlflow=True)``);
 results also land in ``reports/p10_hpo/<model>_<method>.json``. Train split only.
@@ -158,6 +158,10 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cell(v: object) -> str:
+    return f"{v:.4f}" if isinstance(v, float) else str(v)
+
+
 def cmd_report(args: argparse.Namespace) -> int:
     import matplotlib
 
@@ -184,8 +188,9 @@ def cmd_report(args: argparse.Namespace) -> int:
                     "model": model,
                     "method": r["method"],
                     "trials": curves.shape[1],
-                    "best_auc": f"{np.mean(bests):.4f} ± {np.std(bests):.4f}",
-                    "best_at_20": f"{at20.mean():.4f}",
+                    "best_auc": float(np.mean(bests)),
+                    "best_auc_sd": float(np.std(bests)),
+                    "best_at_20": float(at20.mean()),
                     "best_params (seed 0)": r["repeats"][0]["best_params"],
                 }
             )
@@ -199,7 +204,8 @@ def cmd_report(args: argparse.Namespace) -> int:
     fig.savefig(figs / "p10_hpo_methods.png", dpi=150)
     plt.close(fig)
     df = pd.DataFrame(rows)
-    tuned = max(float(r["best_auc"].split(" ")[0]) for r in rows if r["model"] == "gbm")
+    tuned = float(df.loc[df.model == "gbm", "best_auc"].max())
+    df.to_csv(Path("reports") / "p10_hpo.csv", index=False)
     lines = [
         "# Hyperparameter-search methods (rows 10.2, 10.5; C10.1, C10.2)",
         "",
@@ -212,7 +218,7 @@ def cmd_report(args: argparse.Namespace) -> int:
         "",
         "| " + " | ".join(df.columns) + " |",
         "|---" * len(df.columns) + "|",
-        *("| " + " | ".join(str(v) for v in r) + " |" for r in df.itertuples(index=False)),
+        *("| " + " | ".join(_cell(v) for v in r) + " |" for r in df.itertuples(index=False)),
         "",
         f"Untuned LightGBM (lr 0.1, 31 leaves, min_child 20, 150 trees): AUC **{base:.4f}**. "
         f"Best tuned: **{tuned:.4f}** (gain {tuned - base:+.4f}). C10.2 (>= +0.01 or a "
