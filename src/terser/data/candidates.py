@@ -151,8 +151,12 @@ def candidate_id(prompt_id: str, method: str) -> str:
     return f"{prompt_id}:{method}"
 
 
-def load_prompts(path: Path, *, limit: int | None = None) -> list[dict[str, Any]]:
+def load_prompts(
+    path: Path, *, limit: int | None = None, exclude_splits: Sequence[str] = ()
+) -> list[dict[str, Any]]:
     """Read prompts from JSONL (fields ``id`` and ``prompt`` required); keep the first ``limit``.
+
+    Records whose ``split`` is in ``exclude_splits`` are skipped before ``limit`` applies.
 
     Raises:
         FileNotFoundError: If ``path`` does not exist.
@@ -172,6 +176,8 @@ def load_prompts(path: Path, *, limit: int | None = None) -> list[dict[str, Any]
             if row["id"] in seen:
                 raise ValueError(f"{path}:{lineno}: duplicate id {row['id']!r}")
             seen.add(row["id"])
+            if row.get("split") in exclude_splits:
+                continue
             out.append(row)
             if limit is not None and len(out) >= limit:
                 break
@@ -398,6 +404,7 @@ class CandidateSettings:
     llmlingua_device: str = "cpu"
     llmlingua_cache_dir: Path | None = None
     limit: int | None = None
+    exclude_splits: tuple[str, ...] = ()
     budget_phase: str = "phase2"
     workers: int = 1
 
@@ -569,7 +576,9 @@ def run_candidates(
     start = time.perf_counter()
     apply = apply_ops or _default_apply_ops
     count_fn = count or _default_count
-    prompts = load_prompts(settings.prompts_path, limit=settings.limit)
+    prompts = load_prompts(
+        settings.prompts_path, limit=settings.limit, exclude_splits=settings.exclude_splits
+    )
     summary = CandidateSummary(n_prompts=len(prompts))
 
     existing: dict[Path, dict[str, dict[str, Any]]] = {}
@@ -723,6 +732,7 @@ def settings_from_config(cfg: DictConfig) -> CandidateSettings:
         llmlingua_device=str(p.get("llmlingua_device", "cpu")),
         llmlingua_cache_dir=_opt_path(p.get("llmlingua_cache_dir")),
         limit=p.get("limit"),
+        exclude_splits=tuple(str(s) for s in p.get("exclude_splits") or ()),
         budget_phase=str(p.get("budget_phase", "phase2")),
         workers=int(p.get("workers", 1)),
     )
@@ -764,6 +774,7 @@ def run_from_config(
         "llmlingua_rate": settings.llmlingua_rate,
         "length_targets": ",".join(settings.length_targets),
         "limit": settings.limit,
+        "exclude_splits": ",".join(settings.exclude_splits),
         "prompts_path": settings.prompts_path.as_posix(),
     }
     with start_run(
