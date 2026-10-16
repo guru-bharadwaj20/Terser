@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from collections.abc import Sequence
 from functools import cache
 from pathlib import Path
@@ -35,11 +36,23 @@ from terser.features.pair import pair_feature_table
 from terser.features.span import gpt2_surprisal, spacy_pos, span_feature_table
 from terser.tokenizers.count import count_tokens
 
-__all__ = ["main", "prompt_features", "quality_overhead_pct"]
+__all__ = ["has_code", "main", "prompt_features", "quality_overhead_pct"]
 
 
 def _jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines() if x.strip()]
+
+
+CODE_RE = re.compile(
+    r"```|^\s{4}\S|\bdef \w+\s*\(|\bclass \w+\s*[:(]|\bfunction\s*\w*\s*\(|#include\b|=>"
+    r"|\bimport \w+",
+    re.M,
+)
+
+
+def has_code(text: str) -> bool:
+    """Code fence, indented block, or a definition / import pattern (not just the word "def")."""
+    return bool(CODE_RE.search(text))
 
 
 def quality_overhead_pct(
@@ -73,7 +86,7 @@ def prompt_features(text: str, n_tokens: int, bits: Sequence[float]) -> dict[str
         "prompt_numbers": float(sum(map(is_number, toks))),
         "prompt_constraints": float(sum(map(is_constraint, toks))),
         "prompt_mean_si": float(np.mean(bits)) if len(bits) else 0.0,
-        "prompt_has_code": float("```" in text or "def " in text),
+        "prompt_has_code": float(has_code(text)),
     }
 
 
