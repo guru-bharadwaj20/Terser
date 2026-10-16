@@ -48,7 +48,7 @@ Status of all 63 checkpoints as of 2026-10-16, read from the ✅ / ❌ marks in 
 | C7.4 | Queue | ❌ | partial: queue validates and dry-runs; revised 32B estimate unverified on the RTX 4090 workers ([follow-up](C7/README.md#follow-up)) |
 | C8.1 | TextCNN parameters | ✅ | see the phase checkpoint section |
 | C8.2 | TextCNN tagging | ❌ | TextCNN 0.679 vs best classical 0.658 on the binary task (+0.021, McNemar p < 1e-18; target +0.05) ([p8_textcnn.md](../../reports/p8_textcnn.md)) |
-| C8.3 | **Rewriter main gate (val split)** | ❌ | all SFT rungs ≈ 7.6% median savings (targets capped near 10%); `sft_v2` with the judged `llm_max` / `llm_min` targets (train median 21.4%) is being trained ([p8_rewriter_val.md](../../reports/p8_rewriter_val.md)) |
+| C8.3 | **Rewriter main gate (val split)** | ❌ | SFT rungs at 7.6% (0.5B, 1.5B) and 2.1% (3B) median savings, targets capped near 10%; `sft_v2` with the judged `llm_max` / `llm_min` targets (train median 21.4%) is being trained ([p8_rewriter_val.md](../../reports/p8_rewriter_val.md)) |
 | C8.4 | vs zero-shot large open LLM | ❌ | depends on a rewriter that passes C8.3 |
 | C8.5 | vs LLMLingua-2 | ❌ | depends on a rewriter that passes C8.3 |
 | C9.1 | Tabular convergence | ❌ | most settled learner max |dQ| 0.164 (< 1e-3); aliased states make the reward stochastic ([p9_qlearning.md](../../reports/p9_qlearning.md)) |
