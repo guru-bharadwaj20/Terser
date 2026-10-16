@@ -1,0 +1,36 @@
+model: tree
+row: 3.6.4
+params:
+  max_depth: 4
+  min_samples_leaf: 10
+outer_fold_choices:
+- max_depth: 4
+  min_samples_leaf: 10
+- max_depth: 4
+  min_samples_leaf: 10
+- max_depth: 4
+  min_samples_leaf: 10
+- max_depth: 4
+  min_samples_leaf: 10
+- max_depth: 4
+  min_samples_leaf: 10
+- max_depth: 4
+  min_samples_leaf: 10
+- max_depth: 4
+  min_samples_leaf: 10
+- max_depth: 4
+  min_samples_leaf: 10
+- max_depth: 4
+  min_samples_leaf: 10
+- max_depth: 4
+  min_samples_leaf: 10
+- max_depth: 4
+  min_samples_leaf: 10
+- max_depth: 4
+  min_samples_leaf: 10
+- max_depth: 4
+  min_samples_leaf: 10
+- max_depth: 4
+  min_samples_leaf: 1
+- max_depth: 4
+  min_samples_leaf: 1
