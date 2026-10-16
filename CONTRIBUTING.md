@@ -379,7 +379,7 @@ bias–variance and overfitting.
 | 3.3.1 | **ID3 from scratch** | Entropy, information gain, recursive split on discretised span features | Matches a hand-computed toy example; within 2 F1 of scikit-learn `criterion="entropy"` when both trees are grown to full depth (equal-depth multiway trees have more capacity than binary ones) | ✅ |
 | 3.3.2 | Continuous values | C4.5-style threshold search on midpoints between class changes | Test on a 1-D separable fixture | ✅ |
 | 3.3.3 | Overfitting study | Train vs val F1 for depth 1–30 and min-samples-leaf sweep | `reports/figures/p3_tree_overfit.png` | ✅ |
-| 3.3.4 | Overfitting solutions | Pre-pruning, **reduced-error pruning**, **rule post-pruning**, cost-complexity pruning | Comparison table: leaves, val F1, train–val gap | ❌ |
+| 3.3.4 | Overfitting solutions | Pre-pruning, **reduced-error pruning**, **rule post-pruning**, cost-complexity pruning | Comparison table: leaves, val F1, train–val gap | ✅ |
 | 3.3.5 | Decision boundary (x–y) | Axis-aligned regions on `self_information` vs `token_cost` | `reports/figures/p3_tree_boundary.png` | ❌ |
 | 3.3.6 | Hypothesis search and inductive bias | Greedy information-gain search (preference bias for short trees) vs Phase 1 conjunctive restriction bias | `reports/p3_tree_bias.md` | ❌ |
 | 3.3.7 | Rule export | Pruned tree as human-readable rules ("drop is unsafe when a negation is removed and…") | `reports/p3_tree_rules.md` | ❌ |
@@ -420,7 +420,7 @@ bias–variance and overfitting.
 | C3.3 | Quality gate (best of Tree / LR / KNN) | ROC-AUC **≥ 0.75**; specificity **≥ 0.40** at sensitivity 0.95 | ❌ |
 | C3.4 | Span tagger (best of Tree / LR) | Token macro-F1 **≥ 0.65** | ❌ |
 | C3.5 | Savings predictor (KNN regression) | MAE **≤ 10 pp**, R² **≥ 0.3** | ❌ |
-| C3.6 | Overfitting control | ≥ 1 pruning method closes the tree's train–val gap by **≥ 50%** | ❌ |
+| C3.6 | Overfitting control | ≥ 1 pruning method closes the tree's train–val gap by **≥ 50%** | ✅ |
 | C3.7 | Figures | Tree, LR, KNN (3 k values) boundaries on identical axes; bias–variance and learning curves present | ❌ |
 
 ---
