@@ -1,0 +1,5 @@
+outs:
+- md5: 396373d46bf0f9c6fe80af2a6b89773a
+  size: 537794
+  hash: md5
+  path: p4_pairs.parquet
