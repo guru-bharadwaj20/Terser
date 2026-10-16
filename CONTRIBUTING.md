@@ -500,7 +500,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
 | 5.2.1 | Bayes theorem | P(filler \| phrase, context) worked from corpus counts | `docs/derivations/bayes.md` | ✅ |
-| 5.2.3 | Naive Bayes filler detector | Multinomial NB on 1–3-grams: MLE parameters with Laplace smoothing (and why smoothing is MAP); vs LR on the same features | PR curve + table | ❌ |
+| 5.2.3 | Naive Bayes filler detector | Multinomial NB on 1–3-grams: MLE parameters with Laplace smoothing (and why smoothing is MAP); vs LR on the same features | PR curve + table | ✅ |
 | 5.2.4 | Bayes optimal classifier | Phase 1 hypotheses as H; P(h \| D) from validation likelihood; posterior-weighted vote vs MAP hypothesis | `reports/p5_bayes_optimal.md` | ❌ |
 | 5.2.5 | EM from scratch | E-step responsibilities, M-step means/variances/weights; log-likelihood monotone | Test asserts non-decreasing log-likelihood; matches scikit-learn GMM | ✅ |
 | 5.2.6 | GMM on judge score deltas | 2-component GMM on (rewrite score − original score): unsupervised preserved/degraded split vs threshold labels | ARI reported; judge-threshold review issue opened if low | ✅ |
@@ -513,7 +513,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 | 5.3.2 | Supervised MLE | Initial, transition, emission matrices from alignment labels with smoothing | Rows sum to 1 (test) | ✅ |
 | 5.3.3 | Forward algorithm | Sequence likelihood in log space | Matches brute-force enumeration on length-5 sequences | ✅ |
 | 5.3.4 | Viterbi decoding | Most likely tag sequence → compressed prompt | Matches brute force on length-5 sequences | ✅ |
-| 5.3.5 | Baum-Welch | EM on unlabelled casual prompts from supervised initialisation | F1 before vs after | ❌ |
+| 5.3.5 | Baum-Welch | EM on unlabelled casual prompts from supervised initialisation | F1 before vs after | ✅ |
 | 5.3.6 | End-to-end HMM compressor | Viterbi tags → rewrite → Phase 2 judge on **500 val prompts** | `reports/p5_hmm_compressor.md` | ❌ |
 
 ### Checkpoint C5 — Ensembles, Bayes, HMM
@@ -623,7 +623,7 @@ together with the quality gate and fallback, reach the main quality/savings gate
 
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
-| C8.1 | TextCNN parameters | Matches documented count exactly | ❌ |
+| C8.1 | TextCNN parameters | Matches documented count exactly | ✅ |
 | C8.2 | TextCNN tagging | Token macro-F1 **≥ C3.4 best + 0.05**, or documented reason | ❌ |
 | C8.3 🚧 | **Rewriter main gate (val split)** | Median savings **≥ 25%** on every target; preservation **≥ 92%** overall and **≥ 85%** per category (gate + fallback on) | ❌ |
 | C8.4 | vs zero-shot large open LLM | At equal preservation (±1 pp): savings within **5 pp** of zero-shot Qwen2.5-32B-AWQ while **≥ 10× lower** rewrite latency on the same GPU | ❌ |
@@ -650,7 +650,7 @@ neural rewriter is a [stretch goal](#stretch-goals-never-block-a-checkpoint).
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 9.2.1 | Q-learning from scratch | ε-greedy; quality gate as cheap reward model (no LLM calls during learning) | Learning curve | ❌ |
+| 9.2.1 | Q-learning from scratch | ε-greedy; quality gate as cheap reward model (no LLM calls during learning) | Learning curve | ✅ |
 | 9.2.2 | Hyperparameter sweep | α ∈ {0.05, 0.1, 0.3}, γ ∈ {0.9, 0.99}, ε schedule | Table | ❌ |
 | 9.2.3 | Learned policy | Greedy operator order per category | `reports/p9_policy.md` | ❌ |
 | 9.2.4 | Judge verification | Greedy policy on 300 val prompts with the real judge | Savings and preservation table | ❌ |
