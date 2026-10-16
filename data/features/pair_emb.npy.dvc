@@ -1,0 +1,5 @@
+outs:
+- md5: cde6342736166c4e9e836a0332c60db7
+  size: 90513536
+  hash: md5
+  path: pair_emb.npy

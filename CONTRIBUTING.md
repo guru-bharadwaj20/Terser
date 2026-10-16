@@ -415,7 +415,7 @@ bias–variance and overfitting.
 
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
-| C3.1 | Metric implementations | Match scikit-learn to 1e-9 on 20 random fixtures | ❌ |
+| C3.1 | Metric implementations | Match scikit-learn to 1e-9 on 20 random fixtures | ✅ |
 | C3.2 | Leakage demonstration | Grouped-CV AUC lower than naive-KFold AUC; gap recorded | ✅ |
 | C3.3 | Quality gate (best of Tree / LR / KNN) | ROC-AUC **≥ 0.75**; specificity **≥ 0.40** at sensitivity 0.95 | ❌ |
 | C3.4 | Span tagger (best of Tree / LR) | Token macro-F1 **≥ 0.65** | ❌ |
@@ -436,7 +436,7 @@ implementations verified against libraries, plus controlled activation and optim
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
 | 4.1.1 | Perceptron from scratch | Step activation; filler vs non-filler spans | Converges on the linearly separable subset; fails to converge on the full set (logged) | ❌ |
-| 4.1.2 | Pair embedding input | `[e_o, e_r, \|e_o − e_r\|, e_o ⊙ e_r]` from 384-d bge-small ⇒ **1536-d** | Cached `data/features/pair_emb.npy` + id index | ❌ |
+| 4.1.2 | Pair embedding input | `[e_o, e_r, \|e_o − e_r\|, e_o ⊙ e_r]` from 384-d bge-small ⇒ **1536-d** | Cached `data/features/pair_emb.npy` + id index | ✅ |
 | 4.1.3 | NumPy MLP with backprop | Forward, backward, update; no autograd | Gradient check vs finite differences, relative error **< 1e-6**; matches `torch.autograd` | ✅ |
 | 4.1.4 | PyTorch MLP quality gate | 1536 → 256 → 64 → 1 | Scored under the 3.2.4 protocol | ❌ |
 | 4.1.5 | Parameter calculation | 1536×256+256 = 393,472 · 256×64+64 = 16,448 · 64×1+1 = 65 · **total 409,985** | Equals `sum(p.numel())` in a test | ✅ |
@@ -471,8 +471,8 @@ implementations verified against libraries, plus controlled activation and optim
 
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
-| C4.1 | Backprop correctness | Relative gradient error **< 1e-6** on all layers | ❌ |
-| C4.2 | SVM dual correctness | Support-vector set equals scikit-learn's; weight error **< 1e-3** | ❌ |
+| C4.1 | Backprop correctness | Relative gradient error **< 1e-6** on all layers | ✅ |
+| C4.2 | SVM dual correctness | Support-vector set equals scikit-learn's; weight error **< 1e-3** | ✅ |
 | C4.3 | Studies complete | 4 activations × 5 seeds; 5 optimizers × 5 seeds at equal budget; written interpretation | ❌ |
 | C4.4 | Better quality gate | Best MLP/SVM ROC-AUC **≥ C3.3 best + 0.03**, or documented reason (classical model stays champion) | ❌ |
 | C4.5 | Worst category | AUC **≥ 0.70** in every category | ❌ |
