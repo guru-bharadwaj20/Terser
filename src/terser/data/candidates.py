@@ -54,6 +54,7 @@ if TYPE_CHECKING:
 __all__ = [
     "CANDIDATE_FIELDS",
     "DEFAULT_METHODS",
+    "AUG_LLM_LEVELS",
     "LLM_LEVELS",
     "CandidateServerUnavailableError",
     "CandidateSettings",
@@ -89,6 +90,9 @@ CANDIDATE_FIELDS: tuple[str, ...] = (
 
 LLM_LEVELS: tuple[str, ...] = ("low", "medium", "high")
 """Aggressiveness levels of the LLM rewrites (methods ``llm_<level>``)."""
+
+AUG_LLM_LEVELS: tuple[str, ...] = ("max", "min")
+"""Extra levels for the row 8.3.4 target augmentation; never in the default method set."""
 
 DEFAULT_METHODS: tuple[str, ...] = (
     "ops_FHC",
@@ -134,7 +138,7 @@ def method_kind(method: str) -> str:
         return "llmlingua2"
     if method.startswith("ops_") and len(method) > 4:
         return "ops"
-    if method.startswith("llm_") and method[4:] in LLM_LEVELS:
+    if method.startswith("llm_") and method[4:] in (*LLM_LEVELS, *AUG_LLM_LEVELS):
         return "llm"
     raise ValueError(
         f"unknown candidate method {method!r}; expected llm_{{{','.join(LLM_LEVELS)}}}, "
@@ -182,7 +186,7 @@ def _rewrite_sections(version: str) -> dict[str, str]:
     text = path.read_text(encoding="utf-8")
     parts = re.split(r"^=== (\w+) ===\n", text, flags=re.M)
     sections = {name: body.strip("\n") for name, body in zip(parts[1::2], parts[2::2], strict=True)}
-    missing = [s for s in ("template", *LLM_LEVELS) if s not in sections]
+    missing = [s for s in ("template", *LLM_LEVELS, *AUG_LLM_LEVELS) if s not in sections]
     if missing:
         raise ValueError(f"{path}: missing section(s) {missing}")
     return sections
@@ -190,8 +194,8 @@ def _rewrite_sections(version: str) -> dict[str, str]:
 
 def render_rewrite_prompt(prompt: str, level: str, version: str = "rewrite_v1") -> str:
     """Fill the rewrite instruction ``prompts/<version>.txt`` for ``level`` and ``prompt``."""
-    if level not in LLM_LEVELS:
-        raise ValueError(f"level must be one of {LLM_LEVELS}, got {level!r}")
+    if level not in (*LLM_LEVELS, *AUG_LLM_LEVELS):
+        raise ValueError(f"level must be one of {(*LLM_LEVELS, *AUG_LLM_LEVELS)}, got {level!r}")
     sections = _rewrite_sections(version)
     # Substitute the prompt last so braces inside user text are never interpreted.
     body = sections["template"].replace("{level}", level)

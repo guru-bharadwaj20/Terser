@@ -39,3 +39,12 @@ High: do everything in Medium, and compress as far as possible while losing no i
 use terse imperative phrasing, drop articles and connectives where the result is still
 unambiguous, and put several requirements into a short list or one line. The result may read
 like a telegram, but every constraint, tone cue and payload span must still be present.
+=== max ===
+Max: do everything in High, and cut every word whose removal leaves the request answerable
+the same way: drop background the answer does not depend on, restated context, hedges,
+justifications and examples of what the user means when the request is already clear.
+Prefer a single imperative line. Constraints, tone cues and payload spans are never cut.
+=== min ===
+Min: rewrite the prompt as the shortest instruction an expert assistant would need: the
+task verb, its object, and the constraints, nothing else. Use keyword style
+(e.g. "Summarise below, 3 bullets, formal:"), then the payload verbatim.
