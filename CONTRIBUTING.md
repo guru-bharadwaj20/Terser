@@ -717,7 +717,7 @@ quality monitoring.
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
 | 11.3.1 | API | FastAPI `POST /rewrite {prompt, target, mode: fast\|quality}` → `{rewrite, tokens_before, tokens_after, gate_score, fallback_used}` | OpenAPI docs + request/response examples | ✅ |
-| 11.3.2 | Fast path | Span tagger + gate exported to ONNX Runtime | Runs with no GPU | ❌ |
+| 11.3.2 | Fast path | Span tagger + gate exported to ONNX Runtime | Runs with no GPU | ✅ |
 | 11.3.3 | Quality path | Rewriter on vLLM with continuous batching + gate + fallback | Endpoint live on a GPU worker | ❌ |
 | 11.3.4 | Caching | LRU keyed on normalised prompt hash + target | Warm-hit latency measured | ✅ |
 | 11.3.5 | Timeout fallback | Quality path over budget ⇒ fast-path result | Fault-injection test | ✅ |
