@@ -13,3 +13,6 @@ Validation = first grouped fold; pruning set = a grouped third of the remaining 
 | reduced-error | 365.000 | 42.930 | 0.781 | 0.004 | 0.619 | 0.030 | 0.163 | 0.026 |
 | rule post-pruning | 1438.667 | 10.693 | 0.653 | 0.008 | 0.618 | 0.023 | 0.034 | 0.026 |
 | cost-complexity | 3.000 | 0.000 | 0.693 | 0.002 | 0.692 | 0.005 | 0.001 | 0.003 |
+| baseline: majority | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
+| baseline: stratified | 0.000 | 0.000 | 0.433 | 0.004 | 0.442 | 0.007 | -0.009 | 0.008 |
+| baseline: always_preserved | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
