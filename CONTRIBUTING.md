@@ -610,7 +610,7 @@ together with the quality gate and fallback, reach the main quality/savings gate
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 8.3.1 | SFT data | (casual prompt, oracle preserved rewrite) from train split; one target-agnostic rewriter (C1.5: tokenizers agree) | HF dataset in DVC | ❌ |
+| 8.3.1 | SFT data | (casual prompt, oracle preserved rewrite) from train split; one target-agnostic rewriter (C1.5: tokenizers agree) | HF dataset in DVC | ✅ |
 | 8.3.2 | Tiny-config smoke test | Full training loop on a tiny model on CPU | CI test passes; GPU jobs queued | ✅ |
 | 8.3.3 | Rung 1: Qwen2.5-0.5B full FT | bf16, AdamW, grad checkpointing | Model registered; val report | ❌ |
 | 8.3.4 | Rung 2: Qwen2.5-1.5B LoRA | r = 16, α = 32, bf16. Escalate to 3B LoRA, then 7B QLoRA (NF4), only if the previous rung fails C8.3 | Same, per rung trained | ❌ |
@@ -738,7 +738,7 @@ quality monitoring.
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
 | 11.5.1 | Metrics | Prometheus: RPS, p50/p95/p99 latency per path, fallback rate, gate rejections, tokens saved, net savings, GPU util / VRAM | Exposed at `/metrics` | ✅ |
-| 11.5.2 | Input drift | Evidently daily: embedding drift (PSI / MMD on PCA components), length and category distribution | Report generated | ❌ |
+| 11.5.2 | Input drift | Evidently daily: embedding drift (PSI / MMD on PCA components), length and category distribution | Report generated | ✅ |
 | 11.5.3 | Tokenizer drift | Re-count fixture set with current tokenizer versions; alert on any change | Alert fires on a pinned-version swap | ✅ |
 | 11.5.4 | Quality canary | Nightly: a fixed 200-prompt canary set goes through the deployed service and the judge; rolling preservation | Metric on dashboard | ❌ |
 | 11.5.5 | Dashboard and alerts | Grafana; alert at rolling preservation < 92% | Dashboard live | ❌ |

@@ -1,0 +1,6 @@
+outs:
+- md5: 56c7be7283112eb9a5f82b3e5216cd8a.dir
+  size: 1545472
+  nfiles: 3
+  hash: md5
+  path: sft_v2
