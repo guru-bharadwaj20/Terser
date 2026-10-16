@@ -29,7 +29,7 @@ Files: `databricks-dolly-15k.jsonl` (13,085,339 bytes).
 | `dolly` | `CC-BY-SA-3.0` | yes | yes (BY + SA) | Attribution to Databricks and Wikipedia contributors; derived prompts inherit CC-BY-SA-3.0. Decision: include. `reports/license_audit.md#dolly` |
 
 No LLM-generated text in this raw source. Licences of the models that will casualise and rewrite it
-are covered in `reports/license_audit.md` § Generating models (ADR-0003, pending).
+are covered in `reports/license_audit.md` § Generating models ([ADR-0003](../../decisions/ADR-0003-training-on-model-outputs.md)).
 
 ## 3. Size
 

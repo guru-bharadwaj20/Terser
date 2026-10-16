@@ -29,7 +29,7 @@ Files: `openai_humaneval/test-00000-of-00001.parquet` (83,920 bytes).
 | `humaneval` | `MIT` | yes | yes | Keep copyright + permission notice. Decision: include. `reports/license_audit.md#humaneval` |
 
 No LLM-generated text in this raw source. Licences of the models that will casualise and rewrite it
-are covered in `reports/license_audit.md` § Generating models (ADR-0003, pending).
+are covered in `reports/license_audit.md` § Generating models ([ADR-0003](../../decisions/ADR-0003-training-on-model-outputs.md)).
 
 ## 3. Size
 

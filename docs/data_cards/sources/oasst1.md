@@ -29,7 +29,7 @@ Files: `data/train-00000-of-00001-b42a775f407cee45.parquet` (39,516,251 bytes), 
 | `oasst1` | `Apache-2.0` | yes | yes | Keep licence text + notices, mark changes. Decision: include. `reports/license_audit.md#oasst1` |
 
 No LLM-generated text in this raw source. Licences of the models that will casualise and rewrite it
-are covered in `reports/license_audit.md` § Generating models (ADR-0003, pending).
+are covered in `reports/license_audit.md` § Generating models ([ADR-0003](../../decisions/ADR-0003-training-on-model-outputs.md)).
 
 ## 3. Size
 

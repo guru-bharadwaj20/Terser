@@ -29,7 +29,7 @@ Files: `main/train-00000-of-00001.parquet` (2,306,545 bytes), `main/test-00000-o
 | `gsm8k` | `MIT` | yes | yes | Keep copyright + permission notice. Decision: include. `reports/license_audit.md#gsm8k` |
 
 No LLM-generated text in this raw source. Licences of the models that will casualise and rewrite it
-are covered in `reports/license_audit.md` § Generating models (ADR-0003, pending).
+are covered in `reports/license_audit.md` § Generating models ([ADR-0003](../../decisions/ADR-0003-training-on-model-outputs.md)).
 
 ## 3. Size
 
