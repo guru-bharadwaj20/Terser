@@ -409,7 +409,7 @@ bias–variance and overfitting.
 | 3.6.1 | **Bias–variance decomposition and trade-off** | 200 bootstrap resamples; squared loss (KNN regression), 0-1 loss decomposition (classifiers); tree depth ∈ {2,4,8,16,∞}, k ∈ {1,3,5,15,51}; identify and explain the minimum-error point | `reports/figures/p3_bias_variance.png` + `reports/p3_bias_variance.md` | ❌ |
 | 3.6.3 | Learning curves | Train size 10% → 100% for all three models | Figure + diagnosis (high bias vs high variance) | ✅ |
 | 3.6.4 | Grid search | Tree depth × min-samples; KNN k × metric × weighting; LR penalty × C, inside nested CV | Best params recorded in `configs/` | ✅ |
-| 3.6.5 | Baselines | Majority class, stratified random, "always preserved" | Baseline row in every table | ❌ |
+| 3.6.5 | Baselines | Majority class, stratified random, "always preserved" | Baseline row in every table | ✅ |
 
 ### Checkpoint C3 — Evaluation Backbone and Classical Baselines
 
@@ -501,7 +501,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 | :---: | :--- | :--- | :--- | :---: |
 | 5.2.1 | Bayes theorem | P(filler \| phrase, context) worked from corpus counts | `docs/derivations/bayes.md` | ✅ |
 | 5.2.3 | Naive Bayes filler detector | Multinomial NB on 1–3-grams: MLE parameters with Laplace smoothing (and why smoothing is MAP); vs LR on the same features | PR curve + table | ✅ |
-| 5.2.4 | Bayes optimal classifier | Phase 1 hypotheses as H; P(h \| D) from validation likelihood; posterior-weighted vote vs MAP hypothesis | `reports/p5_bayes_optimal.md` | ❌ |
+| 5.2.4 | Bayes optimal classifier | Phase 1 hypotheses as H; P(h \| D) from validation likelihood; posterior-weighted vote vs MAP hypothesis | `reports/p5_bayes_optimal.md` | ✅ |
 | 5.2.5 | EM from scratch | E-step responsibilities, M-step means/variances/weights; log-likelihood monotone | Test asserts non-decreasing log-likelihood; matches scikit-learn GMM | ✅ |
 | 5.2.6 | GMM on judge score deltas | 2-component GMM on (rewrite score − original score): unsupervised preserved/degraded split vs threshold labels | ARI reported; judge-threshold review issue opened if low | ✅ |
 
