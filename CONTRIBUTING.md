@@ -756,7 +756,7 @@ quality monitoring.
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
 | C11.1 | End-to-end orchestration | `data → train_classical → evaluate → promote` runs unattended on a fresh clone (CPU) | ❌ |
-| C11.2 | Fast-path latency | p95 **≤ 150 ms** at 20 RPS | ❌ |
+| C11.2 | Fast-path latency | p95 **≤ 150 ms** at 20 RPS | ✅ |
 | C11.3 | Quality-path latency | p95 **≤ 400 ms** at 5 RPS, prompts ≤ 256 tokens, one 24 GB Ada GPU | ❌ |
 | C11.4 | Throughput | Quality path ≥ 20 RPS sustained 30 min, no OOM | ❌ |
 | C11.5 | Fallback correctness | Rewriter crash/timeout returns original prompt **100%** of the time | ❌ |

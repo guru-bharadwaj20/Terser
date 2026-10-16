@@ -116,8 +116,16 @@ def build_service(cfg: dict[str, Any], metrics: ServiceMetrics | None = None) ->
             q["base_url"], q["model"], timeout_s=float(q.get("http_timeout_s", 2.0))
         )
     gate: Gate | None = OnnxGate(cfg["gate_onnx"]) if cfg.get("gate_onnx") else None
+    fast = None
+    if cfg.get("tagger_onnx"):  # row 11.3.2 ONNX span tagger; else rule-based operators
+        from terser.serving.fast_models import OnnxSpanRewriter
+
+        fast = OnnxSpanRewriter(
+            cfg["tagger_onnx"], threshold=float(cfg.get("tagger_threshold", 0.5))
+        )
     return RewriteService(
         pricing=Pricing.from_config(cfg["pricing"]),
+        fast=fast,
         quality=quality,
         gate=gate,
         gate_threshold=float(cfg.get("gate_threshold", 0.5)),
