@@ -709,7 +709,7 @@ quality monitoring.
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 11.2.2 | Model registry | Stages `None → Staging → Production → Archived` for gate, tagger, rewriter | Registry populated | ❌ |
+| 11.2.2 | Model registry | Stages `None → Staging → Production → Archived` for gate, tagger, rewriter | Registry populated | ✅ |
 | 11.2.3 | Lineage | Each version records git SHA, DVC hash, config, checkpoint IDs passed | Any production model traceable | ❌ |
 
 ### 11.3 Deployment, Serving and Inference Systems
