@@ -1,0 +1,42 @@
+# GRPO v2 (follow-up negative-result ablation of S-9.3; not a CONTRIBUTING row). v1's reward
+# (savings x gate_pass) was hacked (C9.3 fail: 42.4% judged-preserved among gate-passed val
+# rewrites vs 91.0%). v2 keeps everything else of grpo_qwen15b_lora (start hpo08, KL ref, group 8)
+# and swaps in the preservation-aware reward of terser.models.rl.grpo.make_reward_v2.
+# Queued: gpu_queue/grpo-qwen1.5b-v2.yaml (driver /home/temp/p9v2_grpo.sh; deadline via env).
+name: grpo_qwen15b_lora_v2
+phase: 9
+row: null   # follow-up ablation, not a CONTRIBUTING row
+task: rewriter_grpo
+params:
+  model: Qwen/Qwen2.5-1.5B-Instruct
+  init_adapter: ${paths.root}/models/rewriter/sft-qwen1.5b-lora-hpo
+  lora: {r: 16, alpha: 32}
+  grad_checkpointing: true
+  device: cuda
+  data: ${paths.data_dir}/processed/sft_v2/train.jsonl
+  limit: null
+  max_prompt_tokens: 768
+  max_new_tokens: 512
+  steps: 3000            # upper bound; the deadline normally ends the run first
+  prompts_per_step: 4
+  group_size: 8
+  micro_batch: 8
+  lr: 1.0e-5
+  beta: 0.04
+  temperature: 1.0
+  reward: v2             # v1 (default): savings x gate_pass; v2: preservation-aware
+  reward_v2:
+    encoder: BAAI/bge-small-en-v1.5   # CPU; cosine(original, rewrite)
+    gate_gamma: 4.0      # (1 - P(degraded))^4: P=0.26 (served threshold) -> 0.30
+    sim_lo: 0.85         # cosine ramp 0 -> 1 over [0.85, 0.97] (hpo08 val median 0.906)
+    sim_hi: 0.97
+    keep_power: 2.0      # protected-item retention squared
+    savings_cap: 70.0    # no extra reward past 70% savings (length floor)
+  gate_onnx: ${paths.root}/models/fast/gate.onnx
+  serving_config: ${paths.root}/configs/serving/fast_onnx.yaml
+  audit_every: 50
+  save_every: 100
+  deadline_epoch: null
+  mlflow: true
+  mlflow_experiment: terser-p9-grpo-v2
+  output_dir: ${paths.root}/models/rewriter/grpo-qwen1.5b-v2
