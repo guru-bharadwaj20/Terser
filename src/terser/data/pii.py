@@ -581,13 +581,10 @@ def _detect_secrets(text: str, out: list[Detection]) -> None:
         reason = None
         if _looks_placeholder(value):
             reason = "placeholder_credential"
-        elif (
-            not quoted
-            and (
-                re.fullmatch(r"[A-Za-z_]+", value)  # api_key = get_key / token = tokenizer
-                or re.fullmatch(r"[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+", value)  # os.environ
-                or text[end : end + 1] in {"(", "["}  # a call or subscript, not a literal
-            )
+        elif not quoted and (
+            re.fullmatch(r"[A-Za-z_]+", value)  # api_key = get_key / token = tokenizer
+            or re.fullmatch(r"[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+", value)  # os.environ
+            or text[end : end + 1] in {"(", "["}  # a call or subscript, not a literal
         ):
             reason = "identifier_not_secret"
         _emit(out, start, end, EntityType.SECRET, 0.85, text, reason)
