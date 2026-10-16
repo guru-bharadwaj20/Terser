@@ -438,7 +438,7 @@ implementations verified against libraries, plus controlled activation and optim
 | 4.1.1 | Perceptron from scratch | Step activation; filler vs non-filler spans | Converges on the linearly separable subset; fails to converge on the full set (logged) | ❌ |
 | 4.1.2 | Pair embedding input | `[e_o, e_r, \|e_o − e_r\|, e_o ⊙ e_r]` from 384-d bge-small ⇒ **1536-d** | Cached `data/features/pair_emb.npy` + id index | ✅ |
 | 4.1.3 | NumPy MLP with backprop | Forward, backward, update; no autograd | Gradient check vs finite differences, relative error **< 1e-6**; matches `torch.autograd` | ✅ |
-| 4.1.4 | PyTorch MLP quality gate | 1536 → 256 → 64 → 1 | Scored under the 3.2.4 protocol | ❌ |
+| 4.1.4 | PyTorch MLP quality gate | 1536 → 256 → 64 → 1 | Scored under the 3.2.4 protocol | ✅ |
 | 4.1.5 | Parameter calculation | 1536×256+256 = 393,472 · 256×64+64 = 16,448 · 64×1+1 = 65 · **total 409,985** | Equals `sum(p.numel())` in a test | ✅ |
 | 4.1.7 | Backprop derivation | Chain rule through sigmoid output + BCE; hidden-layer recursion | `docs/derivations/backprop.md` | ✅ |
 
@@ -465,7 +465,7 @@ implementations verified against libraries, plus controlled activation and optim
 | 4.4.5 | Hard margin | Linearly separable filler subset | Support vectors plotted | ✅ |
 | 4.4.6 | Soft margin | C ∈ {0.01, 0.1, 1, 10, 100}: margin width, # support vectors, val metrics | Table + figure | ✅ |
 | 4.4.7 | Polynomial kernel | Degree 2, 3 × coef0 × C vs linear | Table: AUC, time, # SVs | ✅ |
-| 4.4.8 | Decision surfaces | Linear vs polynomial on the Phase 3 2-D plane | `reports/figures/p4_svm_surfaces.png` | ❌ |
+| 4.4.8 | Decision surfaces | Linear vs polynomial on the Phase 3 2-D plane | `reports/figures/p4_svm_surfaces.png` | ✅ |
 
 ### Checkpoint C4 — Neural and Margin Models
 
@@ -489,8 +489,8 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 5.1.1 | Combining weak learners | AdaBoost with depth-1 stumps from scratch; which pairs get the largest weights | Matches scikit-learn within 0.01 AUC; training error vs rounds plot; hard-example note | ❌ |
-| 5.1.3 | Random Forest | n_estimators × max_features × bootstrap | Table; OOB vs CV comparison | ❌ |
+| 5.1.1 | Combining weak learners | AdaBoost with depth-1 stumps from scratch; which pairs get the largest weights | Matches scikit-learn within 0.01 AUC; training error vs rounds plot; hard-example note | ✅ |
+| 5.1.3 | Random Forest | n_estimators × max_features × bootstrap | Table; OOB vs CV comparison | ✅ |
 | 5.1.5 | Gradient Boosting | LightGBM: lr × n_estimators × max_depth with early stopping on grouped validation | Table | ❌ |
 | 5.1.6 | Feature importance | Permutation importance + SHAP per task category: what makes a rewrite unsafe | Top-10 features + `reports/figures/p5_shap.png` | ❌ |
 | 5.1.7 | Feature feedback | ≥ 1 importance finding turned into a new feature or operator rule | PR linked | ❌ |
