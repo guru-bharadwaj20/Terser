@@ -1,6 +1,6 @@
 # Checkpoint status
 
-Status of all 61 checkpoints as of 2026-10-16, read from the ✅ / ❌ marks in [CONTRIBUTING.md](../../CONTRIBUTING.md): **30 pass, 31 open**. Open checkpoints are either measured failures (negative results, kept as reports), blocked on human annotation, or waiting on an earlier checkpoint.
+Status of all 63 checkpoints as of 2026-10-16, read from the ✅ / ❌ marks in [CONTRIBUTING.md](../../CONTRIBUTING.md): **30 pass, 33 open**. Open checkpoints are either measured failures (negative results, kept as reports), blocked on human annotation, or waiting on an earlier checkpoint.
 
 | checkpoint | name | status | evidence |
 |---|---|---|---|
@@ -44,6 +44,8 @@ Status of all 61 checkpoints as of 2026-10-16, read from the ✅ / ❌ marks in 
 | C6.2 | K-means ⇔ EM | ✅ | see the phase checkpoint section |
 | C6.3 | Actionable finding | ❌ | riskiest cluster 1.195x the average degradation rate (≥ 1.5x) ([p6_cluster_risk.md](../../reports/p6_cluster_risk.md)) |
 | C7.1 | Environment | ✅ | see the phase checkpoint section |
+| C7.2 | Memory plan | ❌ | partial: several VRAM rows still estimates; needs RTX 4090 worker measurements ([C7 details](C7/README.md)) |
+| C7.4 | Queue | ❌ | partial: queue validates and dry-runs; revised 32B estimate unverified on the RTX 4090 workers ([follow-up](C7/README.md#follow-up)) |
 | C8.1 | TextCNN parameters | ✅ | see the phase checkpoint section |
 | C8.2 | TextCNN tagging | ❌ | TextCNN 0.679 vs best classical 0.658 on the binary task (+0.021, McNemar p < 1e-18; target +0.05) ([p8_textcnn.md](../../reports/p8_textcnn.md)) |
 | C8.3 | **Rewriter main gate (val split)** | ❌ | all SFT rungs ≈ 7.6% median savings (targets capped near 10%); `sft_v2` with the judged `llm_max` / `llm_min` targets (train median 21.4%) is being trained ([p8_rewriter_val.md](../../reports/p8_rewriter_val.md)) |
