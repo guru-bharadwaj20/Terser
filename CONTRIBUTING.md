@@ -397,10 +397,10 @@ bias–variance and overfitting.
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 3.5.1 | KNN classification | Quality gate; k ∈ {1,3,5,7,11,15,25}; Euclidean / Manhattan / cosine; uniform / distance weighting | Grid table under 3.2.4 protocol | ❌ |
-| 3.5.2 | **KNN regression** | Predict a prompt's achievable savings % from its k nearest training prompts | MAE, R² table | ❌ |
-| 3.5.3 | KNN (and LR) decision boundary | k = 1, 5, 25 on 2-D PCA refit inside each fold; LR's linear boundary on the same plane as 3.3.5 | `reports/figures/p3_knn_boundaries.png` | ❌ |
-| 3.5.4 | "Skip short prompts" rule | Use 3.5.2 to skip rewriting when predicted savings < overhead | Rule + expected net-savings curve | ❌ |
+| 3.5.1 | KNN classification | Quality gate; k ∈ {1,3,5,7,11,15,25}; Euclidean / Manhattan / cosine; uniform / distance weighting | Grid table under 3.2.4 protocol | ✅ |
+| 3.5.2 | **KNN regression** | Predict a prompt's achievable savings % from its k nearest training prompts | MAE, R² table | ✅ |
+| 3.5.3 | KNN (and LR) decision boundary | k = 1, 5, 25 on 2-D PCA refit inside each fold; LR's linear boundary on the same plane as 3.3.5 | `reports/figures/p3_knn_boundaries.png` | ✅ |
+| 3.5.4 | "Skip short prompts" rule | Use 3.5.2 to skip rewriting when predicted savings < overhead | Rule + expected net-savings curve | ✅ |
 
 ### 3.6 Bias–Variance and Grid Search
 
