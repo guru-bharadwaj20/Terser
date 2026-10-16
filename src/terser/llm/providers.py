@@ -87,26 +87,6 @@ TokenLogprobs = tuple[tuple[str, tuple[tuple[str, float], ...]], ...]
 """Per generated token: ``(token, ((candidate, logprob), ...))`` from ``top_logprobs``."""
 
 
-def openai_compatible_call(
-    config: ProviderConfig,
-    model: str,
-    messages: list[dict[str, Any]],
-    max_tokens: int,
-    system: str | None,
-    params: dict[str, Any],
-    *,
-    http_client: httpx.Client | None = None,
-) -> tuple[str, int, int, bool]:
-    """POST ``/chat/completions``; return ``(text, prompt_tokens, completion_tokens, usage_ok)``.
-
-    Missing ``usage`` in the reply yields zero counts and ``usage_ok=False``.
-    """
-    text, tokens_in, tokens_out, ok, _ = openai_compatible_request(
-        config, model, messages, max_tokens, system, params, http_client=http_client
-    )
-    return text, tokens_in, tokens_out, ok
-
-
 def parse_logprobs(choice: Mapping[str, Any]) -> TokenLogprobs | None:
     """Extract ``choices[0].logprobs.content`` as :data:`TokenLogprobs` (None if absent)."""
     content = (choice.get("logprobs") or {}).get("content")
@@ -129,7 +109,10 @@ def openai_compatible_request(
     *,
     http_client: httpx.Client | None = None,
 ) -> tuple[str, int, int, bool, TokenLogprobs | None]:
-    """:func:`openai_compatible_call` plus the per-token ``top_logprobs`` when requested.
+    """POST ``/chat/completions``; return ``(text, prompt_tokens, completion_tokens, usage_ok,
+    logprobs)``.
+
+    Missing ``usage`` in the reply yields zero counts and ``usage_ok=False``.
 
     Logprobs are returned only when the server sent them (request ``logprobs=True`` and
     ``top_logprobs=<k>`` in ``params``); otherwise the last element is None.

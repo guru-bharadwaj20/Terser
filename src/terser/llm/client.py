@@ -137,18 +137,6 @@ class ProviderTransport:
         return hosted[provider](provider, model, messages, max_tokens, system, params)
 
 
-def default_transport(
-    provider: str,
-    model: str,
-    messages: list[dict[str, Any]],
-    max_tokens: int,
-    system: str | None,
-    params: dict[str, Any],
-) -> TransportResult:
-    """Transport with built-in providers only (``anthropic``, ``openai``, ``local``)."""
-    return ProviderTransport()(provider, model, messages, max_tokens, system, params)
-
-
 class LLMClient:
     """Every LLM call in Terser (hosted or local) goes through here."""
 
