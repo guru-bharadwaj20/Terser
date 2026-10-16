@@ -832,48 +832,48 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 | :--- | :--- | :--- | :---: |
 | 1 | Introduction to ML, ML models | 1.1.1 (sub-problem taxonomy) | ❌ |
 | 1 | Concept learning: hypotheses, version space | 1.3.2–1.3.7 | ❌ |
-| 1 | Inductive bias | 1.3.8, 3.3.6 | ❌ |
+| 1 | Inductive bias | 1.3.8, 3.3.6 | ✅ |
 | 1 | Accuracy, Precision, Recall, Sensitivity, Specificity | 3.2.1 | ✅ |
 | 1 | ROC, AUC | 3.2.2, 3.2.3 | ✅ |
-| 1 | Bias–variance decomposition and trade-off | 3.6.1 | ❌ |
-| 1 | Cross-validation strategies | 3.2.4–3.2.7 | ❌ |
+| 1 | Bias–variance decomposition and trade-off | 3.6.1 | ✅ |
+| 1 | Cross-validation strategies | 3.2.4–3.2.7 | ✅ |
 | 1 | Decision trees: ID3 | 3.3.1 | ✅ |
-| 1 | Decision boundary for decision trees (x–y axis) | 3.3.5 | ❌ |
-| 1 | Hypothesis search and inductive bias in trees | 3.3.6 | ❌ |
-| 1 | Overfitting and solutions | 3.3.3, 3.3.4 | ❌ |
-| 1 | Continuous values | 3.1.4, 3.3.2 | ❌ |
-| 1 | Logistic regression | 3.4, 3.5.3 (boundary) | ❌ |
-| 1 | KNN classification and regression | 3.5.1, 3.5.2 | ❌ |
-| 1 | Decision boundary for KNN | 3.5.3 | ❌ |
-| 2 | Perceptron | 4.1.1 | ❌ |
-| 2 | Multi-layer networks and backpropagation | 4.1.2–4.1.5, 4.1.7 | ❌ |
-| 2 | Activations: Step, Sigmoid, Tanh, ReLU | 4.2.1 | ❌ |
-| 2 | Optimizers: GD, SGD, Momentum, Adagrad, Adam | 4.3.1 | ❌ |
-| 2 | SVM margin maximisation, primal, Lagrangian dual, dual solution | 4.4.1, 4.4.2, 4.4.4 | ❌ |
-| 2 | Hard margin and soft margin (classification) | 4.4.5, 4.4.6 | ❌ |
-| 2 | Kernels: linear (derivation), polynomial | 4.4.3, 4.4.7 | ❌ |
-| 3 | Combining weak learners | 5.1.1 | ❌ |
-| 3 | Gradient boosting | 5.1.5, 5.1.6 | ❌ |
-| 3 | Random forest | 5.1.3 | ❌ |
-| 3 | Bayes theorem | 5.2.1 | ❌ |
-| 3 | Maximum likelihood | 5.2.3, 5.3.2 | ❌ |
-| 3 | Bayes optimal classifier | 5.2.4 | ❌ |
-| 3 | Naive Bayes | 5.2.3 | ❌ |
-| 3 | Expectation maximisation and GMM | 5.2.5, 5.2.6 | ❌ |
+| 1 | Decision boundary for decision trees (x–y axis) | 3.3.5 | ✅ |
+| 1 | Hypothesis search and inductive bias in trees | 3.3.6 | ✅ |
+| 1 | Overfitting and solutions | 3.3.3, 3.3.4 | ✅ |
+| 1 | Continuous values | 3.1.4, 3.3.2 | ✅ |
+| 1 | Logistic regression | 3.4, 3.5.3 (boundary) | ✅ |
+| 1 | KNN classification and regression | 3.5.1, 3.5.2 | ✅ |
+| 1 | Decision boundary for KNN | 3.5.3 | ✅ |
+| 2 | Perceptron | 4.1.1 | ✅ |
+| 2 | Multi-layer networks and backpropagation | 4.1.2–4.1.5, 4.1.7 | ✅ |
+| 2 | Activations: Step, Sigmoid, Tanh, ReLU | 4.2.1 | ✅ |
+| 2 | Optimizers: GD, SGD, Momentum, Adagrad, Adam | 4.3.1 | ✅ |
+| 2 | SVM margin maximisation, primal, Lagrangian dual, dual solution | 4.4.1, 4.4.2, 4.4.4 | ✅ |
+| 2 | Hard margin and soft margin (classification) | 4.4.5, 4.4.6 | ✅ |
+| 2 | Kernels: linear (derivation), polynomial | 4.4.3, 4.4.7 | ✅ |
+| 3 | Combining weak learners | 5.1.1 | ✅ |
+| 3 | Gradient boosting | 5.1.5, 5.1.6 | ✅ |
+| 3 | Random forest | 5.1.3 | ✅ |
+| 3 | Bayes theorem | 5.2.1 | ✅ |
+| 3 | Maximum likelihood | 5.2.3, 5.3.2 | ✅ |
+| 3 | Bayes optimal classifier | 5.2.4 | ✅ |
+| 3 | Naive Bayes | 5.2.3 | ✅ |
+| 3 | Expectation maximisation and GMM | 5.2.5, 5.2.6 | ✅ |
 | 3 | Hidden Markov Models | 5.3 | ❌ |
 | 4 | Hierarchical vs non-hierarchical clustering | 6.4 | ✅ |
-| 4 | Agglomerative and divisive clustering | 6.5, 6.6 | ❌ |
-| 4 | K-means, bisecting K-means | 6.2, 6.3 | ❌ |
+| 4 | Agglomerative and divisive clustering | 6.5, 6.6 | ✅ |
+| 4 | K-means, bisecting K-means | 6.2, 6.3 | ✅ |
 | 4 | K-means as special case of EM | 6.7 | ✅ |
 | 4 | RL: agent, environment, states, actions, rewards, policy, value functions | 9.1.1, 9.1.2, 9.1.4 | ✅ |
 | 4 | Bellman equation and Q-learning | 9.1.1, 9.2 | ❌ |
 | 4 | Introduction to deep learning | 8.1.1, 8.3 | ❌ |
 | 4 | Convolution operation and CNNs | 8.1.2, 8.2.1 | ✅ |
-| 4 | CNN parameter calculation, max and avg pooling | 8.2.2, 8.2.3 | ❌ |
-| 4 | Hyperparameter tuning: Grid, Random, Bayesian optimisation | 3.6.4, 10.2, 10.5 | ❌ |
+| 4 | CNN parameter calculation, max and avg pooling | 8.2.2, 8.2.3 | ✅ |
+| 4 | Hyperparameter tuning: Grid, Random, Bayesian optimisation | 3.6.4, 10.2, 10.5 | ✅ |
 | 4 | MLOps overview, ML lifecycle and production challenges | 0.3.4, 11.1.1 | ✅ |
 | 4 | Data and feature pipelines | 2.1.7, 11.1 | ❌ |
-| 4 | Experiment tracking and model versioning | 0.2.4, 0.2.5, 11.2 | ❌ |
+| 4 | Experiment tracking and model versioning | 0.2.4, 0.2.5, 11.2 | ✅ |
 | 4 | Model deployment and serving | 11.3 | ❌ |
 | 4 | CI/CD/CT for ML systems | 0.2.9, 11.4 | ❌ |
 | 4 | Inference systems | 11.3.2–11.3.6 | ❌ |
@@ -913,19 +913,19 @@ which were not, and why.
 | :--- | :--- | :---: | :---: | :---: | :---: |
 | 0 — Foundations | Guru | 22 | 4 | 26 | ✅ |
 | 1 — Framing and Concept Learning | Guru | 23 | 5 | 22 | ❌ |
-| 2 — Data Pipeline and Judge | Vivian | 21 | 9 | 16 | ❌ |
-| 3 — Metrics, Trees, LR, KNN | Vivian | 31 | 7 | 11 | ❌ |
-| 4 — ANN and SVM | Vivian | 16 | 5 | 7 | ❌ |
-| 5 — Boosting, Bayes, GMM, HMM | Vivian | 16 | 6 | 6 | ❌ |
-| 6 — Clustering | Vivian | 9 | 3 | 2 | ❌ |
+| 2 — Data Pipeline and Judge | Vivian | 21 | 9 | 22 | ❌ |
+| 3 — Metrics, Trees, LR, KNN | Vivian | 31 | 7 | 36 | ❌ |
+| 4 — ANN and SVM | Vivian | 16 | 5 | 20 | ❌ |
+| 5 — Boosting, Bayes, GMM, HMM | Vivian | 16 | 6 | 16 | ❌ |
+| 6 — Clustering | Vivian | 9 | 3 | 10 | ❌ |
 | 7 — GPU Onboarding | Vivian | 8 | 3 | 9 | ❌ |
-| 8 — CNN and Rewriter | Vivian | 14 | 5 | 7 | ❌ |
-| 9 — Reinforcement Learning | Vivian | 7 | 2 | 3 | ❌ |
-| 10 — HPO | Vivian | 5 | 4 | 2 | ❌ |
-| 11 — MLOps | Vivian | 25 | 7 | 11 | ❌ |
+| 8 — CNN and Rewriter | Vivian | 14 | 5 | 10 | ❌ |
+| 9 — Reinforcement Learning | Vivian | 7 | 2 | 6 | ❌ |
+| 10 — HPO | Vivian | 5 | 4 | 7 | ❌ |
+| 11 — MLOps | Vivian | 25 | 7 | 18 | ❌ |
 | 12 — Final Evaluation | Vivian | 11 | — | 0 | ❌ |
 | 13 — Documentation | Guru | 6 | — | 2 | ❌ |
-| **Total** | | **214** | **60** | **124** | ❌ |
+| **Total** | | **214** | **60** | **204** | ❌ |
 
 Stretch rows are not counted.
 
@@ -933,7 +933,7 @@ Stretch rows are not counted.
 
 | Owner | Hardware | Phases | Rows | Done | Remaining |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 74 | 140 |
+| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 154 | 60 |
 | Guru | 1 × RTX 4500 Ada (24 GB) | 0, 1, 13 | 60 | 50 | 10 |
 
 Each phase has one owner, who runs it end to end, including its checkpoint.
