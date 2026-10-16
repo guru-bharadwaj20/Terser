@@ -995,6 +995,10 @@ pre-commit install
 pytest -m "not gpu and not api"
 ```
 
+`bash scripts/ci_local.sh` runs the same checks as the CI workflow (ruff, black, mypy, DVC dry
+run, test-set audit, feature parity, tokenizer drift, CPU tests) when GitHub Actions is
+unavailable or before a push.
+
 On the RTX 4090 workers the system interpreter is Python 3.10, below this project's minimum.
 Create the environment with an explicit 3.11 or newer interpreter (`uv venv --python 3.11` on
 `worker-1`, `/usr/bin/python3.11 -m venv .venv` on `worker-2`).
