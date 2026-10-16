@@ -759,7 +759,7 @@ quality monitoring.
 | C11.2 | Fast-path latency | p95 **≤ 150 ms** at 20 RPS | ✅ |
 | C11.3 | Quality-path latency | p95 **≤ 400 ms** at 5 RPS, prompts ≤ 256 tokens, one 24 GB Ada GPU | ❌ |
 | C11.4 | Throughput | Quality path ≥ 20 RPS sustained 30 min, no OOM | ❌ |
-| C11.5 | Fallback correctness | Rewriter crash/timeout returns original prompt **100%** of the time | ❌ |
+| C11.5 | Fallback correctness | Rewriter crash/timeout returns original prompt **100%** of the time | ✅ |
 | C11.6 | Drift detection | Synthetic shift (only `code` prompts, or tokenizer version swap) alerts within one cycle | ❌ |
 | C11.7 | CT guard | Synthetic regression correctly refused promotion | ❌ |
 
