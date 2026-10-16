@@ -367,7 +367,7 @@ bias–variance and overfitting.
 | 3.2.2 | ROC / AUC | ROC curves, AUC; PR curves and AP (degraded is the minority) | `eval/curves.py` + figure template | ✅ |
 | 3.2.3 | Threshold rule | Maximise specificity subject to **sensitivity ≥ 0.95** | `eval/threshold.py` + test | ✅ |
 | 3.2.4 | **Grouped stratified k-fold** | `StratifiedGroupKFold(k=5)`, group = source prompt, stratify = category × label | `eval/cv.py`; out-of-fold predictions as the shared unit | ✅ |
-| 3.2.5 | Leakage demonstration | Naive KFold vs grouped CV on the same model | Gap recorded in `reports/p3_cv_leakage.md` | ❌ |
+| 3.2.5 | Leakage demonstration | Naive KFold vs grouped CV on the same model | Gap recorded in `reports/p3_cv_leakage.md` | ✅ |
 | 3.2.6 | Nested CV | Outer 5 / inner 3 for unbiased estimates while tuning | Used by 3.6 | ✅ |
 | 3.2.7 | Leave-one-category-out | Generalisation to unseen task types | Per-category table | ❌ |
 | 3.2.8 | Statistical comparison | McNemar on shared out-of-fold predictions; bootstrap CIs | `eval/significance.py` | ✅ |
@@ -416,7 +416,7 @@ bias–variance and overfitting.
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
 | C3.1 | Metric implementations | Match scikit-learn to 1e-9 on 20 random fixtures | ❌ |
-| C3.2 | Leakage demonstration | Grouped-CV AUC lower than naive-KFold AUC; gap recorded | ❌ |
+| C3.2 | Leakage demonstration | Grouped-CV AUC lower than naive-KFold AUC; gap recorded | ✅ |
 | C3.3 | Quality gate (best of Tree / LR / KNN) | ROC-AUC **≥ 0.75**; specificity **≥ 0.40** at sensitivity 0.95 | ❌ |
 | C3.4 | Span tagger (best of Tree / LR) | Token macro-F1 **≥ 0.65** | ❌ |
 | C3.5 | Savings predictor (KNN regression) | MAE **≤ 10 pp**, R² **≥ 0.3** | ❌ |
