@@ -369,7 +369,7 @@ bias–variance and overfitting.
 | 3.2.4 | **Grouped stratified k-fold** | `StratifiedGroupKFold(k=5)`, group = source prompt, stratify = category × label | `eval/cv.py`; out-of-fold predictions as the shared unit | ✅ |
 | 3.2.5 | Leakage demonstration | Naive KFold vs grouped CV on the same model | Gap recorded in `reports/p3_cv_leakage.md` | ✅ |
 | 3.2.6 | Nested CV | Outer 5 / inner 3 for unbiased estimates while tuning | Used by 3.6 | ✅ |
-| 3.2.7 | Leave-one-category-out | Generalisation to unseen task types | Per-category table | ❌ |
+| 3.2.7 | Leave-one-category-out | Generalisation to unseen task types | Per-category table | ✅ |
 | 3.2.8 | Statistical comparison | McNemar on shared out-of-fold predictions; bootstrap CIs | `eval/significance.py` | ✅ |
 
 ### 3.3 Decision Trees
