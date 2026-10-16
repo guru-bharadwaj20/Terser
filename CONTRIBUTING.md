@@ -381,7 +381,7 @@ bias–variance and overfitting.
 | 3.3.3 | Overfitting study | Train vs val F1 for depth 1–30 and min-samples-leaf sweep | `reports/figures/p3_tree_overfit.png` | ✅ |
 | 3.3.4 | Overfitting solutions | Pre-pruning, **reduced-error pruning**, **rule post-pruning**, cost-complexity pruning | Comparison table: leaves, val F1, train–val gap | ✅ |
 | 3.3.5 | Decision boundary (x–y) | Axis-aligned regions on `self_information` vs `token_cost` | `reports/figures/p3_tree_boundary.png` | ✅ |
-| 3.3.6 | Hypothesis search and inductive bias | Greedy information-gain search (preference bias for short trees) vs Phase 1 conjunctive restriction bias | `reports/p3_tree_bias.md` | ❌ |
+| 3.3.6 | Hypothesis search and inductive bias | Greedy information-gain search (preference bias for short trees) vs Phase 1 conjunctive restriction bias | `reports/p3_tree_bias.md` | ✅ |
 | 3.3.7 | Rule export | Pruned tree as human-readable rules ("drop is unsafe when a negation is removed and…") | `reports/p3_tree_rules.md` | ✅ |
 
 ### 3.4 Logistic Regression
@@ -407,7 +407,7 @@ bias–variance and overfitting.
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
 | 3.6.1 | **Bias–variance decomposition and trade-off** | 200 bootstrap resamples; squared loss (KNN regression), 0-1 loss decomposition (classifiers); tree depth ∈ {2,4,8,16,∞}, k ∈ {1,3,5,15,51}; identify and explain the minimum-error point | `reports/figures/p3_bias_variance.png` + `reports/p3_bias_variance.md` | ❌ |
-| 3.6.3 | Learning curves | Train size 10% → 100% for all three models | Figure + diagnosis (high bias vs high variance) | ❌ |
+| 3.6.3 | Learning curves | Train size 10% → 100% for all three models | Figure + diagnosis (high bias vs high variance) | ✅ |
 | 3.6.4 | Grid search | Tree depth × min-samples; KNN k × metric × weighting; LR penalty × C, inside nested CV | Best params recorded in `configs/` | ❌ |
 | 3.6.5 | Baselines | Majority class, stratified random, "always preserved" | Baseline row in every table | ❌ |
 
@@ -493,7 +493,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 | 5.1.3 | Random Forest | n_estimators × max_features × bootstrap | Table; OOB vs CV comparison | ✅ |
 | 5.1.5 | Gradient Boosting | LightGBM: lr × n_estimators × max_depth with early stopping on grouped validation | Table | ✅ |
 | 5.1.6 | Feature importance | Permutation importance + SHAP per task category: what makes a rewrite unsafe | Top-10 features + `reports/figures/p5_shap.png` | ✅ |
-| 5.1.7 | Feature feedback | ≥ 1 importance finding turned into a new feature or operator rule | PR linked | ❌ |
+| 5.1.7 | Feature feedback | ≥ 1 importance finding turned into a new feature or operator rule | PR linked | ✅ |
 
 ### 5.2 Bayesian Learning
 
@@ -503,7 +503,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 | 5.2.3 | Naive Bayes filler detector | Multinomial NB on 1–3-grams: MLE parameters with Laplace smoothing (and why smoothing is MAP); vs LR on the same features | PR curve + table | ❌ |
 | 5.2.4 | Bayes optimal classifier | Phase 1 hypotheses as H; P(h \| D) from validation likelihood; posterior-weighted vote vs MAP hypothesis | `reports/p5_bayes_optimal.md` | ❌ |
 | 5.2.5 | EM from scratch | E-step responsibilities, M-step means/variances/weights; log-likelihood monotone | Test asserts non-decreasing log-likelihood; matches scikit-learn GMM | ✅ |
-| 5.2.6 | GMM on judge score deltas | 2-component GMM on (rewrite score − original score): unsupervised preserved/degraded split vs threshold labels | ARI reported; judge-threshold review issue opened if low | ❌ |
+| 5.2.6 | GMM on judge score deltas | 2-component GMM on (rewrite score − original score): unsupervised preserved/degraded split vs threshold labels | ARI reported; judge-threshold review issue opened if low | ✅ |
 
 ### 5.3 Hidden Markov Model Span Tagger
 
@@ -524,7 +524,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 | C5.2 | RF OOB vs CV | OOB AUC within **0.02** of grouped-CV AUC | ❌ |
 | C5.3 | Naive Bayes filler detector | Precision **≥ 0.85** at recall ≥ 0.70 | ❌ |
 | C5.4 | Bayes optimal vs MAP | Bayes optimal **no worse** than MAP on validation accuracy | ❌ |
-| C5.5 | GMM agreement | ARI **≥ 0.4** with judge labels, or open judge-threshold review | ❌ |
+| C5.5 | GMM agreement | ARI **≥ 0.4** with judge labels, or open judge-threshold review | ✅ |
 | C5.6 | First non-generative compressor | HMM (or tagger + gate) on 500 val prompts: median savings **≥ 15%**, preservation **≥ 90%** on ≥ 1 target, and beats best single operator at equal preservation | ❌ |
 
 ---

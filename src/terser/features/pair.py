@@ -5,6 +5,9 @@
 ``tokens_saved``               cost(original) - cost(rewrite)
 ``max_si_removed``             largest self-information (bits) among tokens not kept
 ``sum_si_removed``             total self-information of tokens not kept
+``si_removed_share``           ``sum_si_removed`` / total self-information of the original
+                               (row 5.1.7: ``sum_si_removed`` tops the importance ranking, so
+                               the share of the prompt's information removed is made explicit)
 ``negations_removed``          negations in the original minus those in the rewrite (>= 0)
 ``numbers_removed``            likewise for numbers
 ``constraints_removed``        likewise for constraint keywords
@@ -37,6 +40,7 @@ PAIR_FEATURES: Final = (
     "tokens_saved",
     "max_si_removed",
     "sum_si_removed",
+    "si_removed_share",
     "negations_removed",
     "numbers_removed",
     "constraints_removed",
@@ -85,6 +89,7 @@ def pair_features(
         "tokens_saved": float(c_orig - c_rew),
         "max_si_removed": max(gone, default=0.0),
         "sum_si_removed": float(sum(gone)),
+        "si_removed_share": float(sum(gone)) / sum(bits) if sum(bits) > 0 else 0.0,
         "negations_removed": _removed(is_negation, al.original, al.rewrite),
         "numbers_removed": _removed(is_number, al.original, al.rewrite),
         "constraints_removed": _removed(is_constraint, al.original, al.rewrite),
