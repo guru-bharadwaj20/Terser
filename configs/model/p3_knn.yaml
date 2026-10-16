@@ -1,0 +1,52 @@
+model: knn
+row: 3.6.4
+params:
+  k: 25
+  metric: manhattan
+  weights: distance
+outer_fold_choices:
+- k: 25
+  metric: manhattan
+  weights: uniform
+- k: 25
+  metric: manhattan
+  weights: distance
+- k: 25
+  metric: manhattan
+  weights: distance
+- k: 25
+  metric: manhattan
+  weights: distance
+- k: 25
+  metric: manhattan
+  weights: distance
+- k: 25
+  metric: manhattan
+  weights: distance
+- k: 25
+  metric: manhattan
+  weights: distance
+- k: 25
+  metric: manhattan
+  weights: distance
+- k: 25
+  metric: manhattan
+  weights: distance
+- k: 25
+  metric: manhattan
+  weights: distance
+- k: 25
+  metric: manhattan
+  weights: distance
+- k: 25
+  metric: manhattan
+  weights: distance
+- k: 25
+  metric: manhattan
+  weights: distance
+- k: 25
+  metric: manhattan
+  weights: distance
+- k: 25
+  metric: manhattan
+  weights: distance

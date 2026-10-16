@@ -1,0 +1,36 @@
+model: lr
+row: 3.6.4
+params:
+  C: 0.01
+  penalty: l1
+outer_fold_choices:
+- penalty: l1
+  C: 0.01
+- penalty: elasticnet
+  C: 0.01
+- penalty: l1
+  C: 0.01
+- penalty: l1
+  C: 0.01
+- penalty: elasticnet
+  C: 0.01
+- penalty: elasticnet
+  C: 0.01
+- penalty: l1
+  C: 0.01
+- penalty: l1
+  C: 0.01
+- penalty: l1
+  C: 0.01
+- penalty: l1
+  C: 0.01
+- penalty: l1
+  C: 0.01
+- penalty: l1
+  C: 0.01
+- penalty: l1
+  C: 0.01
+- penalty: l1
+  C: 0.01
+- penalty: l1
+  C: 0.01
