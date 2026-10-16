@@ -5,6 +5,8 @@
 # rebuilds every stage on CPU with identical outputs.
 stages:
   collect:
+    # Stale by design since 2.1.3 (scrub instead of drop): the locked clean.jsonl and the
+    # frozen test split are kept; see reports/p2_dvc_repro.md, "Known stale stage".
     cmd: >-
       python -m terser.data.collect --out data/interim/clean.jsonl
       --per-category ${collect.per_category} --seed ${seed}
