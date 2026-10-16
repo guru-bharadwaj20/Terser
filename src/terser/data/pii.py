@@ -1043,7 +1043,6 @@ def render_report(
     sample_path: str | None,
     sample_size: int,
     seed: int,
-    max_listed: int = 200,
     input_hash: str = "unavailable",
     git_sha: str = "unavailable",
     git_dirty: bool = False,
