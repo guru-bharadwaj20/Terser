@@ -389,7 +389,7 @@ bias–variance and overfitting.
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
 | 3.4.1 | From-scratch batch GD | Sigmoid, log-loss, gradient | Coefficients within 1e-3 of scikit-learn | ✅ |
-| 3.4.2 | Regularisation | L1 / L2 / elastic-net, C sweep | Grid results table | ❌ |
+| 3.4.2 | Regularisation | L1 / L2 / elastic-net, C sweep | Grid results table | ✅ |
 | 3.4.3 | Calibration | Reliability diagram, Brier score, ECE | `reports/figures/p3_lr_calibration.png` | ❌ |
 | 3.4.5 | Coefficient interpretation | Odds ratios on standardised features | `reports/p3_lr_coefficients.md` | ❌ |
 
