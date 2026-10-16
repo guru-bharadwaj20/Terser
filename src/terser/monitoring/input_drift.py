@@ -17,7 +17,7 @@ JSON) and a JSON summary land in ``reports/monitoring/``.
 
 Alert rule (:class:`DriftThresholds`): PSI > 0.2 on any monitored feature, or MMD permutation
 p < 0.01. An alert is a ``CRITICAL`` record on the ``terser.alerts`` logger and exit code 1 from the
-CLI, so the scheduled ``drift_flow`` (:mod:`terser.pipelines.flows`) fails loudly; the summary
+CLI, so the scheduled ``drift_flow`` (:mod:`terser.flows`) fails loudly; the summary
 JSON carries ``"alert": true`` and the reasons::
 
     python -m terser.monitoring.input_drift                                   # train vs val
