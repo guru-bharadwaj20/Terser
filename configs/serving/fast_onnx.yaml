@@ -3,6 +3,7 @@
 
 gate_threshold: 0.5
 gate_onnx: models/fast/gate.onnx
+gate_feature_target: qwen2.5   # the gate was trained on qwen2.5 token counts (row 11.3.2)
 tagger_onnx: models/fast/tagger.onnx
 tagger_threshold: 0.5
 quality_timeout_s: 0.4
