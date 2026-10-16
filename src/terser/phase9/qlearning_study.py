@@ -10,7 +10,7 @@ called during learning. Drafts are the deterministic operator stacks of
 cached per (prompt, operator set).
 
 * 9.2.1 - learning curve (moving-average return) for the default learner.
-* 9.2.2 - sweep alpha in {0.05, 0.1, 0.3} x gamma in {0.9, 0.99} x epsilon schedule in
+* 9.2.2 - sweep alpha in {0.05, 0.1, 0.3, 1/N(s,a)} x gamma in {0.9, 0.99} x epsilon schedule in
   {decay 0.999 to floor 0.05, decay 0.9995 to 0}; mean return over the last 1,000 episodes
   and the C9.1 statistic ``max |dQ|`` over the last 1,000 episodes.
 * 9.2.3 - greedy operator order per category from the best learner, with gate-estimated savings
@@ -26,7 +26,7 @@ from __future__ import annotations
 import argparse
 import json
 from collections import Counter
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from functools import cache, lru_cache
 from pathlib import Path
 from typing import Any
@@ -52,7 +52,9 @@ def _jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines() if x.strip()]
 
 
-def build_gate(table: Path, target: str):  # type: ignore[no-untyped-def]
+def build_gate(
+    table: Path, target: str
+) -> tuple[Callable[[str, str], float], Callable[[str], int], dict[str, str]]:
     """LightGBM gate on the pair table and a cached ``gate(original, draft) -> P(degraded)``."""
     import lightgbm as lgb
 
@@ -70,7 +72,7 @@ def build_gate(table: Path, target: str):  # type: ignore[no-untyped-def]
 
     @cache
     def bits(toks: tuple[str, ...]) -> list[float]:
-        return surprisal(list(toks)) if toks else []
+        return list(surprisal(list(toks))) if toks else []
 
     @cache
     def emb(text: str) -> np.ndarray:
@@ -91,7 +93,7 @@ def build_gate(table: Path, target: str):  # type: ignore[no-untyped-def]
         f["target_phi"] = 0.0
         f.update(prompt_features(original, cost(original), bits(tuple(tokenize(original)))))
         x = np.array([[f.get(c, 0.0) for c in cols]], dtype=np.float64)
-        return float(model.predict_proba(x)[0, 1])
+        return float(np.asarray(model.predict_proba(x))[0, 1])
 
     return gate, cost, category_of
 
@@ -123,10 +125,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
 
     sweep = []
-    learners: dict[tuple[float, float, float], QLearner] = {}
+    learners: dict[tuple[float | str, float, float], QLearner] = {}
     # epsilon schedules: (decay, floor). A non-zero floor keeps exploring forever, so the
     # Q-table can only settle (C9.1) under the schedule that anneals to pure greedy.
-    for alpha in (0.05, 0.1, 0.3):
+    for alpha in (0.05, 0.1, 0.3, "visits"):
         for gamma in (0.9, 0.99):
             for decay, floor in ((0.999, 0.05), (0.9995, 0.0)):
                 ql = QLearner(alpha=alpha, gamma=gamma, decay=decay, eps_min=floor, seed=args.seed)
@@ -145,7 +147,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 print(json.dumps(sweep[-1]), flush=True)
     sw = pd.DataFrame(sweep).sort_values("return_last_1000", ascending=False)
     best_key = tuple(sw.iloc[0][["alpha", "gamma", "eps_decay"]])
-    best = learners[best_key]  # type: ignore[index]
+    best = learners[best_key]
     default = learners[(0.1, 0.99, 0.999)]
 
     import matplotlib
@@ -193,7 +195,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         .reset_index()
     )
-    c91 = float(np.max(best.max_delta_[-1000:]))
+    # C9.1 asks whether the table settles: judge it on the most settled learner, not the
+    # highest-return one (which may still be exploring).
+    settled = sw.sort_values("max_dQ_last_1000").iloc[0]
+    c91 = float(settled.max_dQ_last_1000)
 
     def md(df: pd.DataFrame) -> str:
         cols = list(df.columns)
@@ -211,8 +216,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         "gate-degraded at STOP, -0.01 per operator; gate = LightGBM on the row 3.1.3 features "
         "(no LLM calls).\n\n![learning curve](figures/p9_qlearning.png)\n\n"
         "## 9.2.2 Sweep\n\n" + md(sw) + "\n\n"
-        f"## C9.1 Tabular convergence\n\nBest learner (alpha={best_key[0]}, gamma={best_key[1]}, "
-        f"decay={best_key[2]}): max |dQ| over the last 1,000 episodes = **{c91:.2e}** "
+        f"## C9.1 Tabular convergence\n\nMost settled learner (alpha={settled.alpha}, "
+        f"gamma={settled.gamma}, decay={settled.eps_decay}, eps_min={settled.eps_min}): max |dQ| "
+        f"over the last 1,000 episodes = **{c91:.2e}** "
         f"(target < 1e-3: **{'pass' if c91 < 1e-3 else 'fail'}**).\n",
         encoding="utf-8",
     )

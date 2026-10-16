@@ -129,3 +129,20 @@ stages:
       - src/terser/tokenizers/count.py
     outs:
       - data/interim/token_counts.parquet
+
+  register:
+    # Rebuilds the MLflow model registry (rows 11.2.2, 11.2.3). mlruns/ is local and gitignored,
+    # so a fresh clone runs `dvc pull && dvc repro register` to get the same registry back.
+    cmd: python -m terser.phase11.register
+    deps:
+      - src/terser/phase11/register.py
+      - src/terser/tracking/lineage.py
+      - models/fast
+      - models/rewriter/sft-qwen0.5b-full
+      - models/rewriter/sft-qwen1.5b-lora
+      - models/rewriter/sft-qwen3b-lora
+      - reports/p11_fast_path.json
+      - reports/p8_rewriter_val.json
+    outs:
+      - reports/p11_registry.md:
+          cache: false

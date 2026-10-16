@@ -52,6 +52,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap.add_argument("--spans", type=Path, default=Path("data/processed/span_features.parquet"))
     ap.add_argument("--out", type=Path, default=Path("models/fast"))
     ap.add_argument("--report", type=Path, default=Path("reports/p11_fast_path.md"))
+    ap.add_argument("--metrics", type=Path, default=Path("reports/p11_fast_path.json"))
     ap.add_argument("--target", default="qwen2.5")
     args = ap.parse_args(argv)
     from sklearn.ensemble import GradientBoostingClassifier
@@ -160,6 +161,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "rewriter.\n",
         encoding="utf-8",
     )
+    args.metrics.write_text(json.dumps(res, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(res))
     return 0
 

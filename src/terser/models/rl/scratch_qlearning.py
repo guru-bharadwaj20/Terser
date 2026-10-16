@@ -7,6 +7,11 @@ Update (derived from the Bellman optimality equation in ``docs/derivations/rl.md
 with ``max`` over legal actions in ``s'`` and target ``r`` at terminal steps. Behaviour policy:
 epsilon-greedy with ``epsilon_t = max(eps_min, eps0 * decay^t)`` per episode. ``max_delta_``
 records the largest |Q change| per episode, for the C9.1 convergence check.
+
+``alpha="visits"`` uses the Robbins-Monro step ``alpha_t(s, a) = 1 / N(s, a)``. With aliased
+states the reward of a (state, action) pair is random, and a constant ``alpha`` keeps chasing
+samples forever; ``1 / N`` turns Q into the running mean of its targets, so the updates shrink
+and the table settles.
 """
 
 from __future__ import annotations
@@ -26,7 +31,7 @@ Episode = tuple[str, str, Sequence[str]]  # prompt, category, constraints
 
 @dataclass
 class QLearner:
-    alpha: float = 0.1
+    alpha: float | str = 0.1  # a constant, or "visits" for 1 / N(s, a)
     gamma: float = 0.99
     eps0: float = 1.0
     eps_min: float = 0.05
@@ -35,6 +40,18 @@ class QLearner:
     q: dict[tuple[Hashable, str], float] = field(default_factory=lambda: defaultdict(float))
     returns_: list[float] = field(default_factory=list)
     max_delta_: list[float] = field(default_factory=list)
+    visits: dict[tuple[Hashable, str], int] = field(default_factory=lambda: defaultdict(int))
+
+    def __post_init__(self) -> None:
+        if isinstance(self.alpha, str) and self.alpha != "visits":
+            raise ValueError(f"alpha must be a float or 'visits', got {self.alpha!r}")
+
+    def step_size(self, state: Hashable, action: str) -> float:
+        """Learning rate for this update (increments the visit count)."""
+        self.visits[(state, action)] += 1
+        if self.alpha == "visits":
+            return 1.0 / self.visits[(state, action)]
+        return float(self.alpha)
 
     def greedy(self, state: Hashable, legal: Sequence[str]) -> str:
         return max(legal, key=lambda a: (self.q[(state, a)], -legal.index(a)))
@@ -61,7 +78,7 @@ class QLearner:
                     if done
                     else r + self.gamma * max(self.q[(s2, b)] for b in env.legal_actions())
                 )
-                change = self.alpha * (target - self.q[(s, a)])
+                change = self.step_size(s, a) * (target - self.q[(s, a)])
                 self.q[(s, a)] += change
                 delta = max(delta, abs(change))
                 total += r

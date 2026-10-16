@@ -22,7 +22,7 @@ import argparse
 import json
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -192,8 +192,8 @@ def study_gmm(labels: list[dict[str, Any]]) -> tuple[str, dict[str, Any]]:
         d.append(probs["rewrite"] - probs["original"])
         y.append(int(r["label"] == "degraded"))
     res = gmm_on_deltas(np.asarray(d)[:, None], np.asarray(y), seed=0)
-    ari = float(res["ari"])
-    means = sorted((float(res["mean_degraded"]), float(res["mean_preserved"])))
+    ari = float(cast(float, res["ari"]))
+    means = sorted((cast(float, res["mean_degraded"]), cast(float, res["mean_preserved"])))
     text = (
         "## 5.2.6 GMM on judge score deltas (C5.5)\n\n"
         f"{len(d):,} train label records; delta = P(rewrite better) - P(original better) from the "
@@ -229,7 +229,7 @@ def study_baum_welch(
         enc.n_obs,
         n_iter=20,
     )
-    ll = [float(x) for x in res["log_likelihood"]]
+    ll = [float(x) for x in cast(list[float], res["log_likelihood"])]
     text = (
         "## 5.3.5 Baum-Welch\n\n"
         f"Supervised MLE (Laplace smoothing) on {len(tr):,} labelled prompts, then Baum-Welch on "
@@ -244,8 +244,8 @@ def study_baum_welch(
         "text better without matching the tags.\n"
     )
     return text, {
-        "f1_supervised": float(res["f1_supervised"]),
-        "f1_baum_welch": float(res["f1_baum_welch"]),
+        "f1_supervised": cast(float, res["f1_supervised"]),
+        "f1_baum_welch": cast(float, res["f1_baum_welch"]),
     }
 
 
