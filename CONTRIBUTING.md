@@ -452,7 +452,7 @@ implementations verified against libraries, plus controlled activation and optim
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 4.3.1 | Optimizer study | Full-batch GD, SGD (mini-batch 64), SGD + Momentum (β ∈ {0.9, 0.99}), Adagrad, Adam (β₁ 0.9, β₂ 0.999), each over a small lr grid, at **equal gradient-evaluation budget**, 5 seeds; convergence speed vs generalisation tied to each update rule | `reports/figures/p4_optimizers.png` + `reports/p4_optimizers.md` | ❌ |
+| 4.3.1 | Optimizer study | Full-batch GD, SGD (mini-batch 64), SGD + Momentum (β ∈ {0.9, 0.99}), Adagrad, Adam (β₁ 0.9, β₂ 0.999), each over a small lr grid, at **equal gradient-evaluation budget**, 5 seeds; convergence speed vs generalisation tied to each update rule | `reports/figures/p4_optimizers.png` + `reports/p4_optimizers.md` | ✅ |
 
 ### 4.4 Support Vector Machines
 
@@ -473,7 +473,7 @@ implementations verified against libraries, plus controlled activation and optim
 | :---: | :--- | :--- | :---: |
 | C4.1 | Backprop correctness | Relative gradient error **< 1e-6** on all layers | ✅ |
 | C4.2 | SVM dual correctness | Support-vector set equals scikit-learn's; weight error **< 1e-3** | ✅ |
-| C4.3 | Studies complete | 4 activations × 5 seeds; 5 optimizers × 5 seeds at equal budget; written interpretation | ❌ |
+| C4.3 | Studies complete | 4 activations × 5 seeds; 5 optimizers × 5 seeds at equal budget; written interpretation | ✅ |
 | C4.4 | Better quality gate | Best MLP/SVM ROC-AUC **≥ C3.3 best + 0.03**, or documented reason (classical model stays champion) | ❌ |
 | C4.5 | Worst category | AUC **≥ 0.70** in every category | ❌ |
 
