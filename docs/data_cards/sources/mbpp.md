@@ -29,7 +29,7 @@ Files: `full/train-00000-of-00001.parquet` (87,223 bytes), `full/validation-0000
 | `mbpp` | `CC-BY-4.0` | yes | yes (BY) | Attribution to Google Research (Austin et al., 2021), indicate changes. Decision: include. `reports/license_audit.md#mbpp` |
 
 No LLM-generated text in this raw source. Licences of the models that will casualise and rewrite it
-are covered in `reports/license_audit.md` § Generating models (ADR-0003, pending).
+are covered in `reports/license_audit.md` § Generating models ([ADR-0003](../../decisions/ADR-0003-training-on-model-outputs.md)).
 
 ## 3. Size
 

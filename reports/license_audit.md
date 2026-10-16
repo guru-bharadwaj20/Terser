@@ -186,7 +186,8 @@ Logs in the Wild") in any release that contains slice prompts.
 
 Casualisation (2.1.4), candidate generation (2.2.1), target outputs (2.2.3) and judging (2.3.3) produce
 text with local open models. Their licences attach conditions to that output and to models trained on
-it; ADR-0003 (training on model outputs, reserved) records the final policy. Licence fields below were
+it; [ADR-0003](../docs/decisions/ADR-0003-training-on-model-outputs.md) (training on model outputs)
+records the final policy. Licence fields below were
 read from each model's Hugging Face `README.md` on 2026-09-11.
 
 | Model (plan use) | Card licence field | Output use for training | Conditions on release |
