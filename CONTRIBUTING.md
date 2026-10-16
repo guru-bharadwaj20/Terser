@@ -503,7 +503,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 | 5.2.3 | Naive Bayes filler detector | Multinomial NB on 1–3-grams: MLE parameters with Laplace smoothing (and why smoothing is MAP); vs LR on the same features | PR curve + table | ❌ |
 | 5.2.4 | Bayes optimal classifier | Phase 1 hypotheses as H; P(h \| D) from validation likelihood; posterior-weighted vote vs MAP hypothesis | `reports/p5_bayes_optimal.md` | ❌ |
 | 5.2.5 | EM from scratch | E-step responsibilities, M-step means/variances/weights; log-likelihood monotone | Test asserts non-decreasing log-likelihood; matches scikit-learn GMM | ✅ |
-| 5.2.6 | GMM on judge score deltas | 2-component GMM on (rewrite score − original score): unsupervised preserved/degraded split vs threshold labels | ARI reported; judge-threshold review issue opened if low | ❌ |
+| 5.2.6 | GMM on judge score deltas | 2-component GMM on (rewrite score − original score): unsupervised preserved/degraded split vs threshold labels | ARI reported; judge-threshold review issue opened if low | ✅ |
 
 ### 5.3 Hidden Markov Model Span Tagger
 
@@ -524,7 +524,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 | C5.2 | RF OOB vs CV | OOB AUC within **0.02** of grouped-CV AUC | ❌ |
 | C5.3 | Naive Bayes filler detector | Precision **≥ 0.85** at recall ≥ 0.70 | ❌ |
 | C5.4 | Bayes optimal vs MAP | Bayes optimal **no worse** than MAP on validation accuracy | ❌ |
-| C5.5 | GMM agreement | ARI **≥ 0.4** with judge labels, or open judge-threshold review | ❌ |
+| C5.5 | GMM agreement | ARI **≥ 0.4** with judge labels, or open judge-threshold review | ✅ |
 | C5.6 | First non-generative compressor | HMM (or tagger + gate) on 500 val prompts: median savings **≥ 15%**, preservation **≥ 90%** on ≥ 1 target, and beats best single operator at equal preservation | ❌ |
 
 ---
