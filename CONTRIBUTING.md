@@ -471,7 +471,7 @@ implementations verified against libraries, plus controlled activation and optim
 
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
-| C4.1 | Backprop correctness | Relative gradient error **< 1e-6** on all layers | ❌ |
+| C4.1 | Backprop correctness | Relative gradient error **< 1e-6** on all layers | ✅ |
 | C4.2 | SVM dual correctness | Support-vector set equals scikit-learn's; weight error **< 1e-3** | ❌ |
 | C4.3 | Studies complete | 4 activations × 5 seeds; 5 optimizers × 5 seeds at equal budget; written interpretation | ❌ |
 | C4.4 | Better quality gate | Best MLP/SVM ROC-AUC **≥ C3.3 best + 0.03**, or documented reason (classical model stays champion) | ❌ |
