@@ -1,7 +1,7 @@
 # Serving config used inside compose (row 11.3.7): same as configs/serving/default.yaml, with the
 # quality path pointed at the terser-gpu service. Without the gpu profile, terser-cpu still starts
 # and the quality path falls back to the fast path (row 11.3.5).
-gate_threshold: 0.5
+gate_threshold: 0.5   # ConstraintGate threshold; see the comment in configs/serving/default.yaml
 gate_onnx: null
 quality_timeout_s: 0.4
 cache_size: 10000
@@ -15,7 +15,7 @@ pricing:
   target_input_per_mtok:
     gpt-4o: 2.50
     qwen2.5: 0.20
-    llama-3.1: 0.20
+    phi3.5: 0.20
   rewriter_input_per_mtok: 0.05
   rewriter_output_per_mtok: 0.10
   fast_path_per_request: 0.0

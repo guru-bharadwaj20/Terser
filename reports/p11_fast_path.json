@@ -5,5 +5,187 @@
   "tagger_parity": 2.8610229518832853e-08,
   "p50_ms": 1.0734355000749929,
   "p95_ms": 7.290421949619486,
-  "median_savings": 0.2857142857142857
+  "median_savings": 0.2857142857142857,
+  "n_gate_features": 30,
+  "n_gate_pairs": 14732,
+  "n_tagger_features": 10,
+  "n_tagger_words": 129380,
+  "operating_point": {
+    "rule": "maximise specificity subject to sensitivity >= 0.95 (row 3.2.3)",
+    "scores": "grouped 5-fold OOF, seed 0",
+    "reject_rule": "P(degraded) > gate_threshold",
+    "degraded_share": 0.43083084442030956,
+    "ap": 0.6799254618971452,
+    "choose_threshold": 0.2645652688467463,
+    "default_0_5": {
+      "threshold": 0.5,
+      "n": 14732,
+      "sensitivity": 0.6459744761304553,
+      "specificity": 0.7080500894454382,
+      "pass_rate": 0.5555253869128428,
+      "degraded_share_passed": 0.27456011730205276,
+      "per_category": {
+        "code": {
+          "n": 2620,
+          "sensitivity": 0.5895087427144047,
+          "specificity": 0.7392529950669485,
+          "pass_rate": 0.5885496183206107,
+          "degraded_share_passed": 0.31971465629053175,
+          "auc": 0.7507424221886976,
+          "ap": 0.7301316691848124
+        },
+        "creative": {
+          "n": 2546,
+          "sensitivity": 0.6870109546165885,
+          "specificity": 0.5962145110410094,
+          "pass_rate": 0.4540455616653574,
+          "degraded_share_passed": 0.3460207612456747,
+          "auc": 0.7003531000232028,
+          "ap": 0.6514638630132823
+        },
+        "explain": {
+          "n": 2534,
+          "sensitivity": 0.697577276524645,
+          "specificity": 0.5669409124906507,
+          "pass_rate": 0.4419889502762431,
+          "degraded_share_passed": 0.32321428571428573,
+          "auc": 0.699086597071087,
+          "ap": 0.6294490298729436
+        },
+        "fact": {
+          "n": 2242,
+          "sensitivity": 0.770508826583593,
+          "specificity": 0.5887412040656763,
+          "pass_rate": 0.4344335414808207,
+          "degraded_share_passed": 0.2268993839835729,
+          "auc": 0.7559762015528422,
+          "ap": 0.6934600665059992
+        },
+        "reason": {
+          "n": 2556,
+          "sensitivity": 0.18780889621087316,
+          "specificity": 0.9374037968188815,
+          "pass_rate": 0.9076682316118936,
+          "degraded_share_passed": 0.2125,
+          "auc": 0.7098790999143735,
+          "ap": 0.40582016320333647
+        },
+        "transform": {
+          "n": 2234,
+          "sensitivity": 0.7475022706630337,
+          "specificity": 0.7007943512797882,
+          "pass_rate": 0.4798567591763653,
+          "degraded_share_passed": 0.2593283582089552,
+          "auc": 0.7922970612449728,
+          "ap": 0.7491901394963795
+        }
+      }
+    },
+    "chosen": {
+      "threshold": 0.264564,
+      "n": 14732,
+      "sensitivity": 0.950370253663148,
+      "specificity": 0.37960644007155636,
+      "pass_rate": 0.23744230247081183,
+      "degraded_share_passed": 0.09005145797598628,
+      "per_category": {
+        "code": {
+          "n": 2620,
+          "sensitivity": 0.9658617818484596,
+          "specificity": 0.29809725158562367,
+          "pass_rate": 0.17709923664122137,
+          "degraded_share_passed": 0.08836206896551724,
+          "auc": 0.7507424221886976,
+          "ap": 0.7301316691848124
+        },
+        "creative": {
+          "n": 2546,
+          "sensitivity": 0.9687010954616588,
+          "specificity": 0.34069400630914826,
+          "pass_rate": 0.18538884524744698,
+          "degraded_share_passed": 0.0847457627118644,
+          "auc": 0.7003531000232028,
+          "ap": 0.6514638630132823
+        },
+        "explain": {
+          "n": 2534,
+          "sensitivity": 0.9741019214703425,
+          "specificity": 0.33283470456245323,
+          "pass_rate": 0.1878453038674033,
+          "degraded_share_passed": 0.06512605042016807,
+          "auc": 0.699086597071087,
+          "ap": 0.6294490298729436
+        },
+        "fact": {
+          "n": 2242,
+          "sensitivity": 0.9740394600207685,
+          "specificity": 0.33698201720093823,
+          "pass_rate": 0.2033898305084746,
+          "degraded_share_passed": 0.05482456140350877,
+          "auc": 0.7559762015528422,
+          "ap": 0.6934600665059992
+        },
+        "reason": {
+          "n": 2556,
+          "sensitivity": 0.7940691927512356,
+          "specificity": 0.5166752180605438,
+          "pass_rate": 0.4428794992175274,
+          "degraded_share_passed": 0.11042402826855123,
+          "auc": 0.7098790999143735,
+          "ap": 0.40582016320333647
+        },
+        "transform": {
+          "n": 2234,
+          "sensitivity": 0.9518619436875567,
+          "specificity": 0.39276257722859664,
+          "pass_rate": 0.22291853178155774,
+          "degraded_share_passed": 0.10642570281124498,
+          "auc": 0.7922970612449728,
+          "ap": 0.7491901394963795
+        }
+      }
+    },
+    "savings_oof": {
+      "n_prompts": 300,
+      "n_changed": 300,
+      "median_savings_before_gate": 0.2857142857142857,
+      "mean_savings_before_gate": 0.32586506997087333,
+      "default_0_5": {
+        "threshold": 0.5,
+        "rejected": 199,
+        "rejected_share_of_changed": 0.6633333333333333,
+        "median_savings_after_gate": 0.0,
+        "mean_savings_after_gate": 0.08503079679721366
+      },
+      "chosen": {
+        "threshold": 0.264564,
+        "rejected": 298,
+        "rejected_share_of_changed": 0.9933333333333333,
+        "median_savings_after_gate": 0.0,
+        "mean_savings_after_gate": 0.0009225561260444981
+      }
+    },
+    "savings_oof_refit_prompts": 0,
+    "savings_deployed": {
+      "n_prompts": 300,
+      "n_changed": 300,
+      "median_savings_before_gate": 0.2857142857142857,
+      "mean_savings_before_gate": 0.32586506997087333,
+      "default_0_5": {
+        "threshold": 0.5,
+        "rejected": 179,
+        "rejected_share_of_changed": 0.5966666666666667,
+        "median_savings_after_gate": 0.0,
+        "mean_savings_after_gate": 0.09913594105659343
+      },
+      "chosen": {
+        "threshold": 0.264564,
+        "rejected": 298,
+        "rejected_share_of_changed": 0.9933333333333333,
+        "median_savings_after_gate": 0.0,
+        "mean_savings_after_gate": 0.0011261904761904762
+      }
+    },
+    "deployed_parity": 9.987617421991501e-08
+  }
 }
