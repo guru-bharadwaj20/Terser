@@ -4,3 +4,9 @@
 {"path": "data/interim/rewrites/sft-qwen3b-lora.val.jsonl", "split": "val", "purpose": "read"}
 {"path": "data/interim/rewrites/sft15v2.val.jsonl", "split": "val", "purpose": "read"}
 {"path": "data/interim/rewrites/sft3bv2.val.jsonl", "split": "val", "purpose": "read"}
+{"path": "data/processed/sft_v2/train.jsonl", "split": "train", "purpose": "read"}
+{"path": "data/processed/sft_v2/val.jsonl", "split": "val", "purpose": "read"}
+{"path": "data/interim/rewrites/val_labels_hpo.jsonl", "split": "val", "purpose": "read"}
+{"path": "data/interim/rewrites/hpo08.val.jsonl", "split": "val", "purpose": "read"}
+{"path": "data/interim/rewrites/hpo02.val.jsonl", "split": "val", "purpose": "read"}
+{"path": "data/interim/rewrites/hpo00.val.jsonl", "split": "val", "purpose": "read"}

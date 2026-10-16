@@ -1,0 +1,66 @@
+{
+  "base": "Qwen/Qwen2.5-1.5B-Instruct",
+  "experiment": "sft_qwen15b_lora_v2",
+  "baseline_rung": "sft15v2",
+  "candidates": "data/interim/rewrites/val_candidates_hpo.jsonl",
+  "k": 3,
+  "trials": [
+    {
+      "tag": "hpo08",
+      "trial": 8,
+      "params": {
+        "rank": 32,
+        "alpha_mult": 2,
+        "lr": 0.00023162198694668402,
+        "warmup_frac": 0.09789871366485711,
+        "epochs": 1
+      },
+      "value": -1.3955481549169124,
+      "median_savings": 0.5428571428571429,
+      "preserved_est": 0.5244518450830875,
+      "steps": 316,
+      "warmup_steps": 31,
+      "alpha": 64,
+      "model_dir": "experiments/p10_rewriter_hpo/trial-08",
+      "rewrites": "data/interim/rewrites/hpo08.val.jsonl"
+    },
+    {
+      "tag": "hpo02",
+      "trial": 2,
+      "params": {
+        "rank": 16,
+        "alpha_mult": 2,
+        "lr": 0.00037066548889840093,
+        "warmup_frac": 0.0978618342232764,
+        "epochs": 1
+      },
+      "value": -1.399008989763772,
+      "median_savings": 0.603448275862069,
+      "preserved_est": 0.5209910102362281,
+      "steps": 316,
+      "warmup_steps": 31,
+      "alpha": 32,
+      "model_dir": "experiments/p10_rewriter_hpo/trial-02",
+      "rewrites": "data/interim/rewrites/hpo02.val.jsonl"
+    },
+    {
+      "tag": "hpo00",
+      "trial": 0,
+      "params": {
+        "rank": 16,
+        "alpha_mult": 2,
+        "lr": 0.0002,
+        "warmup_frac": 0.0,
+        "epochs": 3
+      },
+      "value": -1.420717305064498,
+      "median_savings": 0.5945945945945945,
+      "preserved_est": 0.49928269493550226,
+      "steps": 947,
+      "warmup_steps": 0,
+      "alpha": 32,
+      "model_dir": "experiments/p10_rewriter_hpo/trial-00",
+      "rewrites": "data/interim/rewrites/hpo00.val.jsonl"
+    }
+  ]
+}
