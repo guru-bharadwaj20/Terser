@@ -623,7 +623,7 @@ together with the quality gate and fallback, reach the main quality/savings gate
 
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
-| C8.1 | TextCNN parameters | Matches documented count exactly | ❌ |
+| C8.1 | TextCNN parameters | Matches documented count exactly | ✅ |
 | C8.2 | TextCNN tagging | Token macro-F1 **≥ C3.4 best + 0.05**, or documented reason | ❌ |
 | C8.3 🚧 | **Rewriter main gate (val split)** | Median savings **≥ 25%** on every target; preservation **≥ 92%** overall and **≥ 85%** per category (gate + fallback on) | ❌ |
 | C8.4 | vs zero-shot large open LLM | At equal preservation (±1 pp): savings within **5 pp** of zero-shot Qwen2.5-32B-AWQ while **≥ 10× lower** rewrite latency on the same GPU | ❌ |
