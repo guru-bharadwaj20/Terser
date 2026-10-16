@@ -221,8 +221,8 @@ The hand-categorised failure analysis (rows 8.3.10 / 12.8) has not been done for
   ([docs/serving/logging.md](../serving/logging.md)).
 - **Licences.** Labels derive from Qwen2.5-32B-AWQ verdicts on Qwen2.5-7B outputs (both
   Apache-2.0, [license_audit.md](../../reports/license_audit.md)). Dolly (CC-BY-SA-3.0) is the
-  largest source (1,109 of 1,665 source groups in `splits.json`). ADR-0003 (training on model
-  outputs) is referenced by CONTRIBUTING but has not been written.
+  largest source (1,109 of 1,665 source groups in `splits.json`). [ADR-0003](../decisions/ADR-0003-training-on-model-outputs.md) (training on model
+  outputs) records the licence check.
 - **Language.** English only; synthetic casual styles (hedging, over_polite, rambling, repetitive,
   texting) produced by an LLM. The lexicons (filler, stopword, constraint) are English word lists.
 - **Compute.** CPU-only training. Labels inherit the judge stage cost (13,042 s wall time,

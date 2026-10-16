@@ -206,7 +206,7 @@ No rewrite from TextCNN tags was ever generated or judged, so there is no failur
 - **Licences.** Labels derive from Apache-2.0 Qwen2.5 models ([license_audit.md](../../reports/license_audit.md)).
   Dolly (CC-BY-SA-3.0) is the largest source (1,109 of 1,665 source groups in `splits.json`).
   bge-small-en-v1.5 is used as a frozen feature extractor; its licence was not part of the audit
-  read for this card. ADR-0003 (training on model outputs) has not been written.
+  read for this card. [ADR-0003](../decisions/ADR-0003-training-on-model-outputs.md) (training on model outputs) records the licence check.
 - **Language.** English-only encoder and English synthetic casual prompts.
 - **Compute.** CPU-only; 3 poolings × 3 seeds × 5 folds = 45 trainings of 12 epochs, plus one
   bge-small pass over 1,262 prompts.
