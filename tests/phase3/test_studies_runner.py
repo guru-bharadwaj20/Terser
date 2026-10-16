@@ -91,7 +91,7 @@ def test_runner_writes_every_artifact(tmp_path: Path) -> None:
         assert doc["row"] == "3.6.4" and doc["params"]
     assert "baseline: always_preserved" in (out / "p3_knn_grid.md").read_text(encoding="utf-8")
     assert "knn_regression" in (out / "p3_bias_variance.md").read_text(encoding="utf-8")
-    assert len(STUDIES) == 8
+    assert len(STUDIES) == 9  # knn_regression reruns the 3.5.2 / 3.5.4 part of knn alone
 
 
 def test_runner_refuses_stand_in_without_flag(tmp_path: Path) -> None:
