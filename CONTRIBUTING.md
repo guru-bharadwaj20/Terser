@@ -489,7 +489,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 5.1.1 | Combining weak learners | AdaBoost with depth-1 stumps from scratch; which pairs get the largest weights | Matches scikit-learn within 0.01 AUC; training error vs rounds plot; hard-example note | ❌ |
+| 5.1.1 | Combining weak learners | AdaBoost with depth-1 stumps from scratch; which pairs get the largest weights | Matches scikit-learn within 0.01 AUC; training error vs rounds plot; hard-example note | ✅ |
 | 5.1.3 | Random Forest | n_estimators × max_features × bootstrap | Table; OOB vs CV comparison | ❌ |
 | 5.1.5 | Gradient Boosting | LightGBM: lr × n_estimators × max_depth with early stopping on grouped validation | Table | ❌ |
 | 5.1.6 | Feature importance | Permutation importance + SHAP per task category: what makes a rewrite unsafe | Top-10 features + `reports/figures/p5_shap.png` | ❌ |
