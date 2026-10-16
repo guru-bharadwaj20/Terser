@@ -88,8 +88,12 @@ class OnnxSpanRewriter:
     """Fast-path rewriter: ONNX span tagger, deletes droppable words outside payload spans."""
 
     def __init__(
-        self, path: str | Path, cost: Callable[[str], int], threshold: float = 0.5
+        self,
+        path: str | Path,
+        cost: Callable[[str], int] | None = None,
+        threshold: float = 0.5,
     ) -> None:
+        """``cost`` fixes the tokenizer; ``None`` uses the request's target tokenizer."""
         import onnxruntime as ort
 
         self.session = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
@@ -97,17 +101,20 @@ class OnnxSpanRewriter:
         self.cost = cost
         self.threshold = threshold
 
-    def drop_probs(self, words: Sequence[str]) -> np.ndarray:
+    def drop_probs(self, words: Sequence[str], cost: Callable[[str], int]) -> np.ndarray:
         if not words:
             return np.zeros(0)
-        out = self.session.run(None, {self.input_name: span_matrix(words, self.cost)})
+        out = self.session.run(None, {self.input_name: span_matrix(words, cost)})
         return np.asarray(out[1])[:, 1]
 
     def __call__(self, prompt: str, target: str) -> RewriteResult:
+        from terser.tokenizers.count import count_tokens
+
+        cost = self.cost or (lambda w: count_tokens(w, target))
         spans = list(_TOKEN_RE.finditer(prompt))
         protected = [m.span() for m in _PROTECTED_RE.finditer(prompt)]
         words = [m.group() for m in spans]
-        probs = self.drop_probs(words)
+        probs = self.drop_probs(words, cost)
         keep_mask = np.ones(len(words), bool)
         for i, (m, w) in enumerate(zip(spans, words, strict=True)):
             inside = any(a <= m.start() < b for a, b in protected)
