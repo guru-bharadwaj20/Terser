@@ -44,6 +44,7 @@ stamped ``STAND-IN``.
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import hashlib
 import json
 import sys
@@ -724,7 +725,17 @@ def study_grid(
     return metrics
 
 
-STUDIES = ("leakage", "loco", "tree", "lr", "knn", "bias_variance", "learning_curves", "grid")
+STUDIES = (
+    "leakage",
+    "loco",
+    "tree",
+    "lr",
+    "knn",
+    "knn_regression",
+    "bias_variance",
+    "learning_curves",
+    "grid",
+)
 
 
 def run(
@@ -752,6 +763,8 @@ def run(
             metrics.update(study_lr(data, out, figs, seeds, g))
         elif name == "knn":
             metrics.update(study_knn(data, out, figs, seeds, g))
+        elif name == "knn_regression":  # 3.5.2 + 3.5.4 only, without the 3.5.1 grid
+            metrics.update(_study_knn_regression(data, out, seeds, g))
         elif name == "bias_variance":
             metrics.update(study_bias_variance(data, out, figs, seeds, g))
         elif name == "learning_curves":
@@ -780,6 +793,13 @@ def _parser() -> argparse.ArgumentParser:
         default=["max_si_removed", "tokens_saved"],
         help="two feature columns for the tree boundary (3.3.5)",
     )
+    p.add_argument(
+        "--overhead-pct",
+        type=float,
+        default=None,
+        help="rewrite overhead per prompt in percent for the 3.5.4 skip rule (overrides the "
+        "table's overhead_pct column)",
+    )
     p.add_argument("--quick", action="store_true", help="tiny grids (smoke test only)")
     p.add_argument("--allow-stand-in", action="store_true")
     p.add_argument("--no-track", action="store_true", help="skip MLflow logging")
@@ -794,6 +814,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     except (FileNotFoundError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
+    if args.overhead_pct is not None:
+        data = dataclasses.replace(data, overhead=np.full(len(data.y), args.overhead_pct))
+    if data.overhead is None and "knn_regression" in args.studies:
+        print(
+            "warning: no overhead_pct; the 3.5.4 skip rule assumes zero overhead", file=sys.stderr
+        )
     grids = Grids.quick() if args.quick else Grids()
 
     def execute() -> dict[str, float]:

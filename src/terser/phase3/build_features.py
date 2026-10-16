@@ -2,7 +2,8 @@
 
 * ``data/processed/pair_features.parquet`` - one row per labelled (original, candidate, target)
   train record: :data:`~terser.features.pair.PAIR_FEATURES`, ``target_phi`` (which target model
-  answered), prompt-level ``prompt_*`` features, and ``savings_pct`` (mean oracle savings of the
+  answered), prompt-level ``prompt_*`` features, ``overhead_pct`` (quality-path rewrite cost,
+  :func:`quality_overhead_pct`) and ``savings_pct`` (mean oracle savings of the
   prompt over targets, in percent) for the KNN savings regression.
 * ``data/processed/span_features.parquet`` - token-level KEEP / DROP / REPLACE table for each
   train prompt against its Qwen2.5 oracle rewrite (``span_feature_table``).
@@ -34,11 +35,27 @@ from terser.features.pair import pair_feature_table
 from terser.features.span import gpt2_surprisal, spacy_pos, span_feature_table
 from terser.tokenizers.count import count_tokens
 
-__all__ = ["main", "prompt_features"]
+__all__ = ["main", "prompt_features", "quality_overhead_pct"]
 
 
 def _jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines() if x.strip()]
+
+
+def quality_overhead_pct(
+    config: Path = Path("configs/serving/default.yaml"), target: str = "gpt-4o"
+) -> float:
+    """Rewrite overhead per prompt, in percent of the prompt's target cost (row 3.5.4).
+
+    The quality-path rewriter reads the prompt and writes at most as many tokens, so per input
+    token it costs ``rewriter_input + rewriter_output`` against the target's input price
+    (prices from the serving config; 6% for ``gpt-4o`` at the configured prices).
+    """
+    import yaml
+
+    pr = yaml.safe_load(config.read_text(encoding="utf-8"))["pricing"]
+    rewrite = pr["rewriter_input_per_mtok"] + pr["rewriter_output_per_mtok"]
+    return 100.0 * rewrite / pr["target_input_per_mtok"][target]
 
 
 def prompt_features(text: str, n_tokens: int, bits: Sequence[float]) -> dict[str, float]:
@@ -119,6 +136,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     pdf = pd.DataFrame.from_dict(pmeta, orient="index")
     pf = pf.join(pdf, on="prompt_id")
     pf["savings_pct"] = pf.prompt_id.map(savings).astype(float)
+    pf["overhead_pct"] = quality_overhead_pct()
     args.out_dir.mkdir(parents=True, exist_ok=True)
     pf.to_parquet(args.out_dir / "pair_features.parquet", index=False)
 
