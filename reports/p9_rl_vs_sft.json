@@ -1,0 +1,107 @@
+{
+  "rungs": {
+    "hpo08": {
+      "n": 285,
+      "targets": [
+        "Qwen/Qwen2.5-7B-Instruct",
+        "microsoft/Phi-3.5-mini-instruct"
+      ],
+      "median_savings": 0.5428571428571429,
+      "oracle_median_savings": 0.17391304347826086,
+      "fell_back": 26,
+      "latency_s": 0.44223693629845223,
+      "preserved": 0.49122807017543857,
+      "preserved_by_category": {
+        "code": 0.5196078431372549,
+        "creative": 0.3404255319148936,
+        "explain": 0.5285714285714286,
+        "fact": 0.5272727272727272,
+        "reason": 0.6145833333333334,
+        "transform": 0.41836734693877553
+      },
+      "c8_3": false,
+      "gate": {
+        "rewrites": 285,
+        "gate_passed": 12,
+        "pairs": 24,
+        "preserved": 17,
+        "precision": 0.7083333333333334,
+        "ci95": [
+          0.508319363412903,
+          0.8508553966583573
+        ]
+      },
+      "degenerate_rate": 0.017543859649122806
+    },
+    "sft15v2": {
+      "n": 285,
+      "targets": [
+        "Qwen/Qwen2.5-7B-Instruct",
+        "microsoft/Phi-3.5-mini-instruct"
+      ],
+      "median_savings": 0.35,
+      "oracle_median_savings": 0.09999999999999998,
+      "fell_back": 72,
+      "latency_s": 0.4414470121403594,
+      "preserved": 0.5701754385964912,
+      "preserved_by_category": {
+        "code": 0.4803921568627451,
+        "creative": 0.5425531914893617,
+        "explain": 0.6571428571428571,
+        "fact": 0.6818181818181818,
+        "reason": 0.4479166666666667,
+        "transform": 0.6224489795918368
+      },
+      "c8_3": false,
+      "gate": {
+        "rewrites": 285,
+        "gate_passed": 12,
+        "pairs": 24,
+        "preserved": 12,
+        "precision": 0.5,
+        "ci95": [
+          0.31427131627763083,
+          0.6857286837223692
+        ]
+      },
+      "degenerate_rate": 0.010526315789473684
+    },
+    "grpo": {
+      "n": 285,
+      "targets": [
+        "Qwen/Qwen2.5-7B-Instruct",
+        "microsoft/Phi-3.5-mini-instruct"
+      ],
+      "median_savings": 0.4460093896713615,
+      "oracle_median_savings": 0.09999999999999998,
+      "fell_back": 36,
+      "latency_s": 0.37940194072638916,
+      "preserved": 0.48596491228070177,
+      "preserved_by_category": {
+        "code": 0.5196078431372549,
+        "creative": 0.40425531914893614,
+        "explain": 0.5142857142857142,
+        "fact": 0.509090909090909,
+        "reason": 0.5104166666666666,
+        "transform": 0.45918367346938777
+      },
+      "c8_3": false,
+      "gate": {
+        "rewrites": 285,
+        "gate_passed": 46,
+        "pairs": 92,
+        "preserved": 39,
+        "precision": 0.42391304347826086,
+        "ci95": [
+          0.3279782090086152,
+          0.5259474349706172
+        ]
+      },
+      "degenerate_rate": 0.014035087719298246
+    }
+  },
+  "gate_threshold": 0.264564,
+  "phase2_precision": 0.9099485420240138,
+  "c9_3": false,
+  "c9_5": false
+}
