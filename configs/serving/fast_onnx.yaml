@@ -1,5 +1,6 @@
 # Serving config with the row 11.3.2 ONNX fast path (gate + span tagger, `dvc pull models/fast`).
 # TERSER_SERVING_CONFIG=configs/serving/fast_onnx.yaml uvicorn terser.serving.api:app
+# Relative model paths resolve against the repo root (terser.serving.api.resolve_path).
 
 gate_threshold: 0.5
 gate_onnx: models/fast/gate.onnx

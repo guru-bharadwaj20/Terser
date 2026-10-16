@@ -107,6 +107,15 @@ def load_config(path: str | Path | None = None) -> dict[str, Any]:
     return dict(yaml.safe_load(p.read_text(encoding="utf-8")))
 
 
+REPO_ROOT = DEFAULT_CONFIG.parents[2]
+
+
+def resolve_path(p: str | Path) -> Path:
+    """Model paths in a config are relative to the repo root, not the process's cwd."""
+    path = Path(p)
+    return path if path.is_absolute() else REPO_ROOT / path
+
+
 def build_service(cfg: dict[str, Any], metrics: ServiceMetrics | None = None) -> RewriteService:
     """Construct the :class:`RewriteService` described by ``cfg``."""
     q = cfg.get("quality") or {}
@@ -115,13 +124,13 @@ def build_service(cfg: dict[str, Any], metrics: ServiceMetrics | None = None) ->
         quality = OpenAICompatibleRewriter(
             q["base_url"], q["model"], timeout_s=float(q.get("http_timeout_s", 2.0))
         )
-    gate: Gate | None = OnnxGate(cfg["gate_onnx"]) if cfg.get("gate_onnx") else None
+    gate: Gate | None = OnnxGate(resolve_path(cfg["gate_onnx"])) if cfg.get("gate_onnx") else None
     fast = None
     if cfg.get("tagger_onnx"):  # row 11.3.2 ONNX span tagger; else rule-based operators
         from terser.serving.fast_models import OnnxSpanRewriter
 
         fast = OnnxSpanRewriter(
-            cfg["tagger_onnx"], threshold=float(cfg.get("tagger_threshold", 0.5))
+            resolve_path(cfg["tagger_onnx"]), threshold=float(cfg.get("tagger_threshold", 0.5))
         )
     return RewriteService(
         pricing=Pricing.from_config(cfg["pricing"]),
