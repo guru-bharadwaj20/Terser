@@ -1,0 +1,36 @@
+# Row 8.3.5: more compressive SFT targets. Two extra LLM rewrite levels (llm_max, llm_min) per
+# labelled prompt, which then go through respond -> judge -> sft_data like the row 2.2.1
+# candidates. The test split is skipped: SFT data reads train / val only, so test candidates
+# would be wasted GPU time.
+#   vllm serve Qwen/Qwen2.5-32B-Instruct-AWQ --max-model-len 4096
+#   python -m terser.data.candidates experiment=p8_target_aug hardware=rtx4500ada
+# The 2026-10-16 run predates exclude_splits and also rewrote test prompts; sft_data drops them.
+name: p8_target_aug
+phase: 8
+row: "8.3.5"
+task: candidates_aug
+params:
+  prompts_path: ${paths.data_dir}/interim/label_prompts.jsonl
+  output_path: ${paths.data_dir}/interim/candidates_aug.jsonl
+  smoke_output_path: ${paths.data_dir}/interim/smoke/candidates_aug.jsonl
+  # null = operator stacks + llmlingua2 + llm_low/medium/high; or an explicit list of methods.
+  methods: [llm_max, llm_min]
+  operator_stacks: [FHC, CHFIDSL]
+  operator_target: null         # tokenizer target for operator S; null = price in characters
+  provider: local
+  stand_in: false
+  rewrite_model: Qwen/Qwen2.5-32B-Instruct-AWQ
+  prompt_version: rewrite_v1    # src/terser/data/prompts/<version>.txt
+  temperature: 0.0
+  max_rewrite_tokens: 1024
+  # A rewrite is rejected if it costs more tokens than the original on any of these.
+  length_targets: [gpt-4o, qwen2.5, llama-3.1]
+  llmlingua_model: microsoft/llmlingua-2-bert-base-multilingual-cased-meetingbank
+  # larger: microsoft/llmlingua-2-xlm-roberta-large-meetingbank
+  llmlingua_rate: 0.5
+  llmlingua_device: cpu
+  llmlingua_cache_dir: ${paths.cache_dir}/llmlingua2
+  limit: null                   # first N prompts; null = all
+  exclude_splits: [test]        # SFT targets come from train / val only
+  budget_phase: phase2
+  workers: 128
