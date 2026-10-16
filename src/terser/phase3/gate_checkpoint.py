@@ -21,6 +21,7 @@ from typing import Any
 
 import numpy as np
 
+from terser.eval.baselines import BASELINES
 from terser.eval.cv import out_of_fold_scores
 from terser.eval.threshold import choose_threshold
 from terser.phase3.studies import FitPredict, knn_fp, load_table, lr_fp, safe_auc, tree_fp
@@ -46,7 +47,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = ap.parse_args(argv)
     data = load_table(args.data)
     rows: list[dict[str, Any]] = []
-    for name, fp in CANDIDATES.items():
+    baselines = {f"baseline: {k}": make() for k, make in BASELINES.items()}
+    for name, fp in {**CANDIDATES, **baselines}.items():
         aucs, specs = [], []
         for s in args.seeds:
             oof = out_of_fold_scores(fp, data.X, data.y, data.categories, data.groups, seed=s)
@@ -64,8 +66,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(json.dumps(rows[-1]), flush=True)
     # The gate is chosen on both criteria: a model counts if it meets the AUC floor *and* the
     # specificity floor at the operating point; the highest-AUC model is reported either way.
-    top_auc = max(rows, key=lambda r: r["auc"])
-    passing = [r for r in rows if r["auc"] >= 0.75 and r["spec"] >= 0.40]
+    models = [r for r in rows if not r["model"].startswith("baseline")]
+    top_auc = max(models, key=lambda r: r["auc"])
+    passing = [r for r in models if r["auc"] >= 0.75 and r["spec"] >= 0.40]
     ok = bool(passing)
     best = max(passing, key=lambda r: r["spec"]) if passing else top_auc
     table = "\n".join(
@@ -84,7 +87,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         f"{table}\n\n"
         f"Chosen gate: **{best['model']}**, AUC {best['auc']:.3f} (target >= 0.75), "
         f"specificity {best['spec']:.3f} at sensitivity 0.95 (target >= 0.40). "
-        f"{len(passing)} of {len(rows)} models meet both targets. The highest-AUC model, "
+        f"{len(passing)} of {len(models)} models meet both targets. The highest-AUC model, "
         f"{top_auc['model']} ({top_auc['auc']:.3f}), reaches only {top_auc['spec']:.3f} "
         "specificity, so overall ranking (AUC) and the high-sensitivity operating point pick "
         "different models; the gate is used at that operating point. "

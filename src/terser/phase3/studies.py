@@ -309,7 +309,8 @@ def study_leakage(data: StudyData, out: Path, seeds: Sequence[int]) -> dict[str,
 
 def study_loco(data: StudyData, out: Path, seeds: Sequence[int]) -> dict[str, float]:
     parts = []
-    for name, fp in {"tree(depth 4)": tree_fp(4), "LR": lr_fp(), "KNN(k 15)": knn_fp(15)}.items():
+    models = {"tree(depth 4)": tree_fp(4), "LR": lr_fp(), "KNN(k 15)": knn_fp(15)}
+    for name, fp in {**models, **_baselines()}.items():
         t = leave_one_category_out(fp, data.X, data.y, data.categories)
         t.insert(0, "model", name)
         parts.append(t)
@@ -318,7 +319,8 @@ def study_loco(data: StudyData, out: Path, seeds: Sequence[int]) -> dict[str, fl
     text += "Train on five categories, test on the held-out one (deterministic: no seeds).\n\n"
     text += _md_table(table) + "\n"
     (out / "p3_loco.md").write_text(text, encoding="utf-8")
-    return {"loco_min_auc": float(np.nanmin(table["auc"].to_numpy(np.float64)))}
+    real = table[~table["model"].str.startswith("baseline")]
+    return {"loco_min_auc": float(np.nanmin(real["auc"].to_numpy(np.float64)))}
 
 
 def _holdout(data: StudyData, seed: int) -> tuple[IntArray, IntArray]:
@@ -415,6 +417,20 @@ def study_tree(
                     "gap": tr_f1 - va_f1,
                 }
             )
+        for bname, make in BASELINES.items():
+            fp = make()
+            tr_f1 = _f1(yf, fp(Xf, yf, Xf) >= 0.5)
+            va_f1 = _f1(data.y[va], fp(Xf, yf, data.X[va]) >= 0.5)
+            rows.append(
+                {
+                    "seed": s,
+                    "method": f"baseline: {bname}",
+                    "leaves/rules": 0,
+                    "train F1": tr_f1,
+                    "val F1": va_f1,
+                    "gap": tr_f1 - va_f1,
+                }
+            )
         if s == seeds[0]:
             rules = sorted(tree_to_rules(variants["reduced-error"]), key=lambda r: -r.coverage)
             rules_text = "\n".join(
@@ -444,7 +460,8 @@ def study_tree(
         [("tree (depth 4)", tree_fp(4))], X2, data.y, figs / "p3_tree_boundary.png", xy[0], xy[1]
     )
     unpruned = table.loc[table["method"] == "unpruned", "gap mean"].iloc[0]
-    best_gap = table.loc[table["method"] != "unpruned", "gap mean"].min()
+    pruned = (table["method"] != "unpruned") & ~table["method"].str.startswith("baseline")
+    best_gap = table.loc[pruned, "gap mean"].min()
     return {"tree_gap_unpruned": float(unpruned), "tree_gap_best_pruned": float(best_gap)}
 
 

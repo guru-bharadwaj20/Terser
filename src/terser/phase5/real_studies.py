@@ -90,6 +90,7 @@ def study_perceptron(sp: pd.DataFrame, rng: np.random.Generator) -> tuple[str, d
 
 
 def study_span_tagger(sp: pd.DataFrame) -> tuple[str, dict[str, Any]]:
+    from sklearn.dummy import DummyClassifier
     from sklearn.linear_model import LogisticRegression
     from sklearn.tree import DecisionTreeClassifier
 
@@ -104,6 +105,9 @@ def study_span_tagger(sp: pd.DataFrame) -> tuple[str, dict[str, Any]]:
         "LR (multinomial, balanced)": lambda: LogisticRegression(
             max_iter=2000, class_weight="balanced"
         ),
+        # row 3.6.5 baselines; all-KEEP is both the majority and the always-preserved one
+        "baseline: majority (all KEEP)": lambda: DummyClassifier(strategy="most_frequent"),
+        "baseline: stratified": lambda: DummyClassifier(strategy="stratified", random_state=0),
     }
     from sklearn.model_selection import StratifiedGroupKFold
 
@@ -126,7 +130,7 @@ def study_span_tagger(sp: pd.DataFrame) -> tuple[str, dict[str, Any]]:
         }
         rows.append({"model": name, "macro_F1": token_macro_f1([y], [pred]), **per})
     df = pd.DataFrame(rows)
-    best = float(df.macro_F1.max())
+    best = float(df.loc[~df.model.str.startswith("baseline"), "macro_F1"].max())
     text = (
         "## C3.4 Span tagger (best of tree / LR)\n\n"
         f"{len(sp):,} train tokens, {sp.prompt_id.nunique():,} prompts, grouped 5-fold by prompt, "
