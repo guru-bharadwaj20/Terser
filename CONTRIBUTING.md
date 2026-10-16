@@ -417,7 +417,7 @@ bias–variance and overfitting.
 | :---: | :--- | :--- | :---: |
 | C3.1 | Metric implementations | Match scikit-learn to 1e-9 on 20 random fixtures | ✅ |
 | C3.2 | Leakage demonstration | Grouped-CV AUC lower than naive-KFold AUC; gap recorded | ✅ |
-| C3.3 | Quality gate (best of Tree / LR / KNN) | ROC-AUC **≥ 0.75**; specificity **≥ 0.40** at sensitivity 0.95 | ❌ |
+| C3.3 | Quality gate (best of Tree / LR / KNN) | ROC-AUC **≥ 0.75**; specificity **≥ 0.40** at sensitivity 0.95 | ✅ |
 | C3.4 | Span tagger (best of Tree / LR) | Token macro-F1 **≥ 0.65** | ❌ |
 | C3.5 | Savings predictor (KNN regression) | MAE **≤ 10 pp**, R² **≥ 0.3** | ❌ |
 | C3.6 | Overfitting control | ≥ 1 pruning method closes the tree's train–val gap by **≥ 50%** | ✅ |
