@@ -738,7 +738,7 @@ quality monitoring.
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
 | 11.5.1 | Metrics | Prometheus: RPS, p50/p95/p99 latency per path, fallback rate, gate rejections, tokens saved, net savings, GPU util / VRAM | Exposed at `/metrics` | ✅ |
-| 11.5.2 | Input drift | Evidently daily: embedding drift (PSI / MMD on PCA components), length and category distribution | Report generated | ❌ |
+| 11.5.2 | Input drift | Evidently daily: embedding drift (PSI / MMD on PCA components), length and category distribution | Report generated | ✅ |
 | 11.5.3 | Tokenizer drift | Re-count fixture set with current tokenizer versions; alert on any change | Alert fires on a pinned-version swap | ✅ |
 | 11.5.4 | Quality canary | Nightly: a fixed 200-prompt canary set goes through the deployed service and the judge; rolling preservation | Metric on dashboard | ❌ |
 | 11.5.5 | Dashboard and alerts | Grafana; alert at rolling preservation < 92% | Dashboard live | ❌ |
