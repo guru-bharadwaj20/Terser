@@ -748,8 +748,8 @@ quality monitoring.
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 11.6.1 | Prefect flows | `data_flow`, `train_classical_flow`, `train_rewriter_flow` (submits to `gpu_queue`), `evaluate_flow`, `promote_flow`, `drift_flow` | Flows registered | ❌ |
-| 11.6.2 | Reliability | Retries, cached LLM steps, failure notifications | Injected failure recovers | ❌ |
+| 11.6.1 | Prefect flows | `data_flow`, `train_classical_flow`, `train_rewriter_flow` (submits to `gpu_queue`), `evaluate_flow`, `promote_flow`, `drift_flow` | Flows registered | ✅ |
+| 11.6.2 | Reliability | Retries, cached LLM steps, failure notifications | Injected failure recovers | ✅ |
 
 ### Checkpoint C11 — Production Readiness
 
