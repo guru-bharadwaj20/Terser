@@ -81,8 +81,13 @@ class RewriteService:
         metrics: Any | None = None,
         counter: Callable[[str, str], int] | None = None,
         max_workers: int = 8,
+        gate_feature_target: str | None = None,
     ) -> None:
+        """``gate_feature_target`` pins the tokenizer of the gate's features to the one the gate
+        was trained on (``None`` = the request's target); token accounting always uses the
+        request's target."""
         self.pricing = pricing
+        self.gate_feature_target = gate_feature_target
         self.fast: Rewriter = fast if fast is not None else FastPath()
         self.quality = quality
         self.gate: Gate = gate if gate is not None else ConstraintGate()
@@ -167,7 +172,15 @@ class RewriteService:
         orig = self.features(prompt, target)
         rewrite = result.text
         rew = self.features(rewrite, target) if rewrite != prompt else orig
-        score = float(self.gate.score(orig, rew)) if rewrite != prompt else 0.0
+        score = 0.0
+        if rewrite != prompt:
+            gt = self.gate_feature_target
+            if gt is None or gt == target:
+                score = float(self.gate.score(orig, rew))
+            else:
+                score = float(
+                    self.gate.score(self.features(prompt, gt), self.features(rewrite, gt))
+                )
         rejected = score > self.gate_threshold
         if rejected:
             rewrite, rew = prompt, orig

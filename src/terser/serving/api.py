@@ -130,6 +130,7 @@ def build_service(cfg: dict[str, Any], metrics: ServiceMetrics | None = None) ->
         gate=gate,
         gate_threshold=float(cfg.get("gate_threshold", 0.5)),
         quality_timeout_s=float(cfg.get("quality_timeout_s", 0.4)),
+        gate_feature_target=cfg.get("gate_feature_target"),
         cache_size=int(cfg.get("cache_size", 10_000)),
         metrics=metrics,
     )
