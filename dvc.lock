@@ -236,3 +236,47 @@ stages:
       hash: md5
       md5: b2fe3fd1dee0a5f61ba762ee03350f8d
       size: 271448
+  register:
+    cmd: python -m terser.phase11.register
+    deps:
+    - path: models/fast
+      hash: md5
+      md5: 9a0cd36b04ad789e706282c2aa304d05.dir
+      size: 134782
+      nfiles: 2
+    - path: models/rewriter/sft-qwen0.5b-full
+      hash: md5
+      md5: db6457ff56acd778cba8b46edf69bd89.dir
+      size: 988176083
+      nfiles: 4
+    - path: models/rewriter/sft-qwen1.5b-lora
+      hash: md5
+      md5: 12c0ba167f9ac82af6383d4a3daaf464.dir
+      size: 73994373
+      nfiles: 4
+    - path: models/rewriter/sft-qwen3b-lora
+      hash: md5
+      md5: 4b7256a1f6f23decc58e2cbf5fffdb53.dir
+      size: 119832993
+      nfiles: 4
+    - path: reports/p11_fast_path.json
+      hash: md5
+      md5: b1f72c64a908f5e30910ce405296fbaa
+      size: 264
+    - path: reports/p8_rewriter_val.json
+      hash: md5
+      md5: eeec6aba729c5f5c282edde09871ec9a
+      size: 1751
+    - path: src/terser/phase11/register.py
+      hash: md5
+      md5: 55629613aedff9ad73b26b15d1040387
+      size: 7011
+    - path: src/terser/tracking/lineage.py
+      hash: md5
+      md5: ac1c2fce59355c1923eabbee81987147
+      size: 4584
+    outs:
+    - path: reports/p11_registry.md
+      hash: md5
+      md5: 9146e506cc725300412a33a51959a62d
+      size: 1800
