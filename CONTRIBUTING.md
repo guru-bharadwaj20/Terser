@@ -406,7 +406,7 @@ bias–variance and overfitting.
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 3.6.1 | **Bias–variance decomposition and trade-off** | 200 bootstrap resamples; squared loss (KNN regression), 0-1 loss decomposition (classifiers); tree depth ∈ {2,4,8,16,∞}, k ∈ {1,3,5,15,51}; identify and explain the minimum-error point | `reports/figures/p3_bias_variance.png` + `reports/p3_bias_variance.md` | ❌ |
+| 3.6.1 | **Bias–variance decomposition and trade-off** | 200 bootstrap resamples; squared loss (KNN regression), 0-1 loss decomposition (classifiers); tree depth ∈ {2,4,8,16,∞}, k ∈ {1,3,5,15,51}; identify and explain the minimum-error point | `reports/figures/p3_bias_variance.png` + `reports/p3_bias_variance.md` | ✅ |
 | 3.6.3 | Learning curves | Train size 10% → 100% for all three models | Figure + diagnosis (high bias vs high variance) | ✅ |
 | 3.6.4 | Grid search | Tree depth × min-samples; KNN k × metric × weighting; LR penalty × C, inside nested CV | Best params recorded in `configs/` | ✅ |
 | 3.6.5 | Baselines | Majority class, stratified random, "always preserved" | Baseline row in every table | ✅ |
@@ -421,7 +421,7 @@ bias–variance and overfitting.
 | C3.4 | Span tagger (best of Tree / LR) | Token macro-F1 **≥ 0.65** | ❌ |
 | C3.5 | Savings predictor (KNN regression) | MAE **≤ 10 pp**, R² **≥ 0.3** | ❌ |
 | C3.6 | Overfitting control | ≥ 1 pruning method closes the tree's train–val gap by **≥ 50%** | ✅ |
-| C3.7 | Figures | Tree, LR, KNN (3 k values) boundaries on identical axes; bias–variance and learning curves present | ❌ |
+| C3.7 | Figures | Tree, LR, KNN (3 k values) boundaries on identical axes; bias–variance and learning curves present | ✅ |
 
 ---
 
