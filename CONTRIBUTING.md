@@ -380,18 +380,18 @@ bias–variance and overfitting.
 | 3.3.2 | Continuous values | C4.5-style threshold search on midpoints between class changes | Test on a 1-D separable fixture | ✅ |
 | 3.3.3 | Overfitting study | Train vs val F1 for depth 1–30 and min-samples-leaf sweep | `reports/figures/p3_tree_overfit.png` | ✅ |
 | 3.3.4 | Overfitting solutions | Pre-pruning, **reduced-error pruning**, **rule post-pruning**, cost-complexity pruning | Comparison table: leaves, val F1, train–val gap | ✅ |
-| 3.3.5 | Decision boundary (x–y) | Axis-aligned regions on `self_information` vs `token_cost` | `reports/figures/p3_tree_boundary.png` | ❌ |
+| 3.3.5 | Decision boundary (x–y) | Axis-aligned regions on `self_information` vs `token_cost` | `reports/figures/p3_tree_boundary.png` | ✅ |
 | 3.3.6 | Hypothesis search and inductive bias | Greedy information-gain search (preference bias for short trees) vs Phase 1 conjunctive restriction bias | `reports/p3_tree_bias.md` | ❌ |
-| 3.3.7 | Rule export | Pruned tree as human-readable rules ("drop is unsafe when a negation is removed and…") | `reports/p3_tree_rules.md` | ❌ |
+| 3.3.7 | Rule export | Pruned tree as human-readable rules ("drop is unsafe when a negation is removed and…") | `reports/p3_tree_rules.md` | ✅ |
 
 ### 3.4 Logistic Regression
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
 | 3.4.1 | From-scratch batch GD | Sigmoid, log-loss, gradient | Coefficients within 1e-3 of scikit-learn | ✅ |
-| 3.4.2 | Regularisation | L1 / L2 / elastic-net, C sweep | Grid results table | ❌ |
-| 3.4.3 | Calibration | Reliability diagram, Brier score, ECE | `reports/figures/p3_lr_calibration.png` | ❌ |
-| 3.4.5 | Coefficient interpretation | Odds ratios on standardised features | `reports/p3_lr_coefficients.md` | ❌ |
+| 3.4.2 | Regularisation | L1 / L2 / elastic-net, C sweep | Grid results table | ✅ |
+| 3.4.3 | Calibration | Reliability diagram, Brier score, ECE | `reports/figures/p3_lr_calibration.png` | ✅ |
+| 3.4.5 | Coefficient interpretation | Odds ratios on standardised features | `reports/p3_lr_coefficients.md` | ✅ |
 
 ### 3.5 K-Nearest Neighbours
 
