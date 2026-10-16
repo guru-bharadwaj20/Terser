@@ -9,7 +9,7 @@ strings) with the tokenizers installed *now* and compares them with the pinned s
 
 The alert is a ``CRITICAL`` record on the ``terser.alerts`` logger (picked up by the log shipper /
 Alertmanager) and exit code 1 from the CLI, which fails the scheduled ``drift_flow``
-(:mod:`terser.pipelines.flows`)::
+(:mod:`terser.flows`)::
 
     python -m terser.monitoring.tokenizer_drift               # all local targets
     python -m terser.monitoring.tokenizer_drift --target gpt-4o

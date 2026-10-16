@@ -2,7 +2,11 @@
 # TERSER_SERVING_CONFIG=configs/serving/fast_onnx.yaml uvicorn terser.serving.api:app
 # Relative model paths resolve against the repo root (terser.serving.api.resolve_path).
 
-gate_threshold: 0.5
+# Row 3.2.3 operating point of gate.onnx: max specificity subject to sensitivity >= 0.95 on the
+# grouped OOF scores (sensitivity 0.950, specificity 0.380, 23.7% of rewrites passed).
+# Source: reports/p11_fast_path.md, operating_point.chosen.threshold in reports/p11_fast_path.json
+# (python -m terser.phase11.train_fast_path --operating-point-only). Rejects P(degraded) > value.
+gate_threshold: 0.264564
 gate_onnx: models/fast/gate.onnx
 gate_feature_target: qwen2.5   # the gate was trained on qwen2.5 token counts (row 11.3.2)
 tagger_onnx: models/fast/tagger.onnx
@@ -19,7 +23,7 @@ pricing:
   target_input_per_mtok:
     gpt-4o: 2.50
     qwen2.5: 0.20
-    llama-3.1: 0.20
+    phi3.5: 0.20
   rewriter_input_per_mtok: 0.05
   rewriter_output_per_mtok: 0.10
   fast_path_per_request: 0.0

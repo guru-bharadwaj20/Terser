@@ -1,0 +1,373 @@
+"""The small, named Prefect tasks the flows are built from (plan rows **11.6.1**, **11.6.2**).
+
+Every task wraps an entry point that already exists and returns a :class:`StepResult`. With
+``dry_run=True`` a task records the command it would run (``executed=False``) instead of running
+it, so a whole flow can be exercised as a command plan without data, a GPU or an LLM server.
+
+==========================  ================================  ===========================
+task                        wraps                             reliability
+==========================  ================================  ===========================
+:func:`shell_step`          any CLI (``dvc repro``, modules)  2 retries, 10 s apart
+:func:`llm_step`            CLIs that call an LLM             3 retries (10/30/90 s),
+                                                              cached on an input hash
+:func:`submit_gpu_job`      :mod:`terser.gpu_queue` API       no retry (deterministic)
+:func:`drift_check`         tokenizer drift (row 11.5.3)      1 retry (tokenizer download)
+:func:`input_drift_check`   input drift CLI (row 11.5.2)      1 retry; an alert is a result
+:func:`promotion_guard`     :mod:`terser.pipelines.promotion` no retry (deterministic)
+:func:`registry_promote`    :func:`terser.tracking.promote`   2 retries
+==========================  ================================  ===========================
+
+Every task's ``on_failure`` hook is :func:`terser.flows.reliability.notify_failure`.
+
+LLM-step cache: the key (:func:`llm_cache_key`) is a SHA-256 of the step name, the command and
+the content of every input file or directory, so a retried or re-run flow returns the stored
+result of an unchanged LLM step without starting it (Prefect state ``Cached``), and any change to
+an input re-runs it. Results persist in Prefect's local result storage
+(``PREFECT_LOCAL_STORAGE_PATH``, default ``~/.prefect/storage``); set
+``PREFECT_TASKS_REFRESH_CACHE=true`` to force a re-run. Inside a step the individual LLM requests
+are additionally disk-cached by :class:`terser.llm.ResponseCache`, so even a cache miss never
+pays twice for a finished generation.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import shlex
+import shutil
+import subprocess
+import sys
+import tempfile
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+import yaml
+from prefect import task
+from prefect.cache_policies import NO_CACHE
+from prefect.context import TaskRunContext
+
+from terser.flows.reliability import (
+    LLM_RETRIES,
+    LLM_RETRY_DELAYS,
+    SHELL_RETRIES,
+    SHELL_RETRY_DELAY,
+    notify_failure,
+)
+from terser.pipelines.promotion import EvalSummary, GuardConfig, decide
+
+__all__ = [
+    "REPO_ROOT",
+    "StepError",
+    "StepResult",
+    "drift_check",
+    "input_digest",
+    "input_drift_check",
+    "llm_cache_key",
+    "llm_step",
+    "load_eval_summary",
+    "promotion_guard",
+    "registry_promote",
+    "run_command",
+    "shell_step",
+    "submit_gpu_job",
+]
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+OUTPUT_TAIL = 2000
+VAL_REPORT = "reports/p8_rewriter_val.json"
+
+
+class StepError(RuntimeError):
+    """A step failed (non-zero exit, invalid queue spec, drift alert)."""
+
+
+@dataclass(frozen=True)
+class StepResult:
+    """What one step ran (or, in a dry run, would run) and how it ended."""
+
+    name: str
+    kind: str
+    cmd: tuple[str, ...]
+    executed: bool
+    ok: bool = True
+    output: str = ""
+
+    @property
+    def command(self) -> str:
+        """The command as one shell-quoted string."""
+        return shlex.join(self.cmd)
+
+
+def _resolve(cmd: Sequence[str]) -> list[str]:
+    """Run ``python`` / ``dvc`` from the current environment, so a flow never escapes the venv."""
+    head, rest = cmd[0], list(cmd[1:])
+    if head == "python":
+        return [sys.executable, *rest]
+    if head == "dvc":
+        for name in ("dvc", "dvc.exe"):
+            local = Path(sys.executable).with_name(name)
+            if local.exists():
+                return [str(local), *rest]
+    return [head, *rest]
+
+
+def _short_cmd(cmd: Sequence[str]) -> str:
+    return shlex.join(a if len(a) <= 60 else a[:57] + "..." for a in cmd)
+
+
+def _run_process(cmd: Sequence[str], cwd: Path = REPO_ROOT) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(_resolve(cmd), cwd=cwd, capture_output=True, text=True, check=False)
+
+
+def run_command(cmd: Sequence[str], cwd: Path = REPO_ROOT) -> str:
+    """Run ``cmd`` from the repo root; return the stdout tail or raise :class:`StepError`."""
+    proc = _run_process(cmd, cwd)
+    if proc.returncode != 0:
+        tail = (proc.stderr or proc.stdout).strip()[-OUTPUT_TAIL:]
+        raise StepError(f"{_short_cmd(cmd)} exited {proc.returncode}: {tail}")
+    return proc.stdout.strip()[-OUTPUT_TAIL:]
+
+
+def _plan(name: str, kind: str, cmd: Sequence[str]) -> StepResult:
+    print(f"[plan] {name}: {shlex.join(cmd)}")
+    return StepResult(name, kind, tuple(cmd), executed=False)
+
+
+@task(
+    name="shell",
+    task_run_name="{name}",
+    retries=SHELL_RETRIES,
+    retry_delay_seconds=SHELL_RETRY_DELAY,
+    cache_policy=NO_CACHE,
+    on_failure=[notify_failure],
+)
+def shell_step(name: str, cmd: Sequence[str], dry_run: bool = False) -> StepResult:
+    """Run one CLI step (``dvc repro``, ``python -m ...``) with retries."""
+    if dry_run:
+        return _plan(name, "shell", cmd)
+    return StepResult(name, "shell", tuple(cmd), executed=True, output=run_command(cmd))
+
+
+def _digest_path(path: Path) -> str:
+    if path.is_file():
+        h = hashlib.sha256()
+        with path.open("rb") as fh:
+            for chunk in iter(lambda: fh.read(1 << 20), b""):
+                h.update(chunk)
+        return h.hexdigest()
+    if path.is_dir():
+        h = hashlib.sha256()
+        for p in sorted(path.rglob("*")):
+            if p.is_file() and "__pycache__" not in p.parts:
+                h.update(f"{p.relative_to(path).as_posix()}\0{_digest_path(p)}\n".encode())
+        return h.hexdigest()
+    return "missing"
+
+
+def input_digest(paths: Sequence[str], root: Path = REPO_ROOT) -> dict[str, str]:
+    """``{path: sha256 of its content}`` (directories hash every file; absent paths: missing)."""
+    return {p: _digest_path(root / p) for p in sorted(paths)}
+
+
+def llm_cache_key(context: TaskRunContext | None, parameters: Mapping[str, Any]) -> str:
+    """Cache key of an :func:`llm_step`: step name, command and input content hashes.
+
+    A dry run keys on the paths only (no hashing of large inputs) and never shares a key with a
+    real run.
+    """
+    del context
+    dry_run = bool(parameters.get("dry_run", False))
+    paths = [str(p) for p in parameters.get("inputs", ())]
+    payload = {
+        "name": parameters["name"],
+        "cmd": [str(c) for c in parameters["cmd"]],
+        "dry_run": dry_run,
+        "inputs": sorted(paths) if dry_run else input_digest(paths),
+    }
+    blob = json.dumps(payload, sort_keys=True).encode()
+    return "terser-llm-" + hashlib.sha256(blob).hexdigest()
+
+
+@task(
+    name="llm",
+    task_run_name="{name}",
+    retries=LLM_RETRIES,
+    retry_delay_seconds=LLM_RETRY_DELAYS,
+    cache_key_fn=llm_cache_key,
+    persist_result=True,
+    on_failure=[notify_failure],
+)
+def llm_step(
+    name: str, cmd: Sequence[str], inputs: Sequence[str] = (), dry_run: bool = False
+) -> StepResult:
+    """Run one LLM-calling CLI step; cached on the content of ``inputs``."""
+    if dry_run:
+        return _plan(name, "llm", cmd)
+    return StepResult(name, "llm", tuple(cmd), executed=True, output=run_command(cmd))
+
+
+@task(name="gpu_queue_submit", cache_policy=NO_CACHE, on_failure=[notify_failure])
+def submit_gpu_job(
+    job: Mapping[str, Any], queue_dir: str = "gpu_queue", dry_run: bool = False
+) -> StepResult:
+    """Validate ``job`` against the whole queue and write ``<queue_dir>/<id>.yaml``.
+
+    The spec is first validated in a scratch copy of the queue (dry run: nothing else happens).
+    A spec already queued unchanged is a no-op; a different spec under the same id is an error.
+    """
+    from terser.gpu_queue import dry_run as queue_order
+    from terser.gpu_queue import format_dry_run, validate
+
+    qdir = REPO_ROOT / queue_dir
+    spec = dict(job)
+    target = qdir / f"{spec['id']}.yaml"
+    cmd = ("python", "-m", "terser.gpu_queue", "validate", "--dir", queue_dir)
+    if target.exists() and yaml.safe_load(target.read_text(encoding="utf-8")) != spec:
+        raise StepError(f"{target.name} is already queued with a different spec; use a new id")
+    text = yaml.safe_dump(spec, sort_keys=False)
+    with tempfile.TemporaryDirectory() as tmp:
+        staged = Path(tmp)
+        for p in [*qdir.glob("*.yaml"), *qdir.glob("*.yml")]:
+            shutil.copy2(p, staged / p.name)
+        (staged / target.name).write_text(text, encoding="utf-8")
+        errors = validate(staged, REPO_ROOT)
+        if errors:
+            raise StepError("gpu_queue validation failed: " + "; ".join(errors))
+        table = format_dry_run(queue_order(staged, REPO_ROOT))
+    if dry_run:
+        print(f"[plan] gpu_queue_submit: would write {queue_dir}/{target.name}")
+        return StepResult("gpu_queue_submit", "gpu_queue", cmd, executed=False, output=table)
+    if not target.exists():
+        target.write_text(text, encoding="utf-8")
+        errors = validate(qdir, REPO_ROOT)
+        if errors:
+            target.unlink()
+            raise StepError("gpu_queue validation failed: " + "; ".join(errors))
+    return StepResult("gpu_queue_submit", "gpu_queue", cmd, executed=True, output=table)
+
+
+def _counter(target: str) -> Callable[[str], int]:
+    from terser.tokenizers import count_tokens
+
+    return lambda s: count_tokens(s, target)
+
+
+@task(
+    name="tokenizer_drift",
+    retries=1,
+    retry_delay_seconds=SHELL_RETRY_DELAY,
+    cache_policy=NO_CACHE,
+    on_failure=[notify_failure],
+)
+def drift_check(targets: Sequence[str] | None = None, dry_run: bool = False) -> StepResult:
+    """Re-count the fixture strings on every target (row 11.5.3); ``ok=False`` on drift."""
+    cmd = ["python", "-m", "terser.monitoring.tokenizer_drift"]
+    for t in targets or ():
+        cmd += ["--target", t]
+    if dry_run:
+        return _plan("tokenizer_drift", "python", cmd)
+    from terser.monitoring.tokenizer_drift import check_tokenizer_drift, load_fixture
+
+    strings, snapshot = load_fixture()
+    counters = {t: _counter(t) for t in (targets or sorted(snapshot))}
+    report = check_tokenizer_drift(strings, snapshot, counters)
+    summary = report.summary()
+    return StepResult("tokenizer_drift", "python", tuple(cmd), True, not report.alert, summary)
+
+
+@task(
+    name="input_drift",
+    retries=1,
+    retry_delay_seconds=SHELL_RETRY_DELAY,
+    cache_policy=NO_CACHE,
+    on_failure=[notify_failure],
+)
+def input_drift_check(name: str, current: str | None = None, dry_run: bool = False) -> StepResult:
+    """Input drift report (row 11.5.2) through its CLI; ``ok=False`` on a drift alert.
+
+    ``python -m terser.monitoring.input_drift`` exits 1 on an alert and prints a JSON verdict
+    (``alert``, ``reasons``, artifact paths) as its last stdout line. An alert is a result, not a
+    step failure, so it is not retried; any other exit (or a missing verdict) is a failure.
+    """
+    cmd = ["python", "-m", "terser.monitoring.input_drift", "--name", name]
+    if current:
+        cmd += ["--current", current]
+    if dry_run:
+        return _plan("input_drift", "python", cmd)
+    proc = _run_process(cmd)
+    lines = proc.stdout.strip().splitlines()
+    verdict: dict[str, Any] | None = None
+    if proc.returncode in (0, 1) and lines:
+        try:
+            verdict = json.loads(lines[-1])
+        except json.JSONDecodeError:
+            verdict = None
+    if not isinstance(verdict, dict) or "alert" not in verdict:
+        tail = (proc.stderr or proc.stdout).strip()[-OUTPUT_TAIL:]
+        raise StepError(f"{_short_cmd(cmd)} exited {proc.returncode} without a verdict: {tail}")
+    alert = bool(verdict["alert"]) or proc.returncode == 1
+    reasons = "; ".join(str(r) for r in verdict.get("reasons", []))
+    artifacts = ", ".join(f"{k}={v}" for k, v in verdict.items() if k not in ("alert", "reasons"))
+    out = ("INPUT DRIFT " + reasons) if alert else f"no input drift ({artifacts})"
+    return StepResult("input_drift", "python", tuple(cmd), True, not alert, out)
+
+
+def load_eval_summary(rung: str, report: str = VAL_REPORT) -> EvalSummary:
+    """Validation summary of a rewriter rung from the row 8.3.5 val report json."""
+    d = json.loads((REPO_ROOT / report).read_text(encoding="utf-8"))[rung]
+    return EvalSummary(
+        preservation=float(d["preserved"]),
+        savings=float(d["median_savings"]),
+        per_category_preservation={k: float(v) for k, v in d["preserved_by_category"].items()},
+        checkpoints_passed=("C8.3",) if d.get("c8_3") else (),
+    )
+
+
+@task(name="promotion_guard", cache_policy=NO_CACHE, on_failure=[notify_failure])
+def promotion_guard(
+    rung: str,
+    champion_rung: str | None = None,
+    report: str = VAL_REPORT,
+    required_checkpoints: Sequence[str] = ("C8.3",),
+) -> StepResult:
+    """Row 11.4.4 guard on validation summaries; ``ok`` is the decision (pure, also in dry run)."""
+    candidate = load_eval_summary(rung, report)
+    champion = load_eval_summary(champion_rung, report) if champion_rung else None
+    decision = decide(candidate, champion, GuardConfig(required_checkpoints=required_checkpoints))
+    out = "allowed" if decision.promote else "refused: " + "; ".join(decision.reasons)
+    print(f"promotion guard ({rung}): {out}")
+    cmd = ("terser.pipelines.promotion.decide", rung, champion_rung or "-")
+    return StepResult("promotion_guard", "python", cmd, True, decision.promote, out)
+
+
+def _version_at(model_name: str, alias: str) -> str:
+    from mlflow import MlflowClient
+
+    from terser.tracking import setup_tracking
+
+    setup_tracking()
+    return str(MlflowClient().get_model_version_by_alias(model_name, alias).version)
+
+
+@task(
+    name="registry_promote",
+    retries=SHELL_RETRIES,
+    retry_delay_seconds=SHELL_RETRY_DELAY,
+    cache_policy=NO_CACHE,
+    on_failure=[notify_failure],
+)
+def registry_promote(
+    model_name: str, stage: str, from_alias: str = "staging", dry_run: bool = False
+) -> StepResult:
+    """Move the version holding ``from_alias`` to ``stage`` (:func:`terser.tracking.promote`)."""
+    cmd = ("terser.tracking.promote", model_name, f"@{from_alias}", stage)
+    if dry_run:
+        return _plan("registry_promote", "python", cmd)
+    from terser.tracking import promote
+
+    version = _version_at(model_name, from_alias)
+    promote(model_name, version, stage)
+    out = f"{model_name} v{version} -> {stage}"
+    return StepResult("registry_promote", "python", cmd, True, True, out)

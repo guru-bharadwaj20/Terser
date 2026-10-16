@@ -103,7 +103,10 @@ Seeds: deterministic folds, single run · MLflow run: `9f315f7c7673448a827a809f6
 
 Sources: [p11_fast_path.json](../../reports/p11_fast_path.json) (`tagger_macro_f1` 0.6313,
 `median_savings` 0.2857). Savings are measured before the gate on train prompts. They are not a
-held-out estimate and do not include gate rejections. The judged end-to-end run of tagger + gate
+held-out estimate and do not include gate rejections. After the gate at its row 3.2.3 threshold
+(0.264564), 298 of the 300 rewrites are rejected and median savings are 0.0% (mean 0.1%; at the
+old 0.5: 199 rejected, median 0.0%, mean 8.5%; grouped-OOF gate scores,
+[p11_fast_path.md](../../reports/p11_fast_path.md)). The judged end-to-end run of tagger + gate
 on 500 val prompts is checkpoint C5.6, still pending ([status.md](../checkpoints/status.md)).
 
 ### 5.2 Per category
@@ -176,8 +179,8 @@ The tagger has its own decision threshold, `tagger_threshold: 0.5` (P(droppable)
 word). It was not tuned. Precision and recall at that threshold are not reported separately; the
 0.631 macro-F1 uses `predict`, which is the same 0.5 cut.
 
-The gate used with this tagger, its threshold (0.5, not selected by the row 3.2.3 rule) and its
-metrics are documented in [quality_gate.md §6](quality_gate.md#6-quality-gate-threshold).
+The gate used with this tagger, its threshold (0.264564, selected by the row 3.2.3 rule on
+grouped out-of-fold scores of Phase 2 candidates) and its metrics are documented in [quality_gate.md §6](quality_gate.md#6-quality-gate-threshold).
 
 | Scope | Threshold | Sensitivity | Specificity | ROC-AUC | AP | Selected on |
 | :--- | ---: | ---: | ---: | ---: | ---: | :--- |
