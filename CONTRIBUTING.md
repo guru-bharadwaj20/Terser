@@ -603,8 +603,8 @@ together with the quality gate and fallback, reach the main quality/savings gate
 | :---: | :--- | :--- | :--- | :---: |
 | 8.2.1 | Architecture | Token embeddings (d = 384) → parallel Conv1d k = 3 and k = 5, 128 filters each, 'same' padding → per-token KEEP head + pooled prompt-compressibility head | `models/neural/textcnn.py` | ✅ |
 | 8.2.2 | **Parameter calculation** | Conv k=3: 384×3×128+128 = 147,584 · Conv k=5: 384×5×128+128 = 245,888 · token head 256+1 = 257 · prompt head 256+1 = 257 · **total 393,986** | Equals `sum(p.numel())` in a test; derivation in docs | ✅ |
-| 8.2.3 | **Max vs average pooling** | Prompt head on global max, global avg, and concatenated (head becomes 512+1 = 513 params); 3 seeds each | Table + interpretation ("any droppable region" vs "how much is droppable") | ❌ |
-| 8.2.4 | Comparison | TextCNN vs HMM vs GBM span taggers on identical folds | McNemar + table | ❌ |
+| 8.2.3 | **Max vs average pooling** | Prompt head on global max, global avg, and concatenated (head becomes 512+1 = 513 params); 3 seeds each | Table + interpretation ("any droppable region" vs "how much is droppable") | ✅ |
+| 8.2.4 | Comparison | TextCNN vs HMM vs GBM span taggers on identical folds | McNemar + table | ✅ |
 
 ### 8.3 Generative Rewriter (Supervised Fine-Tuning)
 
