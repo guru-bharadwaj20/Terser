@@ -465,7 +465,7 @@ implementations verified against libraries, plus controlled activation and optim
 | 4.4.5 | Hard margin | Linearly separable filler subset | Support vectors plotted | ✅ |
 | 4.4.6 | Soft margin | C ∈ {0.01, 0.1, 1, 10, 100}: margin width, # support vectors, val metrics | Table + figure | ✅ |
 | 4.4.7 | Polynomial kernel | Degree 2, 3 × coef0 × C vs linear | Table: AUC, time, # SVs | ✅ |
-| 4.4.8 | Decision surfaces | Linear vs polynomial on the Phase 3 2-D plane | `reports/figures/p4_svm_surfaces.png` | ❌ |
+| 4.4.8 | Decision surfaces | Linear vs polynomial on the Phase 3 2-D plane | `reports/figures/p4_svm_surfaces.png` | ✅ |
 
 ### Checkpoint C4 — Neural and Margin Models
 
