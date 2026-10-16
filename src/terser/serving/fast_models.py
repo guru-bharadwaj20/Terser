@@ -27,6 +27,7 @@ from pathlib import Path
 
 import numpy as np
 
+from terser.features.alignment import TOKEN_RE
 from terser.features.lexicons import (
     is_constraint,
     is_filler,
@@ -50,7 +51,8 @@ SPAN_FAST_FEATURES: tuple[str, ...] = (
     "word_len",
     "prev_filler",
 )
-_TOKEN_RE = re.compile(r"[A-Za-z0-9]+(?:'[A-Za-z]+)?|[^\sA-Za-z0-9]")
+# Same tokenisation as the row 3.1.1 alignment the tagger was trained on (no train/serve skew).
+_TOKEN_RE = TOKEN_RE
 _PROTECTED_RE = re.compile(r"```.*?```|`[^`]*`|\"[^\"]*\"", re.S)
 WINDOW = 2
 

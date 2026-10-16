@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 from difflib import SequenceMatcher
 from typing import Final, Literal
 
-__all__ = ["DROP", "KEEP", "REPLACE", "Alignment", "Label", "align", "tokenize"]
+__all__ = ["DROP", "KEEP", "REPLACE", "TOKEN_RE", "Alignment", "Label", "align", "tokenize"]
 
 Label = Literal["KEEP", "DROP", "REPLACE"]
 KEEP: Final[Label] = "KEEP"
@@ -29,6 +29,8 @@ DROP: Final[Label] = "DROP"
 REPLACE: Final[Label] = "REPLACE"
 
 _TOKEN_RE: Final = re.compile(r"\w+(?:['’]\w+)*|[^\w\s]")
+TOKEN_RE: Final = _TOKEN_RE
+"""The word / punctuation pattern; serving code that needs token *spans* uses it directly."""
 
 
 def tokenize(text: str) -> list[str]:

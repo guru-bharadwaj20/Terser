@@ -61,6 +61,8 @@ class RewriteEnv:
     threshold: float = 0.5
     lam: float = LAMBDA
     target: str | None = None
+    # Operator application; injectable so callers can cache it (operators are deterministic).
+    apply: Callable[[str, str, str | None], str] = apply_ops
     _original: str = field(init=False, default="")
     _category: str = field(init=False, default="")
     _constraints: tuple[str, ...] = field(init=False, default=())
@@ -107,7 +109,7 @@ class RewriteEnv:
         if action == STOP:
             return self.state(), self._final(), True
         self._applied = "".join(sorted(self._applied + action))
-        self._draft = apply_ops(self._original, self._applied, self.target)
+        self._draft = self.apply(self._original, self._applied, self.target)
         reward = STEP_PENALTY
         if len(self._applied) == len(OPERATOR_ACTIONS):  # nothing left: implicit STOP
             reward += self._final()
