@@ -382,7 +382,7 @@ bias–variance and overfitting.
 | 3.3.4 | Overfitting solutions | Pre-pruning, **reduced-error pruning**, **rule post-pruning**, cost-complexity pruning | Comparison table: leaves, val F1, train–val gap | ✅ |
 | 3.3.5 | Decision boundary (x–y) | Axis-aligned regions on `self_information` vs `token_cost` | `reports/figures/p3_tree_boundary.png` | ✅ |
 | 3.3.6 | Hypothesis search and inductive bias | Greedy information-gain search (preference bias for short trees) vs Phase 1 conjunctive restriction bias | `reports/p3_tree_bias.md` | ❌ |
-| 3.3.7 | Rule export | Pruned tree as human-readable rules ("drop is unsafe when a negation is removed and…") | `reports/p3_tree_rules.md` | ❌ |
+| 3.3.7 | Rule export | Pruned tree as human-readable rules ("drop is unsafe when a negation is removed and…") | `reports/p3_tree_rules.md` | ✅ |
 
 ### 3.4 Logistic Regression
 
