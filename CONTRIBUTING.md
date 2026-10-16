@@ -446,7 +446,7 @@ implementations verified against libraries, plus controlled activation and optim
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 4.2.1 | Activation study | Step (straight-through estimator), sigmoid (+ saturated-unit fraction), tanh, ReLU (+ dead-unit fraction): val AUC, epochs to plateau, per-layer gradient norm; 5 seeds each; mechanism tied to observed behaviour | `reports/p4_activations.md` | ❌ |
+| 4.2.1 | Activation study | Step (straight-through estimator), sigmoid (+ saturated-unit fraction), tanh, ReLU (+ dead-unit fraction): val AUC, epochs to plateau, per-layer gradient norm; 5 seeds each; mechanism tied to observed behaviour | `reports/p4_activations.md` | ✅ |
 
 ### 4.3 Optimizers
 
