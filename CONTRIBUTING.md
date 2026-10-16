@@ -651,8 +651,8 @@ neural rewriter is a [stretch goal](#stretch-goals-never-block-a-checkpoint).
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
 | 9.2.1 | Q-learning from scratch | ε-greedy; quality gate as cheap reward model (no LLM calls during learning) | Learning curve | ✅ |
-| 9.2.2 | Hyperparameter sweep | α ∈ {0.05, 0.1, 0.3}, γ ∈ {0.9, 0.99}, ε schedule | Table | ❌ |
-| 9.2.3 | Learned policy | Greedy operator order per category | `reports/p9_policy.md` | ❌ |
+| 9.2.2 | Hyperparameter sweep | α ∈ {0.05, 0.1, 0.3}, γ ∈ {0.9, 0.99}, ε schedule | Table | ✅ |
+| 9.2.3 | Learned policy | Greedy operator order per category | `reports/p9_policy.md` | ✅ |
 | 9.2.4 | Judge verification | Greedy policy on 300 val prompts with the real judge | Savings and preservation table | ❌ |
 
 ### Checkpoint C9 — Reinforcement Learning
@@ -709,7 +709,7 @@ quality monitoring.
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 11.2.2 | Model registry | Stages `None → Staging → Production → Archived` for gate, tagger, rewriter | Registry populated | ❌ |
+| 11.2.2 | Model registry | Stages `None → Staging → Production → Archived` for gate, tagger, rewriter | Registry populated | ✅ |
 | 11.2.3 | Lineage | Each version records git SHA, DVC hash, config, checkpoint IDs passed | Any production model traceable | ❌ |
 
 ### 11.3 Deployment, Serving and Inference Systems
@@ -717,7 +717,7 @@ quality monitoring.
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
 | 11.3.1 | API | FastAPI `POST /rewrite {prompt, target, mode: fast\|quality}` → `{rewrite, tokens_before, tokens_after, gate_score, fallback_used}` | OpenAPI docs + request/response examples | ✅ |
-| 11.3.2 | Fast path | Span tagger + gate exported to ONNX Runtime | Runs with no GPU | ❌ |
+| 11.3.2 | Fast path | Span tagger + gate exported to ONNX Runtime | Runs with no GPU | ✅ |
 | 11.3.3 | Quality path | Rewriter on vLLM with continuous batching + gate + fallback | Endpoint live on a GPU worker | ❌ |
 | 11.3.4 | Caching | LRU keyed on normalised prompt hash + target | Warm-hit latency measured | ✅ |
 | 11.3.5 | Timeout fallback | Quality path over budget ⇒ fast-path result | Fault-injection test | ✅ |
