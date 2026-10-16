@@ -5,9 +5,6 @@
 ``tokens_saved``               cost(original) - cost(rewrite)
 ``max_si_removed``             largest self-information (bits) among tokens not kept
 ``sum_si_removed``             total self-information of tokens not kept
-``si_removed_share``           ``sum_si_removed`` / total self-information of the original
-                               (row 5.1.7: ``sum_si_removed`` tops the importance ranking, so
-                               the share of the prompt's information removed is made explicit)
 ``negations_removed``          negations in the original minus those in the rewrite (>= 0)
 ``numbers_removed``            likewise for numbers
 ``constraints_removed``        likewise for constraint keywords
@@ -17,6 +14,16 @@
 =============================  ==============================================================
 
 As in :mod:`terser.features.span`, the tokenizer, LM and embedder are injected callables.
+
+**Derived features** (:data:`DERIVED_FEATURES`, :func:`add_derived_features`) are computed from
+columns already in the built table, so adding one never desynchronises a committed table from
+this code:
+
+=============================  ==============================================================
+``si_removed_share``           ``sum_si_removed / (prompt_mean_si * prompt_words)``: the share
+                               of the original's self-information the rewrite removed (row
+                               5.1.7; ``sum_si_removed`` tops the 5.1.6 importance ranking)
+=============================  ==============================================================
 """
 
 from __future__ import annotations
@@ -32,7 +39,14 @@ from terser.features.alignment import KEEP, align
 from terser.features.lexicons import is_constraint, is_negation, is_number
 from terser.features.span import SurprisalFn
 
-__all__ = ["PAIR_FEATURES", "cosine", "pair_feature_table", "pair_features"]
+__all__ = [
+    "DERIVED_FEATURES",
+    "PAIR_FEATURES",
+    "add_derived_features",
+    "cosine",
+    "pair_feature_table",
+    "pair_features",
+]
 
 CATEGORIES: Final = tuple(c.value for c in Category)
 PAIR_FEATURES: Final = (
@@ -40,7 +54,6 @@ PAIR_FEATURES: Final = (
     "tokens_saved",
     "max_si_removed",
     "sum_si_removed",
-    "si_removed_share",
     "negations_removed",
     "numbers_removed",
     "constraints_removed",
@@ -49,7 +62,17 @@ PAIR_FEATURES: Final = (
     *(f"cat_{c}" for c in CATEGORIES),
 )
 
+DERIVED_FEATURES: Final = ("si_removed_share",)
+
 EmbedFn = Callable[[Sequence[str]], np.ndarray]
+
+
+def add_derived_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Copy of ``df`` with :data:`DERIVED_FEATURES` added from its existing columns."""
+    out = df.copy()
+    total = out["prompt_mean_si"] * out["prompt_words"]
+    out["si_removed_share"] = np.where(total > 0, out["sum_si_removed"] / total, 0.0)
+    return out
 
 
 def cosine(u: np.ndarray, v: np.ndarray) -> float:
@@ -89,7 +112,6 @@ def pair_features(
         "tokens_saved": float(c_orig - c_rew),
         "max_si_removed": max(gone, default=0.0),
         "sum_si_removed": float(sum(gone)),
-        "si_removed_share": float(sum(gone)) / sum(bits) if sum(bits) > 0 else 0.0,
         "negations_removed": _removed(is_negation, al.original, al.rewrite),
         "numbers_removed": _removed(is_number, al.original, al.rewrite),
         "constraints_removed": _removed(is_constraint, al.original, al.rewrite),
