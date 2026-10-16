@@ -62,6 +62,15 @@ fixed by n.
 ![surfaces](figures/p4_svm_surfaces.png)
 
 Linear vs degree-3 polynomial (coef0 = 1, C = 1) on the Phase 3 plane (`max_si_removed` x
-`tokens_saved`, as in rows 3.3.5 / 3.5.3), 600 standardised pairs. The polynomial boundary bends
-toward "degraded" when a few high-information tokens are dropped, even if few tokens are saved.
-That is the same region where the Phase 3 tree splits first (`max_si_removed > 1.90`).
+`tokens_saved`, as in rows 3.3.5 / 3.5.3), 600 standardised pairs; red is "degraded", blue
+"preserved". The linear boundary is almost flat: it predicts "degraded" once a pair saves more
+than about 0.6-1.5 standard deviations of tokens, and `max_si_removed` barely moves it. The
+polynomial boundary sits near tokens_saved = 0 while `max_si_removed` is below about 1.5, then
+bends sharply upward, so pairs that drop a very high-information token are called "preserved"
+unless they also save many tokens. It also encloses a "preserved" island at high tokens_saved and
+low `max_si_removed`. Both shapes are fitted to a handful of sparse outliers (the blue pairs at
+`max_si_removed` = 10.7 and at tokens_saved = 6-7), not to the dense cloud, where the two
+boundaries agree. This is the overfitting the 4.4.7 table shows for degree 3 at C = 1 (AUC 0.686
+vs 0.721 linear). The bend starts near `max_si_removed` = 1.5-2, close to the first split of the
+Phase 3 tree (`max_si_removed > 1.90`), but it goes the way the outliers push it, so it is not
+evidence about that split.
