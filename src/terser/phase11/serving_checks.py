@@ -134,7 +134,7 @@ class _Slow:
 
 def check_fallback(prompts: list[str]) -> dict[str, Any]:
     pricing = Pricing.from_config(load_config("configs/serving/default.yaml")["pricing"])
-    scenarios = {
+    scenarios: dict[str, tuple[dict[str, Any], str]] = {
         "quality crash": ({"quality": _Crash()}, "fast"),
         "quality timeout (1 s vs 0.05 s budget)": ({"quality": _Slow(1.0)}, "fast"),
         "fast crash (fast mode)": ({"fast": _Crash()}, "original"),

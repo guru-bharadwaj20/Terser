@@ -16,8 +16,9 @@ from __future__ import annotations
 
 import argparse
 import json
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -29,14 +30,14 @@ from terser.features.pair import add_derived_features
 __all__ = ["main"]
 
 
-def _lgbm(seed: int):  # type: ignore[no-untyped-def]
+def _lgbm(seed: int) -> Callable[[np.ndarray, np.ndarray, np.ndarray], np.ndarray]:
     import lightgbm as lgb
 
     def fp(X: np.ndarray, y: np.ndarray, Xv: np.ndarray) -> np.ndarray:
         m = lgb.LGBMClassifier(
             learning_rate=0.1, n_estimators=70, max_depth=3, random_state=seed, verbose=-1
         )
-        return np.asarray(m.fit(X, y).predict_proba(Xv)[:, 1])
+        return np.asarray(m.fit(X, y).predict_proba(Xv))[:, 1]
 
     return fp
 
@@ -52,7 +53,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     cats, groups = df.category.astype(str).tolist(), df.group.astype(str).tolist()
     base = [c for c in df.columns if c not in ("id", "group", "category", "label")]
     base.remove("si_removed_share")
-    rows = []
+    rows: list[dict[str, Any]] = []
     for name, cols in (("without", base), ("with si_removed_share", [*base, "si_removed_share"])):
         X = df[cols].to_numpy(np.float64)
         aucs = [
