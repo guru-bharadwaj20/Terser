@@ -397,10 +397,10 @@ bias–variance and overfitting.
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 3.5.1 | KNN classification | Quality gate; k ∈ {1,3,5,7,11,15,25}; Euclidean / Manhattan / cosine; uniform / distance weighting | Grid table under 3.2.4 protocol | ❌ |
-| 3.5.2 | **KNN regression** | Predict a prompt's achievable savings % from its k nearest training prompts | MAE, R² table | ❌ |
-| 3.5.3 | KNN (and LR) decision boundary | k = 1, 5, 25 on 2-D PCA refit inside each fold; LR's linear boundary on the same plane as 3.3.5 | `reports/figures/p3_knn_boundaries.png` | ❌ |
-| 3.5.4 | "Skip short prompts" rule | Use 3.5.2 to skip rewriting when predicted savings < overhead | Rule + expected net-savings curve | ❌ |
+| 3.5.1 | KNN classification | Quality gate; k ∈ {1,3,5,7,11,15,25}; Euclidean / Manhattan / cosine; uniform / distance weighting | Grid table under 3.2.4 protocol | ✅ |
+| 3.5.2 | **KNN regression** | Predict a prompt's achievable savings % from its k nearest training prompts | MAE, R² table | ✅ |
+| 3.5.3 | KNN (and LR) decision boundary | k = 1, 5, 25 on 2-D PCA refit inside each fold; LR's linear boundary on the same plane as 3.3.5 | `reports/figures/p3_knn_boundaries.png` | ✅ |
+| 3.5.4 | "Skip short prompts" rule | Use 3.5.2 to skip rewriting when predicted savings < overhead | Rule + expected net-savings curve | ✅ |
 
 ### 3.6 Bias–Variance and Grid Search
 
@@ -673,8 +673,8 @@ for the gate and the rewriter.
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
 | 10.1 | HPO module | `terser.hpo` wrapping grid / random / Optuna TPE / GP samplers; MLflow parent-child runs | Module + tests | ✅ |
-| 10.2 | Method study | GBM quality gate: 60-point grid vs random, TPE and GP at 60 trials × 5 repeats. Random and TPE also on the Phase 4 MLP (depth 1–3, width {64..512}, dropout, lr, weight decay) | Best-so-far curves logged to MLflow | ❌ |
-| 10.5 | Method comparison | Grid vs Random vs Bayesian at equal budget | `reports/figures/p10_hpo_methods.png` + report | ❌ |
+| 10.2 | Method study | GBM quality gate: 60-point grid vs random, TPE and GP at 60 trials × 5 repeats. Random and TPE also on the Phase 4 MLP (depth 1–3, width {64..512}, dropout, lr, weight decay) | Best-so-far curves logged to MLflow | ✅ |
+| 10.5 | Method comparison | Grid vs Random vs Bayesian at equal budget | `reports/figures/p10_hpo_methods.png` + report | ✅ |
 | 10.7 | Rewriter LoRA tuning | Rank, α, lr, warmup, epochs; objective = savings s.t. preservation ≥ 0.92; median pruner | Tuned model registered | ❌ |
 | 10.8 | Test-set isolation audit | Data-access logs show HPO touched only train/val | Automated check green | ✅ |
 
@@ -682,10 +682,10 @@ for the gate and the rewriter.
 
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
-| C10.1 | Method comparison | 3 methods × 5 repeats at equal budget, plot + table | ❌ |
-| C10.2 | Gate improvement | Tuned AUC **≥ untuned + 0.01**, or documented plateau | ❌ |
+| C10.1 | Method comparison | 3 methods × 5 repeats at equal budget, plot + table | ✅ |
+| C10.2 | Gate improvement | Tuned AUC **≥ untuned + 0.01**, or documented plateau | ✅ |
 | C10.3 | Rewriter improvement | Still passes C8.3 with **≥ 1 pp** more savings, or documented plateau | ❌ |
-| C10.4 | No test leakage | 10.8 green | ❌ |
+| C10.4 | No test leakage | 10.8 green | ✅ |
 
 ---
 
