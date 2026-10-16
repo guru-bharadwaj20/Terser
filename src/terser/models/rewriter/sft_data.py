@@ -5,6 +5,9 @@ the shortest candidate the judge labelled ``preserved`` for **every** target mod
 with no such candidate keep the original prompt as an identity example, so the rewriter also
 learns when not to compress. Train and val splits only; the test split is never read.
 
+Extra --candidates / --labels / --tokens files (the row 8.3.4 llm_max /
+llm_min augmentation) widen the pool the shortest preserved target is picked from.
+
 Entry point::
 
     python -m terser.models.rewriter.sft_data --out data/processed/sft
@@ -77,20 +80,22 @@ def build_sft_rows(
 def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Build the row 8.3.1 SFT dataset.")
     ap.add_argument("--splits", default="data/processed/splits")
-    ap.add_argument("--candidates", default="data/interim/candidates.jsonl")
-    ap.add_argument("--labels", default="data/processed/labels.jsonl")
-    ap.add_argument("--tokens", default="data/interim/token_counts.parquet")
+    ap.add_argument("--candidates", nargs="+", default=["data/interim/candidates.jsonl"])
+    ap.add_argument("--labels", nargs="+", default=["data/processed/labels.jsonl"])
+    ap.add_argument("--tokens", nargs="+", default=["data/interim/token_counts.parquet"])
     ap.add_argument("--token-target", default="qwen2.5")
     ap.add_argument("--out", default="data/processed/sft")
     args = ap.parse_args(argv)
 
     import pandas as pd
 
-    tc = pd.read_parquet(args.tokens)
+    tc = pd.concat([pd.read_parquet(t) for t in args.tokens]).drop_duplicates(
+        ["candidate_id", "target"]
+    )
     tc = tc[tc.target == args.token_target]
     tokens = dict(zip(tc.candidate_id, tc.tokens.astype(int), strict=True))
-    labels = list(_jsonl(Path(args.labels)))
-    candidates = list(_jsonl(Path(args.candidates)))
+    labels = [r for f in args.labels for r in _jsonl(Path(f))]
+    candidates = [c for f in args.candidates for c in _jsonl(Path(f))]
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     stats: dict[str, dict[str, Any]] = {}
