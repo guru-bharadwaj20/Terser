@@ -7,7 +7,7 @@
 * ``span_tagger`` (C3.4): KEEP / DROP / REPLACE tagger from span features, decision tree and
   multinomial LR, grouped 5-fold by prompt; token macro-F1.
 * ``naive_bayes`` (5.2.3 / C5.3): :func:`~terser.phase5.bayes_studies.nb_vs_lr` on a 5-word window
-  around each token; label = the oracle rewrite dropped the token.
+  around each token; label = droppable (DROP or REPLACE) in the oracle rewrite.
 * ``gmm`` (5.2.6 / C5.5): 2-component GMM on the judge's ``P(rewrite) - P(original)`` per
   labelled pair; ARI against the judge labels.
 * ``baum_welch`` (5.3.5): supervised HMM from alignment labels on 80% of prompts, Baum-Welch on
@@ -148,7 +148,8 @@ def study_naive_bayes(sp: pd.DataFrame, rng: np.random.Generator) -> tuple[str, 
         w = toks[pid]
         left, right = " ".join(w[max(0, pos - 2) : pos]), " ".join(w[pos + 1 : pos + 3])
         texts.append(f"{left} __{tok.lower()}__ {right}")
-    y = (sub.label == "DROP").to_numpy().astype(int)
+    # droppable = DROP or REPLACE, the same positive class as every other tagger here
+    y = (sub.label != "KEEP").to_numpy().astype(int)
     table, curves = nb_vs_lr(texts, y, sub.category.tolist(), sub.prompt_id.tolist(), seed=0)
     p = float(table.loc[table.model == "naive_bayes", "precision_at_recall_0.70"].iloc[0])
     import matplotlib
@@ -169,7 +170,7 @@ def study_naive_bayes(sp: pd.DataFrame, rng: np.random.Generator) -> tuple[str, 
     text = (
         "## 5.2.3 Naive Bayes filler detector (C5.3)\n\n"
         f"{len(sub):,} sampled train tokens; text = 5-word window with the centre token marked; "
-        "label = dropped by the oracle rewrite (DROP, "
+        "label = droppable in the oracle rewrite (DROP or REPLACE, "
         f"{y.mean():.1%} positive). Multinomial NB with Laplace smoothing (alpha = 1, the MAP "
         "estimate under a symmetric Dirichlet(2) prior, so no unseen n-gram gets zero "
         "probability) vs logistic regression on the same 1-3-gram counts, grouped 5-fold.\n\n"
