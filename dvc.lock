@@ -261,8 +261,8 @@ stages:
       nfiles: 4
     - path: reports/p11_fast_path.json
       hash: md5
-      md5: b1f72c64a908f5e30910ce405296fbaa
-      size: 264
+      md5: a5958bf0d55482154385b210e04ab789
+      size: 6397
     - path: reports/p8_rewriter_val.json
       hash: md5
       md5: eeec6aba729c5f5c282edde09871ec9a

@@ -190,7 +190,7 @@ LLMLingua-2) are open and depend on C8.3.
 ## 6. Quality-gate threshold
 
 The quality gate was not applied to rewriter outputs in the val report. The deployed gate
-(`terser-gate / 2`, threshold 0.5) was trained on Phase 2 candidates only and has not been
+(`terser-gate / 2`, threshold 0.264564 by the row 3.2.3 rule) was trained on Phase 2 candidates only and has not been
 validated on SFT rewrites; see [quality_gate.md §6](quality_gate.md#6-quality-gate-threshold).
 
 | Scope | Threshold | Sensitivity | Specificity | ROC-AUC | AP | Selected on |

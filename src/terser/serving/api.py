@@ -125,6 +125,10 @@ def build_service(cfg: dict[str, Any], metrics: ServiceMetrics | None = None) ->
             q["base_url"], q["model"], timeout_s=float(q.get("http_timeout_s", 2.0))
         )
     gate: Gate | None = OnnxGate(resolve_path(cfg["gate_onnx"])) if cfg.get("gate_onnx") else None
+    if gate is not None and "gate_threshold" not in cfg:
+        # the 0.5 default belongs to the rule-based ConstraintGate; a trained gate needs its
+        # row 3.2.3 operating point (reports/p11_fast_path.json, operating_point.chosen)
+        raise KeyError("gate_threshold must be set explicitly when gate_onnx is configured")
     fast = None
     if cfg.get("tagger_onnx"):  # row 11.3.2 ONNX span tagger; else rule-based operators
         from terser.serving.fast_models import OnnxSpanRewriter
