@@ -26,7 +26,8 @@ phases:
   phase9: {max_usd: 60, max_tokens: 12000000, allow_unpriced: false}
   phase10: {max_usd: 0, max_tokens: 0, allow_unpriced: false}
   phase11: {max_usd: 20, max_tokens: 4000000, allow_unpriced: false}
-  phase12: {max_usd: 100, max_tokens: 20000000, allow_unpriced: false}
+  # phase12 judges ~45k test pairs (both targets, position-swapped, ~1.8k tokens per call).
+  phase12: {max_usd: 100, max_tokens: 300000000, allow_unpriced: false}
   phase13: {max_usd: 0, max_tokens: 0, allow_unpriced: false}
 
 # USD per million tokens. Prices are deliberately null: fill them in from the provider's
