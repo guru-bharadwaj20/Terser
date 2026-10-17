@@ -1,10 +1,11 @@
 """Prefect orchestration (plan rows **11.6.1** flows, **11.6.2** reliability, **11.4.3** CT).
 
-Seven flows over the project's existing entry points (``dvc repro`` stages, ``python -m`` modules,
+Eight flows over the project's existing entry points (``dvc repro`` stages, ``python -m`` modules,
 the :mod:`terser.gpu_queue` API, :mod:`terser.phase11.register`, :mod:`terser.monitoring`):
 ``data_flow``, ``train_classical_flow``, ``train_rewriter_flow`` (submits to ``gpu_queue/``),
-``evaluate_flow``, ``promote_flow``, ``drift_flow`` and ``ct_flow`` (continuous training, which
-composes the others; :mod:`terser.flows.flows`). Tasks retry, LLM steps are cached on an input
+``evaluate_flow``, ``promote_flow``, ``drift_flow``, ``ct_flow`` (continuous training, which
+composes the others) and ``canary_flow`` (nightly quality canary, row 11.5.4;
+:mod:`terser.flows.flows`). Tasks retry, LLM steps are cached on an input
 hash, and every failure is notified (:mod:`terser.flows.reliability`). Every flow has a
 ``dry_run`` mode that returns its command plan without running anything.
 
@@ -25,6 +26,7 @@ from __future__ import annotations
 from terser.flows.flows import (
     FLOWS,
     PLAN_PARAMS,
+    canary_flow,
     ct_flow,
     data_flow,
     drift_flow,
@@ -43,6 +45,7 @@ __all__ = [
     "PLAN_PARAMS",
     "StepError",
     "StepResult",
+    "canary_flow",
     "ct_flow",
     "data_flow",
     "drift_flow",

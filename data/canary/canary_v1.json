@@ -1,0 +1,18 @@
+{
+  "version": "canary_v1",
+  "rows": 200,
+  "seed": 0,
+  "source": "data/processed/splits/val.jsonl",
+  "source_sha256": "b1a2fdf676fe02d02cce95b27c22e77ba63c4aa1a8b2f56f642115f3f15cf3ac",
+  "sha256": "e1a9c582e9ff8d206acad010cebe25d1e018a4bba5f54e73711c92c717a83620",
+  "by_category": {
+    "code": 39,
+    "creative": 30,
+    "explain": 22,
+    "fact": 41,
+    "reason": 31,
+    "transform": 37
+  },
+  "distinct_source_ids": 200,
+  "rule": "val split only; rejected and stand-in records dropped; per category sorted by id; 200 allocated in proportion to category size (largest remainder, ties by name); one random.Random(0) shuffles each category in name order; first record of each distinct source_id before any second variant; output sorted by id"
+}

@@ -2,8 +2,9 @@
 
 :func:`build_deployments` turns every flow in :data:`terser.flows.flows.FLOWS` into a
 :class:`prefect.deployments.runner.RunnerDeployment` (module entrypoint
-``terser.flows.flows:<flow>``, tag ``terser``, ``drift_flow`` on a daily cron, the rewriter flow
-also tagged ``gpu_queue``). ``ct_flow`` (continuous training, row 11.4.3) has two starts:
+``terser.flows.flows:<flow>``, tag ``terser``, ``drift_flow`` on a daily cron, the nightly quality
+canary ``canary_flow`` (row 11.5.4) at 02:00, the rewriter flow also tagged ``gpu_queue``).
+``ct_flow`` (continuous training, row 11.4.3) has two starts:
 
 * an **event trigger** :data:`CT_DRIFT_TRIGGER`: every ``prefect.flow-run.Failed`` event of a
   ``drift_flow`` run (a drift alert fails that flow) starts ``ct_flow`` with ``trigger="drift"``;
@@ -46,6 +47,7 @@ TAGS: dict[str, list[str]] = {name: ["terser", "row-11.6"] for name in FLOWS}
 TAGS["train_rewriter_flow"].append("gpu_queue")
 TAGS["drift_flow"].append("monitoring")
 TAGS["ct_flow"] += ["row-11.4.3", "gpu_queue"]
+TAGS["canary_flow"] += ["monitoring", "row-11.5.4"]
 
 CT_DRIFT_TRIGGER = DeploymentEventTrigger(
     name="ct-on-drift-alert",
