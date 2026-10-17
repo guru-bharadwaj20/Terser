@@ -1,0 +1,29 @@
+# Serving config with both paths (row 11.3.3): the ONNX fast path of fast_onnx.yaml plus the SFT
+# rewriter on vLLM. The rewriter is a LoRA adapter served under the name `terser-rewriter`:
+#   vllm serve Qwen/Qwen2.5-<N>B-Instruct --enable-lora --max-lora-rank 16 \
+#     --lora-modules terser-rewriter=models/rewriter/<rung dir> --port 8001
+# TERSER_SERVING_CONFIG=configs/serving/quality.yaml uvicorn terser.serving.api:app
+# The gate and fallback are the same as the fast path: a rewrite with P(degraded) above the row
+# 3.2.3 threshold, or one that misses the latency budget, returns the fast-path result / original.
+gate_threshold: 0.264564
+gate_onnx: models/fast/gate.onnx
+gate_feature_target: qwen2.5
+tagger_onnx: models/fast/tagger.onnx
+tagger_threshold: 0.5
+quality_timeout_s: 0.4
+cache_size: 10000
+
+quality:
+  base_url: http://localhost:8001/v1
+  model: terser-rewriter
+  prompt_format: sft         # raw `<prompt>\n### Rewrite:\n` completion, the SFT training format
+  http_timeout_s: 2.0
+
+pricing:
+  target_input_per_mtok:
+    gpt-4o: 2.50
+    qwen2.5: 0.20
+    phi3.5: 0.20
+  rewriter_input_per_mtok: 0.05
+  rewriter_output_per_mtok: 0.10
+  fast_path_per_request: 0.0
