@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T01:48:16+00:00",
+  "generated_at": "2026-10-20T06:01:06+00:00",
   "board_power_w": {
     "rtx4500ada": 210.0,
     "rtx4090": 450.0
@@ -1998,6 +1998,199 @@
         "vllm_p12_judge2"
       ],
       "note": "ledger bucket phase12"
+    },
+    {
+      "id": "p12-seed-train-s1",
+      "phase": 12,
+      "row": "12.4",
+      "what": "SFT Qwen2.5-3B LoRA v2, seed 1",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 1084.0,
+      "active_source": "first-last timestamp of logs/p12_train_sft3bv2_s1.log",
+      "generated_tokens": null,
+      "tokens_source": "n/a (training)",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "p12s_train_s1"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p12-seed-gen-s1",
+      "phase": 12,
+      "row": "12.4",
+      "what": "test rewrites, 1,992 prompts (seed 1)",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 1482.6450401419133,
+      "active_source": "data/interim/final/test_sft3bv2_s1.jsonl: sum latency_s",
+      "generated_tokens": 177929,
+      "tokens_source": "data/interim/final/test_sft3bv2_s1.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "reported_tokens": 177929,
+      "reported_tokens_source": "data/interim/final/test_sft3bv2_s1.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [],
+      "note": ""
+    },
+    {
+      "id": "p12-seed-train-s2",
+      "phase": 12,
+      "row": "12.4",
+      "what": "SFT Qwen2.5-3B LoRA v2, seed 2",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 1100.0,
+      "active_source": "first-last timestamp of logs/p12_train_sft3bv2_s2.log",
+      "generated_tokens": null,
+      "tokens_source": "n/a (training)",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "p12s_train_s2"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p12-seed-gen-s2",
+      "phase": 12,
+      "row": "12.4",
+      "what": "test rewrites, 1,992 prompts (seed 2)",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 1506.0363703202456,
+      "active_source": "data/interim/final/test_sft3bv2_s2.jsonl: sum latency_s",
+      "generated_tokens": 183180,
+      "tokens_source": "data/interim/final/test_sft3bv2_s2.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "reported_tokens": 183180,
+      "reported_tokens_source": "data/interim/final/test_sft3bv2_s2.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [],
+      "note": ""
+    },
+    {
+      "id": "p12-seed-resp-qwen",
+      "phase": 12,
+      "row": "12.4",
+      "what": "seed test target outputs (Qwen2.5-7B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "attempt": "final",
+      "group": "",
+      "active_s": 920.0341243940056,
+      "active_source": "logs/p12s_resp_qwen2.5-7b.log: wall_seconds",
+      "generated_tokens": 916588,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 916588,
+      "reported_tokens_source": "logs/p12s_resp_qwen2.5-7b.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 2094,
+        "input_tokens": 231558,
+        "output_tokens": 916588,
+        "busy_s": 903.041193,
+        "window": [
+          "2026-10-20T03:05:19+00:00",
+          "2026-10-20T03:22:13+00:00"
+        ],
+        "window_source": "logs/vllm_p12s_qwen2.5-7b.log span + 30 s",
+        "first_call": "2026-10-20T03:06:38.319583+00:00",
+        "last_call": "2026-10-20T03:21:41.360776+00:00"
+      },
+      "sessions": [
+        "vllm_p12s_qwen"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p12-seed-resp-phi",
+      "phase": 12,
+      "row": "12.4",
+      "what": "seed test target outputs (Phi-3.5)",
+      "hardware": "rtx4500ada",
+      "model": "microsoft/Phi-3.5-mini-instruct",
+      "attempt": "final",
+      "group": "",
+      "active_s": 984.827085907018,
+      "active_source": "logs/p12s_resp_phi3.5.log: wall_seconds",
+      "generated_tokens": 1024700,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 1024700,
+      "reported_tokens_source": "logs/p12s_resp_phi3.5.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 2094,
+        "input_tokens": 203952,
+        "output_tokens": 1024700,
+        "busy_s": 968.140341,
+        "window": [
+          "2026-10-20T03:21:56+00:00",
+          "2026-10-20T03:39:35+00:00"
+        ],
+        "window_source": "logs/vllm_p12s_phi3.5.log span + 30 s",
+        "first_call": "2026-10-20T03:22:55.748677+00:00",
+        "last_call": "2026-10-20T03:39:03.889018+00:00"
+      },
+      "sessions": [
+        "vllm_p12s_phi"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p12-seed-judge",
+      "phase": 12,
+      "row": "12.4",
+      "what": "seed test judge (32B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "",
+      "active_s": 8131.536591470998,
+      "active_source": "logs/p12s_judge.log: wall_seconds",
+      "generated_tokens": 376962,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 376962,
+      "reported_tokens_source": "logs/p12s_judge.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 8364,
+        "input_tokens": 14918894,
+        "output_tokens": 376962,
+        "busy_s": 8112.966945,
+        "window": [
+          "2026-10-20T03:39:18+00:00",
+          "2026-10-20T05:56:45+00:00"
+        ],
+        "window_source": "logs/vllm_p12s_judge.log span + 30 s",
+        "first_call": "2026-10-20T03:40:55.100391+00:00",
+        "last_call": "2026-10-20T05:56:08.067336+00:00"
+      },
+      "sessions": [
+        "vllm_p12s_judge"
+      ],
+      "note": "summary records = whole test_labels.jsonl, so no label count"
     }
   ],
   "sessions": [
@@ -2432,6 +2625,51 @@
       "end": "2026-10-20T01:29:27+00:00",
       "reserved_s": 57124.0,
       "note": "resumed judge"
+    },
+    {
+      "id": "p12s_train_s1",
+      "phase": 12,
+      "log": "logs/p12_train_sft3bv2_s1.log",
+      "start": "2026-10-20T01:38:03+00:00",
+      "end": "2026-10-20T01:56:07+00:00",
+      "reserved_s": 1084.0,
+      "note": ""
+    },
+    {
+      "id": "p12s_train_s2",
+      "phase": 12,
+      "log": "logs/p12_train_sft3bv2_s2.log",
+      "start": "2026-10-20T02:21:21+00:00",
+      "end": "2026-10-20T02:39:41+00:00",
+      "reserved_s": 1100.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_p12s_qwen",
+      "phase": 12,
+      "log": "logs/vllm_p12s_qwen2.5-7b.log",
+      "start": "2026-10-20T03:05:19+00:00",
+      "end": "2026-10-20T03:21:43+00:00",
+      "reserved_s": 984.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_p12s_phi",
+      "phase": 12,
+      "log": "logs/vllm_p12s_phi3.5.log",
+      "start": "2026-10-20T03:21:56+00:00",
+      "end": "2026-10-20T03:39:05+00:00",
+      "reserved_s": 1029.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_p12s_judge",
+      "phase": 12,
+      "log": "logs/vllm_p12s_judge.log",
+      "start": "2026-10-20T03:39:18+00:00",
+      "end": "2026-10-20T05:56:15+00:00",
+      "reserved_s": 8217.0,
+      "note": ""
     }
   ],
   "smoke_rtx4090_reserved_h": 0.161858,
@@ -2676,27 +2914,41 @@
         "p12-resp-qwen",
         "p12-resp-phi",
         "p12-judge-run1",
-        "p12-judge"
+        "p12-judge",
+        "p12-seed-train-s1",
+        "p12-seed-gen-s1",
+        "p12-seed-train-s2",
+        "p12-seed-gen-s2",
+        "p12-seed-resp-qwen",
+        "p12-seed-resp-phi",
+        "p12-seed-judge"
       ],
-      "active_s": 102887.65013041427,
+      "active_s": 118096.72934264845,
       "gpu_time_recorded": true,
-      "reserved_s": 107122.37018005925,
-      "active_gpu_h": 28.579902814003965,
-      "reserved_gpu_h": 29.756213938905347,
-      "energy_active_kwh": 6.001779590940832,
-      "energy_reserved_kwh": 6.248804927170124,
-      "tokens": 29599869,
+      "reserved_s": 122525.05159052141,
+      "active_gpu_h": 32.80464703962457,
+      "reserved_gpu_h": 34.03473655292262,
+      "energy_active_kwh": 6.88897587832116,
+      "energy_reserved_kwh": 7.14729467611375,
+      "tokens": 32279228,
       "sessions": [
+        "p12s_train_s1",
+        "p12s_train_s2",
         "vllm_p12_judge",
         "vllm_p12_judge2",
         "vllm_p12_phi",
         "vllm_p12_qwen",
-        "vllm_p12_zs"
+        "vllm_p12_zs",
+        "vllm_p12s_judge",
+        "vllm_p12s_phi",
+        "vllm_p12s_qwen"
       ],
       "reserved_lower_bound_from": [
         "p12-gen-sft15v2",
         "p12-gen-sft3bv2",
-        "p12-gen-sfthpo"
+        "p12-gen-sfthpo",
+        "p12-seed-gen-s1",
+        "p12-seed-gen-s2"
       ],
       "hardware": [
         "rtx4500ada"
@@ -3063,6 +3315,7 @@
     "gpu_queue_est_hours": {
       "source": "gpu_queue/*.yaml est_hours",
       "jobs": {
+        "grpo-qwen1.5b": 18.0,
         "p2-candidates-qwen32b": 3.0,
         "sft-qwen0.5b-full": 6.0,
         "sft-qwen1.5b-lora": 8.0,
@@ -3072,10 +3325,10 @@
   },
   "ledger": {
     "source": ".cache/llm_ledger.json",
-    "cutoff": "2026-10-20T01:37:00",
-    "calls": 311255,
-    "output_tokens": 54540796,
-    "attributed_output_tokens": 54540796,
+    "cutoff": null,
+    "calls": 323807,
+    "output_tokens": 56859046,
+    "attributed_output_tokens": 56859046,
     "unattributed_output_tokens": 0,
     "unattributed_by_model": {},
     "after_cutoff_calls": 0,
@@ -3087,8 +3340,8 @@
         "max_tokens": 5000000
       },
       "phase12": {
-        "calls": 67596,
-        "tokens": 123937971,
+        "calls": 80148,
+        "tokens": 141610625,
         "max_tokens": 300000000
       },
       "phase2": {
@@ -3111,41 +3364,5 @@
     "mean_util_pct": 46.5,
     "power_limit_w": 210.0
   },
-  "excluded": [
-    {
-      "id": "p12-seed-train-s1",
-      "evidence": "logs/p12_train_sft3bv2_s1.log",
-      "since": "2026-10-20T01:37:00"
-    },
-    {
-      "id": "p12-seed-gen-s1",
-      "evidence": "logs/p12_seeds.status",
-      "since": "2026-10-20T01:37:00"
-    },
-    {
-      "id": "p12-seed-train-s2",
-      "evidence": "logs/p12_train_sft3bv2_s2.log",
-      "since": "2026-10-20T01:37:00"
-    },
-    {
-      "id": "p12-seed-gen-s2",
-      "evidence": "logs/p12_seeds.status",
-      "since": "2026-10-20T01:37:00"
-    },
-    {
-      "id": "p12-seed-resp-qwen",
-      "evidence": "logs/p12s_resp_qwen2.5-7b.log",
-      "since": "2026-10-20T01:37:00"
-    },
-    {
-      "id": "p12-seed-resp-phi",
-      "evidence": "logs/p12s_resp_phi3.5.log",
-      "since": "2026-10-20T01:37:00"
-    },
-    {
-      "id": "p12-seed-judge",
-      "evidence": "logs/p12s_judge.log",
-      "since": "2026-10-20T01:37:00"
-    }
-  ]
+  "excluded": []
 }
