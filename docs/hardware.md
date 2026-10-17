@@ -103,7 +103,7 @@ Measurements from rows 7.4–7.7 are in [checkpoints/C7/](checkpoints/C7/README.
 Consequences of the profile:
 
 - bf16 is the default mixed-precision dtype on the GPU. fp16 loss scaling is not needed.
-- ECC memory means VRAM available to CUDA is slightly below 24 GB. Row 7.10 uses **22 GB** as the
+- ECC memory means VRAM available to CUDA is slightly below 24 GB. The queue (C7.4, `max_vram_gb` in `configs/hardware/rtx4500ada.yaml`) uses **22 GB** as the
   usable ceiling for any single job.
 - Until Phase 7 is ✅, nothing in the repository may *require* a GPU to pass CI.
 - **The GPU is on the critical path.** With no hosted APIs, every labelled example (target outputs,
@@ -146,7 +146,7 @@ Every task row in CONTRIBUTING.md carries one or more tags.
 | :--- | :--- | :--- |
 | `CPU` | Runs on either dev machine | Start immediately |
 | `LLM` | Needs text generation from a local open-source model behind an OpenAI-compatible server (`terser.llm` provider `local`). No paid APIs | Build the code now and smoke-test it on CPU with a tiny model (Qwen2.5-0.5B/1.5B via Ollama or llama.cpp), within the phase token cap in `configs/budget.yaml`. Results that feed labels, metrics or reports come only from GPU-served models (an RTX 4090 worker, or the RTX 4500 Ada) |
-| `GPU` | Needs a 24 GB Ada-class card: `worker-1`, `worker-2`, or the RTX 4500 Ada once connected | Write the code, smoke-test on CPU with a tiny stand-in model (e.g. `configs/experiment/grpo_tiny.yaml`), add a `gpu_queue/` job. The row stays ❌ until the job has run on a card |
+| `GPU` | Needs a 24 GB Ada-class card: `worker-1`, `worker-2`, or the RTX 4500 Ada | Write the code, smoke-test on CPU with a tiny stand-in model (e.g. `configs/experiment/grpo_tiny.yaml`), add a `gpu_queue/` job. The row stays ❌ until the job has run on a card |
 | `CPU→GPU` | Reduced scale on CPU now, full scale on a GPU host | Run the CPU version, record it as reduced-scale, and queue the full-scale job |
 
 ---
@@ -195,7 +195,7 @@ outputs: [models/rewriter/sft-qwen0.5b-full/, mlruns/]
    server in a separate, time-shared slot.
 4. The queue drains by `priority` first, then by `depends_on` order. A job whose dependencies are not
    complete is skipped, not failed.
-5. After Phase 7, every job must satisfy `est_vram_gb ≤ 22` using measured values (row 7.10).
+5. After Phase 7, every job must satisfy `est_vram_gb ≤ 22` using measured values (C7.2 / C7.4).
 6. Each job logs GPU-hours to MLflow (see Experiment standards in CONTRIBUTING.md).
 7. **The runner is single-host.** `terser.gpu_queue` validates and drains one queue on the machine it
    runs on, and the job spec has no host field, so a job cannot be addressed to `worker-1` or
@@ -265,7 +265,7 @@ note for comparison, and update the same table in CONTRIBUTING.md in the same co
 
 ---
 
-## 6. Weekly GPU schedule (once connected)
+## 6. Weekly GPU schedule
 
 | Slot | Use | Constraint |
 | :--- | :--- | :--- |

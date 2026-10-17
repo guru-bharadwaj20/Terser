@@ -69,14 +69,15 @@ Supporting sections: [Compute Allocation](#compute-allocation-cpu-local-open-mod
 | Dev workstation (Fedora 44) | Vivian Sobers | AMD Ryzen AI 7 350, 16 threads, 14 GB RAM, no NVIDIA GPU; classical ML, tokenization, pipelines, CI | Available |
 | **NVIDIA RTX 4500 Ada Generation** | Guru Bharadwaj | 24 GB GDDR6 ECC, Ada Lovelace (compute capability 8.9), bf16 supported, ~210 W. WSL2 workstation ([hardware.md § 1.2](docs/hardware.md#12-rtx-4500-ada-workstation-wsl2)) | ✅ connected 2026-10-01 |
 | **2 × NVIDIA GeForce RTX 4090** | Vivian Sobers | `worker-1` and `worker-2`. Each 24 GB, Ada Lovelace (compute capability 8.9), bf16 supported. Ubuntu 22.04.5, i9-13900, 125 GB RAM. Shared lab machines (access details shared out-of-band) | ✅ available |
-| Local open-model serving | both | OpenAI-compatible servers only: Ollama / llama.cpp on a dev machine for tiny models (Qwen2.5-0.5B/1.5B, smoke tests), vLLM or Ollama on an RTX 4090 (and later the RTX 4500 Ada) for all real generation and judging. **No hosted API keys are available or assumed** | CPU: available · GPU: ✅ on the 4090s |
+| Local open-model serving | both | OpenAI-compatible servers only: Ollama / llama.cpp on a dev machine for tiny models (Qwen2.5-0.5B/1.5B, smoke tests), vLLM or Ollama on an RTX 4090 or the RTX 4500 Ada for all real generation and judging. **No hosted API keys are available or assumed** | CPU: available · GPU: ✅ on the 4090s |
 
 The two RTX 4090s have the same compute capability (8.9), VRAM (24 GB) and bf16 support as the
 RTX 4500 Ada, so the precision and VRAM planning below applies to them unchanged. Details, access
 and measurements: [docs/hardware.md § 1](docs/hardware.md#1-resources).
 
-Since [ADR-0004](docs/decisions/ADR-0004-plan-revision.md) the RTX 4090 workers are the primary GPUs
-and the RTX 4500 Ada is optional extra capacity. Wherever a row below names the RTX 4500 Ada, any
+[ADR-0004](docs/decisions/ADR-0004-plan-revision.md) made the RTX 4090 workers the primary GPUs; since
+the RTX 4500 Ada was connected (2026-10-01) it has run most GPU work (Phases 8, 10–12), so both are
+primary. Wherever a row below names the RTX 4500 Ada, any
 24 GB Ada-class card satisfies it; record the card used in the `hardware` tag.
 
 ### GPU job queue
@@ -89,8 +90,8 @@ queued as a job spec in `gpu_queue/`:
 id: sft-qwen0.5b-full
 phase: 8
 depends_on: [C7.1, C2.3]
-command: python -m terser.models.rewriter.train experiment=sft_qwen05b_full hardware=rtx4500ada
-est_vram_gb: 14
+command: python -m terser.models.rewriter.train experiment=sft_qwen05b_full hardware=rtx4090
+est_vram_gb: 17
 est_hours: 6
 exclusive: true            # nothing else on the GPU while this runs
 priority: 2                # 1 = highest
@@ -912,8 +913,8 @@ which were not, and why.
 | Phase | Owner | Tasks | Checks | Done | Status |
 | :--- | :--- | :---: | :---: | :---: | :---: |
 | 0 — Foundations | Guru | 22 | 4 | 26 | ✅ |
-| 1 — Framing and Concept Learning | Guru | 23 | 5 | 22 | ❌ |
-| 2 — Data Pipeline and Judge | Vivian | 21 | 9 | 23 | ❌ |
+| 1 — Framing and Concept Learning | Guru | 23 | 5 | 23 | ❌ |
+| 2 — Data Pipeline and Judge | Vivian | 21 | 9 | 24 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | Vivian | 31 | 7 | 36 | ❌ |
 | 4 — ANN and SVM | Vivian | 16 | 5 | 20 | ❌ |
 | 5 — Boosting, Bayes, GMM, HMM | Vivian | 16 | 6 | 17 | ❌ |
@@ -921,11 +922,11 @@ which were not, and why.
 | 7 — GPU Onboarding | Vivian | 8 | 3 | 9 | ❌ |
 | 8 — CNN and Rewriter | Vivian | 14 | 5 | 15 | ❌ |
 | 9 — Reinforcement Learning | Vivian | 7 | 2 | 7 | ❌ |
-| 10 — HPO | Vivian | 5 | 4 | 7 | ❌ |
-| 11 — MLOps | Vivian | 25 | 7 | 28 | ❌ |
-| 12 — Final Evaluation | Vivian | 11 | — | 0 | ❌ |
-| 13 — Documentation | Guru | 6 | — | 4 | ❌ |
-| **Total** | | **214** | **60** | **224** | ❌ |
+| 10 — HPO | Vivian | 5 | 4 | 9 | ❌ |
+| 11 — MLOps | Vivian | 25 | 7 | 30 | ❌ |
+| 12 — Final Evaluation | Vivian | 11 | — | 10 | ❌ |
+| 13 — Documentation | Guru | 6 | — | 6 | ✅ |
+| **Total** | | **214** | **60** | **242** | ❌ |
 
 Stretch rows are not counted.
 
@@ -933,8 +934,8 @@ Stretch rows are not counted.
 
 | Owner | Hardware | Phases | Rows | Done | Remaining |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 172 | 42 |
-| Guru | 1 × RTX 4500 Ada (24 GB) | 0, 1, 13 | 60 | 52 | 8 |
+| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 187 | 27 |
+| Guru | 1 × RTX 4500 Ada (24 GB) | 0, 1, 13 | 60 | 55 | 5 |
 
 Each phase has one owner, who runs it end to end, including its checkpoint.
 
