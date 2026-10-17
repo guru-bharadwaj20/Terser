@@ -64,7 +64,8 @@ class NumpyMLP:
     Args:
         sizes: Layer widths including input and output, e.g. ``(1536, 256, 64, 1)``.
         activation: Hidden-layer activation.
-        seed: Seed for He (ReLU) / Xavier (tanh, sigmoid) initialisation.
+        seed: Seed for He (ReLU, N(0, 2/fan_in)) / LeCun (tanh, sigmoid, N(0, 1/fan_in))
+            initialisation.
     """
 
     sizes: Sequence[int]
@@ -101,8 +102,8 @@ class NumpyMLP:
     def hidden_unit_stats(self, X: npt.ArrayLike) -> dict[str, float]:
         """Fraction of saturated sigmoid/tanh units and dead ReLU units over ``X`` (row 4.2.1).
 
-        A unit is *saturated* on an input when ``f'(z) < 0.01 * max f'`` (``|z| > ~5.3`` for
-        tanh, ``~9.2`` for sigmoid) and *dead* when it outputs 0 on **every** input in ``X``.
+        A unit is *saturated* on an input when ``f'(z) < 0.01 * max f'`` (``|z| > ~2.99`` for
+        tanh, ``~5.99`` for sigmoid) and *dead* when it outputs 0 on **every** input in ``X``.
         """
         zs, _ = self._forward(np.asarray(X, dtype=np.float64))
         hidden = np.concatenate(zs[:-1], axis=1) if len(zs) > 1 else np.empty((0, 0))

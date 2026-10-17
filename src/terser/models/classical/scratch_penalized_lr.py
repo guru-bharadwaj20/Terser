@@ -9,8 +9,9 @@ C=C, l1_ratio=r)`` (whose objective is ``C sum log-loss + (1 - r)/2 ||w||^2 + r 
     J(w, b) = mean log-loss + [(1 - r)/2 ||w||^2 + r ||w||_1] / (C n)
 
 ``penalty="l2"`` is ``r = 0``, ``"l1"`` is ``r = 1``. The smooth part (log-loss + L2) is handled by
-a gradient step of size ``1/L`` with ``L = sigma_max(X)^2 / (4n) + (1 - r)/(C n)``, its Lipschitz
-constant; the L1 part by its proximal operator, soft-thresholding at ``step * r / (C n)``. The
+a gradient step of size ``1/L`` with ``L = sigma_max(Z)^2 / (4n) + (1 - r)/(C n)``, ``Z = [X, 1]``
+the design matrix with an intercept column, its Lipschitz constant; the L1 part by its proximal
+operator, soft-thresholding at ``step * r / (C n)``. The
 intercept is never penalised. FISTA momentum gives the ``O(1/k^2)`` rate.
 """
 
