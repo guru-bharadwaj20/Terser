@@ -1,8 +1,9 @@
 # Orchestration: Prefect flows
 
-Plan rows 11.6.1 (Prefect flows) and 11.6.2 (reliability). Code:
+Plan rows 11.6.1 (Prefect flows), 11.6.2 (reliability) and 11.4.3 (continuous training). Code:
 [`src/terser/flows/`](../src/terser/flows/). Tests: `tests/test_flows.py`. Evidence:
-[`reports/p11_flows.md`](../reports/p11_flows.md).
+[`reports/p11_flows.md`](../reports/p11_flows.md),
+[`reports/p11_ct_and_fresh_clone.md`](../reports/p11_ct_and_fresh_clone.md).
 
 ```bash
 pip install -e ".[orchestrate]"     # Prefect 3
@@ -15,16 +16,58 @@ run can be repeated by hand from its plan.
 
 | Flow | Steps | Schedule |
 | :--- | :--- | :--- |
-| `data_flow` | `dvc repro --single-item <stage>` for `casualise`, `dedupe`, `split`, `label_subset`, `candidates`, `token_counts`; then `respond` per target and `judge` (`terser.phase2.respond`, `terser.phase2.label_stage`); then `terser.data.validation` if `pairs=` is given | on demand |
-| `train_classical_flow` | `terser.phase3.build_features`, `terser.phase11.train_fast_path` (ONNX gate and tagger) | on demand |
+| `data_flow` | `dvc repro --single-item <stage>` for `casualise`, `dedupe`, `split`, `label_subset`, `candidates`, `token_counts`; then `respond` per target, `dvc unprotect` of the label table, and `judge` (`terser.phase2.respond`, `terser.phase2.label_stage`); then `terser.data.validation` if `pairs=` is given. `label=false` skips `respond` / `judge` and keeps the DVC-tracked labels | on demand |
+| `train_classical_flow` | `dvc unprotect` of its DVC-tracked outputs, then `terser.phase3.build_features`, `terser.phase11.train_fast_path` (ONNX gate and tagger) | on demand |
 | `train_rewriter_flow` | CPU smoke test (`pytest tests/rewriter/test_train_tiny.py`), then a job spec validated against the whole queue and written to `gpu_queue/<id>.yaml`. The GPU machine trains it with `python -m terser.gpu_queue run`; the flow never trains | on demand |
 | `evaluate_flow` | `terser.phase3.gate_checkpoint` (C3.3), `terser.models.rewriter.val_report` (C8.3) | on demand |
-| `promote_flow` | `dvc repro --single-item register` (`terser.phase11.register`), the row 11.4.4 promotion guard on `reports/p8_rewriter_val.json`, then `terser.tracking.promote` only if the guard allows it | on demand |
+| `promote_flow` | `dvc repro --single-item register` (`terser.phase11.register`; with `--force` when the MLflow registry does not know the component, i.e. on a fresh clone), the row 11.4.4 promotion guard on `reports/p8_rewriter_val.json`, then `terser.tracking.promote` only if the guard allows it | on demand |
 | `drift_flow` | tokenizer drift (row 11.5.3), then input drift (row 11.5.2, `python -m terser.monitoring.input_drift --name <date> [--current <jsonl>]`); any alert fails the run | daily 03:00 |
+| `ct_flow` | continuous training (row 11.4.3): trigger check, then `data_flow` (judge labels), `train_classical_flow`, `train_rewriter_flow` (queued only), `evaluate_flow`, `promote_flow(stage="Staging", from_alias="latest")` behind the guard, then the cycle record `logs/ct_state.json` | event trigger on a failed `drift_flow` run; daily 04:00 new-data check |
 
 `collect` is left out of `data_flow` by default because it is stale by design (see
 `reports/p2_dvc_repro.md`). Pass `stages=[...]` to choose stages. Steps and commands of
 `train_classical_flow` and `evaluate_flow` can be overridden with `steps={name: argv}`.
+
+**DVC-protected outputs.** With `cache.type: hardlink` DVC checks outputs out as read-only
+hardlinks into its cache. Before a flow rewrites a DVC-tracked output (labels, pair and span
+features, `models/fast`), it runs `dvc unprotect`. Without that step a fresh clone fails with
+`PermissionError`. The rewritten outputs then show as modified in `dvc status` until they are
+`dvc commit`ted.
+
+## Continuous training (`ct_flow`, row 11.4.3)
+
+`trigger` selects how a cycle starts:
+
+| `trigger` | Started by | What happens |
+| :--- | :--- | :--- |
+| `check` (default) | the daily 04:00 schedule (deployment default `check_drift=false`) or a manual run | detectors run first: tokenizer and input drift when `check_drift`, then `new_data_check` (`dvc status --json` of the data stages, and the content digest of `batch=` against the last cycle). The cycle runs only if one fires; otherwise the run completes with "nothing to do" |
+| `drift` | the Prefect automation `ct-on-drift-alert`: any `prefect.flow-run.Failed` event of a `drift_flow` run (a drift alert fails that flow) | the cycle, no re-check |
+| `batch` | a caller that has landed new data (`batch=<path>`, or DVC data already updated) | the cycle |
+| `force` | a manual run | the cycle |
+
+The cycle, in order:
+
+1. `data_flow`: data stages, then the judge labels. Pass `label=false` on a CPU machine without
+   the LLM response cache.
+2. `train_classical_flow`: gate and tagger on CPU.
+3. `train_rewriter_flow`: a CPU smoke test, then the job `ct-<experiment>-<YYYYMMDD>` is written
+   to `gpu_queue/`. The GPU worker trains it; the CT run never does.
+4. `evaluate_flow`.
+5. `promote_flow(stage="Staging", from_alias="latest")`: the newest registered rewriter version
+   moves to Staging only if the row 11.4.4 guard passes. The guard needs C8.3 and the
+   preservation floors.
+6. `record_ct_cycle`: writes the trigger, the batch digests, the queued job and the Staging
+   decision to `logs/ct_state.json`, so an unchanged batch does not start another cycle.
+
+The rewriter queued in one cycle is evaluated by the next cycle, after the GPU worker has trained
+it. A guard refusal is a decision, not a failure: the run still completes. A failure in any
+sub-flow fails `ct_flow` and notifies.
+
+```bash
+python -m terser.flows plan ct_flow                                  # whole cycle, dry run
+python -m terser.flows run ct_flow --param trigger='"force"' --param label=false
+python -m terser.flows run ct_flow --param check_drift=false --param batch='"data/batches/b1.jsonl"'
+```
 
 ## Commands
 
@@ -37,7 +80,7 @@ python -m terser.flows plan data_flow
 python -m terser.flows run evaluate_flow        # run one flow once
 python -m terser.flows run drift_flow --param current='"logs/requests.jsonl"'
 python -m terser.flows run train_rewriter_flow --dry-run --param experiment='"sft_tiny"'
-python -m terser.flows deploy                   # register the six deployments
+python -m terser.flows deploy                   # register the seven deployments + CT trigger
 python -m terser.flows serve                    # long-running: execute deployments on schedule
 python -m terser.flows demo --out reports/p11_flows.md
 ```
@@ -51,12 +94,15 @@ the promotion guard is evaluated.
 
 **Registration.** `deploy` applies one deployment per flow to the configured Prefect API.
 Deployments use module entrypoints (`terser.flows.flows:<flow>`) and the tags `terser` and
-`row-11.6`. `train_rewriter_flow` is also tagged `gpu_queue`, and `drift_flow` is tagged
-`monitoring`. If `PREFECT_API_URL` is unset, Prefect starts a temporary local server for the
+`row-11.6`. `train_rewriter_flow` is also tagged `gpu_queue`, `drift_flow` is tagged
+`monitoring`, and `ct_flow` is tagged `row-11.4.3` and `gpu_queue`. The `ct_flow` deployment
+carries the event trigger `ct-on-drift-alert`, which Prefect stores as an automation; `deploy`
+prints it. If `PREFECT_API_URL` is unset, Prefect starts a temporary local server for the
 command and stops it on exit. The deployments stay in `~/.prefect/prefect.db`, and
 `prefect deployment ls` lists them. To run them on their schedules, keep
 `python -m terser.flows serve` running, or point `PREFECT_API_URL` at a `prefect server start`
-instance.
+instance. Event triggers need that long-running server, because automations are evaluated
+there.
 
 ## Reliability (row 11.6.2)
 
@@ -67,6 +113,8 @@ instance.
 | `gpu_queue_submit`, `promotion_guard` | 0 | - | none (deterministic) |
 | `tokenizer_drift`, `input_drift` | 1 | 10 s | none |
 | `registry_promote` | 2 | 10 s | none |
+| `new_data_check` (CT trigger) | 1 | 10 s | none |
+| `record_ct_cycle` | 0 | - | none |
 
 - **Cached LLM steps.** The cache key is a SHA-256 of the step name, the command and the content
   of every input file or directory: the DVC stage deps plus `params.yaml`, or the prompts,
