@@ -22,7 +22,16 @@ non-negative, unbiased estimator of KL(policy || reference).
   ``tokens_saved_pct = 100 * (1 - tokens(rewrite) / tokens(prompt))`` on the base tokenizer;
   ``gate_pass`` is 1 when the served quality gate (``models/fast/gate.onnx``) gives
   ``P(degraded) <= gate_threshold`` (``configs/serving/fast_onnx.yaml``), else 0. Logged every
-  step together with its parts.
+  step together with its parts. This is ``reward: v1``, the default.
+* **Reward v2 (follow-up ablation, ``reward: v2``).** v1 was hacked (gate-passed rewrites judged
+  preserved 42.4% vs the gate's Phase 2 precision of 91.0%), so v2 multiplies capped savings by
+  three preservation proxies that fit next to training on one GPU (:func:`make_reward_v2`):
+  ``min(savings_pct, savings_cap) x (1 - P(degraded))^gate_gamma x ramp(cos) x keep^keep_power``.
+  ``cos`` is the cosine between rewrite and original under a small CPU sentence encoder
+  (``BAAI/bge-small-en-v1.5``), ramped linearly from 0 at ``sim_lo`` to 1 at ``sim_hi``; ``keep``
+  is the share of the original's protected items (numbers, quoted / code spans, URLs,
+  identifiers, constraint words; :func:`protected_items`) that survive in the rewrite. The soft
+  gate term keeps the signal dense, and every factor has to be high at once to earn reward.
 * **Reward-hacking audit samples (9.3.3).** Every ``audit_every`` steps all of the step's
   rewrites are written to ``<output_dir>/audit/step_<n>.jsonl``. They are judged *after*
   training by :mod:`terser.models.rl.audit`, with the 32B judge served on its own (never
@@ -74,6 +83,9 @@ __all__ = [
     "is_natural_language",
     "kl_k3",
     "make_reward",
+    "make_reward_v2",
+    "protected_items",
+    "retention",
     "run",
     "train_grpo",
 ]
@@ -159,6 +171,90 @@ def make_reward(
             passed = (not row["fell_back"]) and s <= threshold
             row.update(gate_score=float(s), gate_pass=passed)
             row["reward"] = row["savings_pct"] * float(passed)
+        return rows
+
+    return reward
+
+
+_PROTECT = re.compile(
+    r"`[^`\n]+`"  # inline code
+    r"|\"[^\"\n]{1,80}\""  # quoted strings
+    r"|https?://\S+"  # URLs
+    r"|\b\d[\d.,:/%-]*"  # numbers, dates, versions
+    r"|\b[A-Za-z]+_[A-Za-z0-9_]+\b"  # snake_case
+    r"|\b[a-z]+[A-Z][A-Za-z0-9]*\b"  # camelCase
+    r"|\b[A-Z]{2,}[A-Z0-9]*\b"  # ACRONYMS
+)
+CONSTRAINT_WORDS: frozenset[str] = frozenset(
+    "not no never only must exactly without avoid except least most under over maximum minimum "
+    "words sentences paragraphs bullet bullets list table json csv markdown format step steps "
+    "tone formal informal brief detailed".split()
+)
+
+
+def protected_items(text: str) -> set[str]:
+    """Lower-cased items a faithful rewrite must keep: literals, identifiers, constraint words."""
+    items = {m.group(0).strip().lower().rstrip(".,:") for m in _PROTECT.finditer(text)}
+    items |= {w for w in re.findall(r"[a-z]+", text.lower()) if w in CONSTRAINT_WORDS}
+    return {i for i in items if i}
+
+
+def retention(original: str, rewrite: str) -> float:
+    """Share of the original's :func:`protected_items` found in the rewrite (1.0 if none)."""
+    need = protected_items(original)
+    if not need:
+        return 1.0
+    low = rewrite.lower()
+    words = set(re.findall(r"[a-z]+", low))
+    hit = sum((i in words) if i.isalpha() and i in CONSTRAINT_WORDS else (i in low) for i in need)
+    return hit / len(need)
+
+
+def _ramp(x: float, lo: float, hi: float) -> float:
+    return min(1.0, max(0.0, (x - lo) / (hi - lo))) if hi > lo else float(x >= lo)
+
+
+def make_reward_v2(
+    count: Callable[[str], int],
+    gate_scores: Callable[[list[Row]], list[float]],
+    similarity: Callable[[list[Row]], list[float]],
+    threshold: float,
+    *,
+    gate_gamma: float = 4.0,
+    sim_lo: float = 0.80,
+    sim_hi: float = 0.95,
+    keep_power: float = 2.0,
+    savings_cap: float = 70.0,
+) -> RewardFn:
+    """Preservation-aware reward (GRPO v2); ``gate_pass`` is still the served-threshold pass.
+
+    ``reward = min(savings_pct, savings_cap) * (1 - P)^gate_gamma * ramp(cos) * keep^keep_power``
+    with ``P`` the gate's ``P(degraded)``, ``cos`` = ``similarity(rows)`` and ``keep`` =
+    :func:`retention`; a fallback earns 0.
+    """
+
+    def reward(prompts: Sequence[str], raws: Sequence[str]) -> list[Row]:
+        rows: list[Row] = []
+        for p, r in zip(prompts, raws, strict=True):
+            text, fell_back = safeguard(p, r, count)
+            pct = 100.0 * (1 - count(text) / max(count(p), 1))
+            rows.append({"prompt": p, "rewrite": text, "fell_back": fell_back, "savings_pct": pct})
+        live = [row for row in rows if not row["fell_back"]]
+        scores = iter(gate_scores(live) if live else [])
+        sims = iter(similarity(live) if live else [])
+        for row in rows:
+            if row["fell_back"]:
+                row.update(gate_score=1.0, gate_pass=False, similarity=1.0, keep=1.0, reward=0.0)
+                continue
+            s, cos = float(next(scores)), float(next(sims))
+            keep = retention(row["prompt"], row["rewrite"])
+            row.update(gate_score=s, gate_pass=s <= threshold, similarity=cos, keep=keep)
+            row["reward"] = (
+                min(row["savings_pct"], savings_cap)
+                * max(0.0, 1.0 - s) ** gate_gamma
+                * _ramp(cos, sim_lo, sim_hi)
+                * keep**keep_power
+            )
         return rows
 
     return reward
@@ -369,6 +465,11 @@ def train_grpo(
             "loss": loss_sum,
             "grad_norm": grad_norm,
             "flat_group_share": flat_groups / len(batch),
+            **{
+                f"{k}_mean": statistics.fmean(s[k] for s in scored)
+                for k in ("similarity", "keep")
+                if all(k in s for s in scored)
+            },
             "completion_tokens_mean": statistics.fmean(len(c) for c in comps),
             "step_time_s": last_dt,
             **{f"degenerate_{k}": v for k, v in rates.items()},
@@ -400,6 +501,7 @@ def train_grpo(
                         "gate_score": s["gate_score"],
                         "gate_pass": s["gate_pass"],
                         "reward": s["reward"],
+                        **{k: s[k] for k in ("similarity", "keep") if k in s},
                         "truncated": trunc[j],
                         "degenerate": kinds[j],
                     }
@@ -418,6 +520,23 @@ def load_prompts(path: Path, limit: int | None = None) -> list[Row]:
             rows.append({"id": r.get("id", ""), "category": r.get("category", ""),
                          "prompt": r["prompt"]})  # fmt: skip
     return rows[:limit] if limit else rows
+
+
+_ENCODER = "BAAI/bge-small-en-v1.5"
+
+
+def _cpu_similarity(name: str) -> Callable[[list[Row]], list[float]]:  # pragma: no cover - GPU job
+    """Cosine of (prompt, rewrite) under a small sentence encoder kept on the CPU."""
+    from sentence_transformers import SentenceTransformer
+
+    enc = SentenceTransformer(name, device="cpu")
+
+    def sim(rows: list[Row]) -> list[float]:
+        a = enc.encode([r["prompt"] for r in rows], normalize_embeddings=True, batch_size=32)
+        b = enc.encode([r["rewrite"] for r in rows], normalize_embeddings=True, batch_size=32)
+        return [float(x) for x in (a * b).sum(1)]
+
+    return sim
 
 
 def _load_policy(p: DictConfig, device: str) -> tuple[Any, Any]:  # pragma: no cover - GPU job
@@ -497,6 +616,9 @@ def run(cfg: DictConfig) -> dict[str, Any]:
         def gate_scores(rows: list[Row]) -> list[float]:
             return [0.0] * len(rows)  # stand-in gate: everything passes
 
+        def similarity(rows: list[Row]) -> list[float]:
+            return [1.0] * len(rows)  # stand-in encoder: everything similar
+
         threshold = 0.5
     else:  # pragma: no cover - GPU job
         from terser.phase10.rewriter_hpo import GateScorer, gate_threshold
@@ -525,6 +647,7 @@ def run(cfg: DictConfig) -> dict[str, Any]:
             return scorer(rows)
 
         threshold = gate_threshold(Path(p.serving_config))
+        similarity = _cpu_similarity(str(p.get("reward_v2", {}).get("encoder", _ENCODER)))
 
         def ref_logprobs(ids: torch.Tensor, attn: torch.Tensor, width: int) -> torch.Tensor:
             with policy.disable_adapter():
@@ -532,7 +655,15 @@ def run(cfg: DictConfig) -> dict[str, Any]:
 
         if p.get("max_prompt_tokens"):
             prompts = [r for r in prompts if len(encode(r["prompt"])) <= p.max_prompt_tokens]
-    log.info("GRPO on %d prompts, gate threshold %s", len(prompts), threshold)
+    kind = str(p.get("reward") or "v1")
+    if kind == "v1":
+        reward_fn = make_reward(count, gate_scores, threshold)
+    elif kind == "v2":
+        v2 = {k: v for k, v in dict(p.get("reward_v2") or {}).items() if k != "encoder"}
+        reward_fn = make_reward_v2(count, gate_scores, similarity, threshold, **v2)
+    else:
+        raise ValueError(f"unknown reward {kind!r} (v1 or v2)")
+    log.info("GRPO on %d prompts, reward %s, gate threshold %s", len(prompts), kind, threshold)
     mlf = _mlflow_logger(p, cfg)
     audit_every = int(p.get("audit_every") or 0)
     save_every = int(p.get("save_every") or 0)
@@ -560,7 +691,7 @@ def run(cfg: DictConfig) -> dict[str, Any]:
         sep=sep,
         eos=eos,
         pad=pad,
-        reward_fn=make_reward(count, gate_scores, threshold),
+        reward_fn=reward_fn,
         ref_logprobs=ref_logprobs,
         steps=int(p.steps),
         prompts_per_step=int(p.prompts_per_step),
@@ -581,6 +712,7 @@ def run(cfg: DictConfig) -> dict[str, Any]:
         "init_adapter": p.get("init_adapter"),
         "steps_done": len(history),
         "gate_threshold": threshold,
+        "reward": kind,
         "first": history[0] if history else None,
         "last": history[-1] if history else None,
     }
