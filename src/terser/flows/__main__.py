@@ -17,7 +17,8 @@ from terser.flows.steps import StepResult
 def _print_plan(name: str, results: Sequence[StepResult]) -> None:
     print(f"{name}:")
     for i, r in enumerate(results, 1):
-        status = "planned" if not r.executed else ("ok" if r.ok else "REFUSED")
+        bad = "FIRED" if r.kind == "trigger" else "REFUSED"  # a trigger that fires is not ok
+        status = "planned" if not r.executed else ("ok" if r.ok else bad)
         print(f"  {i}. [{r.kind}] {r.name}: {r.command}  ({status})")
         if r.executed and r.output:
             print(f"     {r.output.splitlines()[0][:200]}")
@@ -73,12 +74,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             _print_plan(name, plan(name))
         return 0
     if args.command == "deploy":
-        from terser.flows.registry import register_deployments
+        from terser.flows.registry import register_deployments, registered_triggers
 
         rows = register_deployments()
         for r in rows:
             print(f"{r['deployment']:45} {r['schedule']:12} {r['entrypoint']}  id={r['id']}")
         print(f"{len(rows)} deployment(s) registered")
+        for t in registered_triggers():
+            print(f"trigger {t['automation']}: on {t['expect']} [{t['match_related']}]")
+            print(f"    -> {t['deployment']} with {t['parameters']}")
         return 0 if len(rows) == len(FLOWS) else 1
     if args.command == "serve":  # pragma: no cover - long-running
         from prefect import serve

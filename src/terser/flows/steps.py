@@ -15,6 +15,8 @@ task                        wraps                             reliability
 :func:`input_drift_check`   input drift CLI (row 11.5.2)      1 retry; an alert is a result
 :func:`promotion_guard`     :mod:`terser.pipelines.promotion` no retry (deterministic)
 :func:`registry_promote`    :func:`terser.tracking.promote`   2 retries
+:func:`new_data_check`      ``dvc status`` + batch digest     1 retry; new data is a result
+:func:`record_ct_cycle`     CT state file (row 11.4.3)        no retry
 ==========================  ================================  ===========================
 
 Every task's ``on_failure`` hook is :func:`terser.flows.reliability.notify_failure`.
@@ -67,7 +69,11 @@ __all__ = [
     "llm_cache_key",
     "llm_step",
     "load_eval_summary",
+    "new_data_check",
     "promotion_guard",
+    "read_ct_state",
+    "record_ct_cycle",
+    "registry_has",
     "registry_promote",
     "run_command",
     "shell_step",
@@ -343,12 +349,38 @@ def promotion_guard(
 
 
 def _version_at(model_name: str, alias: str) -> str:
+    """Version holding ``alias``; ``latest`` is the newest registered version (CT candidate)."""
     from mlflow import MlflowClient
 
     from terser.tracking import setup_tracking
 
     setup_tracking()
-    return str(MlflowClient().get_model_version_by_alias(model_name, alias).version)
+    client = MlflowClient()
+    if alias == "latest":
+        versions = client.search_model_versions(f"name = '{model_name}'")
+        if not versions:
+            raise StepError(f"{model_name} has no registered version")
+        return str(max(int(v.version) for v in versions))
+    return str(client.get_model_version_by_alias(model_name, alias).version)
+
+
+def registry_has(model_name: str) -> bool:
+    """True if the MLflow registry (repo-local by default) knows ``model_name``.
+
+    ``mlruns/`` is gitignored, so on a fresh clone the registry is empty while ``dvc.lock`` says
+    the ``register`` stage is up to date; :func:`terser.flows.flows.promote_flow` then forces it.
+    """
+    from mlflow import MlflowClient
+    from mlflow.exceptions import MlflowException
+
+    from terser.tracking import setup_tracking
+
+    setup_tracking()
+    try:
+        MlflowClient().get_registered_model(model_name)
+    except MlflowException:
+        return False
+    return True
 
 
 @task(
@@ -371,3 +403,95 @@ def registry_promote(
     promote(model_name, version, stage)
     out = f"{model_name} v{version} -> {stage}"
     return StepResult("registry_promote", "python", cmd, True, True, out)
+
+
+# Continuous training (row 11.4.3) -----------------------------------------------------------
+
+
+def read_ct_state(state_path: str) -> dict[str, Any]:
+    """The last completed CT cycle (``{}`` if none): time, trigger, batch digests."""
+    path = REPO_ROOT / state_path
+    if not path.is_file():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return data if isinstance(data, dict) else {}
+
+
+def _dvc_status(stages: Sequence[str]) -> dict[str, Any]:
+    proc = _run_process(["dvc", "status", "--json", *stages])
+    if proc.returncode != 0:
+        tail = (proc.stderr or proc.stdout).strip()[-OUTPUT_TAIL:]
+        raise StepError(f"dvc status exited {proc.returncode}: {tail}")
+    lines = [x for x in proc.stdout.strip().splitlines() if x.strip()]
+    status = json.loads(lines[-1]) if lines else {}
+    return status if isinstance(status, dict) else {}
+
+
+@task(
+    name="new_data_check",
+    retries=1,
+    retry_delay_seconds=SHELL_RETRY_DELAY,
+    cache_policy=NO_CACHE,
+    on_failure=[notify_failure],
+)
+def new_data_check(
+    batch: str | None,
+    stages: Sequence[str],
+    state_path: str,
+    dry_run: bool = False,
+) -> StepResult:
+    """CT trigger "new data batch": ``ok=False`` when new data has arrived.
+
+    Two signals: a DVC-tracked change (``dvc status --json <data stages>`` is not empty, e.g.
+    after ``dvc pull`` or ``dvc add`` of new raw data), and, when ``batch`` is given, a batch path
+    whose content digest differs from the one recorded by the last completed cycle. Like a drift
+    alert, new data is a result, not a step failure.
+    """
+    cmd = ["dvc", "status", "--json", *stages]
+    if dry_run:
+        return _plan("new_data", "trigger", cmd)
+    reasons = []
+    changed = sorted(_dvc_status(stages)) if stages else []
+    if changed:
+        reasons.append("DVC data stages changed: " + ", ".join(changed))
+    if batch:
+        digest = input_digest([batch])[batch]
+        if digest == "missing":
+            raise StepError(f"batch {batch} does not exist")
+        seen = read_ct_state(state_path).get("batches", {}).get(batch)
+        if digest != seen:
+            reasons.append(f"new batch {batch} (sha256 {digest[:12]})")
+    out = ("NEW DATA " + "; ".join(reasons)) if reasons else "no new data"
+    return StepResult("new_data", "trigger", tuple(cmd), True, not reasons, out)
+
+
+@task(name="record_ct_cycle", cache_policy=NO_CACHE, on_failure=[notify_failure])
+def record_ct_cycle(
+    state_path: str,
+    trigger: str,
+    reasons: str,
+    batch: str | None = None,
+    summary: Mapping[str, Any] | None = None,
+    dry_run: bool = False,
+) -> StepResult:
+    """Write the completed cycle to ``state_path`` so the same batch does not trigger again."""
+    cmd = ("terser.flows.steps.record_ct_cycle", state_path)
+    if dry_run:
+        return _plan("record_ct_cycle", "python", cmd)
+    from datetime import UTC, datetime
+
+    state = read_ct_state(state_path)
+    batches = dict(state.get("batches", {}))
+    if batch:
+        batches[batch] = input_digest([batch])[batch]
+    record = {
+        "time": datetime.now(UTC).isoformat(timespec="seconds"),
+        "trigger": trigger,
+        "reasons": reasons,
+        "batches": batches,
+        **dict(summary or {}),
+    }
+    path = REPO_ROOT / state_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    return StepResult("record_ct_cycle", "python", cmd, True, True, f"wrote {state_path}")
