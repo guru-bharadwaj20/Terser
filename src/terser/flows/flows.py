@@ -22,6 +22,10 @@ reproduced by hand from its command plan (``python -m terser.flows plan``):
                             and tagger (``train_classical_flow``), queue the rewriter retrain
                             (``train_rewriter_flow``), evaluate, then ``promote_flow`` to
                             ``Staging`` behind the promotion guard
+``canary_flow``             nightly quality canary (row 11.5.4): the fixed 200-prompt canary set
+                            through the deployed service, both targets and the judge
+                            (``python -m terser.monitoring.canary``); the run's preservation goes
+                            to the history, the Pushgateway and ``reports/p11_canary.md``
 ==========================  ====================================================================
 
 Every flow takes ``dry_run``: tasks then record their commands without running them, and the
@@ -75,6 +79,9 @@ __all__ = [
     "PLAN_PARAMS",
     "SCHEDULES",
     "TRAIN_CLASSICAL_STEPS",
+    "CANARY",
+    "CANARY_TARGETS",
+    "canary_flow",
     "ct_flow",
     "data_flow",
     "drift_flow",
@@ -138,8 +145,13 @@ EVALUATE_STEPS: Mapping[str, Sequence[str]] = {
     ],
 }
 # drift_flow daily; ct_flow polls for a new data batch daily after it (drift alerts start it
-# through an event trigger, see terser.flows.registry); the others run on demand.
-SCHEDULES: Mapping[str, str] = {"drift_flow": "0 3 * * *", "ct_flow": "0 4 * * *"}
+# through an event trigger, see terser.flows.registry); the quality canary nightly before both
+# (UTC); the others run on demand.
+SCHEDULES: Mapping[str, str] = {
+    "drift_flow": "0 3 * * *",
+    "ct_flow": "0 4 * * *",
+    "canary_flow": "0 2 * * *",
+}
 # Example parameters for flows with required ones (plans, tests, the demo report).
 PLAN_PARAMS: Mapping[str, Mapping[str, Any]] = {
     "train_rewriter_flow": {
@@ -454,6 +466,63 @@ def ct_flow(
     return out
 
 
+CANARY = "data/canary/canary_v1.jsonl"
+CANARY_TARGETS: tuple[str, ...] = ("qwen2.5-7b", "phi3.5-mini")  # terser.monitoring.canary
+
+
+@flow(name="canary_flow", log_prints=True, on_failure=[notify_flow_failure])
+def canary_flow(
+    base_url: str = "http://localhost:8080",
+    mode: str = "quality",
+    targets: Sequence[str] = CANARY_TARGETS,
+    llm_url: str | None = None,
+    target_urls: Mapping[str, str] | None = None,
+    judge_url: str | None = None,
+    judge_model: str = JUDGE_MODEL,
+    gateway: str | None = "localhost:9091",
+    canary: str = CANARY,
+    run_id: str | None = None,
+    dry_run: bool = False,
+) -> list[StepResult]:
+    """Nightly quality canary (row 11.5.4): service -> targets -> judge -> push.
+
+    Runs :mod:`terser.monitoring.canary` stage by stage in ``logs/canary/<run_id>`` (default
+    ``run_id``: today's UTC date): ``rewrite`` (every canary prompt through ``POST /rewrite`` of
+    the service at ``base_url`` in ``mode``, once per target), ``respond`` per target (endpoint
+    ``target_urls[tag]``, else ``llm_url``, else ``TERSER_LOCAL_LLM_URL``), ``judge``
+    (``judge_url``), ``finalize`` (history ``logs/canary_history.jsonl``, push to ``gateway``,
+    ``reports/p11_canary.md``). The endpoints must be up for the whole run; on the single-GPU
+    workstation ``/home/temp/canary_chain.sh`` runs the same stages, serving one model at a time.
+    The rewrite step always re-queries the service (``--force``, which clears the run's
+    downstream files): its output is what is measured. Every step is a retried shell step, not
+    an input-hash-cached LLM step, so a rerun never skips writing a stage's outputs; the target
+    and judge requests themselves are disk-cached by :class:`terser.llm.LLMClient`, so a retry
+    does not pay twice. A low rolling value is not a flow failure; the Grafana alert (row 11.5.5)
+    handles it.
+    """
+    rid = run_id or datetime.now(UTC).strftime("%Y-%m-%d")
+    run_dir = f"logs/canary/{rid}"
+    mod = ["python", "-m", "terser.monitoring.canary"]
+    rewrite = [*mod, "rewrite", "--run-dir", run_dir, "--canary", canary, "--base-url", base_url]
+    rewrite += ["--mode", mode, "--targets", *targets, "--judge-model", judge_model, "--force"]
+    out = [shell_step("canary:rewrite", rewrite, dry_run)]
+    for tag in targets:
+        cmd = [*mod, "respond", "--run-dir", run_dir, "--target", tag]
+        url = (target_urls or {}).get(tag, llm_url)
+        if url:
+            cmd += ["--llm-url", url]
+        out.append(shell_step(f"canary:respond:{tag}", cmd, dry_run))
+    cmd = [*mod, "judge", "--run-dir", run_dir, "--judge-model", judge_model]
+    if judge_url:
+        cmd += ["--judge-url", judge_url]
+    out.append(shell_step("canary:judge", cmd, dry_run))
+    cmd = [*mod, "finalize", "--run-dir", run_dir]
+    if gateway:
+        cmd += ["--gateway", gateway]
+    out.append(shell_step("canary:finalize", cmd, dry_run))
+    return out
+
+
 FLOWS: dict[str, Any] = {
     "data_flow": data_flow,
     "train_classical_flow": train_classical_flow,
@@ -462,6 +531,7 @@ FLOWS: dict[str, Any] = {
     "promote_flow": promote_flow,
     "drift_flow": drift_flow,
     "ct_flow": ct_flow,
+    "canary_flow": canary_flow,
 }
 
 
