@@ -6,6 +6,12 @@ takes `budget / n` steps, mini-batch methods `budget / 64`), 5 seeds each. Gener
 `python -m terser.phase4.nn_studies optimizers --table data/processed/p4_pairs.parquet`;
 convergence curves in `reports/figures/p4_optimizers.png`, runs in `reports/p4_optimizers_runs.csv`.
 
+> **Note (post-audit):** in these runs the mini-batch configurations never reached the last
+> checkpoint (5,521 × 64 = 353,344 < 353,400), so their "final" row is the 19th checkpoint
+> (335,744 gradient evaluations, 95% of the budget) while full-batch GD is reported at 100%.
+> `optimizer_run` now places checkpoints on the budget each batch size can spend; the table is
+> unchanged until the study is re-run.
+
 | config | final train loss | final val AUC |
 |---|---|---|
 | gd(lr=0.1) | 0.612 ± 0.011 | 0.731 ± 0.012 |

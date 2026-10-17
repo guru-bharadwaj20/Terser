@@ -15,6 +15,7 @@ whose rows align with a metadata table holding the four key columns.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -73,4 +74,16 @@ def load_table(path: Path, features: Path | None = None) -> FeatureTable:
             f"{path} does not exist: build the Phase 3 feature tables (rows 3.1.2 / 3.1.3) first"
         )
     df = _read(path)
-    return from_frame(df, None if features is None else np.load(features))
+    if features is None:
+        return from_frame(df, None)
+    matrix = np.load(features)
+    ids_path = features.with_name(f"{features.stem}_ids.json")  # pair_emb.npy -> pair_emb_ids.json
+    if ids_path.is_file():
+        # Align by id, not by row order: the matrix must hold a row for every table row.
+        ids = [str(i) for i in json.loads(ids_path.read_text(encoding="utf-8"))]
+        index = {pid: k for k, pid in enumerate(ids)}
+        missing = [pid for pid in df["id"].astype(str) if pid not in index]
+        if missing:
+            raise KeyError(f"{len(missing)} table id(s) not in {ids_path.name}: {missing[:5]}")
+        matrix = matrix[[index[pid] for pid in df["id"].astype(str)]]
+    return from_frame(df, matrix)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import numpy as np
@@ -67,6 +68,15 @@ def test_load_table(tmp_path: Path) -> None:
     assert t.X.shape == (20, 4) and t.feature_names[0] == "x0" and len(t.groups) == 20
     np.save(tmp_path / "f.npy", np.ones((20, 3)))
     assert load_table(tmp_path / "t.csv", tmp_path / "f.npy").X.shape == (20, 3)
+    # With an ids file next to the matrix, rows are aligned by id, not by order.
+    ids = df["id"].astype(str).tolist()
+    np.save(tmp_path / "e.npy", np.arange(20, dtype=float)[::-1, None])
+    (tmp_path / "e_ids.json").write_text(json.dumps(ids[::-1]), encoding="utf-8")
+    aligned = load_table(tmp_path / "t.csv", tmp_path / "e.npy")
+    assert aligned.X[:, 0].tolist() == list(range(20))
+    (tmp_path / "e_ids.json").write_text(json.dumps(ids[:-1]), encoding="utf-8")
+    with pytest.raises(KeyError):
+        load_table(tmp_path / "t.csv", tmp_path / "e.npy")
     with pytest.raises(FileNotFoundError):
         load_table(tmp_path / "missing.csv")
     with pytest.raises(ValueError):

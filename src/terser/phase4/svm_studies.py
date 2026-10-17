@@ -144,7 +144,7 @@ def plot_surfaces(
     C: float = 1.0,
     degree: int = 3,
     coef0: float = 1.0,
-    axis_labels: Sequence[str] = ("self_information", "token_cost"),
+    axis_labels: Sequence[str] = ("feature 1", "feature 2"),
 ) -> None:
     """Row 4.4.8: linear vs polynomial decision surfaces side by side."""
     import matplotlib
