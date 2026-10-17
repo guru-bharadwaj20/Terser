@@ -18,7 +18,7 @@ with no task metric), because annotators judge the two outputs, not the task met
 CLI::
 
     python -m terser.phase2.judge_validation --gold data/gold/human_300.jsonl \\
-        --judge data/labels/labels.jsonl --out reports/p2_judge_validation.md
+        --judge data/processed/labels.jsonl --out reports/p2_judge_validation.md
 """
 
 from __future__ import annotations
@@ -52,6 +52,7 @@ __all__ = [
     "StandInJudgeError",
     "build_report",
     "judge_sides",
+    "raw_order_sides",
     "main",
     "run",
 ]
@@ -80,6 +81,26 @@ def judge_sides(record: Mapping[str, Any]) -> tuple[str | None, str | None]:
             raise ValueError(f"record {record.get('id')!r}: invalid side {v!r} for {order}")
         out.append(v)
     return out[0], out[1]
+
+
+def raw_order_sides(record: Mapping[str, Any]) -> list[tuple[str | None, str | None]]:
+    """Raw ``(original_first, rewrite_first)`` sides used for the position-bias rate.
+
+    ``pairwise_avg`` label-stage records store the *averaged* side in both ``verdicts`` slots, so
+    those slots always agree; their raw per-order verdicts live in ``samples``. Non-identical
+    samples are used when present; otherwise (pilot / ``label_v1`` records) the record's
+    ``verdicts`` pair is used.
+    """
+    samples = record.get("samples")
+    if isinstance(samples, list):
+        raw = [
+            (s.get("original_first"), s.get("rewrite_first"))
+            for s in samples
+            if isinstance(s, Mapping) and not s.get("identical")
+        ]
+        if raw or record.get("judge_protocol") == "pairwise_avg":
+            return raw
+    return [judge_sides(record)]
 
 
 def _judge_label(record: Mapping[str, Any], source: LabelSource) -> str | None:
@@ -171,11 +192,11 @@ def build_report(
         cats, gold_labels, judge_labels, n_boot=n_boot, seed=seed, labels=("preserved", "degraded")
     )
     det = detector_metrics(gold_labels, judge_labels)
-    all_sides = [judge_sides(r) for r in judge_records]
+    all_sides = [s for r in judge_records for s in raw_order_sides(r)]
     pos_rate, pos_dis, pos_n = position_disagreement_rate(
         [s[0] for s in all_sides], [s[1] for s in all_sides]
     )
-    sub_sides = [judge_sides(r) for r in matched]
+    sub_sides = [s for r in matched for s in raw_order_sides(r)]
     sub_rate, sub_dis, sub_n = position_disagreement_rate(
         [s[0] for s in sub_sides], [s[1] for s in sub_sides]
     )
