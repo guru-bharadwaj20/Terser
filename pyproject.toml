@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "terser"
-version = "0.1.0"
+version = "1.0.2"
 description = "Tokenizer-aware casual-to-efficient prompt rewriting"
 readme = "README.md"
 requires-python = ">=3.11"

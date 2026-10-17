@@ -51,10 +51,10 @@ data:
 	else echo "No dvc.yaml pipeline yet; nothing to reproduce."; fi
 
 train-classical:
-	@echo "train-classical: not available until Phase 3."
+	$(PY) -m terser.phase3.studies --help
 
 eval:
-	@echo "eval: not available until Phase 3."
+	@echo "eval: the final evaluation is python -m terser.phase12.results --split test ... (see its --help); it needs the row 12.1 unlock."
 
 mlflow-ui:
 	$(PY) -m mlflow ui --backend-store-uri ./mlruns
