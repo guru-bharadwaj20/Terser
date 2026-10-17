@@ -45,3 +45,6 @@ Thumbs.db
 
 # Phase 12 val dry run of the final-evaluation tooling (never a result)
 /reports/_val_dryrun/
+
+# Benchmark release builds (row 12.11): packaged from DVC data, never committed
+/release/
