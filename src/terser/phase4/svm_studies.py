@@ -144,7 +144,7 @@ def plot_surfaces(
     C: float = 1.0,
     degree: int = 3,
     coef0: float = 1.0,
-    axis_labels: Sequence[str] = ("self_information", "token_cost"),
+    axis_labels: Sequence[str] = ("feature 1", "feature 2"),
 ) -> None:
     """Row 4.4.8: linear vs polynomial decision surfaces side by side."""
     import matplotlib
@@ -186,7 +186,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = ap.parse_args(argv)
     t = load_table(args.table)
     tr, va = next(grouped_folds(t.y, t.categories, t.groups, seed=0))
-    tr = tr[: args.max_train]
+    if len(tr) > args.max_train:  # a random sample: labels.jsonl rows are sorted by target/prompt
+        tr = np.sort(np.random.default_rng(0).choice(tr, args.max_train, replace=False))
     mu, sd = t.X[tr].mean(0), t.X[tr].std(0) + 1e-12
     X, Xv = (t.X[tr] - mu) / sd, (t.X[va] - mu) / sd
     args.out.mkdir(parents=True, exist_ok=True)

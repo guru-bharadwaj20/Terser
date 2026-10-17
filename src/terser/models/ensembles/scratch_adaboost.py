@@ -45,7 +45,8 @@ def fit_stump(X: FloatArray, y: FloatArray, w: FloatArray) -> tuple[Stump, float
     """Exhaustive weighted-error stump search over midpoints between sorted unique values."""
     w = w / w.sum()
     base = float(w[y < 0].sum())  # polarity +1, threshold below every value: all predicted +1
-    best = (Stump(0, -np.inf, 1), base)
+    # The constant stumps: all +1 (error base) or all -1 (error 1 - base).
+    best = (Stump(0, -np.inf, 1), base) if base <= 0.5 else (Stump(0, -np.inf, -1), 1.0 - base)
     for j in range(X.shape[1]):
         order = np.argsort(X[:, j], kind="stable")
         xs, ys, ws = X[order, j], y[order], w[order]

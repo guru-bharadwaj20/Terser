@@ -64,7 +64,8 @@ class NumpyMLP:
     Args:
         sizes: Layer widths including input and output, e.g. ``(1536, 256, 64, 1)``.
         activation: Hidden-layer activation.
-        seed: Seed for He (ReLU) / Xavier (tanh, sigmoid) initialisation.
+        seed: Seed for He (ReLU, N(0, 2/fan_in)) / LeCun (tanh, sigmoid, N(0, 1/fan_in))
+            initialisation.
     """
 
     sizes: Sequence[int]
@@ -101,8 +102,8 @@ class NumpyMLP:
     def hidden_unit_stats(self, X: npt.ArrayLike) -> dict[str, float]:
         """Fraction of saturated sigmoid/tanh units and dead ReLU units over ``X`` (row 4.2.1).
 
-        A unit is *saturated* on an input when ``f'(z) < 0.01 * max f'`` (``|z| > ~5.3`` for
-        tanh, ``~9.2`` for sigmoid) and *dead* when it outputs 0 on **every** input in ``X``.
+        A unit is *saturated* on an input when ``f'(z) < 0.01 * max f'`` (``|z| > ~2.99`` for
+        tanh, ``~5.99`` for sigmoid) and *dead* when it outputs 0 on **every** input in ``X``.
         """
         zs, _ = self._forward(np.asarray(X, dtype=np.float64))
         hidden = np.concatenate(zs[:-1], axis=1) if len(zs) > 1 else np.empty((0, 0))
@@ -132,9 +133,18 @@ class NumpyMLP:
         self, X: npt.ArrayLike, y: npt.ArrayLike
     ) -> tuple[list[FloatArray], list[FloatArray]]:
         """Gradients of :meth:`loss` w.r.t. every weight matrix and bias vector."""
+        _, gws, gbs = self._loss_and_grads(X, y)
+        return gws, gbs
+
+    def _loss_and_grads(
+        self, X: npt.ArrayLike, y: npt.ArrayLike
+    ) -> tuple[float, list[FloatArray], list[FloatArray]]:
+        """:meth:`loss` and its gradients from a single forward pass."""
         Xa = np.asarray(X, dtype=np.float64)
         ya = np.asarray(y, dtype=np.float64).reshape(-1, 1)
         zs, acts = self._forward(Xa)
+        z = zs[-1][:, 0]
+        loss = float(np.mean(np.logaddexp(0.0, z) - ya[:, 0] * z))
         delta = (acts[-1] - ya) / len(ya)
         gws: list[FloatArray] = [np.empty(0)] * len(self.weights)
         gbs: list[FloatArray] = [np.empty(0)] * len(self.biases)
@@ -143,12 +153,11 @@ class NumpyMLP:
             gbs[layer] = delta.sum(axis=0)
             if layer:
                 delta = (delta @ self.weights[layer].T) * _act_grad(self.activation, zs[layer - 1])
-        return gws, gbs
+        return loss, gws, gbs
 
     def step(self, X: npt.ArrayLike, y: npt.ArrayLike, lr: float) -> float:
         """One gradient-descent update; returns the loss before the update."""
-        loss = self.loss(X, y)
-        gws, gbs = self.backward(X, y)
+        loss, gws, gbs = self._loss_and_grads(X, y)
         for w, b, gw, gb in zip(self.weights, self.biases, gws, gbs, strict=True):
             w -= lr * gw
             b -= lr * gb

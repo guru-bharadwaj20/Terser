@@ -53,3 +53,19 @@ def test_adaboost_train_error_matches_predict() -> None:
     y = (X[:, 0] + 0.3 * rng.normal(size=60) > 0).astype(int)
     ab = AdaBoostStumps(n_estimators=5).fit(X, y)
     assert ab.train_error_[-1] == float(np.mean(ab.predict(X) != y))
+
+
+def test_stump_search_considers_the_constant_negative_stump() -> None:
+    from terser.models.ensembles.scratch_adaboost import fit_stump
+
+    X = np.ones((5, 1))  # a degenerate feature with no valid cut
+    y = np.array([-1.0, -1.0, -1.0, -1.0, 1.0])
+    stump, eps = fit_stump(X, y, np.ones(5))
+    assert abs(eps - 0.2) < 1e-12 and stump.polarity == -1
+
+
+def test_logistic_max_iter_zero_keeps_initialisation() -> None:
+    from terser.models.classical.logistic import GDLogisticRegression
+
+    m = GDLogisticRegression(max_iter=0).fit(np.eye(3), np.array([0, 1, 1]))
+    assert m.n_iter_ == 0 and not m.coef_.any() and m.intercept_ == 0.0

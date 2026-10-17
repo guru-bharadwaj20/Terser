@@ -97,7 +97,7 @@ def activation_run(
     m = NumpyMLP((X.shape[1], *hidden, 1), activation=activation, seed=seed)
     rng = np.random.default_rng(seed)
     n_layers = len(m.weights)
-    grad_sq = np.zeros(n_layers)
+    grad_norm_sum = np.zeros(n_layers)  # per-step L2 norms, summed
     steps = 0
     aucs: list[float] = []
     for _ in range(epochs):
@@ -106,7 +106,7 @@ def activation_run(
             b = order[i : i + batch_size]
             gws, gbs = m.backward(X[b], y[b])
             for k, (w, bias, gw, gb) in enumerate(zip(m.weights, m.biases, gws, gbs, strict=True)):
-                grad_sq[k] += float(np.sqrt((gw**2).sum() + (gb**2).sum()))
+                grad_norm_sum[k] += float(np.sqrt((gw**2).sum() + (gb**2).sum()))
                 w -= lr * gw
                 bias -= lr * gb
             steps += 1
@@ -123,7 +123,7 @@ def activation_run(
         **stats,
     }
     for k in range(n_layers):
-        row[f"grad_norm_layer{k + 1}"] = grad_sq[k] / max(steps, 1)
+        row[f"grad_norm_layer{k + 1}"] = grad_norm_sum[k] / max(steps, 1)
     return row
 
 
@@ -147,7 +147,10 @@ def optimizer_run(
     rng = np.random.default_rng(seed)
     params = [*m.weights, *m.biases]
     used, order, pos = 0, rng.permutation(len(y)), 0
-    marks = np.linspace(budget / n_checkpoints, budget, n_checkpoints).astype(int).tolist()
+    # Checkpoints over the budget this batch size can actually spend (whole batches only), so
+    # every config gets all n_checkpoints rows and its last one at its final step.
+    reach = (budget // bs) * bs
+    marks = np.linspace(reach / n_checkpoints, reach, n_checkpoints).astype(int).tolist()
     next_marks = sorted(set(marks))
     rows: list[dict[str, Any]] = []
     while used + bs <= budget:
