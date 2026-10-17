@@ -1,0 +1,20 @@
+# Row 8.3.4 escalation (rung 4): Qwen2.5-7B QLoRA (NF4 base, double quant, bf16 compute), LoRA
+# r=16, alpha=32; rung 3 (3B LoRA) failed C8.3 on sft_v2 (reports/p8_rewriter_val.md). Same data
+# and schedule as sft_qwen3b_lora_v2: 1000 steps (~3 epochs).
+name: sft_qwen7b_qlora_v2
+phase: 8
+row: "8.3.4"
+task: rewriter_sft
+params:
+  model: Qwen/Qwen2.5-7B-Instruct
+  quant: nf4
+  lora: {r: 16, alpha: 32, dropout: 0.05}
+  grad_checkpointing: true
+  data: ${paths.data_dir}/processed/sft_v2/train.jsonl
+  limit: null
+  max_len: 1024
+  steps: 1000
+  batch_size: 4
+  lr: 2.0e-4
+  output_dir: ${paths.root}/models/rewriter/sft-qwen7b-qlora-v2
+  save_weights: true

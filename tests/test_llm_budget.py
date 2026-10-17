@@ -11,9 +11,11 @@ import yaml
 
 import terser.llm.budget as budget_mod
 from terser.llm import (
+    CACHE_ONLY_ENV,
     Budget,
     BudgetExceededError,
     Ledger,
+    LLMCacheMissError,
     LLMClient,
     TransportResult,
     Usage,
@@ -98,6 +100,33 @@ def test_cached_call_costs_zero(tmp_path: Path) -> None:
     assert second.cache_key == first.cache_key
     assert ledger_json(tmp_path) == before
     assert len(before["phases"]["p"]["calls"]) == 1
+
+
+def test_cache_only_serves_hits_and_refuses_misses(tmp_path: Path) -> None:
+    fake = FakeTransport()
+    first = client(tmp_path, fake).complete("local", "m", MSGS, max_tokens=64, temperature=0)
+    before = ledger_json(tmp_path)
+    offline = LLMClient("p", budget_path=tmp_path / "budget.yaml", transport=fake, cache_only=True)
+    hit = offline.complete("local", "m", MSGS, max_tokens=64, temperature=0)
+    assert hit.cached and hit.text == first.text
+    with pytest.raises(LLMCacheMissError, match="cache miss"):
+        offline.complete("local", "m", MSGS, max_tokens=64, temperature=1)
+    assert fake.calls == 1  # the miss never reached the transport
+    assert ledger_json(tmp_path) == before  # nor the ledger
+
+
+@pytest.mark.parametrize(("value", "expected"), [("1", True), ("TRUE", True), ("0", False)])
+def test_cache_only_from_env(tmp_path: Path, monkeypatch, value: str, expected: bool) -> None:
+    monkeypatch.setenv(CACHE_ONLY_ENV, value)
+    fake = FakeTransport()
+    c = client(tmp_path, fake)
+    assert c.cache_only is expected
+    if expected:
+        with pytest.raises(LLMCacheMissError):
+            c.complete("local", "m", MSGS, max_tokens=8)
+        assert fake.calls == 0
+    monkeypatch.delenv(CACHE_ONLY_ENV)
+    assert client(tmp_path, fake).cache_only is False
 
 
 def test_zero_cap_phase_refuses(tmp_path: Path) -> None:

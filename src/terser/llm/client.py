@@ -1,8 +1,14 @@
-"""Budget-guarded, disk-cached LLM client: cache lookup -> budget check -> call -> record."""
+"""Budget-guarded, disk-cached LLM client: cache lookup -> budget check -> call -> record.
+
+Cache-only mode (``TERSER_LLM_CACHE_ONLY=1``, or ``LLMClient(cache_only=True)``) serves every
+request from the response cache and raises :class:`LLMCacheMissError` on a miss instead of
+calling the model, so ``dvc repro`` of the LLM stages can never reach a live server.
+"""
 
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, cast
@@ -20,6 +26,16 @@ if TYPE_CHECKING:
     import httpx
 
 DEFAULT_BUDGET_PATH = Path(__file__).resolve().parents[3] / "configs" / "budget.yaml"
+CACHE_ONLY_ENV = "TERSER_LLM_CACHE_ONLY"
+
+
+class LLMCacheMissError(RuntimeError):
+    """A request missed the response cache while cache-only mode forbids live calls."""
+
+
+def cache_only_from_env() -> bool:
+    """True when ``TERSER_LLM_CACHE_ONLY`` is set to 1/true/yes/on (case-insensitive)."""
+    return os.environ.get(CACHE_ONLY_ENV, "").strip().lower() in {"1", "true", "yes", "on"}
 
 
 @dataclass(frozen=True)
@@ -149,7 +165,9 @@ class LLMClient:
         ledger_path: str | Path | None = None,
         cache_dir: str | Path | None = None,
         http_client: httpx.Client | None = None,
+        cache_only: bool | None = None,
     ) -> None:
+        self.cache_only = cache_only_from_env() if cache_only is None else cache_only
         self.budget = Budget.load(budget_path, phase, ledger_path=ledger_path, cache_dir=cache_dir)
         self.cache = ResponseCache(self.budget.cache_dir)
         self.transport: Transport = transport or ProviderTransport(
@@ -181,6 +199,11 @@ class LLMClient:
                 key,
                 reported,
                 _logprobs_from_json(hit.get("logprobs")),
+            )
+        if self.cache_only:
+            raise LLMCacheMissError(
+                f"cache miss for {provider}/{model} (key {key}) in {self.cache.root}; "
+                f"cache-only mode ({CACHE_ONLY_ENV}) forbids live LLM calls"
             )
 
         if input_tokens_estimate is None:

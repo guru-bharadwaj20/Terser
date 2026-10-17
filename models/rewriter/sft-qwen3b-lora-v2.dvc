@@ -1,0 +1,6 @@
+outs:
+- md5: 8fb1266022139ea87fe37a19ca590a7d.dir
+  size: 119832934
+  nfiles: 4
+  hash: md5
+  path: sft-qwen3b-lora-v2
