@@ -1,17 +1,30 @@
 # Row 11.3.7: terser-gpu, the quality-path rewriter on vLLM (CUDA base image, continuous batching).
-# Serves an OpenAI-compatible API on :8000; terser-cpu calls it as quality.base_url.
+# Serves an OpenAI-compatible API on :8000 (and vLLM's own Prometheus metrics at /metrics);
+# terser-cpu calls it as quality.base_url.
 #   docker build -f docker/Dockerfile.gpu -t terser-gpu .
-# Needs an NVIDIA GPU (24 GB Ada class) and the NVIDIA container toolkit at run time.
-FROM vllm/vllm-openai:v0.6.6
+# Building needs no GPU. Running needs an NVIDIA GPU (24 GB Ada class) and the NVIDIA container
+# toolkit; never run it while a training job holds the card (docs/hardware.md, rule 3).
+# vLLM 0.30.0 matches the GPU host's vLLM (reports/p2_gpu_smoke.md); the image ships its own
+# CUDA runtime on an nvidia/cuda base.
+FROM vllm/vllm-openai:v0.30.0
 
-# The rewriter checkpoint (Phase 8, rows 8.3.3/8.3.4) is mounted at /models/rewriter, or set
-# TERSER_REWRITER_MODEL to an HF repo id. bf16, short context: prompts are <= 256 tokens (C11.3).
-ENV TERSER_REWRITER_MODEL=/models/rewriter \
+# Default: the Staging rewriter (terser-rewriter v6, 3B LoRA, reports/p11_registry.md). The
+# checkpoints are not baked in: compose mounts ./models read-only at /models (dvc pull
+# models/rewriter first) and the HF base model is downloaded into the hf-cache volume on first
+# start. bf16, short context: prompts are <= 256 tokens (C11.3).
+ENV TERSER_BASE_MODEL=Qwen/Qwen2.5-3B-Instruct \
+    TERSER_LORA_PATH=/models/rewriter/sft-qwen3b-lora \
+    TERSER_REWRITER_MODEL= \
     TERSER_SERVED_NAME=terser-rewriter \
     TERSER_MAX_MODEL_LEN=2048 \
-    TERSER_GPU_MEM_UTIL=0.85
+    TERSER_GPU_MEM_UTIL=0.85 \
+    TERSER_MAX_LORA_RANK=16
+
+COPY docker/gpu-entrypoint.sh /usr/local/bin/terser-gpu-entrypoint
+RUN sed -i 's/\r$//' /usr/local/bin/terser-gpu-entrypoint \
+    && chmod 0755 /usr/local/bin/terser-gpu-entrypoint
 
 EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=300s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=600s --retries=3 \
     CMD ["python3", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8000/health', timeout=4)"]
-ENTRYPOINT ["/bin/sh", "-c", "exec python3 -m vllm.entrypoints.openai.api_server --host 0.0.0.0 --port 8000 --model \"$TERSER_REWRITER_MODEL\" --served-model-name \"$TERSER_SERVED_NAME\" --dtype bfloat16 --max-model-len \"$TERSER_MAX_MODEL_LEN\" --gpu-memory-utilization \"$TERSER_GPU_MEM_UTIL\""]
+ENTRYPOINT ["/usr/local/bin/terser-gpu-entrypoint"]
