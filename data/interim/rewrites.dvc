@@ -1,6 +1,6 @@
 outs:
-- md5: 7f5a73db3e127df71cdd552cba0df96a.dir
-  size: 14780084
-  nfiles: 13
+- md5: f2784984ece685a1f544489b1f22dfcd.dir
+  size: 50209576
+  nfiles: 37
   hash: md5
   path: rewrites
