@@ -285,13 +285,15 @@ def fit_calibration(scores: Sequence[float], preserved: Sequence[bool]) -> Calib
 def estimate_preservation(
     rewrites: Sequence[Mapping[str, Any]], scores: Sequence[float], cal: Calibration
 ) -> dict[str, Any]:
-    """Proxy preservation: fallbacks count 1, other rewrites ``cal(gate score)``."""
+    """Proxy preservation: fallbacks and identity rewrites count 1, others ``cal(gate score)``."""
     if len(rewrites) != len(scores):
         raise ValueError("one score per rewrite")
     probs = cal(scores)
     by_cat: dict[str, list[float]] = defaultdict(list)
     for w, p in zip(rewrites, probs, strict=True):
-        by_cat[str(w["category"])].append(1.0 if w["fell_back"] else float(p))
+        # A fallback or an identity rewrite is preserved by construction.
+        same = w["fell_back"] or ("rewrite" in w and w["rewrite"] == w.get("prompt"))
+        by_cat[str(w["category"])].append(1.0 if same else float(p))
     flat = [x for xs in by_cat.values() for x in xs]
     per_cat = {c: float(np.mean(xs)) for c, xs in sorted(by_cat.items())}
     return {
