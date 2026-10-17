@@ -616,7 +616,7 @@ together with the quality gate and fallback, reach the main quality/savings gate
 | 8.3.4 | Rung 2: Qwen2.5-1.5B LoRA | r = 16, α = 32, bf16. Escalate to 3B LoRA, then 7B QLoRA (NF4), only if the previous rung fails C8.3 | Same, per rung trained | ✅ |
 | 8.3.7 | Decoding safeguards | Never longer than input on T; fall back to original if longer | Property test | ✅ |
 | 8.3.8 | Inference-time quality gate | Champion gate rejects risky rewrites ⇒ lighter rewrite or original | Integration test | ✅ |
-| 8.3.9 | Baselines | Original · best operator · HMM compressor · LLMLingua-2 · zero-shot Qwen2.5-32B-Instruct-AWQ "rewrite concisely" | Same val table | ❌ |
+| 8.3.9 | Baselines | Original · best operator · HMM compressor · LLMLingua-2 · zero-shot Qwen2.5-32B-Instruct-AWQ "rewrite concisely" | Same val table | ✅ |
 | 8.3.10 | Failure analysis | 100 degraded cases hand-categorised: dropped constraint / tone / example / changed meaning / other | `reports/p8_failures.md` | ❌ |
 
 ### Checkpoint C8 — Deep Learning
@@ -919,13 +919,13 @@ which were not, and why.
 | 5 — Boosting, Bayes, GMM, HMM | Vivian | 16 | 6 | 17 | ❌ |
 | 6 — Clustering | Vivian | 9 | 3 | 10 | ❌ |
 | 7 — GPU Onboarding | Vivian | 8 | 3 | 9 | ❌ |
-| 8 — CNN and Rewriter | Vivian | 14 | 5 | 13 | ❌ |
+| 8 — CNN and Rewriter | Vivian | 14 | 5 | 14 | ❌ |
 | 9 — Reinforcement Learning | Vivian | 7 | 2 | 7 | ❌ |
 | 10 — HPO | Vivian | 5 | 4 | 7 | ❌ |
 | 11 — MLOps | Vivian | 25 | 7 | 24 | ❌ |
 | 12 — Final Evaluation | Vivian | 11 | — | 0 | ❌ |
 | 13 — Documentation | Guru | 6 | — | 4 | ❌ |
-| **Total** | | **214** | **60** | **218** | ❌ |
+| **Total** | | **214** | **60** | **219** | ❌ |
 
 Stretch rows are not counted.
 
@@ -933,7 +933,7 @@ Stretch rows are not counted.
 
 | Owner | Hardware | Phases | Rows | Done | Remaining |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 166 | 48 |
+| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 167 | 47 |
 | Guru | 1 × RTX 4500 Ada (24 GB) | 0, 1, 13 | 60 | 52 | 8 |
 
 Each phase has one owner, who runs it end to end, including its checkpoint.
