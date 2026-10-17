@@ -201,14 +201,20 @@ validated on SFT rewrites; see [quality_gate.md §6](quality_gate.md#6-quality-g
 
 | Failure mode | Share of degraded cases | Example (hashed id or link) | Mitigation in place |
 | :--- | ---: | :--- | :--- |
-| Dropped constraint | not measured | — | 8.3.7 safeguard (length only) |
-| Lost tone | not measured | — | none |
-| Dropped example | not measured | — | none |
-| Changed meaning | not measured | — | none |
-| Other | not measured | — | — |
+| Dropped constraint | 5% | `dolly:97:hedging` (second request dropped) | 8.3.7 safeguard (length only) |
+| Lost tone | 1% | `dolly:1050:repetitive` | none |
+| Dropped example | 12% | `dolly:5264:rambling`; 4 of 12 are truncations at the 512-token cap | none |
+| Changed meaning | 10% | `gsm8k:train:6101:repetitive` | none |
+| Other | 72% | `dolly:5382:repetitive` (only "Um," removed); 63 of 72 show no visible loss | — |
 
-The row 8.3.10 failure analysis (`reports/p8_failures.md`, 100 hand-categorised degraded cases)
-has not been written.
+Shares are from the row 8.3.10 failure analysis ([p8_failures.md](../../reports/p8_failures.md)):
+100 of the 144 non-fallback degraded (prompt, target) pairs of sft3b (v6), sampled by prompt
+category with seed 0. The categorisation was done by an LLM assistant (Claude), not by a human
+annotator, and has not been human-reviewed. Treat the shares as a first-pass triage.
+
+- **Code line-case corruption.** 12 of the 100 analysed cases (all `code`) have line-initial
+  `Assert` / `Def` and stripped indentation. The operators' `tidy` step upper-cases line starts,
+  and 33 of 220 `code` SFT training targets carry the pattern.
 
 - **Target ceiling.** The model imitates targets with a 10.0% val median. Perfect imitation would
   still miss the 25% savings bar. The sft_v2 retrain addresses this (17.4% val median), but that
