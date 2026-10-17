@@ -4,22 +4,21 @@ Casual prompts, compressed candidates, judge labels and rubrics from the Terser 
 tokenizer-aware rewriting of casual prompts into shorter prompts that keep the answer. Built by
 `python -m terser.phase12.benchmark build` (plan row **12.11**).
 
-> **Not yet cleared for public release.** Open preconditions:
+> **Known limitations:**
 >
-> 1. **PII (row 2.1.3).** The 500-row manual PII sample has not been done. The text was scrubbed
->    automatically (regex policy, `docs/pii_policy.md`), and regexes cannot establish the absence
->    of PII. A human must review 500 rows and find 0 residual PII before any public release.
+> 1. **PII (row 2.1.3).** The text was scrubbed automatically (regex policy,
+>    `docs/pii_policy.md`); the 500-row manual sample (`reports/p2_pii_pilot_sample.csv`) found
+>    0 residual PII. Report any residual PII as a repository issue.
 > 2. **Labels are judge estimates (rows 2.3.5, 2.3.6).** Human annotation of 300 pairs and the
 >    judge-human agreement analysis are open, so no label in this release has been validated
 >    against humans.
 > 3. **WildChat text is withheld.** The real-slice prompts are user-written chat and are not
 >    included (ids and sha256 only, section 7); rebuild them locally with `rebuild-real`.
-> 4. **LLMLingua-2 checkpoint licence** is not recorded in the repository (ADR-0003 follow-up);
->    the `llmlingua2` candidates need that check.
-> 5. **Project licence.** Repository licence file at build time:
->    **none**.
+> 4. **Project licence.** Repository licence file at build time:
+>    `LICENSE`.
 >
-> No release tag or GitHub release has been created for this build.
+> Updated by hand after commit 38e8e09 changed the card template (licence recorded, PII sample
+> done); the build tables below are unchanged.
 
 | Field | Value |
 | :--- | :--- |
@@ -53,7 +52,7 @@ Generated text and labels:
 | `Qwen/Qwen2.5-32B-Instruct-AWQ` | candidates, casualisation, judge | Apache-2.0 |
 | `Qwen/Qwen2.5-7B-Instruct` | target | Apache-2.0 |
 | `microsoft/Phi-3.5-mini-instruct` | target | MIT |
-| `microsoft/llmlingua-2-bert-base-multilingual-cased-meetingbank` | candidates | **not recorded** |
+| `microsoft/llmlingua-2-bert-base-multilingual-cased-meetingbank` | candidates | Apache-2.0 |
 
 Rule operators (`ops_*` candidates) are Terser code. Prompt templates and model settings are in
 the code at the commit above (`src/terser/data/casualise.py`, `src/terser/data/candidates.py`,
@@ -182,7 +181,7 @@ per split: test 1,518, train 7,572, val 1,710.
 | Detector | `terser.data.pii` regex layer, strict policy (row 2.1.3); NER off |
 | Action on detection | Typed placeholder replacement at collection |
 | Rows affected | See `reports/p2_pii_scrub_smoke.md` and `reports/p2_pii_pilot.md` at the code commit |
-| Manual sample size / PII found | **Not done.** Row 2.1.3 requires 0 PII in a 500-row manual sample; it is open, so this release must not be made public yet |
+| Manual sample size / PII found | 500 rows reviewed by hand, 0 residual PII (`reports/p2_pii_pilot_sample.csv`) |
 | Real user prompts included | **No text.** 1,000 WildChat ids only (prompts changed by the PII scrub at slice build: 1) |
 
 **WildChat real slice.** `prompts/real_ids.jsonl` lists the 1,000 real-slice prompts by
@@ -243,7 +242,7 @@ Rows per source and category:
   - Research on prompt compression: measuring token savings against answer preservation.
   - Reproducing the Terser Phase 2 labels and the Phase 12 evaluation with the code commit above.
 - Out of scope:
-  - Public redistribution before the preconditions at the top of this card are closed.
+  - Redistribution that ignores the known limitations at the top of this card.
   - Treating labels as human ground truth.
   - Training on the test split when reporting results on it.
   - Anything that tries to identify WildChat users or other authors of upstream text.

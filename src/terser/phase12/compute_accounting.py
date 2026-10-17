@@ -553,13 +553,13 @@ CPU_PHASES: dict[int, str] = {
     0: "scaffolding, CI",
     3: "classical models (Compute Allocation: CPU)",
     4: "perceptron / MLP studies (CPU)",
-    5: "ensembles, NB, GMM, HMM (CPU)",
+    5: "ensembles, NB, GMM, HMM (CPU; its HMM rewriter C5.6 val labels ran on the q7 chain, "
+    "counted in Phase 8)",
     6: "clustering (CPU)",
     9: "tabular Q-learning (CPU; its C9.2 val labels ran on the q7 chain, counted in Phase 8)",
 }
 # GPU phases that also had CPU-only work (no GPU time to count).
 CPU_PARTS: dict[int, str] = {
-    5: "HMM rewriter C5.6 val labels ran on the q7 chain, counted in Phase 8",
     10: "GBM / MLP HPO studies (MLflow hardware tag cpu)",
     11: "fast path, ONNX serving (MLflow hardware tag cpu)",
     12: "CPU candidates (logs/p12_cpu_candidates*.log) and results",

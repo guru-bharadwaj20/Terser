@@ -67,7 +67,8 @@ def test_build_attributes_ledger_tokens_and_reservations(tmp_path: Path) -> None
             "input_tokens": 5,
             "output_tokens": 20,
         },
-        # another model inside the window, and a call after the v2 cutoff: neither counted
+        # another model inside the window, and a call after the row 12.4 seed-run
+        # LEDGER_CUTOFF: neither counted
         {
             "timestamp": "2026-10-01T17:32:00+00:00",
             "model": "microsoft/Phi-3.5-mini-instruct",
