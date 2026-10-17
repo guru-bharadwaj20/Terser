@@ -794,10 +794,10 @@ quality?", on the untouched test split.
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 13.1 | README | One-paragraph pitch, architecture diagram (casual prompt → fast/quality path → gate → target LLM, with training loop), headline results table with CIs, `docker compose up` quickstart, links to report and benchmark. Start it now and update at every checkpoint | A reader understands the project in 60 seconds | ❌ |
+| 13.1 | README | One-paragraph pitch, architecture diagram (casual prompt → fast/quality path → gate → target LLM, with training loop), headline results table with CIs, `docker compose up` quickstart, links to report and benchmark. Start it now and update at every checkpoint | A reader understands the project in 60 seconds | ✅ |
 | 13.2 | Syllabus mapping doc | Unit 1–4 → phase / file / figure links | `docs/syllabus_map.md` | ✅ |
 | 13.4 | Model cards | Gate, tagger, TextCNN, rewriter | Complete | ✅ |
-| 13.6 | Final report | Problem, related work (LLMLingua / LLMLingua-2, Selective Context), method, experiments, results, ablations, negative results (C1.4, C1.5), limitations (creative prompts, multi-turn context, tokenizer drift, judge dependence, synthetic prompts), future work | `docs/report.md` | ❌ |
+| 13.6 | Final report | Problem, related work (LLMLingua / LLMLingua-2, Selective Context), method, experiments, results, ablations, negative results (C1.4, C1.5), limitations (creative prompts, multi-turn context, tokenizer drift, judge dependence, synthetic prompts), future work | `docs/report.md` | ✅ |
 | 13.8 | Demo script | Live casual prompt → rewrite → side-by-side outputs + token counter | Rehearsed; cached fallback if GPU unavailable | ✅ |
 | 13.9 | Viva prep | ID3 gain, bias–variance, ROC, backprop, SVM dual, AdaBoost weights, EM, Viterbi, K-means ⇔ EM, Bellman / Q-update, CNN parameters, LoRA rank | `docs/viva.md` | ✅ |
 
