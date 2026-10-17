@@ -1,14 +1,19 @@
-# Serving config used inside compose (row 11.3.7): same as configs/serving/default.yaml, with the
-# quality path pointed at the terser-gpu service. Without the gpu profile, terser-cpu still starts
-# and the quality path falls back to the fast path (row 11.3.5).
-gate_threshold: 0.5   # ConstraintGate threshold; see the comment in configs/serving/default.yaml
-gate_onnx: null
+# Serving config used inside compose (row 11.3.7): configs/serving/fast_onnx.yaml (ONNX span tagger
+# + ONNX gate at the row 3.2.3 operating point, baked into the terser-cpu image) with the quality
+# path pointed at the terser-gpu service. When terser-gpu is down or still loading, quality-mode
+# requests fall back to the fast path (row 11.3.5; fallback_reason "timeout" or "error"); fast
+# mode never touches it. Model paths are relative to the repo root, /app in the image.
+gate_threshold: 0.264564     # = configs/serving/fast_onnx.yaml (reports/p11_fast_path.json)
+gate_onnx: models/fast/gate.onnx
+gate_feature_target: qwen2.5
+tagger_onnx: models/fast/tagger.onnx
+tagger_threshold: 0.5
 quality_timeout_s: 0.4
 cache_size: 10000
 
 quality:
   base_url: http://terser-gpu:8000/v1
-  model: terser-rewriter
+  model: terser-rewriter     # = TERSER_SERVED_NAME in docker/Dockerfile.gpu
   http_timeout_s: 2.0
 
 pricing:

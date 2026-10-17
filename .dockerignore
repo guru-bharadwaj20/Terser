@@ -6,10 +6,18 @@
 .mypy_cache
 .pytest_cache
 .ruff_cache
+.coverage
 **/__pycache__
+**/*.egg-info
 data
+experiments
+gpu_queue
+logs
 mlruns
+# models/ holds multi-GB rewriter checkpoints (mounted into terser-gpu at run time); only the
+# ONNX fast-path models are baked into terser-cpu.
 models
+!models/fast
 notebooks
 reports
 tests

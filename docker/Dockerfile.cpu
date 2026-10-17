@@ -1,31 +1,39 @@
-# Row 11.3.7: terser-cpu, the FastAPI service and fast path (span tagger + gate on ONNX Runtime).
-# No GPU. The quality path is enabled by pointing quality.base_url at terser-gpu (compose.yaml).
+# Row 11.3.7: terser-cpu, the FastAPI service and fast path (ONNX span tagger + ONNX gate on ONNX
+# Runtime, row 11.3.2). No GPU. The quality path is enabled by pointing quality.base_url at
+# terser-gpu (compose.yaml mounts docker/serving.compose.yaml for that).
+#   dvc pull models/fast                       # gate.onnx + tagger.onnx are baked into the image
 #   docker build -f docker/Dockerfile.cpu -t terser-cpu .
+#   docker run --rm -p 8080:8080 terser-cpu    # fast path only (configs/serving/fast_onnx.yaml)
 FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONUTF8=1 \
     PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
     HF_HOME=/opt/cache/hf \
     TIKTOKEN_CACHE_DIR=/opt/cache/tiktoken \
     TERSER_CACHE=/tmp/terser-cache \
-    TERSER_SERVING_CONFIG=/app/configs/serving/default.yaml
+    TERSER_SERVING_CONFIG=/app/configs/serving/fast_onnx.yaml
 
 WORKDIR /app
 COPY pyproject.toml README.md ./
 COPY src ./src
 COPY configs ./configs
+COPY models/fast ./models/fast
 
-# Install the package, then warm the target tokenizers so the container starts offline.
-RUN pip install ".[serve]" \
-    && python -c "from terser.tokenizers.count import count_tokens as c; [c('warm up', t) for t in ('gpt-4o', 'qwen2.5', 'llama-3.1')]" \
+# Editable install: terser.serving.api resolves config-relative model paths (models/fast/*.onnx)
+# against the source tree's repo root, which is /app only when the package is imported from
+# /app/src (a regular install would resolve them under site-packages). Then warm every target
+# tokenizer the service can be asked for, so the container starts and serves offline.
+RUN pip install -e ".[serve]" \
+    && python -c "from terser.tokenizers.count import count_tokens as c; [c('warm up', t) for t in ('gpt-4o', 'qwen2.5', 'phi3.5', 'llama-3.1')]" \
     && useradd --create-home --uid 10001 terser \
     && chown -R terser /opt/cache
 
 USER terser
 ENV HF_HUB_OFFLINE=1
 EXPOSE 8080
-HEALTHCHECK --interval=15s --timeout=3s --start-period=30s --retries=3 \
-    CMD ["python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8080/healthz', timeout=2)"]
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
+    CMD ["python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8080/healthz', timeout=4)"]
 CMD ["uvicorn", "terser.serving.api:app", "--host", "0.0.0.0", "--port", "8080"]
