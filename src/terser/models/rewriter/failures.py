@@ -10,6 +10,12 @@ proportional to the degraded pool). Each case is then put in one failure categor
 ``reports/p8_failures.md``. Anything below the ``<!-- manual -->`` marker of an existing report is
 kept, so hand-written discussion survives a re-run.
 
+Annotation records (``data/annotations/p8_failures.jsonl``, ``p12_errors.jsonl``): ``excerpt`` is
+optional; annotators add it only for cases worth quoting, and ``report`` shows up to three
+excerpts per failure category. ``other`` means the rewrite was judged degraded but none of the
+four named failures fits (e.g. a judge disagreement the annotator could not attribute, or a
+formatting change); its ``note`` says what was seen.
+
 Entry points::
 
     python -m terser.models.rewriter.failures sample \

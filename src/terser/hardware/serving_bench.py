@@ -160,8 +160,11 @@ def run(args: argparse.Namespace) -> ServingResult:
             hello: list[Any] = [{"role": "user", "content": "Say hello in one sentence."}]
             out = llm.chat(hello, params)
             seconds = time.perf_counter() - start
-            result.sample_text = out[0].outputs[0].text
             result.batches.append(BatchResult(1, len(out[0].outputs[0].token_ids), seconds))
+            # ignore_eos runs past the assistant turn (the chat template leaks into the text), so
+            # the recorded sample is a separate generation that stops at EOS.
+            stop = SamplingParams(temperature=0.0, max_tokens=32)
+            result.sample_text = llm.chat(hello, stop)[0].outputs[0].text
         else:
             _measure(llm, 1, 16)  # warm-up (CUDA graphs, caches)
             for bs in args.batch_sizes:

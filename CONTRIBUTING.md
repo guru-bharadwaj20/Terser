@@ -68,7 +68,7 @@ Supporting sections: [Compute Allocation](#compute-allocation-cpu-local-open-mod
 | Dev laptop (Windows 11) | Guru Bharadwaj | CPU only; all classical ML, tokenization, pipelines, CI | Available |
 | Dev workstation (Fedora 44) | Vivian Sobers | AMD Ryzen AI 7 350, 16 threads, 14 GB RAM, no NVIDIA GPU; classical ML, tokenization, pipelines, CI | Available |
 | **NVIDIA RTX 4500 Ada Generation** | Guru Bharadwaj | 24 GB GDDR6 ECC, Ada Lovelace (compute capability 8.9), bf16 supported, ~210 W. WSL2 workstation ([hardware.md § 1.2](docs/hardware.md#12-rtx-4500-ada-workstation-wsl2)) | ✅ connected 2026-10-01 |
-| **2 × NVIDIA GeForce RTX 4090** | Vivian Sobers | `worker-1` (10.10.3.83) and `worker-2` (10.10.3.50). Each 24 GB, Ada Lovelace (compute capability 8.9), bf16 supported. Ubuntu 22.04.5, i9-13900, 125 GB RAM. Shared lab machines reached over SSH | ✅ available |
+| **2 × NVIDIA GeForce RTX 4090** | Vivian Sobers | `worker-1` and `worker-2`. Each 24 GB, Ada Lovelace (compute capability 8.9), bf16 supported. Ubuntu 22.04.5, i9-13900, 125 GB RAM. Shared lab machines (access details shared out-of-band) | ✅ available |
 | Local open-model serving | both | OpenAI-compatible servers only: Ollama / llama.cpp on a dev machine for tiny models (Qwen2.5-0.5B/1.5B, smoke tests), vLLM or Ollama on an RTX 4090 (and later the RTX 4500 Ada) for all real generation and judging. **No hosted API keys are available or assumed** | CPU: available · GPU: ✅ on the 4090s |
 
 The two RTX 4090s have the same compute capability (8.9), VRAM (24 GB) and bf16 support as the
@@ -117,7 +117,7 @@ the card · **vLLM serving and training never run at the same time on 24 GB** ·
 | Perceptron / MLP / optimizer study | 4 | `CPU` | fp32 | 0 | Small models |
 | TextCNN span scorer | 8 | `CPU→GPU` | fp32 / bf16 | < 2 GB | GPU only for sweeps |
 | Rewriter SFT: Qwen2.5-0.5B full fine-tune | 8 | `GPU` | bf16 + AdamW, grad checkpointing | **Measured (7.7):** 16.32 GiB reserved fp32-master / 11.77 GiB pure bf16 (seq 1024, mb 4); 0.44 / 0.37 s per step | ~16 bytes/param for weights+grads+Adam (~8 GB) + activations; was est. ~12–16 GB. [C7/training.md](docs/checkpoints/C7/training.md) |
-| Rewriter SFT: Qwen2.5-1.5B / 3B LoRA | 8 | `GPU` | bf16 base, LoRA r=16 | **Measured (7.7), 1.5B:** 12.19 GiB reserved (seq 1024, mb 4), 1.11 s per step · 3B: ~8–16 GB (est.) | Main candidates; 1.5B was est. ~8–16 GB 
+| Rewriter SFT: Qwen2.5-1.5B / 3B LoRA | 8 | `GPU` | bf16 base, LoRA r=16 | **Measured (7.7), 1.5B:** 12.19 GiB reserved (seq 1024, mb 4), 1.11 s per step · 3B: ~8–16 GB (est.) | Main candidates; 1.5B was est. ~8–16 GB |
 | Rewriter SFT: 7B QLoRA | 8 | `GPU` | NF4 base + LoRA | ~10–18 GB at seq ≤ 1024 | Only if smaller rungs fail C8.3 |
 | GRPO rewriter policy (stretch) | 9 | `GPU` | 0.5B–1.5B LoRA | ~12–20 GB | Only if the stretch rows are attempted; never colocated with serving |
 | Tabular Q-learning | 9 | `CPU` | — | 0 | |
@@ -976,7 +976,7 @@ only if they work, so each ends in a report whether or not it succeeds.
 | Contributor | Machines | Reviews |
 | :--- | :--- | :--- |
 | Guru Bharadwaj (`guru-bharadwaj20`) | Dev laptop (Windows 11, CPU only); NVIDIA RTX 4500 Ada workstation (WSL2), connected 2026-10-01 | Repository owner |
-| Vivian Sobers (`vivianedwardbangalore@gmail.com`) | Dev workstation (Fedora 44, CPU only); `worker-1` and `worker-2`, one RTX 4090 each, administered by Vivian | GPU onboarding (Phase 7), serving and queue work |
+| Vivian Sobers (`VivianSobers`) | Dev workstation (Fedora 44, CPU only); `worker-1` and `worker-2`, one RTX 4090 each, administered by Vivian | GPU onboarding (Phase 7), serving and queue work |
 
 Machine details, access and the measurements taken on them:
 [docs/hardware.md § 1.1](docs/hardware.md#11-vivians-gpu-workers). Credentials for the GPU workers
@@ -1043,7 +1043,9 @@ Create the environment with an explicit 3.11 or newer interpreter (`uv venv --py
   on some constructs, and CI runs `black --check .`.
 - From-scratch implementations (ID3, LR, KNN, perceptron, backprop, SVM dual, AdaBoost, NB, EM/GMM,
   HMM forward/Viterbi/Baum-Welch, K-means, bisecting K-means, Q-learning) live in
-  `src/terser/models/**/scratch_*.py`, each with a derivation link and a test against a library or
+  `src/terser/models/**/scratch_*.py` (ID3, KNN, penalised LR, SVM dual, NB, K-means / bisecting
+  K-means, AdaBoost, perceptron, optimisers, Q-learning) plus `classical/logistic.py` (LR),
+  `classical/gmm.py` (EM/GMM), `classical/hmm.py` (HMM) and `neural/numpy_mlp.py` (backprop), each with a derivation link and a test against a library or
   hand-computed example.
 - No hard-coded `"cuda"`: use `terser.hardware.get_device(cfg)`.
 - Hydra configs only, no magic numbers. Notebooks are exploration only, never imported, outputs stripped.

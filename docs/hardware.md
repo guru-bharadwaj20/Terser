@@ -22,7 +22,6 @@ Two shared lab machines administered by Vivian Sobers. Both were verified reacha
 
 | | `worker-1` | `worker-2` |
 | :--- | :--- | :--- |
-| Address | `ccbd@10.10.3.83` | `ccbd@10.10.3.50` |
 | GPU | RTX 4090, 24564 MiB, cap 8.9 | RTX 4090, 24564 MiB, cap 8.9 |
 | Driver | 595.84 | 580.173.02 |
 | CPU / RAM | i9-13900, 32 threads, 125 GB | i9-13900, 26 threads, 125 GB |
@@ -35,13 +34,13 @@ Two shared lab machines administered by Vivian Sobers. Both were verified reacha
 
 Access and serving notes:
 
-- SSH with password authentication as user `ccbd`. **Credentials are provisioned out-of-band and are
+- SSH access. **Host addresses, user names and credentials are provisioned out-of-band and are
   never committed** (same rule as `.env`, row 7.1).
 - Ollama binds to `127.0.0.1` on both hosts, so nothing is reachable directly from a dev machine.
   Forward the port and point the client at the tunnel:
 
   ```bash
-  ssh -f -N -L 127.0.0.1:11434:127.0.0.1:11434 ccbd@10.10.3.50
+  ssh -f -N -L 127.0.0.1:11434:127.0.0.1:11434 worker-2   # host alias from ~/.ssh/config
   export TERSER_LOCAL_LLM_URL=http://localhost:11434/v1
   ```
 
