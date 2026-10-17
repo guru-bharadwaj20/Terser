@@ -107,9 +107,25 @@ class DualSVM:
         self._sv_coef = alpha[self.support_] * ys[self.support_]
         upper = self.C if self.C is not None else np.inf
         margin = self.support_[alpha[self.support_] < upper * (1 - 1e-6)]
-        idx = margin if len(margin) else self.support_
-        f_no_b = self._k(Xa[idx], self._sv_X) @ self._sv_coef
-        self.intercept_ = float(np.mean(ys[idx] - f_no_b))
+        if len(margin):
+            f_no_b = self._k(Xa[margin], self._sv_X) @ self._sv_coef
+            self.intercept_ = float(np.mean(ys[margin] - f_no_b))
+        else:
+            # Every support vector is at the bound C, where KKT gives only inequalities
+            # (y_i f(x_i) <= 1); take the midpoint of the feasible interval, as libsvm does.
+            g = ys - self._k(Xa, self._sv_X) @ self._sv_coef  # y_i - f(x_i) without b
+            at_c = np.zeros(len(ys), dtype=bool)
+            at_c[self.support_] = True
+            # a_i = 0: y_i f >= 1, so b >= g_i (y = +1) or b <= g_i (y = -1);
+            # a_i = C: y_i f <= 1, so b <= g_i (y = +1) or b >= g_i (y = -1).
+            lo = np.concatenate([g[(ys > 0) & ~at_c], g[(ys < 0) & at_c]])
+            up = np.concatenate([g[(ys < 0) & ~at_c], g[(ys > 0) & at_c]])
+            hi_b = float(up.min()) if len(up) else np.inf
+            lo_b = float(lo.max()) if len(lo) else -np.inf
+            if np.isfinite(hi_b) and np.isfinite(lo_b):
+                self.intercept_ = (hi_b + lo_b) / 2
+            else:
+                self.intercept_ = float(np.mean(g[self.support_]))
         return self
 
     @property
