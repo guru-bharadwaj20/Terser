@@ -26,10 +26,10 @@ tokenizer-aware rewriting of casual prompts into shorter prompts that keep the a
 | Card version | `1.0` |
 | Plan row(s) | `12.11` (data from 2.1.1-2.1.8, 2.2.1, 2.3.2, 2.3.3) |
 | Owner | `guru-bharadwaj20` |
-| Last updated | `2026-10-18` |
-| Built (UTC) | `2026-10-18T16:29:21+00:00` |
+| Last updated | `2026-10-20` |
+| Built (UTC) | `2026-10-20T06:01:24+00:00` |
 | Data licence | `CC-BY-SA-4.0` (see `LICENSE`, `NOTICE`) |
-| Code | https://github.com/guru-bharadwaj20/Terser @ `92b2ef77283ab3f0004b74fee8eac592b60e398f` (built from a working tree with uncommitted changes); not copied into the release |
+| Code | https://github.com/guru-bharadwaj20/Terser @ `32aa11a5091ec388ba034e0d1f1988dcce865f8c`; not copied into the release |
 | Code paths | `src/terser/phase12/benchmark.py`, `src/terser/data/`, `src/terser/judge/`, `src/terser/phase2/`, `src/terser/phase12/`, `dvc.yaml` |
 | DVC path | inputs: `data/processed/splits/`, `data/interim/candidates.jsonl`, `data/processed/labels.jsonl` |
 | DVC hash | see `dvc.lock` at the code commit; sha256 in `MANIFEST.json`, `SHA256SUMS` |
@@ -252,7 +252,7 @@ Rows per source and category:
 
 | Version | Date | DVC hash | Git SHA | Change |
 | :--- | :--- | :--- | :--- | :--- |
-| 1.0 | 2026-10-18 | see `dvc.lock` | `92b2ef77283ab3f0004b74fee8eac592b60e398f` | Initial release build (row 12.11) |
+| 1.0 | 2026-10-20 | see `dvc.lock` | `32aa11a5091ec388ba034e0d1f1988dcce865f8c` | Initial release build (row 12.11) |
 
 Check the files with `python -m terser.phase12.benchmark verify --release <this directory>` or
 `sha256sum -c SHA256SUMS`. A new version is built when the inputs change (new DVC version, PII
