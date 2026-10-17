@@ -64,9 +64,9 @@ Status of all 63 checkpoints as of 2026-10-17, read from the ✅ / ❌ marks in 
 | C11.5 | Fallback correctness | ✅ | see the phase checkpoint section |
 | C11.6 | Drift detection | ✅ | see the phase checkpoint section |
 | C11.7 | CT guard | ✅ | see the phase checkpoint section |
-| C9.3 | No reward hacking | ❌ | RL stage not started (depends on C8.3) |
-| C9.4 | No degenerate outputs | ❌ | RL stage not started (depends on C8.3) |
-| C9.5 | RL improves on SFT | ❌ | RL stage not started (depends on C8.3) |
+| C9.3 | No reward hacking | ❌ | measured, fail: RL gate precision 71.4% vs Phase 2 91.0% (19.6 pp > 5 pp), [p9_grpo_v2_val.md](../../reports/p9_grpo_v2_val.md) |
+| C9.4 | No degenerate outputs | ❌ | measured on val only, fail: 1.1% degenerate (target < 1% on 1,000 samples), [p9_grpo_v2_val.md](../../reports/p9_grpo_v2_val.md) |
+| C9.5 | RL improves on SFT | ❌ | measured, fail: savings −25.2 pp vs SFT, SFT stays champion, [p9_grpo_v2_val.md](../../reports/p9_grpo_v2_val.md) |
 
 ## Blocked on people
 

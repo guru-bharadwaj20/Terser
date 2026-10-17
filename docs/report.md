@@ -286,7 +286,7 @@ A data-access audit confirms that HPO touched only train and val (C10.4).
 | Savings tokenizer for rewriter tables | Qwen2.5 (tokenizers agree, § 6.1) |
 | Seeds | 3 for classical tables, 5 for Phase 4 studies and HPO; greedy decoding, one run per rewriter rung |
 | GPU | RTX 4500 Ada (24 GB) for generation, judging and training; RTX 4090 for the Phase 2 smoke run |
-| Compute so far | 23,844,367 generated tokens, 19.90 active / 55.67 reserved GPU-hours, est. ≤ 4.20 kWh active (row 12.10 in progress; excludes the latest v2 chain) ([compute_accounting.md](../reports/compute_accounting.md)) |
+| Compute | 57,986,571 generated tokens, 63.22 active / 100.49 reserved GPU-hours, est. ≤ 13.30 kWh active (row 12.10) ([compute_accounting.md](../reports/compute_accounting.md)) |
 
 ### 4.2 Conventions for the rewriter tables
 
@@ -668,7 +668,7 @@ the fallback).
 | :--- | :--- | :--- |
 | C2.6 position bias | fail: 40.9% raw A/B disagreement on the pilot | § 3.2; labels use order averaging |
 | C7.2 memory plan, C7.4 queue | partial | Several VRAM rows are still estimates; the revised 32B queue estimate is unverified on the RTX 4090 workers ([C7 README](checkpoints/C7/README.md)) |
-| C9.3–C9.5 (stretch GRPO) | not started | See § 6.10 |
+| C9.3–C9.5 (stretch GRPO) | ❌ measured, all fail | See § 6.10 |
 
 Infrastructure findings that do not map to one checkpoint:
 
@@ -708,11 +708,13 @@ These rows and checkpoints cannot be produced by a script, and no script output 
 C2.3–C2.5 are hard gates on the critical path. Until they pass, every preservation number in this
 report is a judge estimate, not a validated measurement.
 
-### 6.10 Stretch work not attempted
+### 6.10 Stretch work (GRPO)
 
-GRPO policy optimisation of the rewriter (rows 9.3.1–9.3.5, checks C9.3–C9.5) was not attempted. The
-stretch section may start only after C8.3 passes ([CONTRIBUTING.md § Stretch Goals](../CONTRIBUTING.md#stretch-goals-never-block-a-checkpoint)),
-and C8.3 has not passed.
+GRPO policy optimisation of the rewriter (rows 9.3.1–9.3.5) was attempted although C8.3 had not
+passed, against the stretch rule in [CONTRIBUTING.md § Stretch Goals](../CONTRIBUTING.md#stretch-goals-never-block-a-checkpoint).
+All three checks fail ([p9_grpo_v2_val.md](../reports/p9_grpo_v2_val.md)): C9.3 gate precision on
+RL rewrites 71.4% vs 91.0% on Phase 2 data (v1 reward-hacked at 42.4%), C9.4 1.1% degenerate on val,
+C9.5 savings 25.2 pp below SFT. SFT stays champion.
 
 ---
 
@@ -763,8 +765,8 @@ The training and validation prompts are clean instructions made casual by an LLM
 slice differs from them clearly: median length 29 vs 62 words (length PSI 0.70) and embedding drift on
 7 PCA components, so live traffic like it would raise the drift alert every day
 ([p11_input_drift.md](../reports/p11_input_drift.md)). A rewriter trained on these prompts may mostly
-learn to undo the injected verbosity. The real slice is part of the Phase 12 evaluation (row 12.3) and
-has not been scored yet. The `texting` style, the closest to short real prompts, also has the least
+learn to undo the injected verbosity. On the real slice the Phase 12 evaluation (row 12.3) scores the full
+system at 97.3% preserved and 0% median savings ([final_results.md](../reports/final_results.md)). The `texting` style, the closest to short real prompts, also has the least
 oracle headroom (§ 5.2).
 
 ### 7.6 Further limitations
@@ -800,8 +802,8 @@ In rough order of expected value:
    prompt, so the quality path can fit the 400 ms budget ([p11_quality_path.md](../reports/p11_quality_path.md)).
 7. **Retrain the gate on the outputs it gates.** Label tagger and SFT rewrites with the judge, refit
    the gate on them, and re-choose the threshold (§ 5.4).
-8. **Rewriter HPO** (row 10.7) with the preservation proxy, then the Phase 12 test evaluation,
-   ablations and net savings by prompt length (rows 12.1–12.9).
+8. **Rewriter HPO with judged preservation** in the objective, instead of the proxy used in
+   row 10.7 (done; the plateau is documented in C10.3).
 9. **Infrastructure:** push the missing DVC outputs, track the LLM response cache, pin the formatter
    versions in CI, and fix `register_one`'s alias move.
 10. **Multi-turn prompts and more target families**, including a validated small judge for cheaper
