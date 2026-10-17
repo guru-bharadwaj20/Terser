@@ -1,12 +1,19 @@
-# Phase 2 dataset pipeline (plan row 2.1.7): collect -> casualise -> dedupe -> split.
-#   dvc repro split
-# casualise calls a local OpenAI-compatible server (vLLM, see the stage comment) only for
-# requests that are not yet in .cache/llm_responses; with a populated cache `dvc repro`
-# rebuilds every stage on CPU with identical outputs.
+# Dataset pipeline (plan rows 2.1.7, 11.1.2):
+#   collect -> casualise -> dedupe -> split (+ stratification) -> label_subset -> candidates
+#   -> token_counts -> respond@<target> -> label (judge + label) -> oracle -> features
+#   dvc repro features
+# The LLM stages (casualise, candidates, respond, label) call a local OpenAI-compatible server
+# (vLLM, see the stage comments) only for requests that are not yet in .cache/llm_responses.
+# With a populated cache, `TERSER_LLM_CACHE_ONLY=1 dvc repro` rebuilds every stage on CPU with
+# identical outputs and fails on a cache miss instead of calling a model
+# (reports/p11_dvc_repro.md).
 stages:
   collect:
     # Stale by design since 2.1.3 (scrub instead of drop): the locked clean.jsonl and the
-    # frozen test split are kept; see reports/p2_dvc_repro.md, "Known stale stage".
+    # frozen test split are kept; see reports/p2_dvc_repro.md, "Known stale stage". Frozen, so
+    # `dvc status` / `dvc repro` keep the locked output; the locked code (9092ee6) reproduces
+    # it byte for byte (reports/p11_dvc_repro.md). Unfreeze for a new dataset version.
+    frozen: true
     cmd: >-
       python -m terser.data.collect --out data/interim/clean.jsonl
       --per-category ${collect.per_category} --seed ${seed}
@@ -74,6 +81,11 @@ stages:
           cache: false
 
   split:
+    # Also the "stratify" step of row 11.1.2; there is no separate stage. Whole source groups
+    # go to train / val / test by a seeded hash, which stratifies by category and by source in
+    # expectation without reshuffling existing groups when data is added (splits.py
+    # docstring); per-category and per-source proportions are reported in splits.json.
+    # label_subset then draws an exact per-category quota from the splits.
     cmd: >-
       python -m terser.data.splits --in data/interim/casual_dedup.jsonl
       --out-dir data/processed/splits --seed ${seed}
@@ -131,6 +143,97 @@ stages:
       - src/terser/tokenizers/count.py
     outs:
       - data/interim/token_counts.parquet
+
+  respond:
+    # Row 2.2.3: target outputs for every label prompt and non-rejected candidate.
+    # GPU: vllm serve <target> (one target at a time); export TERSER_LOCAL_LLM_URL=http://localhost:8000/v1
+    foreach: ${respond.targets}
+    do:
+      cmd: >-
+        python -m terser.phase2.respond --prompts data/interim/label_prompts.jsonl
+        --candidates data/interim/candidates.jsonl --target ${item}
+        --out data/interim/responses/${key}.jsonl --max-tokens ${respond.max_tokens}
+        --creative-samples ${respond.creative_samples}
+        --creative-temperature ${respond.creative_temperature} --workers ${respond.workers}
+      deps:
+        - data/interim/label_prompts.jsonl
+        - data/interim/candidates.jsonl
+        - src/terser/phase2/respond.py
+      params:
+        - respond.max_tokens
+        - respond.creative_samples
+        - respond.creative_temperature
+      outs:
+        - data/interim/responses/${key}.jsonl
+
+  label:
+    # Rows 2.3.3 + 2.3.4: judge (ADR-0005 pairwise_avg, both A/B orders) and task metrics, then
+    # label_v1 records. Task-metric results are cached under .cache/task_metrics.
+    # GPU: vllm serve Qwen/Qwen2.5-32B-Instruct-AWQ --quantization awq_marlin --max-model-len 4096
+    cmd: >-
+      python -m terser.phase2.label_stage --prompts data/interim/label_prompts.jsonl
+      --responses data/interim/responses/qwen2.5-7b.jsonl
+      data/interim/responses/phi3.5-mini.jsonl
+      --judge-model ${label.judge_model} --splits-dir data/processed/splits
+      --out data/processed/labels.jsonl --workers ${label.workers}
+    deps:
+      - data/interim/label_prompts.jsonl
+      - data/interim/responses/qwen2.5-7b.jsonl
+      - data/interim/responses/phi3.5-mini.jsonl
+      - data/processed/splits
+      - data/raw/humaneval
+      - data/raw/mbpp
+      - src/terser/phase2/label_stage.py
+      - src/terser/judge/protocols.py
+      - src/terser/judge/pairwise.py
+      - src/terser/judge/rubrics.py
+      - src/terser/judge/rubrics
+      - src/terser/judge/prompts/pairwise_v1.txt
+      - src/terser/judge/metrics.py
+      - src/terser/judge/code_runner.py
+      - src/terser/judge/labels.py
+    params:
+      - label.judge_model
+    outs:
+      - data/processed/labels.jsonl
+
+  oracle:
+    # Row 2.4.1: the shortest preserved candidate per (prompt, target); CPU only.
+    cmd: >-
+      python -m terser.phase2.oracle --candidates data/interim/candidates.jsonl
+      --token-counts data/interim/token_counts.parquet --labels data/processed/labels.jsonl
+      --prompts data/interim/label_prompts.jsonl
+      --target-map Qwen/Qwen2.5-7B-Instruct=qwen2.5 microsoft/Phi-3.5-mini-instruct=phi3.5
+      --out data/processed/oracle.csv
+    deps:
+      - data/interim/candidates.jsonl
+      - data/interim/token_counts.parquet
+      - data/processed/labels.jsonl
+      - data/interim/label_prompts.jsonl
+      - src/terser/phase2/oracle.py
+    outs:
+      - data/processed/oracle.csv
+
+  features:
+    # Rows 3.1.2 + 3.1.3: pair and span feature tables (train split only); CPU. overhead_pct
+    # comes from the pricing in configs/serving/default.yaml.
+    cmd: python -m terser.phase3.build_features --device cpu
+    deps:
+      - data/interim/label_prompts.jsonl
+      - data/interim/candidates.jsonl
+      - data/processed/labels.jsonl
+      - data/processed/oracle.csv
+      - src/terser/phase3/build_features.py
+      - src/terser/features/alignment.py
+      - src/terser/features/embeddings.py
+      - src/terser/features/lexicons.py
+      - src/terser/features/pair.py
+      - src/terser/features/span.py
+      - src/terser/tokenizers/count.py
+      - configs/serving/default.yaml
+    outs:
+      - data/processed/pair_features.parquet
+      - data/processed/span_features.parquet
 
   register:
     # Rebuilds the MLflow model registry (rows 11.2.2, 11.2.3). mlruns/ is local and gitignored,

@@ -1,4 +1,4 @@
-# DVC pipeline parameters (dvc.yaml, plan row 2.1.7).
+# DVC pipeline parameters (dvc.yaml, plan rows 2.1.7 and 11.1.2).
 seed: 0
 collect:
   per_category: 280      # x 5 styles = 8,400 generations; ~20% fail validation (smoke run) -> >= 6,000
@@ -21,3 +21,14 @@ label_subset:
 candidates:
   model: Qwen/Qwen2.5-32B-Instruct-AWQ
   workers: 32
+respond:                 # row 2.2.3; one stage per target (respond@<key>), output data/interim/responses/<key>.jsonl
+  targets:
+    qwen2.5-7b: Qwen/Qwen2.5-7B-Instruct
+    phi3.5-mini: microsoft/Phi-3.5-mini-instruct   # second family, ADR-0011
+  max_tokens: 768
+  creative_samples: 3    # creative prompts: seeded samples (common random numbers across candidates)
+  creative_temperature: 0.7
+  workers: 64            # concurrent requests so vLLM can batch; no effect on the output
+label:                   # rows 2.3.3 (judge, ADR-0005 pairwise_avg) + 2.3.4 (label)
+  judge_model: Qwen/Qwen2.5-32B-Instruct-AWQ
+  workers: 16
