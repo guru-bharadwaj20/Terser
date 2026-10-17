@@ -2,8 +2,8 @@
 
 Run on 2026-10-17, 13:10 to 13:35 UTC, Docker Desktop 29.8.0 (Compose v5.5.1) on the RTX 4500 Ada
 workstation. The GPU was busy with training and judge jobs the whole time, so nothing below
-used it. The quality-path container was built and checked statically but not started. What
-still needs the GPU is listed in [Pending (needs the GPU)](#pending-needs-the-gpu).
+used it. The quality-path container was built and checked statically here. It was started
+later on the GPU: see [GPU run](#gpu-run-docker-compose-up-serves-both-paths-row-1137).
 
 ## What changed
 
@@ -214,12 +214,38 @@ which needs a device, and failed with "Failed to infer device type".
 `docker compose down -v` removed all containers, the network and the volumes. `docker ps -a`
 is empty. The images are kept.
 
-## Pending (needs the GPU)
+## GPU run: `docker compose up` serves both paths (row 11.3.7)
 
-Run these once the card is free; the hardware rules forbid running vLLM while a training job
-holds it. On this workstation Docker runs from Windows, so use a Windows copy of the repo or of
-the build context. A WSL UNC path does not work as a bind-mount source. On a Linux GPU host, run
-from the repo root.
+Run later, once the training queue had released the card, from the Windows copy of the build
+context (`C:\Users\Temp\terser_compose`, same images as above, `--no-build`). Nothing else held
+the GPU.
+
+| Step | Result |
+|---|---|
+| `docker compose up -d --no-build` | all 5 services started; `terser-gpu` **healthy after 181 s**. The new `hf-cache` volume was empty, so this included the `Qwen/Qwen2.5-3B-Instruct` download |
+| GPU memory with the stack up | 21,230 / 24,570 MiB (`TERSER_GPU_MEM_UTIL` 0.85) |
+| `GET :8000/v1/models` | ids `Qwen/Qwen2.5-3B-Instruct` and `terser-rewriter` (root `/models/rewriter/sft-qwen3b-lora`, parent the 3B base) |
+| `POST :8000/v1/completions`, `terser-rewriter`, hash-table prompt | HTTP 200 in 1.10 s, 29 completion tokens: `Explain hash table in simple terms. ### Hash Table Basics: ...` |
+| `GET :8080/healthz` | `{"status":"ok","quality_path":true}` |
+| `POST :8080/rewrite`, `mode: fast` | `path: "fast"`, `fallback_used: false`, 1.0 ms |
+| `POST :8080/rewrite`, `mode: quality`, palindrome prompt from the checklist, 5 requests, **deployed 0.4 s budget** | 5/5 `path: "fast"`, `fallback_used: true`, `fallback_reason: "timeout"`, 401 ms each. The first, cold request (hash-table prompt) took 820 ms |
+| Same, `terser-cpu` recreated with a **diagnostic-only** override (`quality_timeout_s: 5.0`, `http_timeout_s: 6.0`; a compose override file outside the repo, removed afterwards) | `path: "quality"`, `fallback_used: false`: palindrome 1,296 ms, hash-table 954 ms. Repeats were cache hits (`cached: true`, 0.05 ms). In both cases the ONNX gate rejected the rewrite (`gate_rejected: true`), so the original prompt was returned and `net_savings_usd` is the rewriter cost alone (-8.5e-6 USD) |
+| Prometheus targets | `terser-cpu`, `terser-gpu` and `pushgateway` all `health: up` |
+| `vllm:request_success_total{job="terser-gpu"}` | 9 (`finished_reason="stop"`), so the GPU panel has data |
+| `sum(terser_requests_total) by (path, mode)` | `{mode="quality", path="quality"} 6` after the override |
+| `docker compose down` | all containers and the network removed; GPU back to 428 MiB. Volumes kept, including `hf-cache` |
+
+**Row 11.3.7: done.** Plain `docker compose up` starts the CPU and GPU images. The fast path
+serves from `terser-cpu`. The quality path runs end to end on the GPU: API, then vLLM on
+`terser-gpu` with the Staging LoRA, then the gate, then the response. Prometheus scrapes both.
+
+**C11.3: still a fail, now confirmed in the container.** At the deployed 0.4 s budget every
+quality request times out and is answered by the fast path, as in
+[p11_quality_path.md](p11_quality_path.md). An unloaded quality request takes 0.95 to 1.3 s
+end to end. The committed `docker/serving.compose.yaml` keeps `quality_timeout_s: 0.4`; the
+5 s value was only for this check.
+
+### Checklist used
 
 ```bash
 dvc pull models/fast models/rewriter/sft-qwen3b-lora
@@ -235,18 +261,11 @@ curl -s localhost:9090/api/v1/targets | grep -o '"job":"terser-gpu"[^}]*"health"
 docker compose down                   # free the GPU again
 ```
 
-What these establish, all pending:
+On this workstation Docker runs from Windows, so use a Windows copy of the repo or of the build
+context; a WSL UNC path does not work as a bind-mount source. On a Linux GPU host, run from the
+repo root.
 
-1. **`docker compose up` serves both paths** (row 11.3.7 acceptance). Requires a `quality` mode
-   response with `path: "quality"`.
-2. **GPU panel data.** `vllm:*` metrics on the dashboard.
-3. **Quality-path latency under the 0.4 s budget.** Served quality-path latency has never been
-   measured (rewriter model card, section 5.3). If the 3B LoRA misses the budget, quality requests
-   fall back with `timeout`: the stack is correct, but C11.3 is not met. Raise
-   `quality_timeout_s` only if C11.3 is relaxed.
-
-Also open: row 11.5.4 must call `push_canary` (pushgateway `:9091`) after each nightly run for
-the canary panels and the alert to carry real data, and the alert needs a contact point.
+Still open: the alert needs a contact point. The canary (row 11.5.4) pushes to `:9091`.
 
 ## Tests and lint
 
