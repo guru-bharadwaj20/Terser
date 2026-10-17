@@ -33,7 +33,11 @@ def pairwise_distances(A: npt.ArrayLike, B: npt.ArrayLike, metric: Metric) -> Fl
     a = np.asarray(A, dtype=np.float64)
     b = np.asarray(B, dtype=np.float64)
     if metric == "euclidean":
-        sq = (a**2).sum(1)[:, None] + (b**2).sum(1)[None, :] - 2 * a @ b.T
+        norms = (a**2).sum(1)[:, None] + (b**2).sum(1)[None, :]
+        sq = norms - 2 * a @ b.T
+        # The expansion leaves round-off (~1e-6 after the sqrt) for identical points; snap values
+        # within relative round-off of zero to exactly 0 so duplicates are at distance 0.
+        sq[sq <= 1e-12 * norms] = 0.0
         return np.sqrt(np.maximum(sq, 0.0))
     if metric == "manhattan":
         return np.abs(a[:, None, :] - b[None, :, :]).sum(-1)

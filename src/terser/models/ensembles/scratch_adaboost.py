@@ -94,7 +94,8 @@ class AdaBoostStumps:
             self.stumps_.append(stump)
             self.alphas_.append(float(alpha))
             F += alpha * h
-            self.train_error_.append(float(np.mean(np.sign(F) != ys)))
+            # Same rule as predict: F == 0 is the negative class, not an error.
+            self.train_error_.append(float(np.mean(np.where(F > 0, 1.0, -1.0) != ys)))
             w = w * np.exp(-alpha * ys * h)
             w /= w.sum()
             if eps <= 1e-12:
