@@ -1,0 +1,18 @@
+{
+  "latency": {
+    "requests": 600,
+    "errors": 0,
+    "achieved_rps": 4.990944661876276,
+    "p50_ms": 416.19417049514595,
+    "p95_ms": 436.58670675213216,
+    "p99_ms": 457.96028055716306,
+    "served": {
+      "timeout": 599,
+      "quality": 1
+    },
+    "quality_share": 0.0016666666666666668,
+    "gate_rejected": 596,
+    "rps": 5.0,
+    "c11_3": false
+  }
+}

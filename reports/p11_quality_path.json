@@ -1,0 +1,33 @@
+{
+  "latency": {
+    "requests": 600,
+    "errors": 0,
+    "achieved_rps": 4.990734756736992,
+    "p50_ms": 416.4179465005873,
+    "p95_ms": 437.93623714809655,
+    "p99_ms": 451.3676376637886,
+    "served": {
+      "timeout": 600
+    },
+    "quality_share": 0.0,
+    "gate_rejected": 596,
+    "rps": 5.0,
+    "c11_3": false
+  },
+  "throughput": {
+    "requests": 36000,
+    "errors": 0,
+    "achieved_rps": 19.994860485303445,
+    "p50_ms": 414.1868589940714,
+    "p95_ms": 437.9342609499872,
+    "p99_ms": 460.1465072621068,
+    "served": {
+      "timeout": 36000
+    },
+    "quality_share": 0.0,
+    "gate_rejected": 34707,
+    "rps": 20.0,
+    "vllm_alive_after": true,
+    "c11_4": false
+  }
+}

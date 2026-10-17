@@ -1,0 +1,11 @@
+{
+  "rung": "15v2",
+  "n": 100,
+  "p50_ms": 1145.493757998338,
+  "p95_ms": 1768.4006108494941,
+  "mean_completion_tokens": 102.1,
+  "mean_prompt_tokens": 167.51,
+  "ms_per_output_token": 11.030313731244734,
+  "within_400ms": 0.01,
+  "hit_512_cap": 0
+}
