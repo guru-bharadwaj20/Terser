@@ -447,8 +447,8 @@
       "complete": true,
       "missing_labels": 0,
       "missing_candidates": 0,
-      "latency_s": 0.2128757417040049,
-      "latency_note": "+ gate 110 ms",
+      "latency_s": 0.14267901060572175,
+      "latency_note": "+ gate 39 ms",
       "per_target": {
         "Qwen/Qwen2.5-7B-Instruct": {
           "n": 992,
@@ -540,8 +540,8 @@
       "complete": true,
       "missing_labels": 0,
       "missing_candidates": 0,
-      "latency_s": 0.09627221276849768,
-      "latency_note": "bge-small forward per prompt (encoder loaded); CNN forward excluded; + gate 67 ms",
+      "latency_s": 0.06914060569575142,
+      "latency_note": "bge-small forward per prompt (encoder loaded); CNN forward excluded; + gate 39 ms",
       "per_target": {
         "Qwen/Qwen2.5-7B-Instruct": {
           "n": 992,
@@ -809,6 +809,192 @@
       "reward": -3.123921647421011
     },
     {
+      "name": "SFT rewriter `sft3bv2_s1`",
+      "method": "sft3bv2_s1",
+      "row": "SFT rewriter",
+      "gate": null,
+      "fallback": true,
+      "path": "quality",
+      "kind": "main",
+      "complete": true,
+      "missing_labels": 0,
+      "missing_candidates": 0,
+      "latency_s": 0.7442997189467436,
+      "latency_note": "HF generate, batch 16, per prompt",
+      "per_target": {
+        "Qwen/Qwen2.5-7B-Instruct": {
+          "n": 992,
+          "median_savings": {
+            "estimate": 0.04794745484400659,
+            "low": 0.020268326101849754,
+            "high": 0.09236234458259329
+          },
+          "mean_savings": 0.25193375771113624,
+          "preserved": {
+            "estimate": 0.7540322580645161,
+            "low": 0.7250749133958073,
+            "high": 0.7821305159287456
+          },
+          "median_net_savings": {
+            "estimate": -0.6875,
+            "low": -0.7273634262327677,
+            "high": -0.6277173913043479
+          },
+          "mean_net_savings": {
+            "estimate": -0.3888023500822928,
+            "low": -0.42988269928227485,
+            "high": -0.3454766445704382
+          },
+          "net_savings_p25_length": {
+            "estimate": -0.3132952597911997,
+            "low": -0.4200055171094418,
+            "high": -0.19155050872058113
+          },
+          "fell_back": 408,
+          "gate_rejected": 0,
+          "missing_labels": 0,
+          "worst_category_preserved": 0.7116564417177914
+        },
+        "microsoft/Phi-3.5-mini-instruct": {
+          "n": 992,
+          "median_savings": {
+            "estimate": 0.04416232231931888,
+            "low": 0.02083333333333337,
+            "high": 0.09027777777777779
+          },
+          "mean_savings": 0.24287240322997702,
+          "preserved": {
+            "estimate": 0.7076612903225806,
+            "low": 0.675675001348654,
+            "high": 0.7386074831800497
+          },
+          "median_net_savings": {
+            "estimate": -0.6125259875259874,
+            "low": -0.633275663206459,
+            "high": -0.5576923076923077
+          },
+          "mean_net_savings": {
+            "estimate": -0.33746128068427483,
+            "low": -0.3761454930541223,
+            "high": -0.2965220426702183
+          },
+          "net_savings_p25_length": {
+            "estimate": -0.2709141509659839,
+            "low": -0.3779688870012602,
+            "high": -0.1507529095270707
+          },
+          "fell_back": 404,
+          "gate_rejected": 0,
+          "missing_labels": 0,
+          "worst_category_preserved": 0.5726495726495726
+        }
+      },
+      "preserved_pooled": {
+        "estimate": 0.7308467741935484,
+        "low": 0.7056166162037515,
+        "high": 0.7567449578675612
+      },
+      "worst_category_preserved": {
+        "estimate": 0.6452991452991453,
+        "low": 0.5724378881987577,
+        "high": 0.6859132124352332
+      },
+      "reward": -2.175014533589496
+    },
+    {
+      "name": "SFT rewriter `sft3bv2_s2`",
+      "method": "sft3bv2_s2",
+      "row": "SFT rewriter",
+      "gate": null,
+      "fallback": true,
+      "path": "quality",
+      "kind": "main",
+      "complete": true,
+      "missing_labels": 0,
+      "missing_candidates": 0,
+      "latency_s": 0.7560423545784366,
+      "latency_note": "HF generate, batch 16, per prompt",
+      "per_target": {
+        "Qwen/Qwen2.5-7B-Instruct": {
+          "n": 992,
+          "median_savings": {
+            "estimate": 0.045368782161234966,
+            "low": 0.01727160944861284,
+            "high": 0.11429742388758785
+          },
+          "mean_savings": 0.24171505253208492,
+          "preserved": {
+            "estimate": 0.7590725806451613,
+            "low": 0.726809982371535,
+            "high": 0.7876681810326162
+          },
+          "median_net_savings": {
+            "estimate": -0.6964285714285714,
+            "low": -0.7288179072111578,
+            "high": -0.5901639344262293
+          },
+          "mean_net_savings": {
+            "estimate": -0.41052266032554385,
+            "low": -0.4544935254762411,
+            "high": -0.3686568018811477
+          },
+          "net_savings_p25_length": {
+            "estimate": -0.404285870436843,
+            "low": -0.4881740080340999,
+            "high": -0.3040640077096908
+          },
+          "fell_back": 410,
+          "gate_rejected": 0,
+          "missing_labels": 0,
+          "worst_category_preserved": 0.6495726495726496
+        },
+        "microsoft/Phi-3.5-mini-instruct": {
+          "n": 992,
+          "median_savings": {
+            "estimate": 0.04033898305084749,
+            "low": 0.016393442622950838,
+            "high": 0.10580204778156999
+          },
+          "mean_savings": 0.23147214366326282,
+          "preserved": {
+            "estimate": 0.7288306451612904,
+            "low": 0.69520374617737,
+            "high": 0.7579540816326531
+          },
+          "median_net_savings": {
+            "estimate": -0.605732395239276,
+            "low": -0.6352941176470589,
+            "high": -0.5114678899082569
+          },
+          "mean_net_savings": {
+            "estimate": -0.35957504947550056,
+            "low": -0.400966498041954,
+            "high": -0.3204509471481218
+          },
+          "net_savings_p25_length": {
+            "estimate": -0.38784608171481405,
+            "low": -0.4741109055908243,
+            "high": -0.2938201639155541
+          },
+          "fell_back": 409,
+          "gate_rejected": 0,
+          "missing_labels": 0,
+          "worst_category_preserved": 0.5042735042735043
+        }
+      },
+      "preserved_pooled": {
+        "estimate": 0.7439516129032258,
+        "low": 0.7171457449270889,
+        "high": 0.7680241191547076
+      },
+      "worst_category_preserved": {
+        "estimate": 0.5769230769230769,
+        "low": 0.49498132183908045,
+        "high": 0.6595744680851063
+      },
+      "reward": -1.94547889991003
+    },
+    {
       "name": "SFT rewriter `sfthpo`",
       "method": "sfthpo",
       "row": "SFT rewriter",
@@ -912,8 +1098,8 @@
       "complete": true,
       "missing_labels": 0,
       "missing_candidates": 0,
-      "latency_s": 0.7614986523602486,
-      "latency_note": "HF generate, batch 16, per prompt; + gate 56 ms",
+      "latency_s": 0.7453778973833002,
+      "latency_note": "HF generate, batch 16, per prompt; + gate 39 ms",
       "per_target": {
         "Qwen/Qwen2.5-7B-Instruct": {
           "n": 992,
@@ -1646,6 +1832,192 @@
       "reward": -11.077527108694452
     },
     {
+      "name": "Terser full (`sft3bv2` + gate) seed 1",
+      "method": "sft3bv2_s1",
+      "row": "SFT rewriter",
+      "gate": "tuned",
+      "fallback": true,
+      "path": "quality",
+      "kind": "seed",
+      "complete": true,
+      "missing_labels": 0,
+      "missing_candidates": 0,
+      "latency_s": 0.7908833015307443,
+      "latency_note": "HF generate, batch 16, per prompt; + gate 47 ms",
+      "per_target": {
+        "Qwen/Qwen2.5-7B-Instruct": {
+          "n": 992,
+          "median_savings": {
+            "estimate": 0.0,
+            "low": 0.0,
+            "high": 0.0
+          },
+          "mean_savings": 0.08301311679759256,
+          "preserved": {
+            "estimate": 0.9516129032258065,
+            "low": 0.9333316733067729,
+            "high": 0.9681282828883472
+          },
+          "median_net_savings": {
+            "estimate": -0.7367608717040535,
+            "low": -0.7458100987996972,
+            "high": -0.7150090852540597
+          },
+          "mean_net_savings": {
+            "estimate": -0.5577229909958367,
+            "low": -0.5930695432792292,
+            "high": -0.5191786774235837
+          },
+          "net_savings_p25_length": {
+            "estimate": -0.592605579797984,
+            "low": -0.6349743944255107,
+            "high": -0.5451053544541549
+          },
+          "fell_back": 408,
+          "gate_rejected": 435,
+          "missing_labels": 0,
+          "worst_category_preserved": 0.7361963190184049
+        },
+        "microsoft/Phi-3.5-mini-instruct": {
+          "n": 992,
+          "median_savings": {
+            "estimate": 0.0,
+            "low": 0.0,
+            "high": 0.0
+          },
+          "mean_savings": 0.00851523430521552,
+          "preserved": {
+            "estimate": 0.9879032258064516,
+            "low": 0.9798382010676736,
+            "high": 0.9948930080102124
+          },
+          "median_net_savings": {
+            "estimate": -0.6396343094385264,
+            "low": -0.6519084582781794,
+            "high": -0.6149583483989064
+          },
+          "mean_net_savings": {
+            "estimate": -0.5718184496090364,
+            "low": -0.5874003114622293,
+            "high": -0.555174360100306
+          },
+          "net_savings_p25_length": {
+            "estimate": -0.5713290060797652,
+            "low": -0.606647407977044,
+            "high": -0.5331757884533526
+          },
+          "fell_back": 404,
+          "gate_rejected": 551,
+          "missing_labels": 0,
+          "worst_category_preserved": 0.9631901840490797
+        }
+      },
+      "preserved_pooled": {
+        "estimate": 0.969758064516129,
+        "low": 0.959542518193922,
+        "high": 0.9791242615589558
+      },
+      "worst_category_preserved": {
+        "estimate": 0.8496932515337423,
+        "low": 0.8076844262295082,
+        "high": 0.8905325443786982
+      },
+      "reward": 1.5522240067533066
+    },
+    {
+      "name": "Terser full (`sft3bv2` + gate) seed 2",
+      "method": "sft3bv2_s2",
+      "row": "SFT rewriter",
+      "gate": "tuned",
+      "fallback": true,
+      "path": "quality",
+      "kind": "seed",
+      "complete": true,
+      "missing_labels": 0,
+      "missing_candidates": 0,
+      "latency_s": 0.8024230812581696,
+      "latency_note": "HF generate, batch 16, per prompt; + gate 46 ms",
+      "per_target": {
+        "Qwen/Qwen2.5-7B-Instruct": {
+          "n": 992,
+          "median_savings": {
+            "estimate": 0.0,
+            "low": 0.0,
+            "high": 0.0
+          },
+          "mean_savings": 0.08790618961733289,
+          "preserved": {
+            "estimate": 0.9495967741935484,
+            "low": 0.9309301157030674,
+            "high": 0.9660489409478288
+          },
+          "median_net_savings": {
+            "estimate": -0.7359800838574422,
+            "low": -0.7462311557788944,
+            "high": -0.7039392319137064
+          },
+          "mean_net_savings": {
+            "estimate": -0.5643315232402959,
+            "low": -0.6031096932029321,
+            "high": -0.5240988211054712
+          },
+          "net_savings_p25_length": {
+            "estimate": -0.624129156617064,
+            "low": -0.66057277269139,
+            "high": -0.5828200093434827
+          },
+          "fell_back": 410,
+          "gate_rejected": 429,
+          "missing_labels": 0,
+          "worst_category_preserved": 0.7239263803680982
+        },
+        "microsoft/Phi-3.5-mini-instruct": {
+          "n": 992,
+          "median_savings": {
+            "estimate": 0.0,
+            "low": 0.0,
+            "high": 0.0
+          },
+          "mean_savings": 0.008535638112308864,
+          "preserved": {
+            "estimate": 0.9949596774193549,
+            "low": 0.9907024793388429,
+            "high": 0.9989889031875888
+          },
+          "median_net_savings": {
+            "estimate": -0.6320525795518734,
+            "low": -0.649185575769692,
+            "high": -0.610759493670886
+          },
+          "mean_net_savings": {
+            "estimate": -0.5825115550264545,
+            "low": -0.6012680982841726,
+            "high": -0.5650678319995985
+          },
+          "net_savings_p25_length": {
+            "estimate": -0.6098484654953672,
+            "low": -0.6386307139346883,
+            "high": -0.5785292663504309
+          },
+          "fell_back": 409,
+          "gate_rejected": 551,
+          "missing_labels": 0,
+          "worst_category_preserved": 0.9914529914529915
+        }
+      },
+      "preserved_pooled": {
+        "estimate": 0.9722782258064516,
+        "low": 0.963075,
+        "high": 0.9811060441868061
+      },
+      "worst_category_preserved": {
+        "estimate": 0.8588957055214724,
+        "low": 0.8189122671894692,
+        "high": 0.895724710338681
+      },
+      "reward": 2.0499139671272486
+    },
+    {
       "name": "TextCNN + gate seed 1",
       "method": "textcnn_tagger_s1",
       "row": "TextCNN+gate",
@@ -1656,7 +2028,7 @@
       "complete": true,
       "missing_labels": 0,
       "missing_candidates": 0,
-      "latency_s": 0.07599961305787052,
+      "latency_s": 0.07606479788034176,
       "latency_note": "bge-small forward per prompt (encoder loaded); CNN forward excluded; + gate 46 ms",
       "per_target": {
         "Qwen/Qwen2.5-7B-Instruct": {
@@ -1749,8 +2121,8 @@
       "complete": true,
       "missing_labels": 0,
       "missing_candidates": 0,
-      "latency_s": 0.07185664790529082,
-      "latency_note": "bge-small forward per prompt (encoder loaded); CNN forward excluded; + gate 41 ms",
+      "latency_s": 0.07738708060302724,
+      "latency_note": "bge-small forward per prompt (encoder loaded); CNN forward excluded; + gate 46 ms",
       "per_target": {
         "Qwen/Qwen2.5-7B-Instruct": {
           "n": 992,
@@ -1935,8 +2307,8 @@
       "complete": true,
       "missing_labels": 0,
       "missing_candidates": 0,
-      "latency_s": 0.7465376285735995,
-      "latency_note": "HF generate, batch 16, per prompt; + gate 41 ms",
+      "latency_s": 0.7523700123289723,
+      "latency_note": "HF generate, batch 16, per prompt; + gate 46 ms",
       "per_target": {
         "Qwen/Qwen2.5-7B-Instruct": {
           "n": 992,
@@ -2028,8 +2400,8 @@
       "complete": true,
       "missing_labels": 0,
       "missing_candidates": 0,
-      "latency_s": 0.7462808576742733,
-      "latency_note": "HF generate, batch 16, per prompt; + gate 40 ms",
+      "latency_s": 0.7521098316838456,
+      "latency_note": "HF generate, batch 16, per prompt; + gate 46 ms",
       "per_target": {
         "Qwen/Qwen2.5-7B-Instruct": {
           "n": 992,
@@ -2121,8 +2493,8 @@
       "complete": true,
       "missing_labels": 0,
       "missing_candidates": 0,
-      "latency_s": 0.03970417233785591,
-      "latency_note": "+ gate 39 ms",
+      "latency_s": 0.04669628728352797,
+      "latency_note": "+ gate 46 ms",
       "per_target": {
         "Qwen/Qwen2.5-7B-Instruct": {
           "n": 992,
@@ -2444,6 +2816,70 @@
       },
       "S3": {
         "value": 0.6153846153846154,
+        "pass": false
+      },
+      "S4": {
+        "per_target": {
+          "Qwen/Qwen2.5-7B-Instruct": false,
+          "microsoft/Phi-3.5-mini-instruct": false
+        },
+        "pass": false
+      },
+      "S5": {
+        "per_target": {
+          "Qwen/Qwen2.5-7B-Instruct": false,
+          "microsoft/Phi-3.5-mini-instruct": false
+        },
+        "pass": false
+      },
+      "complete": true
+    },
+    "SFT rewriter `sft3bv2_s1`": {
+      "S1": {
+        "per_target": {
+          "Qwen/Qwen2.5-7B-Instruct": false,
+          "microsoft/Phi-3.5-mini-instruct": false
+        },
+        "pass": false
+      },
+      "S2": {
+        "value": 0.7308467741935484,
+        "pass": false
+      },
+      "S3": {
+        "value": 0.6452991452991453,
+        "pass": false
+      },
+      "S4": {
+        "per_target": {
+          "Qwen/Qwen2.5-7B-Instruct": false,
+          "microsoft/Phi-3.5-mini-instruct": false
+        },
+        "pass": false
+      },
+      "S5": {
+        "per_target": {
+          "Qwen/Qwen2.5-7B-Instruct": false,
+          "microsoft/Phi-3.5-mini-instruct": false
+        },
+        "pass": false
+      },
+      "complete": true
+    },
+    "SFT rewriter `sft3bv2_s2`": {
+      "S1": {
+        "per_target": {
+          "Qwen/Qwen2.5-7B-Instruct": false,
+          "microsoft/Phi-3.5-mini-instruct": false
+        },
+        "pass": false
+      },
+      "S2": {
+        "value": 0.7439516129032258,
+        "pass": false
+      },
+      "S3": {
+        "value": 0.5769230769230769,
         "pass": false
       },
       "S4": {
@@ -3533,6 +3969,186 @@
             "median_savings": 0.012145748987854255,
             "preserved": 0.6577540106951871,
             "mean_net_savings": -0.43712578357051807,
+            "missing": 0
+          }
+        }
+      },
+      "SFT rewriter `sft3bv2_s1`": {
+        "Qwen/Qwen2.5-7B-Instruct": {
+          "code": {
+            "n": 117,
+            "median_savings": 0.2603550295857988,
+            "preserved": 0.717948717948718,
+            "mean_net_savings": -0.37480022332273305,
+            "missing": 0
+          },
+          "creative": {
+            "n": 133,
+            "median_savings": 0.0,
+            "preserved": 0.7142857142857143,
+            "mean_net_savings": -0.41660719406694485,
+            "missing": 0
+          },
+          "explain": {
+            "n": 177,
+            "median_savings": 0.0,
+            "preserved": 0.7457627118644068,
+            "mean_net_savings": -0.3825333096552471,
+            "missing": 0
+          },
+          "fact": {
+            "n": 215,
+            "median_savings": 0.0,
+            "preserved": 0.827906976744186,
+            "mean_net_savings": -0.5745456164171323,
+            "missing": 0
+          },
+          "reason": {
+            "n": 163,
+            "median_savings": 0.664179104477612,
+            "preserved": 0.7116564417177914,
+            "mean_net_savings": 0.06239673323961106,
+            "missing": 0
+          },
+          "transform": {
+            "n": 187,
+            "median_savings": 0.0,
+            "preserved": 0.7647058823529411,
+            "mean_net_savings": -0.5634572862105105,
+            "missing": 0
+          }
+        },
+        "microsoft/Phi-3.5-mini-instruct": {
+          "code": {
+            "n": 117,
+            "median_savings": 0.23030303030303034,
+            "preserved": 0.5726495726495726,
+            "mean_net_savings": -0.33890824450766727,
+            "missing": 0
+          },
+          "creative": {
+            "n": 133,
+            "median_savings": 0.0,
+            "preserved": 0.7368421052631579,
+            "mean_net_savings": -0.3692982527423831,
+            "missing": 0
+          },
+          "explain": {
+            "n": 177,
+            "median_savings": 0.0,
+            "preserved": 0.7288135593220338,
+            "mean_net_savings": -0.3328018214274596,
+            "missing": 0
+          },
+          "fact": {
+            "n": 215,
+            "median_savings": 0.0,
+            "preserved": 0.7813953488372093,
+            "mean_net_savings": -0.5101842725377765,
+            "missing": 0
+          },
+          "reason": {
+            "n": 163,
+            "median_savings": 0.6467065868263473,
+            "preserved": 0.6196319018404908,
+            "mean_net_savings": 0.08529800813722484,
+            "missing": 0
+          },
+          "transform": {
+            "n": 187,
+            "median_savings": 0.0,
+            "preserved": 0.7433155080213903,
+            "mean_net_savings": -0.48823899761899436,
+            "missing": 0
+          }
+        }
+      },
+      "SFT rewriter `sft3bv2_s2`": {
+        "Qwen/Qwen2.5-7B-Instruct": {
+          "code": {
+            "n": 117,
+            "median_savings": 0.28915662650602414,
+            "preserved": 0.6495726495726496,
+            "mean_net_savings": -0.33320232412780454,
+            "missing": 0
+          },
+          "creative": {
+            "n": 133,
+            "median_savings": 0.0,
+            "preserved": 0.7969924812030075,
+            "mean_net_savings": -0.4909862136175581,
+            "missing": 0
+          },
+          "explain": {
+            "n": 177,
+            "median_savings": 0.0,
+            "preserved": 0.7796610169491526,
+            "mean_net_savings": -0.4368452420668309,
+            "missing": 0
+          },
+          "fact": {
+            "n": 215,
+            "median_savings": 0.0,
+            "preserved": 0.8418604651162791,
+            "mean_net_savings": -0.5999281415021236,
+            "missing": 0
+          },
+          "reason": {
+            "n": 163,
+            "median_savings": 0.6666666666666667,
+            "preserved": 0.6625766871165644,
+            "mean_net_savings": 0.1285959173232152,
+            "missing": 0
+          },
+          "transform": {
+            "n": 187,
+            "median_savings": 0.0,
+            "preserved": 0.7700534759358288,
+            "mean_net_savings": -0.628917737774062,
+            "missing": 0
+          }
+        },
+        "microsoft/Phi-3.5-mini-instruct": {
+          "code": {
+            "n": 117,
+            "median_savings": 0.2558139534883721,
+            "preserved": 0.5042735042735043,
+            "mean_net_savings": -0.2950795898567602,
+            "missing": 0
+          },
+          "creative": {
+            "n": 133,
+            "median_savings": 0.0,
+            "preserved": 0.7443609022556391,
+            "mean_net_savings": -0.4445181434791067,
+            "missing": 0
+          },
+          "explain": {
+            "n": 177,
+            "median_savings": 0.0,
+            "preserved": 0.7740112994350282,
+            "mean_net_savings": -0.3908024701664816,
+            "missing": 0
+          },
+          "fact": {
+            "n": 215,
+            "median_savings": 0.0,
+            "preserved": 0.813953488372093,
+            "mean_net_savings": -0.5348444795330393,
+            "missing": 0
+          },
+          "reason": {
+            "n": 163,
+            "median_savings": 0.6511627906976745,
+            "preserved": 0.6748466257668712,
+            "mean_net_savings": 0.1455664700725161,
+            "missing": 0
+          },
+          "transform": {
+            "n": 187,
+            "median_savings": 0.0,
+            "preserved": 0.7647058823529411,
+            "mean_net_savings": -0.548753787628256,
             "missing": 0
           }
         }
@@ -5225,6 +5841,270 @@
           }
         }
       },
+      "SFT rewriter `sft3bv2_s1`": {
+        "Qwen/Qwen2.5-7B-Instruct": {
+          "0": {
+            "n": 135,
+            "median_savings": 0.0,
+            "preserved": 0.8074074074074075,
+            "mean_net_savings": -0.5390715434103246,
+            "missing": 0
+          },
+          "1": {
+            "n": 26,
+            "median_savings": 0.08088235294117652,
+            "preserved": 0.6538461538461539,
+            "mean_net_savings": -0.280495615600938,
+            "missing": 0
+          },
+          "2": {
+            "n": 131,
+            "median_savings": 0.0,
+            "preserved": 0.7786259541984732,
+            "mean_net_savings": -0.563910569228131,
+            "missing": 0
+          },
+          "3": {
+            "n": 140,
+            "median_savings": 0.0,
+            "preserved": 0.75,
+            "mean_net_savings": -0.4083164398579017,
+            "missing": 0
+          },
+          "4": {
+            "n": 117,
+            "median_savings": 0.2603550295857988,
+            "preserved": 0.717948717948718,
+            "mean_net_savings": -0.37480022332273305,
+            "missing": 0
+          },
+          "5": {
+            "n": 91,
+            "median_savings": 0.0,
+            "preserved": 0.7582417582417582,
+            "mean_net_savings": -0.578078162932623,
+            "missing": 0
+          },
+          "6": {
+            "n": 96,
+            "median_savings": 0.02588058419243988,
+            "preserved": 0.7291666666666666,
+            "mean_net_savings": -0.37144269358553766,
+            "missing": 0
+          },
+          "7": {
+            "n": 165,
+            "median_savings": 0.664179104477612,
+            "preserved": 0.7090909090909091,
+            "mean_net_savings": 0.0537726817838178,
+            "missing": 0
+          },
+          "8": {
+            "n": 91,
+            "median_savings": 0.0,
+            "preserved": 0.8241758241758241,
+            "mean_net_savings": -0.564231381550711,
+            "missing": 0
+          }
+        },
+        "microsoft/Phi-3.5-mini-instruct": {
+          "0": {
+            "n": 135,
+            "median_savings": 0.0,
+            "preserved": 0.7777777777777778,
+            "mean_net_savings": -0.4660394381765118,
+            "missing": 0
+          },
+          "1": {
+            "n": 26,
+            "median_savings": 0.07803030303030306,
+            "preserved": 0.6923076923076923,
+            "mean_net_savings": -0.2475789505011258,
+            "missing": 0
+          },
+          "2": {
+            "n": 131,
+            "median_savings": 0.0,
+            "preserved": 0.7251908396946565,
+            "mean_net_savings": -0.4920390418891485,
+            "missing": 0
+          },
+          "3": {
+            "n": 140,
+            "median_savings": 0.0,
+            "preserved": 0.7428571428571429,
+            "mean_net_savings": -0.3599045626067256,
+            "missing": 0
+          },
+          "4": {
+            "n": 117,
+            "median_savings": 0.23030303030303034,
+            "preserved": 0.5726495726495726,
+            "mean_net_savings": -0.33890824450766727,
+            "missing": 0
+          },
+          "5": {
+            "n": 91,
+            "median_savings": 0.0,
+            "preserved": 0.7912087912087912,
+            "mean_net_savings": -0.5238547986763797,
+            "missing": 0
+          },
+          "6": {
+            "n": 96,
+            "median_savings": 0.022981981546785157,
+            "preserved": 0.6875,
+            "mean_net_savings": -0.3143233596852874,
+            "missing": 0
+          },
+          "7": {
+            "n": 165,
+            "median_savings": 0.6467065868263473,
+            "preserved": 0.6181818181818182,
+            "mean_net_savings": 0.0780495135910033,
+            "missing": 0
+          },
+          "8": {
+            "n": 91,
+            "median_savings": 0.0,
+            "preserved": 0.8021978021978022,
+            "mean_net_savings": -0.5048960026956323,
+            "missing": 0
+          }
+        }
+      },
+      "SFT rewriter `sft3bv2_s2`": {
+        "Qwen/Qwen2.5-7B-Instruct": {
+          "0": {
+            "n": 135,
+            "median_savings": 0.0,
+            "preserved": 0.8296296296296296,
+            "mean_net_savings": -0.583782686935376,
+            "missing": 0
+          },
+          "1": {
+            "n": 26,
+            "median_savings": 0.02826317488127622,
+            "preserved": 0.6153846153846154,
+            "mean_net_savings": -0.4011043660716253,
+            "missing": 0
+          },
+          "2": {
+            "n": 131,
+            "median_savings": 0.0,
+            "preserved": 0.7786259541984732,
+            "mean_net_savings": -0.6194477658052535,
+            "missing": 0
+          },
+          "3": {
+            "n": 140,
+            "median_savings": 0.0,
+            "preserved": 0.8071428571428572,
+            "mean_net_savings": -0.4295062719110521,
+            "missing": 0
+          },
+          "4": {
+            "n": 117,
+            "median_savings": 0.28915662650602414,
+            "preserved": 0.6495726495726496,
+            "mean_net_savings": -0.33320232412780454,
+            "missing": 0
+          },
+          "5": {
+            "n": 91,
+            "median_savings": 0.0,
+            "preserved": 0.8351648351648352,
+            "mean_net_savings": -0.614955741080994,
+            "missing": 0
+          },
+          "6": {
+            "n": 96,
+            "median_savings": 0.0,
+            "preserved": 0.7916666666666666,
+            "mean_net_savings": -0.5067736057682916,
+            "missing": 0
+          },
+          "7": {
+            "n": 165,
+            "median_savings": 0.6666666666666667,
+            "preserved": 0.6666666666666666,
+            "mean_net_savings": 0.12139005201531043,
+            "missing": 0
+          },
+          "8": {
+            "n": 91,
+            "median_savings": 0.0,
+            "preserved": 0.7912087912087912,
+            "mean_net_savings": -0.5841100600902487,
+            "missing": 0
+          }
+        },
+        "microsoft/Phi-3.5-mini-instruct": {
+          "0": {
+            "n": 135,
+            "median_savings": 0.0,
+            "preserved": 0.8148148148148148,
+            "mean_net_savings": -0.5110338433281565,
+            "missing": 0
+          },
+          "1": {
+            "n": 26,
+            "median_savings": 0.02648819152377868,
+            "preserved": 0.6538461538461539,
+            "mean_net_savings": -0.36259092259455666,
+            "missing": 0
+          },
+          "2": {
+            "n": 131,
+            "median_savings": 0.0,
+            "preserved": 0.7709923664122137,
+            "mean_net_savings": -0.5451587305754942,
+            "missing": 0
+          },
+          "3": {
+            "n": 140,
+            "median_savings": 0.0,
+            "preserved": 0.7571428571428571,
+            "mean_net_savings": -0.38641678431330373,
+            "missing": 0
+          },
+          "4": {
+            "n": 117,
+            "median_savings": 0.2558139534883721,
+            "preserved": 0.5042735042735043,
+            "mean_net_savings": -0.2950795898567602,
+            "missing": 0
+          },
+          "5": {
+            "n": 91,
+            "median_savings": 0.0,
+            "preserved": 0.8021978021978022,
+            "mean_net_savings": -0.5572808274669159,
+            "missing": 0
+          },
+          "6": {
+            "n": 96,
+            "median_savings": 0.0,
+            "preserved": 0.7708333333333334,
+            "mean_net_savings": -0.4450796873009466,
+            "missing": 0
+          },
+          "7": {
+            "n": 165,
+            "median_savings": 0.6511627906976745,
+            "preserved": 0.6848484848484848,
+            "mean_net_savings": 0.13968739555174667,
+            "missing": 0
+          },
+          "8": {
+            "n": 91,
+            "median_savings": 0.0,
+            "preserved": 0.7692307692307693,
+            "mean_net_savings": -0.525838194572546,
+            "missing": 0
+          }
+        }
+      },
       "SFT rewriter `sfthpo`": {
         "Qwen/Qwen2.5-7B-Instruct": {
           "0": {
@@ -6647,6 +7527,130 @@
           }
         }
       },
+      "SFT rewriter `sft3bv2_s1`": {
+        "Qwen/Qwen2.5-7B-Instruct": {
+          "creative": {
+            "n": 6,
+            "median_savings": 0.26785714285714285,
+            "preserved": 0.8333333333333334,
+            "mean_net_savings": -0.31931659464265233,
+            "missing": 0
+          },
+          "explain": {
+            "n": 37,
+            "median_savings": 0.08333333333333337,
+            "preserved": 0.7567567567567568,
+            "mean_net_savings": -0.2729643371733714,
+            "missing": 0
+          },
+          "fact": {
+            "n": 13,
+            "median_savings": 0.0,
+            "preserved": 0.6153846153846154,
+            "mean_net_savings": -0.4888531770082769,
+            "missing": 0
+          },
+          "transform": {
+            "n": 40,
+            "median_savings": 0.01215388385199706,
+            "preserved": 0.725,
+            "mean_net_savings": -0.43219568099583405,
+            "missing": 0
+          }
+        },
+        "microsoft/Phi-3.5-mini-instruct": {
+          "creative": {
+            "n": 6,
+            "median_savings": 0.24193548387096775,
+            "preserved": 0.5,
+            "mean_net_savings": -0.2884668203464475,
+            "missing": 0
+          },
+          "explain": {
+            "n": 37,
+            "median_savings": 0.11538461538461542,
+            "preserved": 0.6486486486486487,
+            "mean_net_savings": -0.23397586900289816,
+            "missing": 0
+          },
+          "fact": {
+            "n": 13,
+            "median_savings": 0.0,
+            "preserved": 0.6923076923076923,
+            "mean_net_savings": -0.420629598322538,
+            "missing": 0
+          },
+          "transform": {
+            "n": 40,
+            "median_savings": 0.010732323232323204,
+            "preserved": 0.75,
+            "mean_net_savings": -0.357973741910217,
+            "missing": 0
+          }
+        }
+      },
+      "SFT rewriter `sft3bv2_s2`": {
+        "Qwen/Qwen2.5-7B-Instruct": {
+          "creative": {
+            "n": 6,
+            "median_savings": 0.0,
+            "preserved": 1.0,
+            "mean_net_savings": -0.7711277475519057,
+            "missing": 0
+          },
+          "explain": {
+            "n": 37,
+            "median_savings": 0.0,
+            "preserved": 0.8108108108108109,
+            "mean_net_savings": -0.4338722687637828,
+            "missing": 0
+          },
+          "fact": {
+            "n": 13,
+            "median_savings": 0.0714285714285714,
+            "preserved": 0.7692307692307693,
+            "mean_net_savings": -0.4832190404097475,
+            "missing": 0
+          },
+          "transform": {
+            "n": 40,
+            "median_savings": 0.0,
+            "preserved": 0.75,
+            "mean_net_savings": -0.5422094549714467,
+            "missing": 0
+          }
+        },
+        "microsoft/Phi-3.5-mini-instruct": {
+          "creative": {
+            "n": 6,
+            "median_savings": 0.0,
+            "preserved": 0.8333333333333334,
+            "mean_net_savings": -0.7153392374489016,
+            "missing": 0
+          },
+          "explain": {
+            "n": 37,
+            "median_savings": 0.0,
+            "preserved": 0.8108108108108109,
+            "mean_net_savings": -0.3949020493247641,
+            "missing": 0
+          },
+          "fact": {
+            "n": 13,
+            "median_savings": 0.06818181818181823,
+            "preserved": 0.6153846153846154,
+            "mean_net_savings": -0.42889000963693086,
+            "missing": 0
+          },
+          "transform": {
+            "n": 40,
+            "median_savings": 0.0,
+            "preserved": 0.775,
+            "mean_net_savings": -0.4562167151475272,
+            "missing": 0
+          }
+        }
+      },
       "SFT rewriter `sfthpo`": {
         "Qwen/Qwen2.5-7B-Instruct": {
           "creative": {
@@ -7487,8 +8491,8 @@
       "complete": true,
       "missing_labels": 0,
       "missing_candidates": 0,
-      "latency_s": 0.2128757417040049,
-      "latency_note": "+ gate 110 ms",
+      "latency_s": 0.14267901060572175,
+      "latency_note": "+ gate 39 ms",
       "per_target": {
         "Qwen/Qwen2.5-7B-Instruct": {
           "n": 1000,
@@ -7580,8 +8584,8 @@
       "complete": true,
       "missing_labels": 0,
       "missing_candidates": 0,
-      "latency_s": 0.09627221276849768,
-      "latency_note": "bge-small forward per prompt (encoder loaded); CNN forward excluded; + gate 67 ms",
+      "latency_s": 0.06914060569575142,
+      "latency_note": "bge-small forward per prompt (encoder loaded); CNN forward excluded; + gate 39 ms",
       "per_target": {
         "Qwen/Qwen2.5-7B-Instruct": {
           "n": 1000,
@@ -7849,6 +8853,192 @@
       "reward": -11.682522491110442
     },
     {
+      "name": "SFT rewriter `sft3bv2_s1`",
+      "method": "sft3bv2_s1",
+      "row": "SFT rewriter",
+      "gate": null,
+      "fallback": true,
+      "path": "quality",
+      "kind": "main",
+      "complete": true,
+      "missing_labels": 0,
+      "missing_candidates": 0,
+      "latency_s": 0.7442997189467436,
+      "latency_note": "HF generate, batch 16, per prompt",
+      "per_target": {
+        "Qwen/Qwen2.5-7B-Instruct": {
+          "n": 1000,
+          "median_savings": {
+            "estimate": 0.0,
+            "low": 0.0,
+            "high": 0.0
+          },
+          "mean_savings": 0.10346222708318814,
+          "preserved": {
+            "estimate": 0.789,
+            "low": 0.764,
+            "high": 0.813
+          },
+          "median_net_savings": {
+            "estimate": -0.7574362755424477,
+            "low": -0.7598684210526315,
+            "high": -0.7549668874172185
+          },
+          "mean_net_savings": {
+            "estimate": -0.6966104700706623,
+            "low": -0.7693526523194838,
+            "high": -0.6396261897266692
+          },
+          "net_savings_p25_length": {
+            "estimate": -0.9838518654884636,
+            "low": -1.4691620985010008,
+            "high": -0.6993294762845393
+          },
+          "fell_back": 625,
+          "gate_rejected": 0,
+          "missing_labels": 0,
+          "worst_category_preserved": 0.6826347305389222
+        },
+        "microsoft/Phi-3.5-mini-instruct": {
+          "n": 1000,
+          "median_savings": {
+            "estimate": 0.0,
+            "low": 0.0,
+            "high": 0.0
+          },
+          "mean_savings": 0.09632791986193692,
+          "preserved": {
+            "estimate": 0.772,
+            "low": 0.746975,
+            "high": 0.798025
+          },
+          "median_net_savings": {
+            "estimate": -0.6582482993197278,
+            "low": -0.6666666666666666,
+            "high": -0.6524959239130435
+          },
+          "mean_net_savings": {
+            "estimate": -0.6207872172645694,
+            "low": -0.6916321497996338,
+            "high": -0.5657222810849319
+          },
+          "net_savings_p25_length": {
+            "estimate": -0.8564660782791376,
+            "low": -1.3426050790508508,
+            "high": -0.6324140943163586
+          },
+          "fell_back": 631,
+          "gate_rejected": 0,
+          "missing_labels": 0,
+          "worst_category_preserved": 0.718562874251497
+        }
+      },
+      "preserved_pooled": {
+        "estimate": 0.7805,
+        "low": 0.7579875,
+        "high": 0.8030125
+      },
+      "worst_category_preserved": {
+        "estimate": 0.7005988023952096,
+        "low": 0.6388848747591521,
+        "high": 0.7463840579710145
+      },
+      "reward": -11.960492652743746
+    },
+    {
+      "name": "SFT rewriter `sft3bv2_s2`",
+      "method": "sft3bv2_s2",
+      "row": "SFT rewriter",
+      "gate": null,
+      "fallback": true,
+      "path": "quality",
+      "kind": "main",
+      "complete": true,
+      "missing_labels": 0,
+      "missing_candidates": 0,
+      "latency_s": 0.7560423545784366,
+      "latency_note": "HF generate, batch 16, per prompt",
+      "per_target": {
+        "Qwen/Qwen2.5-7B-Instruct": {
+          "n": 1000,
+          "median_savings": {
+            "estimate": 0.0,
+            "low": 0.0,
+            "high": 0.0
+          },
+          "mean_savings": 0.10007823741014552,
+          "preserved": {
+            "estimate": 0.787,
+            "low": 0.76,
+            "high": 0.815
+          },
+          "median_net_savings": {
+            "estimate": -0.7560249709639953,
+            "low": -0.7586206896551724,
+            "high": -0.7542043527416619
+          },
+          "mean_net_savings": {
+            "estimate": -0.7068894945325733,
+            "low": -0.7920782252818362,
+            "high": -0.6472008641054201
+          },
+          "net_savings_p25_length": {
+            "estimate": -0.7871032532759338,
+            "low": -0.9529050630668934,
+            "high": -0.6967485719575562
+          },
+          "fell_back": 607,
+          "gate_rejected": 0,
+          "missing_labels": 0,
+          "worst_category_preserved": 0.7218934911242604
+        },
+        "microsoft/Phi-3.5-mini-instruct": {
+          "n": 1000,
+          "median_savings": {
+            "estimate": 0.0,
+            "low": 0.0,
+            "high": 0.0
+          },
+          "mean_savings": 0.09444199732981236,
+          "preserved": {
+            "estimate": 0.777,
+            "low": 0.751975,
+            "high": 0.803
+          },
+          "median_net_savings": {
+            "estimate": -0.6538461538461539,
+            "low": -0.6605838534055246,
+            "high": -0.6472891562506238
+          },
+          "mean_net_savings": {
+            "estimate": -0.6261699890311293,
+            "low": -0.7073299158495631,
+            "high": -0.5716534951724366
+          },
+          "net_savings_p25_length": {
+            "estimate": -0.8534643884727804,
+            "low": -1.3162644937712058,
+            "high": -0.6308547201566355
+          },
+          "fell_back": 614,
+          "gate_rejected": 0,
+          "missing_labels": 0,
+          "worst_category_preserved": 0.7159763313609467
+        }
+      },
+      "preserved_pooled": {
+        "estimate": 0.782,
+        "low": 0.7589875,
+        "high": 0.8050125
+      },
+      "worst_category_preserved": {
+        "estimate": 0.7189349112426036,
+        "low": 0.6536399147727273,
+        "high": 0.7532703330189364
+      },
+      "reward": -12.073988263002105
+    },
+    {
       "name": "SFT rewriter `sfthpo`",
       "method": "sfthpo",
       "row": "SFT rewriter",
@@ -7952,8 +9142,8 @@
       "complete": true,
       "missing_labels": 0,
       "missing_candidates": 0,
-      "latency_s": 0.7614986523602486,
-      "latency_note": "HF generate, batch 16, per prompt; + gate 56 ms",
+      "latency_s": 0.7453778973833002,
+      "latency_note": "HF generate, batch 16, per prompt; + gate 39 ms",
       "per_target": {
         "Qwen/Qwen2.5-7B-Instruct": {
           "n": 1000,
@@ -8757,6 +9947,70 @@
       },
       "complete": true
     },
+    "SFT rewriter `sft3bv2_s1`": {
+      "S1": {
+        "per_target": {
+          "Qwen/Qwen2.5-7B-Instruct": false,
+          "microsoft/Phi-3.5-mini-instruct": false
+        },
+        "pass": false
+      },
+      "S2": {
+        "value": 0.7805,
+        "pass": false
+      },
+      "S3": {
+        "value": 0.7005988023952096,
+        "pass": false
+      },
+      "S4": {
+        "per_target": {
+          "Qwen/Qwen2.5-7B-Instruct": false,
+          "microsoft/Phi-3.5-mini-instruct": false
+        },
+        "pass": false
+      },
+      "S5": {
+        "per_target": {
+          "Qwen/Qwen2.5-7B-Instruct": false,
+          "microsoft/Phi-3.5-mini-instruct": false
+        },
+        "pass": false
+      },
+      "complete": true
+    },
+    "SFT rewriter `sft3bv2_s2`": {
+      "S1": {
+        "per_target": {
+          "Qwen/Qwen2.5-7B-Instruct": false,
+          "microsoft/Phi-3.5-mini-instruct": false
+        },
+        "pass": false
+      },
+      "S2": {
+        "value": 0.782,
+        "pass": false
+      },
+      "S3": {
+        "value": 0.7189349112426036,
+        "pass": false
+      },
+      "S4": {
+        "per_target": {
+          "Qwen/Qwen2.5-7B-Instruct": false,
+          "microsoft/Phi-3.5-mini-instruct": false
+        },
+        "pass": false
+      },
+      "S5": {
+        "per_target": {
+          "Qwen/Qwen2.5-7B-Instruct": false,
+          "microsoft/Phi-3.5-mini-instruct": false
+        },
+        "pass": false
+      },
+      "complete": true
+    },
     "SFT rewriter `sfthpo`": {
       "S1": {
         "per_target": {
@@ -9070,6 +10324,18 @@
       "savings_sd": 0.0,
       "preserved_mean": 0.9274193548387096,
       "preserved_sd": 0.0025201612903225645
+    },
+    "Terser full (`sft3bv2` + gate)": {
+      "n_seeds": 3,
+      "methods": [
+        "sft3bv2",
+        "sft3bv2_s1",
+        "sft3bv2_s2"
+      ],
+      "savings_mean": 0.0,
+      "savings_sd": 0.0,
+      "preserved_mean": 0.9695900537634409,
+      "preserved_sd": 0.0027759932193982687
     }
   },
   "seeds_note": "Seeds (row 12.4, >= 3 seeds): deterministic systems need none (original, operators, HMM, LLMLingua-2, deployed fast path, LightGBM tagger and both gates at a fixed random_state; greedy decoding of the SFT and zero-shot rewriters). Seeded CPU systems get seed variants from `terser.phase12.candidates build --textcnn-seeds 0,1,2 --rl-seeds 0,1,2` (methods `<method>_s<k>`, judged like any candidate, summarised above). The SFT rewriter's seed is its training seed: the main session retrains the chosen rung with `python -m terser.models.rewriter.train experiment=<rung> seed=<k>` on the GPU for k = 1, 2, generates with `terser.models.rewriter.generate`, imports each as tag `<rung>_s<k>` (`terser.phase12.candidates import-sft`) and passes `--sft <rung>_s<k>=<file>`. Judge sampling is greedy; creative prompts use the three fixed respond seeds (common random numbers). Bootstrap CIs cover prompt sampling, the seed table covers training variance.",
