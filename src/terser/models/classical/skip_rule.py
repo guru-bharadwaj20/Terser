@@ -64,7 +64,7 @@ def net_savings_curve(
     if thresholds is None:
         t = np.concatenate([[-np.inf], np.unique(p), [np.inf]])
     else:
-        t = np.asarray(thresholds, dtype=np.float64)
+        t = np.sort(np.asarray(thresholds, dtype=np.float64))  # best_threshold relies on order
     gain = a - o
     take = p[None, :] > t[:, None]
     return NetSavingsCurve(

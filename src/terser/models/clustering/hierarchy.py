@@ -100,6 +100,11 @@ def cophenetic_correlation(Z: npt.ArrayLike, X: npt.ArrayLike) -> float:
 
 
 def cut_tree(Z: npt.ArrayLike, k: int) -> npt.NDArray[np.int64]:
-    """Flat labels ``0..k-1`` from cutting a linkage matrix into ``k`` clusters."""
+    """Flat labels ``0..m-1`` from cutting a linkage matrix into at most ``k`` clusters.
+
+    ``fcluster(criterion="maxclust")`` can return fewer than ``k`` clusters when merge heights
+    tie (likely with the zero-SSE duplicate splits of :func:`divisive_linkage`); callers that need
+    exactly ``k`` must check ``labels.max() + 1``.
+    """
     labels = fcluster(np.asarray(Z, dtype=np.float64), t=k, criterion="maxclust")
     return np.asarray(labels, dtype=np.int64) - 1

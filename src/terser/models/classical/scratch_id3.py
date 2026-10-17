@@ -413,7 +413,12 @@ class Condition:
 
 @dataclass(frozen=True)
 class Rule:
-    """``IF all conditions THEN class index prediction``, with an accuracy estimate."""
+    """``IF all conditions THEN class index prediction``, with an accuracy estimate.
+
+    ``accuracy`` / ``coverage`` describe the data the rule was last scored on: training counts
+    from :func:`tree_to_rules`, **validation** counts (Laplace accuracy) after
+    :func:`rule_post_prune`. :func:`export_rules` prints whichever the rule carries as ``n=``.
+    """
 
     conditions: tuple[Condition, ...]
     prediction: int
