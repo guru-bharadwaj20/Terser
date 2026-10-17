@@ -1,0 +1,11 @@
+{
+  "rung": "3b",
+  "n": 100,
+  "p50_ms": 2374.031601997558,
+  "p95_ms": 4297.5912245914515,
+  "mean_completion_tokens": 130.92,
+  "mean_prompt_tokens": 167.51,
+  "ms_per_output_token": 19.34510767399559,
+  "within_400ms": 0.0,
+  "hit_512_cap": 2
+}

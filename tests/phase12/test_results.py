@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 from typing import Any
 
@@ -184,6 +185,30 @@ def test_gate_cache_keeps_scores_and_timing(tmp_path: Path) -> None:
     assert again.calls["tuned"] == 1  # served from the cache, timing unchanged
     other = R.GateBank({"tuned": FakeGate("other")}, cache_path=path)  # gate changed
     assert other.cache == {} and other.mean_seconds("tuned") is None
+
+
+def test_pair_gates_share_feature_time() -> None:
+    class Feat:
+        calls = 0
+        seen: set[tuple[str, str]] = set()
+
+        def features(self, o: str, t: str, c: str, tgt: str) -> dict[str, float]:
+            if (o, t) not in self.seen:
+                self.seen.add((o, t))
+                self.calls += 1
+                time.sleep(0.01)
+            return {"x": 1.0}
+
+    class Pair(FakeGate):
+        def score_rows(self, rows: list[dict[str, float]]) -> list[float]:
+            return [0.1 for _ in rows]
+
+    bank = R.GateBank({"tuned": Pair("t"), "untuned": Pair("u")}, Feat())
+    bank.score("tuned", "a b", "a", "fact", "qwen2.5")
+    bank.score("untuned", "a b", "a", "fact", "qwen2.5")  # features cached
+    assert bank.calls[R.FEATURES] == 1
+    for g in ("tuned", "untuned"):
+        assert bank.mean_seconds(g) >= 0.01  # both pay the shared feature time
 
 
 def test_label_index_matches_identical_text() -> None:
