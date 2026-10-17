@@ -124,8 +124,18 @@ def _crosstab(records: Sequence[dict[str, Any]], key: str) -> list[str]:
     return lines
 
 
-def render(records: Sequence[dict[str, Any]], pool: dict[str, Any] | None = None) -> str:
-    """Generated part of ``reports/p8_failures.md`` (everything above the manual marker)."""
+def render(
+    records: Sequence[dict[str, Any]],
+    pool: dict[str, Any] | None = None,
+    title: str = "Phase 8 rewriter failure analysis (row 8.3.10)",
+    split: str = "val",
+    annotations: str = "data/annotations/p8_failures.jsonl",
+) -> str:
+    """Generated part of the report (everything above the manual marker).
+
+    Defaults reproduce ``reports/p8_failures.md``; row 12.8 passes its own title, split and
+    annotation path for ``reports/final_errors.md``.
+    """
     n = len(records)
     bad = [r for r in records if r["failure"] not in FAILURES]
     if bad:
@@ -134,7 +144,7 @@ def render(records: Sequence[dict[str, Any]], pool: dict[str, Any] | None = None
     rungs = sorted({r["rung"] for r in records})
     cnt = Counter(r["failure"] for r in records)
     lines = [
-        "# Phase 8 rewriter failure analysis (row 8.3.10)",
+        f"# {title}",
         "",
         "> **Annotator caveat.** Every case below was categorised by an LLM assistant (Claude), not"
         " by a human annotator. The categories and notes have **not been human-reviewed**. Treat"
@@ -142,7 +152,7 @@ def render(records: Sequence[dict[str, Any]], pool: dict[str, Any] | None = None
         "",
         f"Annotator field: {', '.join(f'`{a}`' for a in annotators)}. Rung(s): "
         f"{', '.join(f'`{r}`' for r in rungs)}. Cases: {n} degraded (prompt, target) pairs on "
-        f"{len({r['prompt_id'] for r in records})} unique val prompts.",
+        f"{len({r['prompt_id'] for r in records})} unique {split} prompts.",
         "",
     ]
     if pool:
@@ -150,7 +160,7 @@ def render(records: Sequence[dict[str, Any]], pool: dict[str, Any] | None = None
             f"Population: {pool['n_degraded']} non-fallback degraded pairs "
             f"({pool['n_prompts']} prompts); sample of {n}, stratified by prompt category, "
             f"seed {pool['seed']}. Annotations: "
-            "[data/annotations/p8_failures.jsonl](../data/annotations/p8_failures.jsonl).",
+            f"[{annotations}](../{annotations}).",
             "",
         ]
     sav: dict[str, list[float]] = defaultdict(list)
@@ -210,6 +220,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     r.add_argument("--annotations", type=Path, required=True)
     r.add_argument("--pool", type=Path, help="JSON written by sample (population stats)")
     r.add_argument("--out", type=Path, default=Path("reports/p8_failures.md"))
+    r.add_argument("--title", default="Phase 8 rewriter failure analysis (row 8.3.10)")
+    r.add_argument("--split", default="val")
     args = ap.parse_args(argv)
 
     if args.cmd == "sample":
@@ -242,7 +254,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     records = _jsonl(args.annotations)
     stats = json.loads(args.pool.read_text()) if args.pool else None
-    md = render(records, stats)
+    md = render(records, stats, args.title, args.split, args.annotations.as_posix())
     if args.out.exists() and MANUAL in (old := args.out.read_text(encoding="utf-8")):
         md += "\n" + MANUAL + old.split(MANUAL, 1)[1]
     else:
