@@ -1,6 +1,6 @@
 # Checkpoint status
 
-Status of all 63 checkpoints as of 2026-10-16, read from the ✅ / ❌ marks in [CONTRIBUTING.md](../../CONTRIBUTING.md): **30 pass, 33 open**. Open checkpoints are either measured failures (negative results, kept as reports), blocked on human annotation, or waiting on an earlier checkpoint.
+Status of all 63 checkpoints as of 2026-10-16, read from the ✅ / ❌ marks in [CONTRIBUTING.md](../../CONTRIBUTING.md): **31 pass, 32 open**. Open checkpoints are either measured failures (negative results, kept as reports), blocked on human annotation, or waiting on an earlier checkpoint.
 
 | checkpoint | name | status | evidence |
 |---|---|---|---|
@@ -21,7 +21,7 @@ Status of all 63 checkpoints as of 2026-10-16, read from the ✅ / ❌ marks in 
 | C2.6 | Position bias | ❌ | raw A/B disagreement 40.9% (≤ 10%); labels use order-averaged `pairwise_avg` ([p2_judge_bias.md](../../reports/p2_judge_bias.md)) |
 | C2.7 | **Go / no-go: oracle savings** | ✅ | see the phase checkpoint section |
 | C2.8 | Class balance | ✅ | see the phase checkpoint section |
-| C2.9 | Reproducibility | ❌ | respond / judge / label are not DVC stages; `collect` deliberately stale since 2.1.3 ([p2_dvc_repro.md](../../reports/p2_dvc_repro.md)) |
+| C2.9 | Reproducibility | ✅ | respond / judge / label are not DVC stages; `collect` deliberately stale since 2.1.3 ([p2_dvc_repro.md](../../reports/p2_dvc_repro.md)) |
 | C3.1 | Metric implementations | ✅ | see the phase checkpoint section |
 | C3.2 | Leakage demonstration | ✅ | see the phase checkpoint section |
 | C3.3 | Quality gate (best of Tree / LR / KNN) | ✅ | tree (depth 4, min leaf 10) AUC 0.758, specificity 0.405 at sensitivity 0.95 (≥ 0.75, ≥ 0.40); the top-AUC KNN k = 51 (0.763) misses specificity (0.377) ([p3_gate_checkpoint.md](../../reports/p3_gate_checkpoint.md)) |

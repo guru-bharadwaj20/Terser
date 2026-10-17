@@ -339,7 +339,7 @@ downstream can be measured without it.
 | C2.6 | Position bias | A/B-order disagreement **≤ 10%** | ❌ |
 | C2.7 🚧 | **Go / no-go: oracle savings** | Median **≥ 25%** on ≥ 2 targets; ≥ 15% in ≥ 5 of 6 categories. Also reported (not gated) on the real-prompt slice 2.1.8. On failure: negative-result report and scope narrowing before continuing |✅ |
 | C2.8 | Class balance | Degraded share among candidates between **15% and 60%** |✅ |
-| C2.9 | Reproducibility | `dvc repro` gives an identical dataset hash from cached responses | ❌ |
+| C2.9 | Reproducibility | `dvc repro` gives an identical dataset hash from cached responses | ✅ |
 
 ---
 
