@@ -741,7 +741,7 @@ quality monitoring.
 | 11.5.2 | Input drift | Evidently daily: embedding drift (PSI / MMD on PCA components), length and category distribution | Report generated | ✅ |
 | 11.5.3 | Tokenizer drift | Re-count fixture set with current tokenizer versions; alert on any change | Alert fires on a pinned-version swap | ✅ |
 | 11.5.4 | Quality canary | Nightly: a fixed 200-prompt canary set goes through the deployed service and the judge; rolling preservation | Metric on dashboard | ❌ |
-| 11.5.5 | Dashboard and alerts | Grafana; alert at rolling preservation < 92% | Dashboard live | ❌ |
+| 11.5.5 | Dashboard and alerts | Grafana; alert at rolling preservation < 92% | Dashboard live | ✅ |
 | 11.5.6 | Structured logging | Request IDs; hashes by default, raw text only if consented | Log schema doc | ✅ |
 
 ### 11.6 ML Orchestration
