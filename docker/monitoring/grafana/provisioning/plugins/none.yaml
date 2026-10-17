@@ -1,0 +1,5 @@
+# Row 11.5.5: no app plugins are provisioned (this file only keeps Grafana from logging a missing
+# provisioning/plugins directory at startup).
+apiVersion: 1
+
+apps: []
