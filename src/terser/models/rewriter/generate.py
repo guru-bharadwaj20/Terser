@@ -28,12 +28,28 @@ __all__ = ["main"]
 SEP_TEXT = "\n### Rewrite:\n"
 
 
-def _load(base: str, model_dir: str) -> tuple[Any, Any]:  # pragma: no cover - GPU only
+def _load(
+    base: str, model_dir: str, quant: str | None = None
+) -> tuple[Any, Any]:  # pragma: no cover - GPU only
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     tok = AutoTokenizer.from_pretrained(base)
     model: Any
+    if quant == "nf4":  # QLoRA rung: the adapter runs on the same NF4 base it was trained on
+        from peft import PeftModel
+        from transformers import BitsAndBytesConfig
+
+        bnb = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_compute_dtype=torch.bfloat16,
+        )
+        model = AutoModelForCausalLM.from_pretrained(
+            base, quantization_config=bnb, torch_dtype=torch.bfloat16, device_map={"": 0}
+        )
+        return PeftModel.from_pretrained(model, model_dir).eval(), tok
     if (Path(model_dir) / "adapter_config.json").exists():
         from peft import PeftModel
 
@@ -52,11 +68,12 @@ def main(argv: Sequence[str] | None = None) -> int:  # pragma: no cover - GPU on
     ap.add_argument("--out", required=True)
     ap.add_argument("--batch-size", type=int, default=16)
     ap.add_argument("--max-new-tokens", type=int, default=512)
+    ap.add_argument("--quant", choices=["nf4"], default=None, help="4-bit base (QLoRA rung)")
     args = ap.parse_args(argv)
 
     import torch
 
-    model, tok = _load(args.base, args.model)
+    model, tok = _load(args.base, args.model, args.quant)
     sep = tok(SEP_TEXT, add_special_tokens=False)["input_ids"][-1]
     pad = tok.pad_token_id if tok.pad_token_id is not None else tok.eos_token_id
     rows = [json.loads(x) for x in Path(args.data).read_text(encoding="utf-8").splitlines() if x]
