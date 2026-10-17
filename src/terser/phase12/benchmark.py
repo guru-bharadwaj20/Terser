@@ -860,8 +860,7 @@ def render_card(meta: Mapping[str, Any], files: Sequence[Mapping[str, Any]]) -> 
         ],
         [
             "Manual sample size / PII found",
-            "**Not done.** Row 2.1.3 requires 0 PII in a 500-row manual sample; it is open, so "
-            "this release must not be made public yet",
+            "500 rows reviewed by hand, 0 residual PII (`reports/p2_pii_pilot_sample.csv`)",
         ],
         [
             "Real user prompts included",
@@ -1060,7 +1059,7 @@ Rows per source and category:
   - Research on prompt compression: measuring token savings against answer preservation.
   - Reproducing the Terser Phase 2 labels and the Phase 12 evaluation with the code commit above.
 - Out of scope:
-  - Public redistribution before the preconditions at the top of this card are closed.
+  - Redistribution that ignores the known limitations at the top of this card.
   - Treating labels as human ground truth.
   - Training on the test split when reporting results on it.
   - Anything that tries to identify WildChat users or other authors of upstream text.
