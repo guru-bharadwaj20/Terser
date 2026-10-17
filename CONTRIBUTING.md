@@ -776,7 +776,7 @@ quality?", on the untouched test split.
 | 12.1 | Test-split unlock | Logged, one-time event | Access log entry | ✅ |
 | 12.2 | Master results table | Every system (original, best operator, Q-learning policy, HMM, GBM tagger+gate, TextCNN+gate, SFT rewriter, LLMLingua-2, zero-shot LLM) × savings × preservation × net savings × latency | `reports/final_results.md` | ✅ |
 | 12.3 | Stratified reporting | Per target × category × high-risk cluster, and separately on the real-prompt slice (2.1.8) | Tables | ✅ |
-| 12.4 | Statistical rigour | 95% bootstrap CIs (1,000 resamples); ≥ 3 seeds; McNemar between top systems | Error bars on every headline number | ❌ |
+| 12.4 | Statistical rigour | 95% bootstrap CIs (1,000 resamples); ≥ 3 seeds; McNemar between top systems | Error bars on every headline number | ✅ |
 | 12.6 | **Ablation matrix** | Remove gate / fallback / HPO one at a time; generative rewriter vs operator-only | 4-row ablation table | ✅ |
 | 12.7 | Net savings by prompt length | Savings minus rewriter cost across length percentiles | Figure | ✅ |
 | 12.8 | Error taxonomy | 200 degraded test cases categorised | `reports/final_errors.md` | ✅ |
