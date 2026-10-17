@@ -59,8 +59,8 @@ Status of all 63 checkpoints as of 2026-10-17, read from the ✅ / ❌ marks in 
 | C10.4 | No test leakage | ✅ | test-set isolation audit green (`python -m terser.hpo.audit --scan src/terser`) |
 | C11.1 | End-to-end orchestration | ✅ | fresh clone, CPU: data_flow(label=false) -> train_classical -> evaluate -> promote all Completed unattended in 585 s, after two fixes (dvc unprotect, registry rebuild); 5 DVC outputs missing from the shared remote were pulled from the workstation cache ([p11_ct_and_fresh_clone.md](../../reports/p11_ct_and_fresh_clone.md)) |
 | C11.2 | Fast-path latency | ✅ | see the phase checkpoint section |
-| C11.3 | Quality-path latency | ❌ | pending: quality path needs a rewriter that passes C8.3 |
-| C11.4 | Throughput | ❌ | pending: quality path needs a rewriter that passes C8.3 |
+| C11.3 | Quality-path latency | ❌ | fail: at 5 RPS p95 438 ms with 0% of requests served by the quality path (all hit the 400 ms budget and fell back); uncapped, the sft3b rewriter needs p95 4.3 s and sft15v2 1.8 s ([p11_quality_path.md](../../reports/p11_quality_path.md)) |
+| C11.4 | Throughput | ❌ | fail: 20.0 RPS sustained 30 min, 0 errors, no OOM, vLLM alive, but 0% quality-served (every request answered by the timeout fallback) ([p11_quality_path.md](../../reports/p11_quality_path.md)) |
 | C11.5 | Fallback correctness | ✅ | see the phase checkpoint section |
 | C11.6 | Drift detection | ✅ | see the phase checkpoint section |
 | C11.7 | CT guard | ✅ | see the phase checkpoint section |
