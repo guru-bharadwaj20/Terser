@@ -239,7 +239,7 @@ def build_batch(
         with csv_paths[name].open("w", encoding="utf-8", newline="") as fh:
             writer = csv.DictWriter(fh, fieldnames=list(SHEET_COLUMNS), lineterminator="\n")
             writer.writeheader()
-            writer.writerows(rows)
+            writer.writerows(_csv_safe(row) for row in rows)
         jsonl_paths[name] = _sheet_path(out_dir, name, "jsonl")
         write_jsonl(rows, jsonl_paths[name])
     key_path = out_dir / "key.jsonl"
@@ -258,6 +258,21 @@ def build_batch(
     manifest_path = out_dir / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8", newline="\n")
     return BatchPaths(out_dir, key_path, manifest_path, csv_paths, jsonl_paths)
+
+
+_FORMULA_LEADS = ("=", "+", "-", "@")
+
+
+def _csv_safe(row: Mapping[str, Any]) -> dict[str, Any]:
+    """Prefix text cells that a spreadsheet would run as a formula (``=``, ``+``, ``-``, ``@``).
+
+    Model outputs often start with a markdown bullet ("- step"), which Excel shows as #NAME?.
+    Only the CSV gets the ``'`` prefix; the JSONL sheet keeps the raw text.
+    """
+    return {
+        k: "'" + v if isinstance(v, str) and v.startswith(_FORMULA_LEADS) else v
+        for k, v in row.items()
+    }
 
 
 def load_key(path: Path) -> dict[str, dict[str, Any]]:
@@ -348,10 +363,7 @@ def import_sheet(
         raw_conf = str(row.get("confidence") or "").strip()
         confidence: int | None = None
         if raw_conf:
-            try:
-                confidence = int(float(raw_conf))
-            except ValueError:
-                confidence = -1
+            confidence = int(raw_conf) if raw_conf in ("1", "2", "3") else -1
             if confidence not in (1, 2, 3):
                 errors.append(f"line {lineno}: confidence {raw_conf!r} must be 1, 2, 3 or empty")
                 continue

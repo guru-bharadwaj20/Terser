@@ -267,3 +267,12 @@ def test_parse_scores_rejects_non_finite_values() -> None:
     for bad in ("NaN", "Infinity", "-Infinity"):
         reply = '{"scores": {"correctness": ' + bad + '}, "hard_fail": false}'
         assert parse_scores(reply, ("correctness",)) is None
+
+
+def test_pointwise_rubric_section_speaks_of_one_response() -> None:
+    from terser.judge.pairwise import rubric_section
+
+    text = rubric_section("code", mode="pointwise")
+    assert "both responses" not in text
+    assert "loses unless" not in text
+    assert "both responses" in rubric_section("code")

@@ -445,7 +445,7 @@ def _cmd_report(args: argparse.Namespace) -> int:
             stats[name] = json.loads(path.read_text(encoding="utf-8"))
     df = protocol_rows(pilot, runs, stats)
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(args.out, index=False, float_format="%.4f")
+    df.to_csv(args.out, index=False, float_format="%.4f", lineterminator="\n")
     cols = [
         "run",
         "protocol",

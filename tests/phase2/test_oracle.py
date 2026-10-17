@@ -46,7 +46,7 @@ def tables() -> dict[str, pd.DataFrame]:
     cands = pd.DataFrame(
         [
             _cand("p1", "c1", "llm_high"),
-            _cand("p1", "c2", "operators"),
+            _cand("p1", "c2", "ops_FHC"),
             _cand("p1", "c3", "llm_low"),
             _cand("p1", "c4", "llm_medium", rejected=True),
             _cand("p2", "c1", "llm_high"),
@@ -98,9 +98,9 @@ def test_oracle_picks_shortest_preserved_with_method_tiebreak(tables):
     assert tuple(out.columns) == ORACLE_COLUMNS
     assert len(out) == 4
     r = _row(out, "p1", "qwen")
-    # c1 and c2 tie at 60 tokens; operators ranks before llm_high. c4 (10 tokens) is rejected.
+    # c1 and c2 tie at 60 tokens; ops_FHC ranks before llm_high. c4 (10 tokens) is rejected.
     assert r["oracle_candidate_id"] == "c2"
-    assert r["method"] == "operators"
+    assert r["method"] == "ops_FHC"
     assert r["savings"] == pytest.approx(0.4)
     assert r["n_candidates"] == 3 and r["n_labelled"] == 3 and r["n_preserved"] == 3
     assert not r["is_original"] and not r["stand_in"]

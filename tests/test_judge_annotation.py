@@ -249,3 +249,10 @@ def test_cli_round_trip(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> N
     gold = load_jsonl(gold_path)
     assert len(gold) == 300 and {g["gold_label"] for g in gold} == {"preserved"}
     assert main(["import", "--batch", str(out), "--sheet", "bad", "--out", str(gold_path)]) == 1
+
+
+def test_csv_cells_that_look_like_formulas_are_prefixed() -> None:
+    from terser.judge.annotation import _csv_safe
+
+    row = {"a": "- step one", "b": "=SUM(A1)", "c": "plain", "d": 3}
+    assert _csv_safe(row) == {"a": "'- step one", "b": "'=SUM(A1)", "c": "plain", "d": 3}

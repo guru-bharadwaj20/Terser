@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -301,11 +302,21 @@ def test_write_report_deterministic_lf(scenario: dict[str, Any], tmp_path: Path)
         assert b"\r\n" not in data
 
 
-def test_mlflow_loader(tmp_path: Path) -> None:
+@pytest.fixture
+def mlflow_uri(tmp_path: Path) -> Iterator[str]:
+    """A per-test SQLite tracking URI; the process-global URI is reset afterwards."""
     import mlflow
 
     uri = f"sqlite:///{(tmp_path / 'mlflow.db').as_posix()}"
     mlflow.set_tracking_uri(uri)
+    yield uri
+    mlflow.set_tracking_uri(None)
+
+
+def test_mlflow_loader(tmp_path: Path, mlflow_uri: str) -> None:
+    import mlflow
+
+    uri = mlflow_uri
     exp = mlflow.create_experiment("p2test", artifact_location=(tmp_path / "art").as_uri())
     with mlflow.start_run(experiment_id=exp, run_name="2-judge-q-full-0") as run:
         mlflow.set_tags({"task": "judge", "hardware": GPU, "stand_in": "false", "n_gpus": "2"})

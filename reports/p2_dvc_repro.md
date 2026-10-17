@@ -43,5 +43,8 @@ and kept). Every downstream stage, the frozen test split (sha256 above) and all 
 built from the locked `clean.jsonl`, so `collect` is deliberately **not** re-run: `split` would
 fail its `--expect-test-sha256` check and every label would need regenerating. The locked
 dataset dropped all 24 PII-flagged rows, so it carries no unscrubbed PII.
+[p2_collect_stats.json](p2_collect_stats.json) is the locked stage's output: its `pii_flagged`
+key (those 24 dropped rows) is not produced by the current `collect.py`, which reports
+`pii:<type>` counts for scrubbed rows instead.
 `dvc repro --dry --allow-missing` (CI) still passes. A future dataset version should re-run the
 whole pipeline from `collect` and re-freeze the test split.
