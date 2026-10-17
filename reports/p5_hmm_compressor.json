@@ -1,0 +1,247 @@
+{
+  "methods": {
+    "hmm": {
+      "n": 500,
+      "targets": [
+        "Qwen/Qwen2.5-7B-Instruct",
+        "microsoft/Phi-3.5-mini-instruct"
+      ],
+      "labelled_pairs": 1000,
+      "missing_labels": 0,
+      "identity": 181,
+      "not_shorter": 181,
+      "median_savings": 0.16480354407320003,
+      "mean_savings": 0.2314798127954786,
+      "median_savings_by_category": {
+        "code": 0.29850746268656714,
+        "creative": 0.0,
+        "explain": 0.0,
+        "fact": 0.09494494494494493,
+        "reason": 0.37362637362637363,
+        "transform": 0.21370967741935487
+      },
+      "preserved": 0.554,
+      "preserved_by_target": {
+        "Qwen/Qwen2.5-7B-Instruct": 0.58,
+        "microsoft/Phi-3.5-mini-instruct": 0.528
+      },
+      "preserved_by_category": {
+        "code": 0.39690721649484534,
+        "creative": 0.8266666666666667,
+        "explain": 0.8888888888888888,
+        "fact": 0.5384615384615384,
+        "reason": 0.6428571428571429,
+        "transform": 0.24731182795698925
+      },
+      "preserved_by_target_category": {
+        "Qwen/Qwen2.5-7B-Instruct": {
+          "code": 0.4536082474226804,
+          "creative": 0.84,
+          "explain": 0.8888888888888888,
+          "fact": 0.5480769230769231,
+          "reason": 0.6883116883116883,
+          "transform": 0.26881720430107525
+        },
+        "microsoft/Phi-3.5-mini-instruct": {
+          "code": 0.3402061855670103,
+          "creative": 0.8133333333333334,
+          "explain": 0.8888888888888888,
+          "fact": 0.5288461538461539,
+          "reason": 0.5974025974025974,
+          "transform": 0.22580645161290322
+        }
+      }
+    },
+    "op_F": {
+      "n": 500,
+      "targets": [
+        "Qwen/Qwen2.5-7B-Instruct",
+        "microsoft/Phi-3.5-mini-instruct"
+      ],
+      "labelled_pairs": 1000,
+      "missing_labels": 0,
+      "identity": 344,
+      "not_shorter": 344,
+      "median_savings": 0.0,
+      "mean_savings": 0.014525765949634277,
+      "median_savings_by_category": {
+        "code": 0.0,
+        "creative": 0.0,
+        "explain": 0.0,
+        "fact": 0.0,
+        "reason": 0.0,
+        "transform": 0.0
+      },
+      "preserved": 0.895,
+      "preserved_by_target": {
+        "Qwen/Qwen2.5-7B-Instruct": 0.884,
+        "microsoft/Phi-3.5-mini-instruct": 0.906
+      },
+      "preserved_by_category": {
+        "code": 0.8762886597938144,
+        "creative": 0.8733333333333333,
+        "explain": 0.9074074074074074,
+        "fact": 0.875,
+        "reason": 0.9415584415584416,
+        "transform": 0.9086021505376344
+      },
+      "preserved_by_target_category": {
+        "Qwen/Qwen2.5-7B-Instruct": {
+          "code": 0.8762886597938144,
+          "creative": 0.8666666666666667,
+          "explain": 0.8888888888888888,
+          "fact": 0.8461538461538461,
+          "reason": 0.935064935064935,
+          "transform": 0.9032258064516129
+        },
+        "microsoft/Phi-3.5-mini-instruct": {
+          "code": 0.8762886597938144,
+          "creative": 0.88,
+          "explain": 0.9259259259259259,
+          "fact": 0.9038461538461539,
+          "reason": 0.948051948051948,
+          "transform": 0.9139784946236559
+        }
+      }
+    }
+  },
+  "operator_method": "op_F",
+  "verdict": {
+    "median_savings_ok": true,
+    "targets_preserved_ok": [],
+    "targets_beats_op": [],
+    "qualifying_targets": [],
+    "per_target": {
+      "Qwen/Qwen2.5-7B-Instruct": {
+        "preservation_hmm": 0.58,
+        "preservation_op": 0.884,
+        "matched_preservation": 0.884,
+        "mixed": "hmm",
+        "savings_hmm": 0.0,
+        "savings_op": 0.0,
+        "hmm_beats_op": false
+      },
+      "microsoft/Phi-3.5-mini-instruct": {
+        "preservation_hmm": 0.528,
+        "preservation_op": 0.906,
+        "matched_preservation": 0.906,
+        "mixed": "hmm",
+        "savings_hmm": 0.0,
+        "savings_op": 0.0,
+        "hmm_beats_op": false
+      }
+    },
+    "pooled": {
+      "preservation_hmm": 0.554,
+      "preservation_op": 0.895,
+      "matched_preservation": 0.895,
+      "mixed": "hmm",
+      "savings_hmm": 0.0,
+      "savings_op": 0.0,
+      "hmm_beats_op": false
+    },
+    "c5_6": false
+  },
+  "prep": {
+    "n_prompts": 500,
+    "categories": {
+      "code": 97,
+      "creative": 75,
+      "explain": 54,
+      "fact": 104,
+      "reason": 77,
+      "transform": 93
+    },
+    "seed": 0,
+    "val": "data/processed/splits/val.jsonl",
+    "hmm": {
+      "model": "supervised MLE, Laplace 1 (row 5.3.2)",
+      "train_prompts": 1262,
+      "train_tokens": 129380
+    },
+    "operator": "F",
+    "operator_method": "op_F",
+    "operator_rule": "max mean Phase 9 stop reward (LightGBM gate >= 0.5) on 300 train prompts, seed 0",
+    "operator_table": [
+      {
+        "operator": "F",
+        "n": 300,
+        "changed": 78,
+        "median_savings": 0.0,
+        "mean_savings": 0.011992460409392119,
+        "gate_degraded": 0.0,
+        "mean_reward": 1.1992460409392118
+      },
+      {
+        "operator": "H",
+        "n": 300,
+        "changed": 95,
+        "median_savings": 0.0,
+        "mean_savings": 0.009815633625301672,
+        "gate_degraded": 0.0,
+        "mean_reward": 0.9815633625301674
+      },
+      {
+        "operator": "D",
+        "n": 300,
+        "changed": 15,
+        "median_savings": 0.0,
+        "mean_savings": 0.009941502409403447,
+        "gate_degraded": 0.01,
+        "mean_reward": -0.00584975905965526
+      },
+      {
+        "operator": "I",
+        "n": 300,
+        "changed": 55,
+        "median_savings": 0.0,
+        "mean_savings": 0.008063290718378774,
+        "gate_degraded": 0.0,
+        "mean_reward": 0.8063290718378774
+      },
+      {
+        "operator": "L",
+        "n": 300,
+        "changed": 0,
+        "median_savings": 0.0,
+        "mean_savings": 0.0,
+        "gate_degraded": 0.0,
+        "mean_reward": 0.0
+      },
+      {
+        "operator": "C",
+        "n": 300,
+        "changed": 0,
+        "median_savings": 0.0,
+        "mean_savings": 0.0,
+        "gate_degraded": 0.0,
+        "mean_reward": 0.0
+      },
+      {
+        "operator": "S",
+        "n": 300,
+        "changed": 4,
+        "median_savings": 0.0,
+        "mean_savings": 0.00012939817298993146,
+        "gate_degraded": 0.0,
+        "mean_reward": 0.012939817298993147
+      }
+    ],
+    "pre_judge": {
+      "hmm": {
+        "n": 500,
+        "identity": 181,
+        "not_shorter": 181,
+        "median_savings": 0.16480354407320003,
+        "mean_savings": 0.2314798127954786
+      },
+      "op_F": {
+        "n": 500,
+        "identity": 344,
+        "not_shorter": 344,
+        "median_savings": 0.0,
+        "mean_savings": 0.014525765949634277
+      }
+    }
+  }
+}
