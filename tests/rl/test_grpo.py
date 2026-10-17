@@ -14,6 +14,9 @@ from terser.models.rl.grpo import (
     group_advantages,
     is_natural_language,
     make_reward,
+    make_reward_v2,
+    protected_items,
+    retention,
 )
 from terser.models.rl.report import build, gate_precision, wilson
 
@@ -46,6 +49,53 @@ def test_reward_is_savings_times_gate_pass() -> None:
     assert out[0]["reward"] == pytest.approx(100 * (1 - 3 / 8)) and out[0]["gate_pass"]
     assert out[1]["reward"] == 0.0 and not out[1]["gate_pass"] and out[1]["savings_pct"] > 0
     assert out[2]["fell_back"] and out[2]["reward"] == 0.0 and not out[2]["gate_pass"]
+
+
+def test_protected_items_and_retention() -> None:
+    p = 'Write exactly 3 bullet points about `max_len` in "config.yaml", not JSON.'
+    items = protected_items(p)
+    assert {"3", "`max_len`", '"config.yaml"', "json", "exactly", "bullet", "not"} <= items
+    assert retention(p, p) == 1.0
+    assert retention(p, "Write about config.") < 0.3
+    assert retention("hello there friend", "hi") == 1.0  # nothing to protect
+
+
+def test_reward_v2_is_preservation_aware() -> None:
+    count = lambda t: len(t.split())  # noqa: E731
+    sims = {"sort the 3 numbers": 0.97, "sort": 0.97, "sort the 3 numbers ok": 0.80}
+    reward = make_reward_v2(
+        count,
+        lambda rows: [0.0 if "ok" not in r["rewrite"] else 0.5 for r in rows],
+        lambda rows: [sims[r["rewrite"]] for r in rows],
+        threshold=0.3,
+        gate_gamma=1.0,
+        sim_lo=0.85,
+        sim_hi=0.95,
+        keep_power=1.0,
+        savings_cap=50.0,
+    )
+    p = "please could you kindly sort the 3 numbers for me now"
+    out = reward([p] * 4, ["sort the 3 numbers", "sort", "sort the 3 numbers ok", p])
+    assert out[0]["reward"] == pytest.approx(50.0) and out[0]["gate_pass"]  # capped savings
+    assert out[0]["keep"] == 1.0 and out[0]["similarity"] == 0.97
+    assert out[1]["keep"] == 0.0 and out[1]["reward"] == 0.0  # dropped the number
+    assert out[2]["reward"] == 0.0 and not out[2]["gate_pass"]  # similarity below sim_lo
+    assert out[3]["fell_back"] and out[3]["reward"] == 0.0
+
+
+def test_tiny_grpo_v2_smoke(tmp_path: Path) -> None:
+    pytest.importorskip("torch")
+    from terser.config import load_config
+    from terser.models.rl.grpo import run
+
+    cfg = load_config(
+        ["experiment=grpo_tiny", "hardware=cpu", f"experiment.params.output_dir={tmp_path}",
+         "+experiment.params.reward=v2"]  # fmt: skip
+    )
+    summary = run(cfg)
+    assert summary["reward"] == "v2" and summary["steps_done"] == 3
+    s = json.loads((tmp_path / "audit" / "step_00002.jsonl").read_text().splitlines()[0])
+    assert "reward" in s and "gate_pass" in s
 
 
 def test_tiny_grpo_smoke(tmp_path: Path) -> None:
