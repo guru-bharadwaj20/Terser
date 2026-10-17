@@ -274,7 +274,7 @@ statistical model.
 | C1.1 | ADR-0002 merged | Reviewed by ≥ 1 other contributor | ❌ |
 | C1.2 | Operator safety | Every operator is a no-op on 50 already-efficient prompts (100%) | ✅ |
 | C1.3 | Version space | Non-empty for **≥ 4 of 6** categories; each collapse explained by named conflicting examples | ❌ |
-| C1.4 | Savings exist (non-blocking, [ADR-0004](docs/decisions/ADR-0004-plan-revision.md)) | Median best-single-operator savings **≥ 10%** on the pilot set. Measured 1.7%: recorded negative result; savings must come from generative rewriting, gated at C2.7 | ❌ |
+| C1.4 | Savings exist (non-blocking as proposed in [ADR-0004](docs/decisions/ADR-0004-plan-revision.md), still Proposed) | Median best-single-operator savings **≥ 10%** on the pilot set. Measured 1.7%: recorded negative result; savings must come from generative rewriting, gated at C2.7 | ❌ |
 | C1.5 | Tokenizer dependence | Spearman ρ < 0.9 for ≥ 1 tokenizer pair **or** documented finding that tokenizers agree (Phase 8 then ships a single target-agnostic rewriter) | ✅ |
 
 ---

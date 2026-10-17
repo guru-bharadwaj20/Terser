@@ -1,6 +1,6 @@
 # Checkpoint status
 
-Status of all 63 checkpoints as of 2026-10-17, read from the ✅ / ❌ marks in [CONTRIBUTING.md](../../CONTRIBUTING.md): **33 pass, 30 open**. Open checkpoints are either measured failures (negative results, kept as reports), blocked on human annotation, or waiting on an earlier checkpoint.
+Status of all 63 checkpoints as of 2026-10-25, read from the ✅ / ❌ marks in [CONTRIBUTING.md](../../CONTRIBUTING.md): **33 pass, 30 open**. Open checkpoints are either measured failures (negative results, kept as reports), blocked on human annotation, or waiting on an earlier checkpoint.
 
 | checkpoint | name | status | evidence |
 |---|---|---|---|
@@ -21,7 +21,7 @@ Status of all 63 checkpoints as of 2026-10-17, read from the ✅ / ❌ marks in 
 | C2.6 | Position bias | ❌ | raw A/B disagreement 40.9% (≤ 10%); labels use order-averaged `pairwise_avg` ([p2_judge_bias.md](../../reports/p2_judge_bias.md)) |
 | C2.7 | **Go / no-go: oracle savings** | ✅ | see the phase checkpoint section |
 | C2.8 | Class balance | ✅ | see the phase checkpoint section |
-| C2.9 | Reproducibility | ✅ | respond / judge / label are not DVC stages; `collect` deliberately stale since 2.1.3 ([p2_dvc_repro.md](../../reports/p2_dvc_repro.md)) |
+| C2.9 | Reproducibility | ✅ | respond and label (judge + label) are DVC stages in `dvc.yaml`; `collect` deliberately stale since 2.1.3 ([p2_dvc_repro.md](../../reports/p2_dvc_repro.md)) |
 | C3.1 | Metric implementations | ✅ | see the phase checkpoint section |
 | C3.2 | Leakage demonstration | ✅ | see the phase checkpoint section |
 | C3.3 | Quality gate (best of Tree / LR / KNN) | ✅ | tree (depth 4, min leaf 10) AUC 0.758, specificity 0.405 at sensitivity 0.95 (≥ 0.75, ≥ 0.40); the top-AUC KNN k = 51 (0.763) misses specificity (0.377) ([p3_gate_checkpoint.md](../../reports/p3_gate_checkpoint.md)) |
@@ -55,7 +55,7 @@ Status of all 63 checkpoints as of 2026-10-17, read from the ✅ / ❌ marks in 
 | C9.2 | Tabular policy value | ❌ | fail: RL greedy 0.0% median savings at 89.3% preserved vs fixed order FHIS 1.4% at 77.8% on 300 val prompts; preservation equal or better (+11.5 pp), savings 1.4 pp lower ([p9_judge_verification.md](../../reports/p9_judge_verification.md)) |
 | C10.1 | Method comparison | ✅ | 4 GBM methods + 2 MLP methods, 60 trials x 5 seeds ([p10_hpo.md](../../reports/p10_hpo.md)) |
 | C10.2 | Gate improvement | ✅ | +0.0095 AUC, documented plateau ([p10_hpo.md](../../reports/p10_hpo.md)) |
-| C10.3 | Rewriter improvement | ✅ | depends on a rewriter that passes C8.3 |
+| C10.3 | Rewriter improvement | ✅ | documented plateau: chosen trial `hpo08` and the untuned rung both fail C8.3 ([p10_rewriter_hpo.md](../../reports/p10_rewriter_hpo.md)) |
 | C10.4 | No test leakage | ✅ | test-set isolation audit green (`python -m terser.hpo.audit --scan src/terser`) |
 | C11.1 | End-to-end orchestration | ✅ | fresh clone, CPU: data_flow(label=false) -> train_classical -> evaluate -> promote all Completed unattended in 585 s, after two fixes (dvc unprotect, registry rebuild); 5 DVC outputs missing from the shared remote were pulled from the workstation cache ([p11_ct_and_fresh_clone.md](../../reports/p11_ct_and_fresh_clone.md)) |
 | C11.2 | Fast-path latency | ✅ | see the phase checkpoint section |
@@ -74,4 +74,4 @@ C1.1, C2.3, C2.4 and C2.5 need a second reviewer or human labels. No script outp
 
 ## Critical path
 
-C8.3 (rewriter main gate) blocks C8.4, C8.5, C9.3-C9.5, C10.3, C11.3 and C11.4. The SFT targets capped savings near 10%. The augmented `llm_max` / `llm_min` targets (`configs/experiment/p8_target_aug.yaml`, train/val prompts only) are judged and built into `data/processed/sft_v2` (median target savings 21.4% train, 17.4% val); the rewriter is retrained on it next.
+C8.3 (rewriter main gate) blocks C8.4, C8.5, C9.3-C9.5, C10.3, C11.3 and C11.4. The SFT targets capped savings near 10%. The augmented `llm_max` / `llm_min` targets (`configs/experiment/p8_target_aug.yaml`, train/val prompts only) are judged and built into `data/processed/sft_v2` (median target savings 21.4% train, 17.4% val); the v2 rungs retrained on it (registry v7–v9) still fail C8.3.
