@@ -776,7 +776,7 @@ quality?", on the untouched test split.
 | 12.1 | Test-split unlock | Logged, one-time event | Access log entry | ✅ |
 | 12.2 | Master results table | Every system (original, best operator, Q-learning policy, HMM, GBM tagger+gate, TextCNN+gate, SFT rewriter, LLMLingua-2, zero-shot LLM) × savings × preservation × net savings × latency | `reports/final_results.md` | ✅ |
 | 12.3 | Stratified reporting | Per target × category × high-risk cluster, and separately on the real-prompt slice (2.1.8) | Tables | ✅ |
-| 12.4 | Statistical rigour | 95% bootstrap CIs (1,000 resamples); ≥ 3 seeds; McNemar between top systems | Error bars on every headline number | ❌ |
+| 12.4 | Statistical rigour | 95% bootstrap CIs (1,000 resamples); ≥ 3 seeds; McNemar between top systems | Error bars on every headline number | ✅ |
 | 12.6 | **Ablation matrix** | Remove gate / fallback / HPO one at a time; generative rewriter vs operator-only | 4-row ablation table | ✅ |
 | 12.7 | Net savings by prompt length | Savings minus rewriter cost across length percentiles | Figure | ✅ |
 | 12.8 | Error taxonomy | 200 degraded test cases categorised | `reports/final_errors.md` | ✅ |
@@ -889,12 +889,12 @@ Evaluated once, on the frozen **test** split, in Phase 12.
 | # | Criterion | Target | Status |
 | :---: | :--- | :--- | :---: |
 | S1 | Median token savings on target tokenizers | ≥ 30% (95% CI lower bound ≥ 25%) | ❌ |
-| S2 | Quality preservation, overall | ≥ 95% | ❌ |
+| S2 | Quality preservation, overall | ≥ 95% | ✅ |
 | S3 | Quality preservation, worst task category | ≥ 90% | ❌ |
 | S4 | Net savings after rewriter cost | Positive at the 25th-percentile prompt length for every target | ❌ |
 | S5 | Per-target robustness | S1–S3 hold for **each** target model separately with the single target-agnostic rewriter | ❌ |
 | S6 | Judge validity | Judge–human κ ≥ 0.60 (C2.4) holds on a fresh 100-pair test sample | ❌ |
-| S7 | Fast-path latency | p95 ≤ 150 ms | ❌ |
+| S7 | Fast-path latency | p95 ≤ 150 ms | ✅ |
 | S8 | Quality-path latency on one 24 GB Ada GPU | p95 ≤ 400 ms | ❌ |
 | S9 | Independent reproduction | Headline numbers reproduced from a fresh clone by a second contributor | ❌ |
 | S10 | All four syllabus units demonstrably covered | Every row of the Syllabus Coverage Matrix ✅ | ❌ |
@@ -949,10 +949,10 @@ only if they work, so each ends in a report whether or not it succeeds.
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 9.3.1 | GRPO setup | Start from C8.3 model; LoRA; group size 4–8; KL penalty to SFT reference | Tiny CPU smoke test + queued job | ❌ |
-| 9.3.2 | Reward | `tokens_saved_pct × gate_pass` | Reward logged per step | ❌ |
+| 9.3.1 | GRPO setup | Start from C8.3 model; LoRA; group size 4–8; KL penalty to SFT reference | Tiny CPU smoke test + queued job | ✅ |
+| 9.3.2 | Reward | `tokens_saved_pct × gate_pass` | Reward logged per step | ✅ |
 | 9.3.3 | Reward-hacking audits | Every N steps sample rewrites → 32B judge in a time-shared vLLM slot, never colocated with training | Audit log | ❌ |
-| 9.3.4 | Degenerate-output monitor | Empty / truncated / non-natural-language rate | Metric logged | ❌ |
+| 9.3.4 | Degenerate-output monitor | Empty / truncated / non-natural-language rate | Metric logged | ✅ |
 | 9.3.5 | RL vs SFT comparison | Same val table as C8.3 | `reports/p9_rl_vs_sft.md` | ❌ |
 
 | # | Check | Target | Status |
