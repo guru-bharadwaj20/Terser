@@ -61,7 +61,7 @@ def test_stump_search_considers_the_constant_negative_stump() -> None:
     X = np.ones((5, 1))  # a degenerate feature with no valid cut
     y = np.array([-1.0, -1.0, -1.0, -1.0, 1.0])
     stump, eps = fit_stump(X, y, np.ones(5))
-    assert eps == 0.2 and stump.polarity == -1
+    assert abs(eps - 0.2) < 1e-12 and stump.polarity == -1
 
 
 def test_logistic_max_iter_zero_keeps_initialisation() -> None:
