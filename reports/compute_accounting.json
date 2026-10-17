@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-17T18:11:02+00:00",
+  "generated_at": "2026-10-20T01:48:16+00:00",
   "board_power_w": {
     "rtx4500ada": 210.0,
     "rtx4090": 450.0
@@ -944,6 +944,1060 @@
         "vllm_aug_judge"
       ],
       "note": "restarted at 05:37; wall_seconds and summary tokens cover the restarted run"
+    },
+    {
+      "id": "p8-sft-1.5b-v2",
+      "phase": 8,
+      "row": "8.3.4",
+      "what": "SFT Qwen2.5-1.5B LoRA v2, 3,000 steps",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 1873.0,
+      "active_source": "first-last timestamp of logs/sft_qwen15b_lora_v2.log",
+      "generated_tokens": null,
+      "tokens_source": "n/a (training)",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "sft15v2"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-sft-3b-v2",
+      "phase": 8,
+      "row": "8.3.4",
+      "what": "SFT Qwen2.5-3B LoRA v2, 1,000 steps",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 1193.0,
+      "active_source": "first-last timestamp of logs/sft_qwen3b_lora_v2.log",
+      "generated_tokens": null,
+      "tokens_source": "n/a (training)",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "sft3bv2"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-sft-7b-v2",
+      "phase": 8,
+      "row": "8.3.5",
+      "what": "SFT Qwen2.5-7B QLoRA v2, 1,000 steps",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 7338.0,
+      "active_source": "first-last timestamp of logs/sft_qwen7b_qlora_v2.log",
+      "generated_tokens": null,
+      "tokens_source": "n/a (training)",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "sft7bv2"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-gen-1.5b-v2",
+      "phase": 8,
+      "row": "8.3.4",
+      "what": "val rewrites, 285 prompts (1.5B v2)",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 125.81239846000244,
+      "active_source": "data/interim/rewrites/sft15v2.val.jsonl: sum latency_s",
+      "generated_tokens": 21933,
+      "tokens_source": "data/interim/rewrites/sft15v2.val.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "reported_tokens": 21933,
+      "reported_tokens_source": "data/interim/rewrites/sft15v2.val.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [],
+      "note": ""
+    },
+    {
+      "id": "p8-gen-3b-v2",
+      "phase": 8,
+      "row": "8.3.4",
+      "what": "val rewrites, 285 prompts (3B v2)",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 278.5505486110087,
+      "active_source": "data/interim/rewrites/sft3bv2.val.jsonl: sum latency_s",
+      "generated_tokens": 26067,
+      "tokens_source": "data/interim/rewrites/sft3bv2.val.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "reported_tokens": 26067,
+      "reported_tokens_source": "data/interim/rewrites/sft3bv2.val.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [],
+      "note": ""
+    },
+    {
+      "id": "p8-gen-7b-v2",
+      "phase": 8,
+      "row": "8.3.5",
+      "what": "val rewrites, 285 prompts (7B QLoRA v2)",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 488.1319005779951,
+      "active_source": "data/interim/rewrites/sft7bv2.val.jsonl: sum latency_s",
+      "generated_tokens": 30933,
+      "tokens_source": "data/interim/rewrites/sft7bv2.val.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "reported_tokens": 30933,
+      "reported_tokens_source": "data/interim/rewrites/sft7bv2.val.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [],
+      "note": ""
+    },
+    {
+      "id": "p8-v2-qwen",
+      "phase": 8,
+      "row": "8.3.4",
+      "what": "val target outputs, v2 rungs (Qwen2.5-7B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "attempt": "final",
+      "group": "p8-v2",
+      "active_s": 128.80395048100036,
+      "active_source": "logs/v2_resp_qwen.log: wall_seconds",
+      "generated_tokens": 135794,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 135794,
+      "reported_tokens_source": "logs/v2_resp_qwen.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 403,
+        "input_tokens": 35919,
+        "output_tokens": 135794,
+        "busy_s": 124.947904,
+        "window": [
+          "2026-10-17T09:22:39+00:00",
+          "2026-10-17T09:26:22+00:00"
+        ],
+        "window_source": "logs/vllm_v2_qwen.log span + 30 s",
+        "first_call": "2026-10-17T09:23:47.255691+00:00",
+        "last_call": "2026-10-17T09:25:52.203595+00:00"
+      },
+      "sessions": [
+        "vllm_v2_qwen"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-v2-phi",
+      "phase": 8,
+      "row": "8.3.4",
+      "what": "val target outputs, v2 rungs (Phi-3.5)",
+      "hardware": "rtx4500ada",
+      "model": "microsoft/Phi-3.5-mini-instruct",
+      "attempt": "final",
+      "group": "p8-v2",
+      "active_s": 143.07266736799647,
+      "active_source": "logs/v2_resp_phi.log: wall_seconds",
+      "generated_tokens": 170703,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 170703,
+      "reported_tokens_source": "logs/v2_resp_phi.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 403,
+        "input_tokens": 28595,
+        "output_tokens": 170703,
+        "busy_s": 139.888958,
+        "window": [
+          "2026-10-17T09:26:06+00:00",
+          "2026-10-17T09:29:32+00:00"
+        ],
+        "window_source": "logs/vllm_v2_phi.log span + 30 s",
+        "first_call": "2026-10-17T09:26:42.449760+00:00",
+        "last_call": "2026-10-17T09:29:02.338718+00:00"
+      },
+      "sessions": [
+        "vllm_v2_phi"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-v2-judge",
+      "phase": 8,
+      "row": "8.3.4",
+      "what": "val judge, v2 rungs (32B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "p8-v2",
+      "active_s": 1193.9922781239984,
+      "active_source": "logs/v2_judge.log: wall_seconds",
+      "generated_tokens": 70510,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 70510,
+      "reported_tokens_source": "logs/v2_judge.log: generated_tokens",
+      "labels": 1140,
+      "labels_source": "logs/v2_judge.log: records",
+      "ledger": {
+        "calls": 1592,
+        "input_tokens": 2570042,
+        "output_tokens": 70510,
+        "busy_s": 1180.205843,
+        "window": [
+          "2026-10-17T09:29:15+00:00",
+          "2026-10-17T09:50:33+00:00"
+        ],
+        "window_source": "logs/vllm_v2_judge.log span + 30 s",
+        "first_call": "2026-10-17T09:30:22.280743+00:00",
+        "last_call": "2026-10-17T09:50:02.486586+00:00"
+      },
+      "sessions": [
+        "vllm_v2_judge"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-q7-7b-qwen",
+      "phase": 8,
+      "row": "8.3.5",
+      "what": "val target outputs, 7B v2 rung (Qwen2.5-7B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "attempt": "final",
+      "group": "p8-q7",
+      "active_s": 51.09666137599561,
+      "active_source": "logs/q7_resp_7b_qwen2.5-7b.log: wall_seconds",
+      "generated_tokens": 39721,
+      "tokens_source": "logs/q7_resp_7b_qwen2.5-7b.log: generated_tokens",
+      "reported_tokens": 39721,
+      "reported_tokens_source": "logs/q7_resp_7b_qwen2.5-7b.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 797,
+        "input_tokens": 108197,
+        "output_tokens": 245183,
+        "busy_s": 310.31503,
+        "window": [
+          "2026-10-17T18:04:01+00:00",
+          "2026-10-17T18:10:27+00:00"
+        ],
+        "window_source": "logs/vllm_q7_qwen2.5-7b.log span + 30 s",
+        "first_call": "2026-10-17T18:04:46.664212+00:00",
+        "last_call": "2026-10-17T18:09:56.979242+00:00"
+      },
+      "sessions": [
+        "vllm_q7_qwen"
+      ],
+      "note": "one server per target ran the 7b, hmm and rl sets; its ledger window (all three sets) is on the 7b stage"
+    },
+    {
+      "id": "p8-q7-7b-phi",
+      "phase": 8,
+      "row": "8.3.5",
+      "what": "val target outputs, 7B v2 rung (Phi-3.5)",
+      "hardware": "rtx4500ada",
+      "model": "microsoft/Phi-3.5-mini-instruct",
+      "attempt": "final",
+      "group": "p8-q7",
+      "active_s": 47.71814123100194,
+      "active_source": "logs/q7_resp_7b_phi3.5.log: wall_seconds",
+      "generated_tokens": 46616,
+      "tokens_source": "logs/q7_resp_7b_phi3.5.log: generated_tokens",
+      "reported_tokens": 46616,
+      "reported_tokens_source": "logs/q7_resp_7b_phi3.5.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 797,
+        "input_tokens": 97770,
+        "output_tokens": 303756,
+        "busy_s": 281.080231,
+        "window": [
+          "2026-10-17T18:10:20+00:00",
+          "2026-10-17T18:16:31+00:00"
+        ],
+        "window_source": "logs/vllm_q7_phi3.5.log span + 30 s",
+        "first_call": "2026-10-17T18:11:19.895839+00:00",
+        "last_call": "2026-10-17T18:16:00.976070+00:00"
+      },
+      "sessions": [
+        "vllm_q7_phi"
+      ],
+      "note": "one server per target ran the 7b, hmm and rl sets; its ledger window (all three sets) is on the 7b stage"
+    },
+    {
+      "id": "p8-q7-hmm-qwen",
+      "phase": 8,
+      "row": "C5.6",
+      "what": "val target outputs, HMM rewriter set (Qwen2.5-7B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "attempt": "final",
+      "group": "p8-q7",
+      "active_s": 176.54025741100486,
+      "active_source": "logs/q7_resp_hmm_qwen2.5-7b.log: wall_seconds",
+      "generated_tokens": 147468,
+      "tokens_source": "logs/q7_resp_hmm_qwen2.5-7b.log: generated_tokens",
+      "reported_tokens": 147468,
+      "reported_tokens_source": "logs/q7_resp_hmm_qwen2.5-7b.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "vllm_q7_qwen"
+      ],
+      "note": "shares the 7b server"
+    },
+    {
+      "id": "p8-q7-hmm-phi",
+      "phase": 8,
+      "row": "C5.6",
+      "what": "val target outputs, HMM rewriter set (Phi-3.5)",
+      "hardware": "rtx4500ada",
+      "model": "microsoft/Phi-3.5-mini-instruct",
+      "attempt": "final",
+      "group": "p8-q7",
+      "active_s": 164.34239899200475,
+      "active_source": "logs/q7_resp_hmm_phi3.5.log: wall_seconds",
+      "generated_tokens": 184605,
+      "tokens_source": "logs/q7_resp_hmm_phi3.5.log: generated_tokens",
+      "reported_tokens": 184605,
+      "reported_tokens_source": "logs/q7_resp_hmm_phi3.5.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "vllm_q7_phi"
+      ],
+      "note": "shares the 7b server"
+    },
+    {
+      "id": "p8-q7-rl-qwen",
+      "phase": 8,
+      "row": "C9.2",
+      "what": "val target outputs, RL (Q-learning) operator set (Qwen2.5-7B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "attempt": "final",
+      "group": "p8-q7",
+      "active_s": 81.61747555799957,
+      "active_source": "logs/q7_resp_rl_qwen2.5-7b.log: wall_seconds",
+      "generated_tokens": 57994,
+      "tokens_source": "logs/q7_resp_rl_qwen2.5-7b.log: generated_tokens",
+      "reported_tokens": 57994,
+      "reported_tokens_source": "logs/q7_resp_rl_qwen2.5-7b.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "vllm_q7_qwen"
+      ],
+      "note": "shares the 7b server"
+    },
+    {
+      "id": "p8-q7-rl-phi",
+      "phase": 8,
+      "row": "C9.2",
+      "what": "val target outputs, RL (Q-learning) operator set (Phi-3.5)",
+      "hardware": "rtx4500ada",
+      "model": "microsoft/Phi-3.5-mini-instruct",
+      "attempt": "final",
+      "group": "p8-q7",
+      "active_s": 69.77901701800147,
+      "active_source": "logs/q7_resp_rl_phi3.5.log: wall_seconds",
+      "generated_tokens": 72535,
+      "tokens_source": "logs/q7_resp_rl_phi3.5.log: generated_tokens",
+      "reported_tokens": 72535,
+      "reported_tokens_source": "logs/q7_resp_rl_phi3.5.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "vllm_q7_phi"
+      ],
+      "note": "shares the 7b server"
+    },
+    {
+      "id": "p8-q7-judge-7b",
+      "phase": 8,
+      "row": "8.3.5",
+      "what": "val judge, 7B v2 rung (32B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "p8-q7",
+      "active_s": 391.66382390799845,
+      "active_source": "logs/q7_judge_7b.log: wall_seconds",
+      "generated_tokens": 20454,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 20077,
+      "reported_tokens_source": "logs/q7_judge_7b.log: generated_tokens",
+      "labels": 570,
+      "labels_source": "logs/q7_judge_7b.log: records",
+      "ledger": {
+        "calls": 481,
+        "input_tokens": 771607,
+        "output_tokens": 20454,
+        "busy_s": 402.09093,
+        "window": [
+          "2026-10-17T18:16:00+00:00",
+          "2026-10-17T18:24:30+00:00"
+        ],
+        "window_source": "fixed window (see STAGES)",
+        "first_call": "2026-10-17T18:17:45.444047+00:00",
+        "last_call": "2026-10-17T18:24:27.534977+00:00"
+      },
+      "sessions": [
+        "vllm_q7_judge"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-q7-judge-hmm",
+      "phase": 8,
+      "row": "C5.6",
+      "what": "val judge, HMM rewriter set (32B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "p8-q7",
+      "active_s": 1448.4189394810019,
+      "active_source": "logs/q7_judge_hmm.log: wall_seconds",
+      "generated_tokens": 87139,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 87557,
+      "reported_tokens_source": "logs/q7_judge_hmm.log: generated_tokens",
+      "labels": 2000,
+      "labels_source": "logs/q7_judge_hmm.log: records",
+      "ledger": {
+        "calls": 1958,
+        "input_tokens": 3068646,
+        "output_tokens": 87139,
+        "busy_s": 1439.29852,
+        "window": [
+          "2026-10-17T18:24:30+00:00",
+          "2026-10-17T18:48:30+00:00"
+        ],
+        "window_source": "fixed window (see STAGES)",
+        "first_call": "2026-10-17T18:24:30.238004+00:00",
+        "last_call": "2026-10-17T18:48:29.536524+00:00"
+      },
+      "sessions": [
+        "vllm_q7_judge"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-q7-judge-rl",
+      "phase": 8,
+      "row": "C9.2",
+      "what": "val judge, RL operator set (32B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "p8-q7",
+      "active_s": 535.7703065550013,
+      "active_source": "logs/q7_judge_rl.log: wall_seconds",
+      "generated_tokens": 30311,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 30270,
+      "reported_tokens_source": "logs/q7_judge_rl.log: generated_tokens",
+      "labels": 1200,
+      "labels_source": "logs/q7_judge_rl.log: records",
+      "ledger": {
+        "calls": 703,
+        "input_tokens": 1118937,
+        "output_tokens": 30311,
+        "busy_s": 556.827677,
+        "window": [
+          "2026-10-17T18:48:30+00:00",
+          "2026-10-17T18:58:20+00:00"
+        ],
+        "window_source": "fixed window (see STAGES)",
+        "first_call": "2026-10-17T18:48:30.895457+00:00",
+        "last_call": "2026-10-17T18:57:47.723134+00:00"
+      },
+      "sessions": [
+        "vllm_q7_judge"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p10-hpo-trials",
+      "phase": 10,
+      "row": "10.x",
+      "what": "Optuna LoRA HPO, 12 trials (5 complete, 7 pruned)",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 16666.410946,
+      "active_source": "experiments/p10_rewriter_hpo/optuna.db: sum of trial datetime_complete - datetime_start",
+      "generated_tokens": null,
+      "tokens_source": "n/a (training)",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "hpo_trials"
+      ],
+      "note": "val rewrites of hpo00/02/08 generated inside the trials"
+    },
+    {
+      "id": "p10-hpo-qwen",
+      "phase": 10,
+      "row": "10.x",
+      "what": "val target outputs, HPO candidates (Qwen2.5-7B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "attempt": "final",
+      "group": "p10-hpo",
+      "active_s": 209.36912311601918,
+      "active_source": "logs/hpo_resp_qwen2.5-7b.log: wall_seconds",
+      "generated_tokens": 256101,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 256101,
+      "reported_tokens_source": "logs/hpo_resp_qwen2.5-7b.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 751,
+        "input_tokens": 60736,
+        "output_tokens": 256101,
+        "busy_s": 218.358119,
+        "window": [
+          "2026-10-18T18:52:47+00:00",
+          "2026-10-18T18:57:33+00:00"
+        ],
+        "window_source": "logs/vllm_hpo_qwen2.5-7b.log span + 30 s",
+        "first_call": "2026-10-18T18:53:24.567155+00:00",
+        "last_call": "2026-10-18T18:57:02.925274+00:00"
+      },
+      "sessions": [
+        "vllm_hpo_qwen"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p10-hpo-phi",
+      "phase": 10,
+      "row": "10.x",
+      "what": "val target outputs, HPO candidates (Phi-3.5)",
+      "hardware": "rtx4500ada",
+      "model": "microsoft/Phi-3.5-mini-instruct",
+      "attempt": "final",
+      "group": "p10-hpo",
+      "active_s": 236.292793043016,
+      "active_source": "logs/hpo_resp_phi3.5.log: wall_seconds",
+      "generated_tokens": 316620,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 316620,
+      "reported_tokens_source": "logs/hpo_resp_phi3.5.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 751,
+        "input_tokens": 46649,
+        "output_tokens": 316620,
+        "busy_s": 245.066077,
+        "window": [
+          "2026-10-18T18:57:15+00:00",
+          "2026-10-18T19:02:29+00:00"
+        ],
+        "window_source": "logs/vllm_hpo_phi3.5.log span + 30 s",
+        "first_call": "2026-10-18T18:57:53.981978+00:00",
+        "last_call": "2026-10-18T19:01:59.048055+00:00"
+      },
+      "sessions": [
+        "vllm_hpo_phi"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p10-hpo-judge",
+      "phase": 10,
+      "row": "10.x",
+      "what": "val judge, HPO candidates (32B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "p10-hpo",
+      "active_s": 1992.6816178360023,
+      "active_source": "logs/hpo_judge.log: wall_seconds",
+      "generated_tokens": 131139,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 131139,
+      "reported_tokens_source": "logs/hpo_judge.log: generated_tokens",
+      "labels": 1710,
+      "labels_source": "logs/hpo_judge.log: records",
+      "ledger": {
+        "calls": 2942,
+        "input_tokens": 4814654,
+        "output_tokens": 131139,
+        "busy_s": 2073.474413,
+        "window": [
+          "2026-10-18T19:02:13+00:00",
+          "2026-10-18T19:38:19+00:00"
+        ],
+        "window_source": "logs/vllm_hpo_judge.log span + 30 s",
+        "first_call": "2026-10-18T19:03:13.018928+00:00",
+        "last_call": "2026-10-18T19:37:46.493341+00:00"
+      },
+      "sessions": [
+        "vllm_hpo_judge"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p11-qb-3b",
+      "phase": 11,
+      "row": "11.x",
+      "what": "quality-path load benchmark (C11.3/C11.4), rewriter 3b",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 2070.0,
+      "active_source": "logs/vllm_qb_3b.log: server span",
+      "generated_tokens": null,
+      "tokens_source": "n/a (training)",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "vllm_qb_3b"
+      ],
+      "note": "no stage timer; active = server span (rewriter calls not ledgered)"
+    },
+    {
+      "id": "p11-qb-15v2",
+      "phase": 11,
+      "row": "11.x",
+      "what": "quality-path load benchmark (C11.3/C11.4), rewriter 15v2",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 223.0,
+      "active_source": "logs/vllm_qb_15v2.log: server span",
+      "generated_tokens": null,
+      "tokens_source": "n/a (training)",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "vllm_qb_15v2"
+      ],
+      "note": "no stage timer; active = server span (rewriter calls not ledgered)"
+    },
+    {
+      "id": "p11-qraw-3b",
+      "phase": 11,
+      "row": "11.x",
+      "what": "raw quality-path benchmark, rewriter 3b",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 315.0,
+      "active_source": "logs/vllm_qraw_3b.log: server span",
+      "generated_tokens": null,
+      "tokens_source": "n/a (training)",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "vllm_qraw_3b"
+      ],
+      "note": "no stage timer; active = server span (rewriter calls not ledgered)"
+    },
+    {
+      "id": "p11-qraw-15v2",
+      "phase": 11,
+      "row": "11.x",
+      "what": "raw quality-path benchmark, rewriter 15v2",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 175.0,
+      "active_source": "logs/vllm_qraw_15v2.log: server span",
+      "generated_tokens": null,
+      "tokens_source": "n/a (training)",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "vllm_qraw_15v2"
+      ],
+      "note": "no stage timer; active = server span (rewriter calls not ledgered)"
+    },
+    {
+      "id": "p11-canary-rewrite",
+      "phase": 11,
+      "row": "11.x",
+      "what": "canary, 400 prompts via the quality path",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "p11-canary",
+      "active_s": 138.15,
+      "active_source": "logs/canary_rewrite.log: rewrite.wall_seconds",
+      "generated_tokens": null,
+      "tokens_source": "n/a (training)",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "vllm_canary_rw"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p11-canary-qwen",
+      "phase": 11,
+      "row": "11.x",
+      "what": "canary target outputs (Qwen2.5-7B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "attempt": "final",
+      "group": "p11-canary",
+      "active_s": 27.74885172600625,
+      "active_source": "logs/canary_respond_qwen2.5-7b.log: wall_seconds",
+      "generated_tokens": 5342,
+      "tokens_source": "logs/canary_respond_qwen2.5-7b.log: generated_tokens",
+      "reported_tokens": 5342,
+      "reported_tokens_source": "logs/canary_respond_qwen2.5-7b.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "vllm_canary_qwen"
+      ],
+      "note": "not ledgered"
+    },
+    {
+      "id": "p11-canary-phi",
+      "phase": 11,
+      "row": "11.x",
+      "what": "canary target outputs (Phi-3.5)",
+      "hardware": "rtx4500ada",
+      "model": "microsoft/Phi-3.5-mini-instruct",
+      "attempt": "final",
+      "group": "p11-canary",
+      "active_s": 19.807686018000823,
+      "active_source": "logs/canary_respond_phi3.5-mini.log: wall_seconds",
+      "generated_tokens": 8457,
+      "tokens_source": "logs/canary_respond_phi3.5-mini.log: generated_tokens",
+      "reported_tokens": 8457,
+      "reported_tokens_source": "logs/canary_respond_phi3.5-mini.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "vllm_canary_phi"
+      ],
+      "note": "not ledgered"
+    },
+    {
+      "id": "p11-canary-judge",
+      "phase": 11,
+      "row": "11.x",
+      "what": "canary judge (32B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "p11-canary",
+      "active_s": 63.13080114799959,
+      "active_source": "logs/canary_judge.log: wall_seconds",
+      "generated_tokens": 2534,
+      "tokens_source": "logs/canary_judge.log: generated_tokens",
+      "reported_tokens": 2534,
+      "reported_tokens_source": "logs/canary_judge.log: generated_tokens",
+      "labels": 20,
+      "labels_source": "logs/canary_judge.log: records",
+      "ledger": {},
+      "sessions": [
+        "vllm_canary_judge"
+      ],
+      "note": "not ledgered"
+    },
+    {
+      "id": "p12-gen-sft3bv2",
+      "phase": 12,
+      "row": "12.x",
+      "what": "test rewrites, 1,992 prompts (sft3bv2)",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 1406.3306570132845,
+      "active_source": "data/interim/final/test_sft3bv2.jsonl: sum latency_s",
+      "generated_tokens": 174778,
+      "tokens_source": "data/interim/final/test_sft3bv2.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "reported_tokens": 174778,
+      "reported_tokens_source": "data/interim/final/test_sft3bv2.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [],
+      "note": ""
+    },
+    {
+      "id": "p12-gen-sft15v2",
+      "phase": 12,
+      "row": "12.x",
+      "what": "test rewrites, 1,992 prompts (sft15v2)",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 834.2794775669172,
+      "active_source": "data/interim/final/test_sft15v2.jsonl: sum latency_s",
+      "generated_tokens": 151045,
+      "tokens_source": "data/interim/final/test_sft15v2.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "reported_tokens": 151045,
+      "reported_tokens_source": "data/interim/final/test_sft15v2.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [],
+      "note": ""
+    },
+    {
+      "id": "p12-gen-sfthpo",
+      "phase": 12,
+      "row": "12.x",
+      "what": "test rewrites, 1,992 prompts (sfthpo)",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 798.7600454790518,
+      "active_source": "data/interim/final/test_sfthpo.jsonl: sum latency_s",
+      "generated_tokens": 124648,
+      "tokens_source": "data/interim/final/test_sfthpo.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "reported_tokens": 124648,
+      "reported_tokens_source": "data/interim/final/test_sfthpo.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [],
+      "note": ""
+    },
+    {
+      "id": "p12-zeroshot-32b",
+      "phase": 12,
+      "row": "12.x",
+      "what": "zero-shot 32B candidates low/medium/high, 1,992 prompts",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "",
+      "active_s": 1359.382,
+      "active_source": "logs/p12_llm.log: wall_seconds",
+      "generated_tokens": 322629,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 5217,
+        "input_tokens": 2768932,
+        "output_tokens": 322629,
+        "busy_s": 1419.414077,
+        "window": [
+          "2026-10-18T20:32:28+00:00",
+          "2026-10-18T20:57:34+00:00"
+        ],
+        "window_source": "logs/vllm_p12_zs.log span + 30 s",
+        "first_call": "2026-10-18T20:33:23.954121+00:00",
+        "last_call": "2026-10-18T20:57:03.368198+00:00"
+      },
+      "sessions": [
+        "vllm_p12_zs"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p12-resp-qwen",
+      "phase": 12,
+      "row": "12.x",
+      "what": "test target outputs (Qwen2.5-7B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "attempt": "final",
+      "group": "p12",
+      "active_s": 8030.984682406008,
+      "active_source": "logs/p12_resp_qwen2.5-7b.log: wall_seconds",
+      "generated_tokens": 11046926,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 11046926,
+      "reported_tokens_source": "logs/p12_resp_qwen2.5-7b.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 26763,
+        "input_tokens": 2606927,
+        "output_tokens": 11046926,
+        "busy_s": 8451.913723,
+        "window": [
+          "2026-10-18T20:57:18+00:00",
+          "2026-10-18T23:19:20+00:00"
+        ],
+        "window_source": "logs/vllm_p12_qwen2.5-7b.log span + 30 s",
+        "first_call": "2026-10-18T20:57:57.323401+00:00",
+        "last_call": "2026-10-18T23:18:49.237124+00:00"
+      },
+      "sessions": [
+        "vllm_p12_qwen"
+      ],
+      "note": "ledger bucket phase2"
+    },
+    {
+      "id": "p12-resp-phi",
+      "phase": 12,
+      "row": "12.x",
+      "what": "test target outputs (Phi-3.5)",
+      "hardware": "rtx4500ada",
+      "model": "microsoft/Phi-3.5-mini-instruct",
+      "attempt": "final",
+      "group": "p12",
+      "active_s": 10041.797137513,
+      "active_source": "logs/p12_resp_phi3.5.log: wall_seconds",
+      "generated_tokens": 13089009,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 13089009,
+      "reported_tokens_source": "logs/p12_resp_phi3.5.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 26763,
+        "input_tokens": 2208371,
+        "output_tokens": 13089009,
+        "busy_s": 10605.720293,
+        "window": [
+          "2026-10-18T23:19:02+00:00",
+          "2026-10-19T02:16:49+00:00"
+        ],
+        "window_source": "logs/vllm_p12_phi3.5.log span + 30 s",
+        "first_call": "2026-10-18T23:19:32.615524+00:00",
+        "last_call": "2026-10-19T02:16:18.335817+00:00"
+      },
+      "sessions": [
+        "vllm_p12_phi"
+      ],
+      "note": "ledger bucket phase2"
+    },
+    {
+      "id": "p12-judge-run1",
+      "phase": 12,
+      "row": "12.x",
+      "what": "test judge (32B), stopped by the phase2 token cap",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "retry",
+      "group": "p12",
+      "active_s": 26300.183843,
+      "active_source": ".cache/llm_ledger.json busy span (logs/vllm_p12_judge.log span + 30 s)",
+      "generated_tokens": 1548661,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 34612,
+        "input_tokens": 59094376,
+        "output_tokens": 1548661,
+        "busy_s": 26300.183843,
+        "window": [
+          "2026-10-19T02:16:32+00:00",
+          "2026-10-19T09:36:16+00:00"
+        ],
+        "window_source": "logs/vllm_p12_judge.log span + 30 s",
+        "first_call": "2026-10-19T02:17:25.028459+00:00",
+        "last_call": "2026-10-19T09:35:45.212302+00:00"
+      },
+      "sessions": [
+        "vllm_p12_judge"
+      ],
+      "note": "BudgetExceededError (logs/p12_judge.log); ledger bucket phase2; its calls are cache hits of the resumed run"
+    },
+    {
+      "id": "p12-judge",
+      "phase": 12,
+      "row": "12.x",
+      "what": "test judge (32B), resumed run",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "p12",
+      "active_s": 54115.93228743601,
+      "active_source": "logs/p12_judge2.log: wall_seconds",
+      "generated_tokens": 3142173,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 3142173,
+      "reported_tokens_source": "logs/p12_judge2.log: generated_tokens",
+      "labels": 66408,
+      "labels_source": "logs/p12_judge2.log: records",
+      "ledger": {
+        "calls": 67596,
+        "input_tokens": 120795798,
+        "output_tokens": 3142173,
+        "busy_s": 57008.142415,
+        "window": [
+          "2026-10-19T09:37:23+00:00",
+          "2026-10-20T01:29:57+00:00"
+        ],
+        "window_source": "logs/vllm_p12_judge2.log span + 30 s",
+        "first_call": "2026-10-19T09:38:48.086105+00:00",
+        "last_call": "2026-10-20T01:28:56.228520+00:00"
+      },
+      "sessions": [
+        "vllm_p12_judge2"
+      ],
+      "note": "ledger bucket phase12"
     }
   ],
   "sessions": [
@@ -1144,6 +2198,240 @@
       "end": "2026-10-17T08:12:10+00:00",
       "reserved_s": 10716.0,
       "note": ""
+    },
+    {
+      "id": "sft15v2",
+      "phase": 8,
+      "log": "logs/sft_qwen15b_lora_v2.log",
+      "start": "2026-10-17T08:23:38+00:00",
+      "end": "2026-10-17T08:54:51+00:00",
+      "reserved_s": 1873.0,
+      "note": ""
+    },
+    {
+      "id": "sft3bv2",
+      "phase": 8,
+      "log": "logs/sft_qwen3b_lora_v2.log",
+      "start": "2026-10-17T08:57:17+00:00",
+      "end": "2026-10-17T09:17:10+00:00",
+      "reserved_s": 1193.0,
+      "note": ""
+    },
+    {
+      "id": "sft7bv2",
+      "phase": 8,
+      "log": "logs/sft_qwen7b_qlora_v2.log",
+      "start": "2026-10-17T13:20:32+00:00",
+      "end": "2026-10-17T15:22:50+00:00",
+      "reserved_s": 7338.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_v2_qwen",
+      "phase": 8,
+      "log": "logs/vllm_v2_qwen.log",
+      "start": "2026-10-17T09:22:39+00:00",
+      "end": "2026-10-17T09:25:52+00:00",
+      "reserved_s": 193.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_v2_phi",
+      "phase": 8,
+      "log": "logs/vllm_v2_phi.log",
+      "start": "2026-10-17T09:26:06+00:00",
+      "end": "2026-10-17T09:29:02+00:00",
+      "reserved_s": 176.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_v2_judge",
+      "phase": 8,
+      "log": "logs/vllm_v2_judge.log",
+      "start": "2026-10-17T09:29:15+00:00",
+      "end": "2026-10-17T09:50:03+00:00",
+      "reserved_s": 1248.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_q7_qwen",
+      "phase": 8,
+      "log": "logs/vllm_q7_qwen2.5-7b.log",
+      "start": "2026-10-17T18:04:01+00:00",
+      "end": "2026-10-17T18:09:57+00:00",
+      "reserved_s": 356.0,
+      "note": "7b + hmm + rl sets"
+    },
+    {
+      "id": "vllm_q7_phi",
+      "phase": 8,
+      "log": "logs/vllm_q7_phi3.5.log",
+      "start": "2026-10-17T18:10:20+00:00",
+      "end": "2026-10-17T18:16:01+00:00",
+      "reserved_s": 341.0,
+      "note": "7b + hmm + rl sets"
+    },
+    {
+      "id": "vllm_q7_judge",
+      "phase": 8,
+      "log": "logs/vllm_q7_judge.log",
+      "start": "2026-10-17T18:16:16+00:00",
+      "end": "2026-10-17T18:57:49+00:00",
+      "reserved_s": 2493.0,
+      "note": "7b + hmm + rl sets"
+    },
+    {
+      "id": "hpo_trials",
+      "phase": 10,
+      "log": "experiments/p10_rewriter_hpo/optuna.db",
+      "start": "2026-10-18T14:14:49.771491+00:00",
+      "end": "2026-10-18T18:52:36.284172+00:00",
+      "reserved_s": 16666.512681,
+      "note": "first trial start to last trial end"
+    },
+    {
+      "id": "vllm_hpo_qwen",
+      "phase": 10,
+      "log": "logs/vllm_hpo_qwen2.5-7b.log",
+      "start": "2026-10-18T18:52:47+00:00",
+      "end": "2026-10-18T18:57:03+00:00",
+      "reserved_s": 256.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_hpo_phi",
+      "phase": 10,
+      "log": "logs/vllm_hpo_phi3.5.log",
+      "start": "2026-10-18T18:57:15+00:00",
+      "end": "2026-10-18T19:01:59+00:00",
+      "reserved_s": 284.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_hpo_judge",
+      "phase": 10,
+      "log": "logs/vllm_hpo_judge.log",
+      "start": "2026-10-18T19:02:13+00:00",
+      "end": "2026-10-18T19:37:49+00:00",
+      "reserved_s": 2136.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_qb_3b",
+      "phase": 11,
+      "log": "logs/vllm_qb_3b.log",
+      "start": "2026-10-18T01:43:20+00:00",
+      "end": "2026-10-18T02:17:50+00:00",
+      "reserved_s": 2070.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_qb_15v2",
+      "phase": 11,
+      "log": "logs/vllm_qb_15v2.log",
+      "start": "2026-10-18T02:18:05+00:00",
+      "end": "2026-10-18T02:21:48+00:00",
+      "reserved_s": 223.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_qraw_3b",
+      "phase": 11,
+      "log": "logs/vllm_qraw_3b.log",
+      "start": "2026-10-18T02:22:56+00:00",
+      "end": "2026-10-18T02:28:11+00:00",
+      "reserved_s": 315.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_qraw_15v2",
+      "phase": 11,
+      "log": "logs/vllm_qraw_15v2.log",
+      "start": "2026-10-18T02:28:24+00:00",
+      "end": "2026-10-18T02:31:19+00:00",
+      "reserved_s": 175.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_canary_rw",
+      "phase": 11,
+      "log": "logs/vllm_canary_rewriter.log",
+      "start": "2026-10-18T02:40:57+00:00",
+      "end": "2026-10-18T02:46:25+00:00",
+      "reserved_s": 328.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_canary_qwen",
+      "phase": 11,
+      "log": "logs/vllm_canary_qwen2.5-7b.log",
+      "start": "2026-10-18T02:48:57+00:00",
+      "end": "2026-10-18T02:50:00+00:00",
+      "reserved_s": 63.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_canary_phi",
+      "phase": 11,
+      "log": "logs/vllm_canary_phi3.5-mini.log",
+      "start": "2026-10-18T02:52:31+00:00",
+      "end": "2026-10-18T02:53:36+00:00",
+      "reserved_s": 65.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_canary_judge",
+      "phase": 11,
+      "log": "logs/vllm_canary_judge.log",
+      "start": "2026-10-18T02:56:08+00:00",
+      "end": "2026-10-18T02:58:28+00:00",
+      "reserved_s": 140.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_p12_zs",
+      "phase": 12,
+      "log": "logs/vllm_p12_zs.log",
+      "start": "2026-10-18T20:32:28+00:00",
+      "end": "2026-10-18T20:57:04+00:00",
+      "reserved_s": 1476.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_p12_qwen",
+      "phase": 12,
+      "log": "logs/vllm_p12_qwen2.5-7b.log",
+      "start": "2026-10-18T20:57:18+00:00",
+      "end": "2026-10-18T23:18:50+00:00",
+      "reserved_s": 8492.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_p12_phi",
+      "phase": 12,
+      "log": "logs/vllm_p12_phi3.5.log",
+      "start": "2026-10-18T23:19:02+00:00",
+      "end": "2026-10-19T02:16:19+00:00",
+      "reserved_s": 10637.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_p12_judge",
+      "phase": 12,
+      "log": "logs/vllm_p12_judge.log",
+      "start": "2026-10-19T02:16:32+00:00",
+      "end": "2026-10-19T09:35:46+00:00",
+      "reserved_s": 26354.0,
+      "note": "stopped by the token cap"
+    },
+    {
+      "id": "vllm_p12_judge2",
+      "phase": 12,
+      "log": "logs/vllm_p12_judge2.log",
+      "start": "2026-10-19T09:37:23+00:00",
+      "end": "2026-10-20T01:29:27+00:00",
+      "reserved_s": 57124.0,
+      "note": "resumed judge"
     }
   ],
   "smoke_rtx4090_reserved_h": 0.161858,
@@ -1249,20 +2537,41 @@
         "p8-aug-candidates",
         "p8-aug-qwen",
         "p8-aug-phi",
-        "p8-aug-judge"
+        "p8-aug-judge",
+        "p8-sft-1.5b-v2",
+        "p8-sft-3b-v2",
+        "p8-sft-7b-v2",
+        "p8-gen-1.5b-v2",
+        "p8-gen-3b-v2",
+        "p8-gen-7b-v2",
+        "p8-v2-qwen",
+        "p8-v2-phi",
+        "p8-v2-judge",
+        "p8-q7-7b-qwen",
+        "p8-q7-7b-phi",
+        "p8-q7-hmm-qwen",
+        "p8-q7-hmm-phi",
+        "p8-q7-rl-qwen",
+        "p8-q7-rl-phi",
+        "p8-q7-judge-7b",
+        "p8-q7-judge-hmm",
+        "p8-q7-judge-rl"
       ],
-      "active_s": 22857.871708307,
+      "active_s": 38587.18247345901,
       "gpu_time_recorded": true,
-      "reserved_s": 24803.089168888,
-      "active_gpu_h": 6.349408807863056,
-      "reserved_gpu_h": 6.889746991357778,
-      "energy_active_kwh": 1.3333758496512416,
-      "energy_reserved_kwh": 1.4468468681851334,
-      "tokens": 9689924,
+      "reserved_s": 40906.584016537,
+      "active_gpu_h": 10.718661798183058,
+      "reserved_gpu_h": 11.362940004593613,
+      "energy_active_kwh": 2.250918977618442,
+      "energy_reserved_kwh": 2.3862174009646586,
+      "tokens": 10832707,
       "sessions": [
         "sft05",
         "sft15",
+        "sft15v2",
         "sft3b",
+        "sft3bv2",
+        "sft7bv2",
         "vllm_aug_gen",
         "vllm_aug_judge",
         "vllm_aug_phi",
@@ -1272,15 +2581,122 @@
         "vllm_eval_qwen",
         "vllm_eval_qwen1",
         "vllm_eval_qwen2",
+        "vllm_q7_judge",
+        "vllm_q7_phi",
+        "vllm_q7_qwen",
         "vllm_r3_judge",
         "vllm_r3_phi",
-        "vllm_r3_qwen"
+        "vllm_r3_qwen",
+        "vllm_v2_judge",
+        "vllm_v2_phi",
+        "vllm_v2_qwen"
       ],
       "reserved_lower_bound_from": [
         "p8-gen-0.5b",
         "p8-gen-1.5b",
+        "p8-gen-1.5b-v2",
         "p8-gen-3b",
+        "p8-gen-3b-v2",
+        "p8-gen-7b-v2",
         "vllm_r3_judge"
+      ],
+      "hardware": [
+        "rtx4500ada"
+      ]
+    },
+    {
+      "phase": 10,
+      "stage_ids": [
+        "p10-hpo-trials",
+        "p10-hpo-qwen",
+        "p10-hpo-phi",
+        "p10-hpo-judge"
+      ],
+      "active_s": 19104.754479995037,
+      "gpu_time_recorded": true,
+      "reserved_s": 19342.512681,
+      "active_gpu_h": 5.306876244443066,
+      "reserved_gpu_h": 5.372920189166667,
+      "energy_active_kwh": 1.1144440113330438,
+      "energy_reserved_kwh": 1.1283132397250002,
+      "tokens": 703860,
+      "sessions": [
+        "hpo_trials",
+        "vllm_hpo_judge",
+        "vllm_hpo_phi",
+        "vllm_hpo_qwen"
+      ],
+      "reserved_lower_bound_from": [],
+      "hardware": [
+        "rtx4500ada"
+      ]
+    },
+    {
+      "phase": 11,
+      "stage_ids": [
+        "p11-qb-3b",
+        "p11-qb-15v2",
+        "p11-qraw-3b",
+        "p11-qraw-15v2",
+        "p11-canary-rewrite",
+        "p11-canary-qwen",
+        "p11-canary-phi",
+        "p11-canary-judge"
+      ],
+      "active_s": 3031.8373388920068,
+      "gpu_time_recorded": true,
+      "reserved_s": 3379.0,
+      "active_gpu_h": 0.842177038581113,
+      "reserved_gpu_h": 0.9386111111111111,
+      "energy_active_kwh": 0.1768571781020337,
+      "energy_reserved_kwh": 0.19710833333333333,
+      "tokens": 16333,
+      "sessions": [
+        "vllm_canary_judge",
+        "vllm_canary_phi",
+        "vllm_canary_qwen",
+        "vllm_canary_rw",
+        "vllm_qb_15v2",
+        "vllm_qb_3b",
+        "vllm_qraw_15v2",
+        "vllm_qraw_3b"
+      ],
+      "reserved_lower_bound_from": [],
+      "hardware": [
+        "rtx4500ada"
+      ]
+    },
+    {
+      "phase": 12,
+      "stage_ids": [
+        "p12-gen-sft3bv2",
+        "p12-gen-sft15v2",
+        "p12-gen-sfthpo",
+        "p12-zeroshot-32b",
+        "p12-resp-qwen",
+        "p12-resp-phi",
+        "p12-judge-run1",
+        "p12-judge"
+      ],
+      "active_s": 102887.65013041427,
+      "gpu_time_recorded": true,
+      "reserved_s": 107122.37018005925,
+      "active_gpu_h": 28.579902814003965,
+      "reserved_gpu_h": 29.756213938905347,
+      "energy_active_kwh": 6.001779590940832,
+      "energy_reserved_kwh": 6.248804927170124,
+      "tokens": 29599869,
+      "sessions": [
+        "vllm_p12_judge",
+        "vllm_p12_judge2",
+        "vllm_p12_phi",
+        "vllm_p12_qwen",
+        "vllm_p12_zs"
+      ],
+      "reserved_lower_bound_from": [
+        "p12-gen-sft15v2",
+        "p12-gen-sft3bv2",
+        "p12-gen-sfthpo"
       ],
       "hardware": [
         "rtx4500ada"
@@ -1293,9 +2709,13 @@
     "4": "perceptron / MLP studies (CPU)",
     "5": "ensembles, NB, GMM, HMM (CPU)",
     "6": "clustering (CPU)",
-    "9": "tabular Q-learning (CPU)",
-    "10": "HPO (MLflow hardware tag cpu)",
-    "11": "serving, fast path (MLflow hardware tag cpu)"
+    "9": "tabular Q-learning (CPU; its C9.2 val labels ran on the q7 chain, counted in Phase 8)"
+  },
+  "cpu_parts": {
+    "5": "HMM rewriter C5.6 val labels ran on the q7 chain, counted in Phase 8",
+    "10": "GBM / MLP HPO studies (MLflow hardware tag cpu)",
+    "11": "fast path, ONNX serving (MLflow hardware tag cpu)",
+    "12": "CPU candidates (logs/p12_cpu_candidates*.log) and results"
   },
   "groups": {
     "p1": {
@@ -1439,6 +2859,146 @@
       "gpu_s_per_label": 2.8402889760731367,
       "final_gpu_s_per_label": 2.8402889760731367,
       "reserved_gpu_s_per_label": 3.1273830155979203
+    },
+    "p8-v2": {
+      "stage_ids": [
+        "p8-v2-qwen",
+        "p8-v2-phi",
+        "p8-v2-judge"
+      ],
+      "active_s": 1465.8688959729952,
+      "gpu_time_recorded": true,
+      "reserved_s": 1617.0,
+      "active_gpu_h": 0.40718580443694313,
+      "reserved_gpu_h": 0.44916666666666666,
+      "energy_active_kwh": 0.08550901893175805,
+      "energy_reserved_kwh": 0.094325,
+      "tokens": 377007,
+      "sessions": [
+        "vllm_v2_judge",
+        "vllm_v2_phi",
+        "vllm_v2_qwen"
+      ],
+      "reserved_lower_bound_from": [],
+      "final_active_s": 1465.8688959729952,
+      "labels": 1140,
+      "gpu_s_per_label": 1.2858499087482413,
+      "final_gpu_s_per_label": 1.2858499087482413,
+      "reserved_gpu_s_per_label": 1.418421052631579
+    },
+    "p8-q7": {
+      "stage_ids": [
+        "p8-q7-7b-qwen",
+        "p8-q7-7b-phi",
+        "p8-q7-hmm-qwen",
+        "p8-q7-hmm-phi",
+        "p8-q7-rl-qwen",
+        "p8-q7-rl-phi",
+        "p8-q7-judge-7b",
+        "p8-q7-judge-hmm",
+        "p8-q7-judge-rl"
+      ],
+      "active_s": 2966.94702153001,
+      "gpu_time_recorded": true,
+      "reserved_s": 3190.0,
+      "active_gpu_h": 0.8241519504250028,
+      "reserved_gpu_h": 0.8861111111111111,
+      "energy_active_kwh": 0.1730719095892506,
+      "energy_reserved_kwh": 0.18608333333333332,
+      "tokens": 686843,
+      "sessions": [
+        "vllm_q7_judge",
+        "vllm_q7_phi",
+        "vllm_q7_qwen"
+      ],
+      "reserved_lower_bound_from": [],
+      "final_active_s": 2966.94702153001,
+      "labels": 3770,
+      "gpu_s_per_label": 0.7869885998753342,
+      "final_gpu_s_per_label": 0.7869885998753342,
+      "reserved_gpu_s_per_label": 0.8461538461538461
+    },
+    "p10-hpo": {
+      "stage_ids": [
+        "p10-hpo-qwen",
+        "p10-hpo-phi",
+        "p10-hpo-judge"
+      ],
+      "active_s": 2438.3435339950374,
+      "gpu_time_recorded": true,
+      "reserved_s": 2676.0,
+      "active_gpu_h": 0.6773176483319548,
+      "reserved_gpu_h": 0.7433333333333333,
+      "energy_active_kwh": 0.1422367061497105,
+      "energy_reserved_kwh": 0.15610000000000002,
+      "tokens": 703860,
+      "sessions": [
+        "vllm_hpo_judge",
+        "vllm_hpo_phi",
+        "vllm_hpo_qwen"
+      ],
+      "reserved_lower_bound_from": [],
+      "final_active_s": 2438.3435339950374,
+      "labels": 1710,
+      "gpu_s_per_label": 1.4259318912251682,
+      "final_gpu_s_per_label": 1.4259318912251682,
+      "reserved_gpu_s_per_label": 1.5649122807017544
+    },
+    "p11-canary": {
+      "stage_ids": [
+        "p11-canary-rewrite",
+        "p11-canary-qwen",
+        "p11-canary-phi",
+        "p11-canary-judge"
+      ],
+      "active_s": 248.83733889200667,
+      "gpu_time_recorded": true,
+      "reserved_s": 596.0,
+      "active_gpu_h": 0.06912148302555741,
+      "reserved_gpu_h": 0.16555555555555557,
+      "energy_active_kwh": 0.014515511435367055,
+      "energy_reserved_kwh": 0.03476666666666667,
+      "tokens": 16333,
+      "sessions": [
+        "vllm_canary_judge",
+        "vllm_canary_phi",
+        "vllm_canary_qwen",
+        "vllm_canary_rw"
+      ],
+      "reserved_lower_bound_from": [],
+      "final_active_s": 248.83733889200667,
+      "labels": 20,
+      "gpu_s_per_label": 12.441866944600333,
+      "final_gpu_s_per_label": 12.441866944600333,
+      "reserved_gpu_s_per_label": 29.8
+    },
+    "p12": {
+      "stage_ids": [
+        "p12-resp-qwen",
+        "p12-resp-phi",
+        "p12-judge-run1",
+        "p12-judge"
+      ],
+      "active_s": 98488.89795035502,
+      "gpu_time_recorded": true,
+      "reserved_s": 102607.0,
+      "active_gpu_h": 27.35802720843195,
+      "reserved_gpu_h": 28.501944444444444,
+      "energy_active_kwh": 5.745185713770709,
+      "energy_reserved_kwh": 5.985408333333334,
+      "tokens": 28826769,
+      "sessions": [
+        "vllm_p12_judge",
+        "vllm_p12_judge2",
+        "vllm_p12_phi",
+        "vllm_p12_qwen"
+      ],
+      "reserved_lower_bound_from": [],
+      "final_active_s": 72188.71410735502,
+      "labels": 66408,
+      "gpu_s_per_label": 1.4830878501137668,
+      "final_gpu_s_per_label": 1.087048459633704,
+      "reserved_gpu_s_per_label": 1.5450999879532585
     }
   },
   "estimates": {
@@ -1512,30 +3072,35 @@
   },
   "ledger": {
     "source": ".cache/llm_ledger.json",
-    "cutoff": "2026-10-17T08:20:00",
-    "calls": 138726,
-    "output_tokens": 23623688,
-    "attributed_output_tokens": 23623688,
+    "cutoff": "2026-10-20T01:37:00",
+    "calls": 311255,
+    "output_tokens": 54540796,
+    "attributed_output_tokens": 54540796,
     "unattributed_output_tokens": 0,
     "unattributed_by_model": {},
-    "after_cutoff_calls": 3195,
-    "after_cutoff_output_tokens": 622190,
+    "after_cutoff_calls": 0,
+    "after_cutoff_output_tokens": 0,
     "budget": {
       "phase1": {
         "calls": 1053,
         "tokens": 1083756,
         "max_tokens": 5000000
       },
+      "phase12": {
+        "calls": 67596,
+        "tokens": 123937971,
+        "max_tokens": 300000000
+      },
       "phase2": {
-        "calls": 140868,
-        "tokens": 146227989,
+        "calls": 242606,
+        "tokens": 250038339,
         "max_tokens": 250000000
       }
     }
   },
   "power_sample": {
     "source": "reports/compute_power_sample.csv (nvidia-smi -l 1)",
-    "workload": "sft_qwen7b_qlora_v2 training (excluded run), plus other users' CPU jobs",
+    "workload": "sft_qwen7b_qlora_v2 training (stage p8-sft-7b-v2), plus other users' CPU jobs",
     "n": 60,
     "first": "2026/10/17 13:24:19.653",
     "last": "2026/10/17 13:25:19.092",
@@ -1548,24 +3113,39 @@
   },
   "excluded": [
     {
-      "id": "sft-qwen1.5b-lora-v2",
-      "evidence": "logs/sft_qwen15b_lora_v2.log"
+      "id": "p12-seed-train-s1",
+      "evidence": "logs/p12_train_sft3bv2_s1.log",
+      "since": "2026-10-20T01:37:00"
     },
     {
-      "id": "sft15v2 val generation",
-      "evidence": "logs/gen-sft15v2.log"
+      "id": "p12-seed-gen-s1",
+      "evidence": "logs/p12_seeds.status",
+      "since": "2026-10-20T01:37:00"
     },
     {
-      "id": "sft-qwen3b-lora-v2",
-      "evidence": "logs/sft_qwen3b_lora_v2.log"
+      "id": "p12-seed-train-s2",
+      "evidence": "logs/p12_train_sft3bv2_s2.log",
+      "since": "2026-10-20T01:37:00"
     },
     {
-      "id": "sft-qwen7b-qlora-v2",
-      "evidence": "running (experiment=sft_qwen7b_qlora_v2)"
+      "id": "p12-seed-gen-s2",
+      "evidence": "logs/p12_seeds.status",
+      "since": "2026-10-20T01:37:00"
     },
     {
-      "id": "v2 validation (targets + judge)",
-      "evidence": "logs/v2_chain.status"
+      "id": "p12-seed-resp-qwen",
+      "evidence": "logs/p12s_resp_qwen2.5-7b.log",
+      "since": "2026-10-20T01:37:00"
+    },
+    {
+      "id": "p12-seed-resp-phi",
+      "evidence": "logs/p12s_resp_phi3.5.log",
+      "since": "2026-10-20T01:37:00"
+    },
+    {
+      "id": "p12-seed-judge",
+      "evidence": "logs/p12s_judge.log",
+      "since": "2026-10-20T01:37:00"
     }
   ]
 }
