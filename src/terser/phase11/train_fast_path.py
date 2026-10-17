@@ -337,7 +337,9 @@ def render_report(res: Mapping[str, Any]) -> str:
         "Caveats: the gate was trained on Phase 2 candidates, not on tagger rewrites, and no "
         "judge labels exist for tagger rewrites (checkpoint C5.6), so the gate's sensitivity on "
         "what the fast path actually produces is not measured. The tagger was trained on these "
-        "train prompts. The threshold is fitted on fold-model scores and applied to the refit "
+        "train prompts. The threshold is chosen on the same pooled OOF scores its sensitivity / "
+        "specificity are read from, so sensitivity 0.95 holds by construction (in-sample). "
+        "The threshold is fitted on fold-model scores and applied to the refit "
         "`gate.onnx`. Refit sklearn gate vs the exported `gate.onnx`: max dP "
         f"{op['deployed_parity']:.1e} on 2,000 training rows.\n"
     )
@@ -360,6 +362,9 @@ def _gate_operating_point(
     op: dict[str, Any] = {
         "rule": "maximise specificity subject to sensitivity >= 0.95 (row 3.2.3)",
         "scores": "grouped 5-fold OOF, seed 0",
+        # The threshold is chosen on these same pooled OOF scores and the rates below are read
+        # off them, so sensitivity >= 0.95 holds by construction (an in-sample operating point).
+        "threshold_selection": "in-sample on the pooled OOF scores",
         "reject_rule": "P(degraded) > gate_threshold",
         "degraded_share": float(pairs.y.mean()),
         "ap": average_precision(pairs.y, oof.scores),
@@ -484,13 +489,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     tpath = export_sklearn(tagger, len(SPAN_FAST_FEATURES), tpath)
     tag_diff = check_parity(tagger, tpath, Xs[:5000])
 
-    # ---- latency (single request, CPU, warm)
+    # ---- latency (single request, CPU, warm): explicit warm-up calls first, and the original
+    # prompt's features are extracted uncached inside the timer, as the server does per request.
     og, rw = OnnxGate(gpath), OnnxSpanRewriter(tpath, cost)
+    for t in [p["prompt"] for p in sample][:5]:
+        og.score(extract_features(t, args.target, cost), extract_features(t, args.target, cost))
+        rw(t, args.target)
     lat, sav = [], []
     for t in (p["prompt"] for p in sample):
         t0 = time.perf_counter()
         out = rw(t, args.target).text
-        og.score(feats(t), extract_features(out, args.target, cost))
+        og.score(extract_features(t, args.target, cost), extract_features(out, args.target, cost))
         lat.append((time.perf_counter() - t0) * 1000)
         sav.append(1 - cost(out) / max(1, cost(t)))
     lat_a = np.asarray(lat)
