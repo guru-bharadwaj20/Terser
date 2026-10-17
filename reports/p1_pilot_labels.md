@@ -79,7 +79,11 @@ Because of finding 1, the judge protocol was compared on these 836 pairs
 `pairwise_v1` calls, with the A/B/tie probabilities of both orders averaged before the 2.3.4 rule
 is applied. The pilot was relabelled with it
 (`experiment.params.protocol=pairwise_avg`, stage `judge`; MLflow `508e0d17bce8`; all 1,672
-requests from the cache, 0 new tokens).
+requests from the cache, 0 new tokens). The cached verdicts are those of the 32B logprob re-run
+(`data/pilot/judge_bias/pairwise_32b`, MLflow `09d66708740b`), not the original pilot verdicts:
+they differ from `labels_pairwise_v1.jsonl` on 43 rows, and 4 pairs change position consistency
+(`code-020:I`, `code-023:I`, `explain-009:F`, `explain-009:FHC`), which is why the flagged count
+moves from 340 to 342.
 
 | Labels | File | Preserved | Degraded | Flagged for review |
 | :--- | :--- | ---: | ---: | ---: |
@@ -96,8 +100,9 @@ requests from the cache, 0 new tokens).
 | transform | 122 | 30 |
 
 165 labels changed from `degraded` to `preserved` and 1 the other way (`transform-001:F`, an
-order-inconsistent pair whose averaged probabilities favour the original). All 494
-position-consistent pairs keep their label. The 342 flagged rows are the
+order-inconsistent pair whose averaged probabilities favour the original). All 494 pairs
+that are position-consistent under the re-run verdicts keep their label (496 pairs were
+consistent under `pairwise_v1`; the two sets differ by the 4 pairs named above). The 342 flagged rows are the
 position-inconsistent pairs; 209 of them also carry `low_margin` (averaged margin < 0.2), and
 these are the closest calls. The review CSV has three new columns: `protocol`,
 `averaged_side`, `averaged_margin`.
