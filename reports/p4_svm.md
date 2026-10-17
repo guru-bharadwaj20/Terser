@@ -5,6 +5,11 @@ validation, 2,000 standardised training pairs (QP memory is O(n²)). Tables from
 `python -m terser.phase4.svm_studies --table data/processed/p4_pairs.parquet` (`p4_svm_soft_margin.csv`,
 `p4_svm_kernels.csv`), figures from `python -m terser.phase4.svm_figures`.
 
+> **Note (post-audit):** the numbers below were produced with the first 2,000 training indices,
+> not a random sample; the pair table is sorted by (target, prompt id, candidate), so they come
+> from the alphabetically first prompts. `svm_studies` now draws a seeded random sample of 2,000;
+> the tables are unchanged until the study is re-run.
+
 ## 4.4.5 Hard margin
 
 ![hard margin](figures/p4_svm_hard_margin.png)

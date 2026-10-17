@@ -186,7 +186,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = ap.parse_args(argv)
     t = load_table(args.table)
     tr, va = next(grouped_folds(t.y, t.categories, t.groups, seed=0))
-    tr = tr[: args.max_train]
+    if len(tr) > args.max_train:  # a random sample: labels.jsonl rows are sorted by target/prompt
+        tr = np.sort(np.random.default_rng(0).choice(tr, args.max_train, replace=False))
     mu, sd = t.X[tr].mean(0), t.X[tr].std(0) + 1e-12
     X, Xv = (t.X[tr] - mu) / sd, (t.X[va] - mu) / sd
     args.out.mkdir(parents=True, exist_ok=True)
