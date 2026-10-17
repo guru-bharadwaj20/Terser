@@ -1,0 +1,6 @@
+outs:
+- md5: 0f7550f0da92e55b01b77a25f2aed83f.dir
+  size: 161564661
+  nfiles: 4
+  hash: md5
+  path: sft-qwen7b-qlora-v2
