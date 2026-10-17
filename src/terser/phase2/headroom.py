@@ -25,8 +25,8 @@ Savings are fractions in the tables/CSV and percentages in the markdown.
 CLI::
 
     python -m terser.phase2.headroom --oracle data/processed/oracle.csv \\
-        --candidates data/processed/candidates.jsonl --labels data/processed/labels.jsonl \\
-        --prompts data/processed/prompts.jsonl
+        --candidates data/interim/candidates.jsonl --labels data/processed/labels.jsonl \\
+        --prompts data/interim/label_prompts.jsonl
 """
 
 from __future__ import annotations

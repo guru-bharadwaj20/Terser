@@ -61,15 +61,15 @@ Compute (distinct requests only; repeats are cache hits):
 
 ## Findings
 
-1. **The 32B judge's position bias is reproducible.** With logprobs requested the verdicts match
-   the pilot run on 99.6% of pairs; 40.9% of pairs still flip with the order, 77% of them towards
+1. **The 32B judge's position bias is reproducible.** With logprobs requested the verdict pairs match
+   the pilot run on 832 of 836 pairs (99.5%; label agreement on the 496 reference pairs is 99.6%); 40.9% of pairs still flip with the order, 77% of them towards
    the first-shown answer. The bias is concentrated in the open-ended categories (creative 69%,
    explain 63%), where outputs for slightly different prompts differ a lot at temperature 0.
 2. **The 14B judge is less biased but not unbiased.** 28.7% disagreement. Where both orders name
    a winner, it picks the *second*-shown answer both times in 64 pairs and the first in 26 (the
    32B judge: first 264, second 20); the other 150 disagreements involve a tie. It also disagrees with 15% of the 32B judge's
    consistent verdicts.
-3. **Pointwise scoring is order-free but too coarse.** It calls 84–89% of pairs a tie or better,
+3. **Pointwise scoring is order-free but too coarse.** It calls 86–89% of pairs a tie or better,
    including many pairs the 32B judge consistently judged worse (κ 0.48 against the reference).
 4. **Order-averaging fixes the label without losing the consistent verdicts.** `pairwise_avg`
    (32B) keeps all reference labels and decides the 342 order-inconsistent pairs by the averaged
@@ -86,8 +86,8 @@ Proposed). It keeps the 2.3.4 label rule, applied to the order-averaged verdict.
 **C2.6 stays ❌.** Measured raw A/B disagreement of the chosen judge: **40.9%** on the pilot
 (target ≤ 10%). The label produced by `pairwise_avg` cannot depend on order, but C2.6 as written
 measures the judge's verdicts. Whether it should be re-stated is left to the ADR-0005 reviewer.
-The full-scale value is measured again when the 2.3.3 judge stage runs (see
-[p2_headroom.md](p2_headroom.md) once it exists).
+At full scale the 2.3.3 judge stage measured **44.0%** raw A/B disagreement (10,432 of 23,718
+parsed per-order verdict pairs, [p2_label_stats.json](p2_label_stats.json)).
 
 ## Pilot relabel (row 1.3.6, still awaiting human review)
 
