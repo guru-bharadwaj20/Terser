@@ -300,6 +300,13 @@ def _rewriter_tokens(
     cands: Mapping[str, Mapping[str, Mapping[str, Any]]],
     count: Callable[[str, str], int],
 ) -> tuple[int, int]:
+    """Rewriter (input, output) tokens for one rewrite.
+
+    Recorded counts win. Otherwise the two families are counted differently, by design: a
+    zero-shot ``llm_*`` rewrite counts the full rendered instruction prompt in and the rewrite
+    out (chat-template and EOS tokens not counted), while an SFT rung counts prompt + separator
+    (+1) in and rewrite + EOS (+1) out, matching its training format.
+    """
     if "rewriter_tokens_in" in rec:
         return int(rec["rewriter_tokens_in"]), int(rec["rewriter_tokens_out"])
     base = method[: -len("_raw")] if method.endswith("_raw") else method
@@ -424,7 +431,11 @@ def default_systems(
     for name, m, row, gate in fixed:
         if m in have:
             s.append(System(name, m, row, gate))
+    tag_set = set(sft_tags)
     for tag in sft_tags:
+        mm = SEED_RE.match(tag)
+        if mm and mm.group("base") in tag_set:
+            continue  # a seed run of another rung: a seed variant below, not a main row
         if tag in have or f"{tag}_raw" in have:
             s.append(System(f"SFT rewriter `{tag}`", tag, "SFT rewriter", None, path="quality"))
     if full and (full in have or f"{full}_raw" in have):
@@ -437,11 +448,16 @@ def default_systems(
         s.append(System(f"Zero-shot 32B {m[4:]}", m, "zero-shot LLM", path="quality"))
     if "fast_path" in have:
         s.append(System("Fast path (deployed ONNX)", "fast_path", "fast path", "onnx"))
-    names = {x.method: x for x in s}
+    # Keyed by method, holding every system on it: "Terser full" and the ungated SFT rung share
+    # a method, and each gets its own seed group.
+    by_method: dict[str, list[System]] = {}
+    for x in s:
+        by_method.setdefault(x.method, []).append(x)
     for m in sorted(have):
         mm = SEED_RE.match(m)
-        if mm and mm.group("base") in names:
-            b = names[mm.group("base")]
+        if mm is None:
+            continue
+        for b in by_method.get(mm.group("base"), []):
             s.append(
                 System(
                     f"{b.name} seed {mm.group('seed')}",
@@ -1288,14 +1304,24 @@ def run(
     results: list[SystemResult] = []
     for sys_ in systems:
         ev = evaluate(sys_, prompts, cands, index, count, pricing, gates, targets)
-        latency, note = _latency(sys_, meta, sft_latency, gen_runs, cands)
-        if sys_.gate and gates is not None and latency is not None:
-            g = gates.mean_seconds(sys_.gate)
-            if g is not None:
-                latency += g
-                note = (note + "; " if note else "") + f"+ gate {1000 * g:.0f} ms"
-        ev.latency_s, ev.latency_note = latency, note
+        ev.latency_s, ev.latency_note = _latency(sys_, meta, sft_latency, gen_runs, cands)
         results.append(ev)
+    # Gate time is added only after every system is scored, so its mean does not depend on the
+    # evaluation order; it is weighted by the share of requests the gate actually saw (the
+    # rewrites that did not already fall back).
+    for ev in results:
+        sys_ = ev.system
+        if not (sys_.gate and gates is not None and ev.latency_s is not None):
+            continue
+        g = gates.mean_seconds(sys_.gate)
+        if g is None:
+            continue
+        seen = [float(np.mean(~fb)) for fb in ev.fell_back.values() if len(fb)]
+        share = float(np.mean(seen)) if seen else 1.0
+        ev.latency_s += g * share
+        ev.latency_note = (ev.latency_note + "; " if ev.latency_note else "") + (
+            f"+ gate {_sec(g)} × {share:.0%} of requests"
+        )
     if gates is not None:
         gates.save()
 

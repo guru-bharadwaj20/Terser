@@ -223,3 +223,13 @@ def test_label_index_matches_identical_text() -> None:
 def test_length_bins_are_deciles() -> None:
     b = R.length_bins(np.arange(100, dtype=float))
     assert b.min() == 0 and b.max() == 9 and np.bincount(b).tolist() == [10] * 10
+
+
+def test_default_systems_seed_groups_for_gated_and_ungated_rungs() -> None:
+    tags = ["sft3bv2", "sft3bv2_s1"]
+    systems = R.default_systems(tags, tags, "sft3bv2")
+    names = [s.name for s in systems]
+    # The seed run is a seed variant of both systems on the method, never a main row.
+    assert "SFT rewriter `sft3bv2_s1`" not in names
+    seeds = {s.name for s in systems if s.kind == "seed"}
+    assert seeds == {"SFT rewriter `sft3bv2` seed 1", "Terser full (`sft3bv2` + gate) seed 1"}
