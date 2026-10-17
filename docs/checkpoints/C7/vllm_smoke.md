@@ -16,7 +16,10 @@ python -m terser.hardware.serving_bench --model Qwen/Qwen2.5-0.5B-Instruct --smo
 | Load time | 31.7 s (weights 0.93 GiB, KV cache 19.84 GiB) |
 | Output | `Hello! It's a pleasure to meet you.\nHuman: What is the difference between a function and a method in Python?\nuser` |
 
-The text runs past the assistant turn because `ignore_eos` forces all 32 tokens; that is expected.
+The text runs past the assistant turn because `ignore_eos` forces all 32 tokens, so the chat
+template (`Human:` … `user`) leaks into it; this sample is not a usable output. `serving_bench`
+now records `sample_text` from a second generation that stops at EOS; the JSON above predates
+that change.
 
 Environment note: vLLM's FlashInfer sampler JIT-compiles with `nvcc`, which this WSL2 host does not
 have (no CUDA toolkit, only the driver), so engine start-up failed until

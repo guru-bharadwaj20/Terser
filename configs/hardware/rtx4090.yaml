@@ -1,5 +1,5 @@
 # NVIDIA GeForce RTX 4090 (24 GB, Ada Lovelace, bf16). Lab workers administered by Vivian Sobers.
-# Hosts: worker-1 (10.10.3.83), worker-2 (10.10.3.50). Verified available 2026-09-10.
+# Hosts: worker-1, worker-2 (addresses shared out-of-band). Verified available 2026-09-10.
 name: "NVIDIA GeForce RTX 4090"
 device: "cuda:0"
 precision: bf16
