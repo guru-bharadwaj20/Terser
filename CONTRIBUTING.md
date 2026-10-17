@@ -228,7 +228,7 @@ statistical model.
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 1.1.1 | Sub-problem taxonomy | Quality gate (binary classification) · span tagger (sequence labelling KEEP/DROP/REPLACE) · savings predictor (regression) · intent discovery (clustering) · rewriter (conditional generation) · rewrite policy (RL) | `docs/decisions/ADR-0002-problem-framing.md` reviewed | ❌ |
+| 1.1.1 | Sub-problem taxonomy | Quality gate (binary classification) · span tagger (sequence labelling KEEP/DROP/REPLACE) · savings predictor (regression) · intent discovery (clustering) · rewriter (conditional generation) · rewrite policy (RL) | `docs/decisions/ADR-0002-problem-framing.md` reviewed | ✅ |
 | 1.1.2 | Task categories | `code`, `fact`, `reason`, `explain`, `creative`, `transform`, each with its quality measure (unit tests / EM-F1 / answer accuracy / rubric judge / pairwise judge / rubric + constraint checklist) | Category spec in `docs/categories.md` | ✅ |
 | 1.1.3 | Positive-class convention | Quality gate positive = **degraded**, so sensitivity = catching degradations, specificity = not rejecting good rewrites | Recorded in ADR-0002 and used by `terser.eval` | ✅ |
 
@@ -292,7 +292,7 @@ downstream can be measured without it.
 | :---: | :--- | :--- | :--- | :---: |
 | 2.1.1 | Source datasets | Permissively licensed instruction sets (e.g. Dolly, OpenAssistant), HumanEval/MBPP prompts, GSM8K problems | `data/SOURCES.md` + one data card per source | ✅ |
 | 2.1.2 | Licence audit | Research use and redistribution terms; unknown ⇒ non-redistributable | `reports/license_audit.md` | ✅ |
-| 2.1.3 | PII scrubbing | PII detector over all text before `data/interim/` | Scrub report; 0 detected PII in a 500-row manual sample | ❌ |
+| 2.1.3 | PII scrubbing | PII detector over all text before `data/interim/` | Scrub report; 0 detected PII in a 500-row manual sample | ✅ |
 | 2.1.4 | Casualisation | LLM rewrites clean instructions in 5 styles: rambling, hedging, texting, over-polite, repetitive; clean version kept as reference | ≥ 6,000 casual prompts | ✅ |
 | 2.1.5 | Deduplication | MinHash, Jaccard ≥ 0.8 removed; paraphrase groups kept whole | Duplicate report | ✅ |
 | 2.1.6 | **Source-grouped splits** | Train 70 / val 15 / test 15 by source prompt; test frozen end of week 4 and hash-locked | Automated test: 0 source prompts shared across splits | ✅ |
@@ -783,7 +783,7 @@ quality?", on the untouched test split.
 | 12.9 | Qualitative gallery | Best and worst casual → rewrite → output pairs | `reports/gallery.md` | ✅ |
 | 12.10 | Compute accounting | Generated tokens, GPU-hours, energy per phase; GPU-seconds per labelled pair (estimate vs actual) | Table | ✅ |
 | 12.11 | Benchmark release | Prompts, candidates, labels, rubrics, eval code (licence permitting) | Release tag + data card | ❌ |
-| 12.12 | Reproduction | Second contributor reproduces headline numbers from a fresh clone | Within CI bounds | ❌ |
+| 12.12 | Reproduction | Second contributor reproduces headline numbers from a fresh clone | Within CI bounds | ⏭️ waived by owner |
 
 ---
 
@@ -896,7 +896,7 @@ Evaluated once, on the frozen **test** split, in Phase 12.
 | S6 | Judge validity | Judge–human κ ≥ 0.60 (C2.4) holds on a fresh 100-pair test sample | ❌ |
 | S7 | Fast-path latency | p95 ≤ 150 ms | ✅ |
 | S8 | Quality-path latency on one 24 GB Ada GPU | p95 ≤ 400 ms | ❌ |
-| S9 | Independent reproduction | Headline numbers reproduced from a fresh clone by a second contributor | ❌ |
+| S9 | Independent reproduction | Headline numbers reproduced from a fresh clone by a second contributor | ⏭️ waived by owner |
 | S10 | All four syllabus units demonstrably covered | Every row of the Syllabus Coverage Matrix ✅ | ❌ |
 
 S1–S3 are also reported, not gated, on the real-prompt slice (2.1.8). A large gap between the
