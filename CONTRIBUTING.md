@@ -81,7 +81,7 @@ and the RTX 4500 Ada is optional extra capacity. Wherever a row below names the 
 
 ### GPU job queue
 
-GPU work is written, unit-tested on CPU with `configs/model/tiny.yaml`, and
+GPU work is written, unit-tested on CPU with a tiny stand-in model (e.g. `configs/experiment/grpo_tiny.yaml`, Qwen2.5-0.5B), and
 queued as a job spec in `gpu_queue/`:
 
 ```yaml

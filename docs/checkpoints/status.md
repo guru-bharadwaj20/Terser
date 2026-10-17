@@ -11,7 +11,7 @@ Status of all 63 checkpoints as of 2026-10-17, read from the ✅ / ❌ marks in 
 | C1.1 | ADR-0002 merged | ❌ | ADR-0002 review by a second contributor: needs human annotation / review; cannot be produced by a script |
 | C1.2 | Operator safety | ✅ | see the phase checkpoint section |
 | C1.3 | Version space | ❌ | 0 of 6 categories non-empty on the GPU judge labels; every collapse named ([p1_version_spaces.md](../../reports/p1_version_spaces.md)) |
-| C1.4 | Savings exist (non-blocking, [ADR-0004](docs/decisions/ADR-0004-plan-revision.md)) | ❌ | non-blocking (ADR-0004): 1.7% median best-single-operator savings, recorded negative result |
+| C1.4 | Savings exist (non-blocking, [ADR-0004](../decisions/ADR-0004-plan-revision.md)) | ❌ | non-blocking (ADR-0004): 1.7% median best-single-operator savings, recorded negative result |
 | C1.5 | Tokenizer dependence | ✅ | see the phase checkpoint section |
 | C2.1 | Dataset size | ✅ | see the phase checkpoint section |
 | C2.2 | Leakage | ✅ | see the phase checkpoint section |

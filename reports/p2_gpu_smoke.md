@@ -71,7 +71,7 @@ Startup recovery was scoped to project processes and paths: missing conda execut
 
 [Command ledger](p2_smoke_commands.md) provides exact remote scripts, exit codes and trimmed real output. Download weights and the environment remain under the authorized project paths on worker-1; only smoke outputs, source archive, logs and tracking artifacts were copied locally.
 
-The local `.git` directory is mounted read-only. `git add reports/p2_worker_environment.md` failed with `Unable to create .../.git/index.lock: Read-only file system`; therefore no task commit could be created and nothing was pushed. The prepared changes and small commit sequence are listed in [handoff](p2_smoke_commit_handoff.md). CONTRIBUTING statuses remain unchanged.
+The local `.git` directory is mounted read-only. `git add reports/p2_worker_environment.md` failed with `Unable to create .../.git/index.lock: Read-only file system`; therefore no task commit could be created and nothing was pushed. The prepared changes were committed later from the main checkout; the handoff note that listed them was not kept. CONTRIBUTING statuses remain unchanged.
 
 ## Local DVC retention
 
