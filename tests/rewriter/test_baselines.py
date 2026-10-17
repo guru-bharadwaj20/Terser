@@ -12,6 +12,7 @@ from terser.models.rewriter.baselines import (
     c8_4,
     c8_5,
     candidate_rewrites,
+    hmm_system,
     identity_metrics,
     parse_generation_logs,
     phase9_reward,
@@ -55,6 +56,30 @@ def test_candidate_rewrites_fallback_rules() -> None:
     assert rw["b"]["fell_back"] and rw["b"]["savings"] == 0.0  # rejected
     assert rw["c"]["fell_back"] and rw["c"]["savings"] == 0.0  # not strictly shorter
     assert rw["c"]["tokens_out"] == 10
+
+
+def test_hmm_system_scores_shared_prompts_only() -> None:
+    hmm_prompts = [
+        {"id": "a", "prompt": "one two three four"},
+        {"id": "b", "prompt": "one two"},
+        {"id": "z", "prompt": "not in val"},
+    ]
+    cands = [
+        _cand("a", "hmm", text="one two"),
+        _cand("b", "hmm", text="one two"),
+        _cand("z", "hmm", text="x"),
+        _cand("a", "op_F", text="one"),
+    ]
+    labels = [_l("a", "hmm", "p", "degraded"), _l("b", "hmm", "p", "degraded")]
+    labels.append(_l("a", "op_F", "p", "preserved"))
+    m = hmm_system(PROMPTS, hmm_prompts, cands, labels, lambda s: len(s.split()))
+    assert m is not None
+    assert m["n"] == 2 and m["n_hmm_prompts"] == 3 and m["fell_back"] == 1
+    # a: 50% saved but degraded; b: unchanged -> falls back, preserved by construction
+    assert m["preserved"] == 0.5
+    assert m["median_savings"] == pytest.approx(0.25)
+    assert m["latency_s"] is None and "2 shared prompts" in m["source"]
+    assert hmm_system(PROMPTS, [{"id": "z", "prompt": "q"}], cands, labels, len) is None
 
 
 def test_identity_is_fully_preserved() -> None:

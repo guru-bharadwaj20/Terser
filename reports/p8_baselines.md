@@ -7,7 +7,7 @@ Same 285 val prompts and metric definitions as [p8_rewriter_val.md](p8_rewriter_
 | Original | identity | 285 | 0.0% | 285 | 100.0% | 100.0% | 100.0% | 0.00 | fail |
 | Best operator | `ops_FHC` | 285 | 0.3% | 138 | 81.4% | 81.8% | 81.1% | n/r | fail |
 | Other operator stack | `ops_CHFIDSL` | 285 | 1.2% | 101 | 75.1% | 75.1% | 75.1% | n/r | fail |
-| HMM compressor | row 5.3.6 not judged | pending | pending | pending | pending | pending | pending | pending | — |
+| HMM compressor | `hmm` (row 5.3.6, 124 shared prompts) | 124 | 10.9% | 51 | 58.1% | 60.5% | 55.6% | n/r | fail |
 | LLMLingua-2 | `llmlingua2` | 285 | 50.7% | 1 | 28.9% | 30.2% | 27.7% | n/r | fail |
 | Zero-shot 32B low | `llm_low` | 285 | 40.1% | 24 | 58.8% | 64.9% | 52.6% | 0.25 | fail |
 | Zero-shot 32B medium | `llm_medium` | 285 | 47.9% | 26 | 57.5% | 62.8% | 52.3% | 0.15 | fail |
@@ -19,6 +19,9 @@ Same 285 val prompts and metric definitions as [p8_rewriter_val.md](p8_rewriter_
 | SFT sft3b | `sft3b` | 285 | 2.1% | 130 | 74.7% | 78.6% | 70.9% | 0.76 | fail |
 | SFT sft15v2 | `sft15v2` | 285 | 35.0% | 72 | 57.0% | 61.1% | 53.0% | 0.44 | fail |
 | SFT sft3bv2 | `sft3bv2` | 285 | 12.5% | 104 | 71.4% | 75.1% | 67.7% | 0.98 | fail |
+| SFT sft7bv2 | `sft7bv2` | 285 | 2.0% | 130 | 75.3% | 77.9% | 72.6% | 1.71 | fail |
+
+HMM compressor: row 5.3.6 judged its own 500 val prompts (seed 0, stratified), of which 124 are in this table's 285; its row is scored on those only, so it is not directly comparable with the other rows. Here an unchanged rewrite falls back and counts as preserved; the full 5.3.6 result is in [p5_hmm_compressor.md](p5_hmm_compressor.md).
 
 Latency: SFT rungs are the mean generation time per prompt in batches of 16 (HF `generate`, RTX 4500 Ada). Zero-shot 32B levels are the measured wall time of the vLLM generation run divided by the prompts it wrote (concurrent requests, continuous batching, same RTX 4500 Ada); `llm_low` has no recorded GPU time (its run was client-bound, [p2_candidates.md](p2_candidates.md)), so it shows the batch-16 decode estimate below. Operators and LLMLingua-2 timings were not recorded (n/r).
 
@@ -29,7 +32,7 @@ Preservation by category:
 | Original | 100.0% | 100.0% | 100.0% | 100.0% | 100.0% | 100.0% |
 | Best operator | 78.4% | 70.2% | 84.3% | 80.0% | 97.9% | 78.6% |
 | Other operator stack | 64.7% | 64.9% | 77.1% | 73.6% | 96.9% | 74.5% |
-| HMM compressor | pending | pending | pending | pending | pending | pending |
+| HMM compressor | 43.8% | 78.3% | 92.9% | 59.5% | 57.1% | 28.6% |
 | LLMLingua-2 | 7.8% | 27.7% | 47.1% | 24.5% | 49.0% | 24.5% |
 | Zero-shot 32B low | 57.8% | 39.4% | 48.6% | 63.6% | 83.3% | 56.1% |
 | Zero-shot 32B medium | 52.9% | 34.0% | 60.0% | 65.5% | 77.1% | 55.1% |
@@ -41,6 +44,7 @@ Preservation by category:
 | SFT sft3b | 57.8% | 75.5% | 85.7% | 80.0% | 82.3% | 70.4% |
 | SFT sft15v2 | 48.0% | 54.3% | 65.7% | 68.2% | 44.8% | 62.2% |
 | SFT sft3bv2 | 61.8% | 70.2% | 80.0% | 80.0% | 63.5% | 74.5% |
+| SFT sft7bv2 | 56.9% | 85.1% | 65.7% | 80.0% | 81.2% | 80.6% |
 
 ## Best operator (chosen on train)
 
@@ -96,6 +100,11 @@ Pass needs a level within ±1 pp preservation, a savings gap (level − rung) �
 | sft3bv2 | `llm_high` | +19.1 pp | +42.6 pp | 0.22× | 2.9× | no | fail |
 | sft3bv2 | `llm_max` | +20.7 pp | +53.9 pp | 0.20× | 2.0× | no | fail |
 | sft3bv2 | `llm_min` | +21.4 pp | +39.6 pp | 0.29× | 3.7× | no | fail |
+| sft7bv2 | `llm_low` | +16.5 pp | +38.1 pp | 0.15× | 2.3× | no | fail |
+| sft7bv2 | `llm_medium` | +17.7 pp | +45.9 pp | 0.09× | 2.0× | no | fail |
+| sft7bv2 | `llm_high` | +23.0 pp | +53.2 pp | 0.13× | 1.7× | no | fail |
+| sft7bv2 | `llm_max` | +24.6 pp | +64.4 pp | 0.11× | 1.1× | no | fail |
+| sft7bv2 | `llm_min` | +25.3 pp | +50.2 pp | 0.17× | 2.1× | no | fail |
 
 | Rung | Closest level | 32B savings at rung's preservation (interp.) | C8.4 |
 |---|---|---|---|
@@ -104,8 +113,9 @@ Pass needs a level within ±1 pp preservation, a savings gap (level − rung) �
 | sft3b | `llm_low` | outside the 32B range | fail |
 | sft15v2 | `llm_medium` | 48.6% (gap +13.6 pp) | fail |
 | sft3bv2 | `llm_low` | outside the 32B range | fail |
+| sft7bv2 | `llm_low` | outside the 32B range | fail |
 
-**C8.4: fail.** sft05: matched levels none, closest `llm_low` (+8.6 pp preservation, +32.5 pp savings gap), best latency ratio 0.86×; sft15: matched levels none, closest `llm_low` (+10.5 pp preservation, +32.5 pp savings gap), best latency ratio 0.57×; sft3b: matched levels none, closest `llm_low` (+16.0 pp preservation, +38.0 pp savings gap), best latency ratio 0.38×; sft15v2: matched levels llm_medium, closest `llm_medium` (-0.5 pp preservation, +12.9 pp savings gap), best latency ratio 0.65×; sft3bv2: matched levels none, closest `llm_low` (+12.6 pp preservation, +27.6 pp savings gap), best latency ratio 0.29×. No level of the provisional 32B baseline is a plain "rewrite concisely" prompt, and SFT and 32B latencies come from different batching set-ups, so a batch-1 latency benchmark of both on the same GPU is still needed for a final latency call.
+**C8.4: fail.** sft05: matched levels none, closest `llm_low` (+8.6 pp preservation, +32.5 pp savings gap), best latency ratio 0.86×; sft15: matched levels none, closest `llm_low` (+10.5 pp preservation, +32.5 pp savings gap), best latency ratio 0.57×; sft3b: matched levels none, closest `llm_low` (+16.0 pp preservation, +38.0 pp savings gap), best latency ratio 0.38×; sft15v2: matched levels llm_medium, closest `llm_medium` (-0.5 pp preservation, +12.9 pp savings gap), best latency ratio 0.65×; sft3bv2: matched levels none, closest `llm_low` (+12.6 pp preservation, +27.6 pp savings gap), best latency ratio 0.29×; sft7bv2: matched levels none, closest `llm_low` (+16.5 pp preservation, +38.1 pp savings gap), best latency ratio 0.17×. No level of the provisional 32B baseline is a plain "rewrite concisely" prompt, and SFT and 32B latencies come from different batching set-ups, so a batch-1 latency benchmark of both on the same GPU is still needed for a final latency call.
 
 ## C8.5: vs LLMLingua-2
 
@@ -118,5 +128,6 @@ Pass needs higher preservation than LLMLingua-2 and equal or better median savin
 | sft3b | +45.8 pp | -48.6 pp | fail |
 | sft15v2 | +28.1 pp | -15.7 pp | fail |
 | sft3bv2 | +42.5 pp | -38.2 pp | fail |
+| sft7bv2 | +46.3 pp | -48.7 pp | fail |
 
-**C8.5: fail.** sft05: preservation +38.4 pp, median savings -43.1 pp; sft15: preservation +40.4 pp, median savings -43.1 pp; sft3b: preservation +45.8 pp, median savings -48.6 pp; sft15v2: preservation +28.1 pp, median savings -15.7 pp; sft3bv2: preservation +42.5 pp, median savings -38.2 pp.
+**C8.5: fail.** sft05: preservation +38.4 pp, median savings -43.1 pp; sft15: preservation +40.4 pp, median savings -43.1 pp; sft3b: preservation +45.8 pp, median savings -48.6 pp; sft15v2: preservation +28.1 pp, median savings -15.7 pp; sft3bv2: preservation +42.5 pp, median savings -38.2 pp; sft7bv2: preservation +46.3 pp, median savings -48.7 pp.
