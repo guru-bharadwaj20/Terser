@@ -730,7 +730,7 @@ quality monitoring.
 | :---: | :--- | :--- | :--- | :---: |
 | 11.4.1 | CI | Every PR: lint, types, unit tests, CPU smoke training, `dvc repro --dry`, feature parity | Median ≤ 15 min | ❌ |
 | 11.4.2 | CD | Tag `v*`: build + scan images → push to GHCR → start the container in CI → smoke + latency tests | Release images published by the workflow | ❌ |
-| 11.4.3 | CT | On drift alert or a new data batch: judge labels → retrain gate/tagger (CPU) → queue rewriter retrain (GPU) → evaluate → register as Staging if checkpoints pass | One full cycle completed | ❌ |
+| 11.4.3 | CT | On drift alert or a new data batch: judge labels → retrain gate/tagger (CPU) → queue rewriter retrain (GPU) → evaluate → register as Staging if checkpoints pass | One full cycle completed | ✅ |
 | 11.4.4 | Promotion guard | CT refuses promotion when a synthetic regression is injected | Test green | ✅ |
 
 ### 11.5 Monitoring, Drift and Observability
@@ -755,7 +755,7 @@ quality monitoring.
 
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
-| C11.1 | End-to-end orchestration | `data → train_classical → evaluate → promote` runs unattended on a fresh clone (CPU) | ❌ |
+| C11.1 | End-to-end orchestration | `data → train_classical → evaluate → promote` runs unattended on a fresh clone (CPU) | ✅ |
 | C11.2 | Fast-path latency | p95 **≤ 150 ms** at 20 RPS | ✅ |
 | C11.3 | Quality-path latency | p95 **≤ 400 ms** at 5 RPS, prompts ≤ 256 tokens, one 24 GB Ada GPU | ❌ |
 | C11.4 | Throughput | Quality path ≥ 20 RPS sustained 30 min, no OOM | ❌ |
