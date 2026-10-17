@@ -1,0 +1,6 @@
+outs:
+- md5: 60f3a8870a45047efa69a637f7c73238.dir
+  size: 73994274
+  nfiles: 4
+  hash: md5
+  path: sft-qwen1.5b-lora-v2
