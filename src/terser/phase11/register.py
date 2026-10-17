@@ -33,7 +33,7 @@ from mlflow.pyfunc import PythonModel
 from terser.tracking.lineage import MODEL_NAMES, register_with_lineage, trace
 from terser.tracking.runs import promote, start_run
 
-__all__ = ["COMPONENTS", "load_metrics", "main"]
+__all__ = ["COMPONENTS", "load_metrics", "main", "register_one"]
 
 REWRITER_METRICS = {"median_savings": "median_savings", "preserved": "preserved"}
 # Each component's metrics: (json file, key or None, {logged name: field}). The files are
@@ -100,38 +100,66 @@ def load_metrics(src: str, key: str | None, fields: dict[str, str]) -> dict[str,
     return {name: float(d[field]) for name, field in fields.items()}
 
 
+def register_one(
+    component: str,
+    path: str,
+    config: dict[str, Any],
+    checkpoints: Sequence[str],
+    stages: Sequence[str],
+    metrics: dict[str, float],
+    *,
+    phase: int = 11,
+    row: str = "11.2.2",
+    run_name: str | None = None,
+) -> dict[str, Any]:
+    """Log ``path`` as a pyfunc artifact bundle, register it with lineage, walk ``stages``.
+
+    One registry entry, as :func:`main` makes for each of :data:`COMPONENTS`; later rows (e.g.
+    10.7, the tuned rewriter) call it to add a version without re-registering the others.
+    Returns the registry-table row.
+    """
+    p = Path(path)
+    name = p.stem if p.is_file() else p.name
+    with start_run(
+        phase=phase,
+        row=row,
+        task=f"register_{component}",
+        run_name=run_name or f"{phase}-register-{component}-{name.replace('.', '')}",
+        params=config,
+    ) as run:
+        mlflow.log_metrics(metrics)
+        # MLflow 3 registers logged models only, so the files ride as pyfunc artifacts.
+        mlflow.pyfunc.log_model(
+            name="model", python_model=_Artifacts(), artifacts={"weights": str(p)}
+        )
+        run_id = run.info.run_id
+    mv = register_with_lineage(run_id, "model", component, config, checkpoints)
+    for stage in stages:
+        promote(MODEL_NAMES[component], mv.version, stage)
+    return {
+        "component": component,
+        "registry name": MODEL_NAMES[component],
+        "version": mv.version,
+        "source": path,
+        "stage history": " -> ".join(["None", *stages]),
+    }
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Register served models with lineage.")
     ap.add_argument("--report", type=Path, default=Path("reports/p11_registry.md"))
     args = ap.parse_args(argv)
     rows = []
     for c in COMPONENTS:
-        p = Path(c["path"])
-        name = p.stem if p.is_file() else p.name
-        with start_run(
-            phase=11,
-            row="11.2.2",
-            task=f"register_{c['component']}",
-            run_name=f"11-register-{c['component']}-{name.replace('.', '')}",
-            params=c["config"],
-        ) as run:
-            mlflow.log_metrics(load_metrics(*c["metrics"]))
-            # MLflow 3 registers logged models only, so the files ride as pyfunc artifacts.
-            mlflow.pyfunc.log_model(
-                name="model", python_model=_Artifacts(), artifacts={"weights": str(p)}
-            )
-            run_id = run.info.run_id
-        mv = register_with_lineage(run_id, "model", c["component"], c["config"], c["checkpoints"])
-        for stage in c["stages"]:
-            promote(MODEL_NAMES[c["component"]], mv.version, stage)
         rows.append(
-            {
-                "component": c["component"],
-                "registry name": MODEL_NAMES[c["component"]],
-                "version": mv.version,
-                "source": c["path"],
-                "stage history": " -> ".join(["None", *c["stages"]]),
-            }
+            register_one(
+                c["component"],
+                c["path"],
+                c["config"],
+                c["checkpoints"],
+                c["stages"],
+                load_metrics(*c["metrics"]),
+            )
         )
         print(json.dumps(rows[-1]), flush=True)
     traced = {
