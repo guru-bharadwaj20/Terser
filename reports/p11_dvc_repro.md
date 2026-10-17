@@ -101,7 +101,8 @@ stage was forced to rerun with `-s` on top of the locked `clean.jsonl`.
   `respond` ×2 → `label_stage` from cache gives `labels.jsonl` `c5a38491…`, the hash in
   `data/processed/labels.jsonl.dvc`. collect is the one documented exception (stale by design).
   With the locked code it also reproduces its locked hash.
-- **11.1.2 ❌ (partial)** "Full DVC pipeline … `dvc repro` end to end". `dvc.yaml` has `collect`,
+- **11.1.2**: superseded by the section "11.1.2: full pipeline as DVC stages" below. Original
+  finding: ❌ (partial) "Full DVC pipeline … `dvc repro` end to end". `dvc.yaml` has `collect`,
   `casualise`, `dedupe`, `split`, `label_subset`, `candidates`, `token_counts` (and `register`).
   **`respond`, `judge`, `label`, `features` and `stratify` are not DVC stages.** `respond` and
   `judge`/`label` exist as modules (`terser.phase2.respond`, `terser.phase2.label_stage`) and are
@@ -122,8 +123,99 @@ stage was forced to rerun with `-s` on top of the locked `clean.jsonl`.
    `dvc pull data/raw/*.dvc` fails. Fix: `dvc push` the raw dirs from the workspace.
 3. `labels.jsonl`, `oracle.csv`, `pair_features.parquet`, `span_features.parquet` are in
    `~/Terser/.dvc/cache` but not on the `local` remote. Fix: `dvc push`.
-4. `pair_features.parquet` needs a refresh (`dvc add`) to pick up `overhead_pct`.
-5. `data/interim/responses/*.jsonl` is not DVC-tracked. It reproduces bit-for-bit from cache, but
+4. `pair_features.parquet` needs a refresh to pick up `overhead_pct`. Gaps 4 and 5 are
+   handled by the stages in the 11.1.2 section below.
+5. `data/interim/responses/*.jsonl` is not DVC-tracked. It reproduces bit for bit from cache, but
    it should become a stage output.
-6. To close 11.1.2: add `respond_qwen`, `respond_phi`, `label` (and `features`) stages to
-   `dvc.yaml` with the commands above, then `dvc repro` from a populated cache.
+
+## 11.1.2: full pipeline as DVC stages
+
+The pipeline is now `collect (frozen) → casualise → dedupe → split (+ stratify) → label_subset →
+candidates → token_counts → respond@qwen2.5-7b, respond@phi3.5-mini → label → oracle →
+features` (`dvc.yaml`, parameters `respond.*` and `label.*` in `params.yaml`, overview in
+`docs/data_pipeline.md`). The new stages use the commands and parameters that produced the
+committed outputs. Those come from the MLflow run params (`n_prompts = 1800`, `max_tokens 768`,
+3 creative samples at 0.7) and the `p11_flows.md` commands, and they are confirmed by the
+identical hashes below.
+
+| new stage | module | outputs (moved out of a standalone `.dvc` file where one existed) |
+| --- | --- | --- |
+| `respond@qwen2.5-7b`, `respond@phi3.5-mini` | `terser.phase2.respond` (`foreach` over `respond.targets`) | `data/interim/responses/<key>.jsonl` (were untracked) |
+| `label` | `terser.phase2.label_stage` (judge + task metrics + `label_v1`) | `data/processed/labels.jsonl` (was `labels.jsonl.dvc`) |
+| `oracle` | `terser.phase2.oracle` (`--target-map` HF id → tokenizer target) | `data/processed/oracle.csv` (was `oracle.csv.dvc`) |
+| `features` | `terser.phase3.build_features --device cpu` | `pair_features.parquet`, `span_features.parquet` (were `.dvc` files) |
+
+- **`judge` and `label`** are one stage: `label_stage` runs the judge and builds the labels in
+  one pass, and judge verdicts are not a separate artifact.
+- **`oracle`** is not named in 11.1.2, but `features` reads `oracle.csv` (savings and the
+  best Qwen2.5 rewrite for the span table). Without the stage, `features` would depend on a
+  hand-made file.
+- **`stratify`** is not a stage. Stratification happens inside `split` (seeded hash of whole
+  source groups, stratified by category and source in expectation), and `label_subset` draws an
+  exact per-category quota. This is documented in the `split` stage comment and
+  `docs/data_pipeline.md`. A no-op stage would only copy `split`'s outputs.
+- **`collect`** is `frozen: true`. Without that, `dvc repro` would rerun the stale collect,
+  produce a different `clean.jsonl` and fail at `split --expect-test-sha256`. Side effect (DVC
+  behaviour): a `dvc repro` that passes through the frozen stage rewrites collect's **dep**
+  hashes in `dvc.lock` to the current `collect.py`/`pii.py`. Its outputs keep the locked hashes.
+  The provenance of `clean.jsonl` is commit `9092ee6` (verified above). To build a new dataset
+  version, run `dvc unfreeze collect && dvc repro -f collect`.
+
+### End-to-end check (fresh clone, CPU, `TERSER_LLM_CACHE_ONLY=1`)
+
+The four standalone `.dvc` files were removed with `dvc remove`, the new `dvc.yaml`/`params.yaml`
+were copied in, and then `dvc repro -f features` was run. That forces every stage upstream of
+`features`; collect is frozen and only its outputs were verified. Exit code 0. Total wall time
+3,765 s on a CPU shared with a running GPU job; `features` (GPT-2 surprisal + bge-small on CPU)
+takes most of it. A second `dvc repro features` reports *Data and pipelines are up to date*,
+and `dvc status` of all pipeline stages is clean.
+
+| stage | output | reference | rerun | verdict |
+| --- | --- | --- | --- | --- |
+| casualise … token_counts | all outputs | `dvc.lock` | same `dvc.lock` entries | identical |
+| respond@qwen2.5-7b | `responses/qwen2.5-7b.jsonl` | `30a74339…` | `30a74339…` (13,100 / 13,100 cached) | identical |
+| respond@phi3.5-mini | `responses/phi3.5-mini.jsonl` | `76112b2a…` | `76112b2a…` (13,100 / 13,100 cached) | identical |
+| label | `labels.jsonl` | `c5a38491…` | `c5a38491…` (20,986 records) | identical |
+| oracle | `oracle.csv` | `1fef5d14…` | `1fef5d14…` | identical |
+| features | `span_features.parquet` | `0fbf27fc…` | `0fbf27fc…` | identical |
+| features | `pair_features.parquet` | `3310cfab…` (32 columns) | `e8e6f6ee…` (33 columns) | the 32 committed columns are exactly equal; new column `overhead_pct` (6.0 for every row). The same hash came out in two independent runs |
+
+### pair_features: regenerate, and what changes downstream
+
+Fix: replace the committed table with the regenerated one (`e8e6f6ee…`) and record it as the
+`features` stage output. This is cheaper and more honest than dropping the column from the code.
+`overhead_pct` is a constant 6.0 = 100 × (0.05 + 0.10) / 2.50 from the `gpt-4o` pricing in
+`configs/serving/default.yaml`. Downstream:
+
+- `terser.phase3.studies` / `gate_checkpoint`: `overhead_pct` is in `META_COLUMNS`, so it is
+  never a feature. It only feeds the 3.5.4 skip rule, and `reports/p3_skip_rule.md` already
+  states the same 6% (`quality_overhead_pct`). Rerunning with the column gives the same skip rule.
+- `terser.phase4.build_inputs` drops the column. Rebuilt from the new table:
+  `p4_pairs.parquet` `396373d4…`, `pair_emb.npy` `cde63427…` and `pair_emb_ids.json` `a71f5a24…`
+  are **identical** to the committed `.dvc` hashes. So nothing in phases 4, 5 or 11 that reads
+  them changes.
+- `svm_figures` reads named columns only, so nothing changes there either.
+- Risk: `features` now depends on `configs/serving/default.yaml`, so any edit to the serving
+  config (not only to prices) marks `features` stale in `dvc status`.
+
+### Verdict
+
+**11.1.2 ✅ in the clone.** Every stage that 11.1.2 lists, plus `oracle`, is a DVC stage, and
+`dvc repro` runs end to end on CPU from the response cache with identical hashes. The only
+expected change is `pair_features.parquet`, for the reason given above.
+
+**11.1.2 ✅ in `~/Terser` (2026-10-18).** Installation steps:
+
+- The new `dvc.yaml`/`params.yaml` were installed, the four standalone `.dvc` files were removed
+  with `dvc remove`, and the regenerated pair table was copied in.
+- `dvc commit -f respond@qwen2.5-7b respond@phi3.5-mini label oracle features` recorded the new
+  stages. Before that, the stage dependencies were checked to be unchanged from HEAD.
+
+Checks after installation:
+
+- The output and dependency hashes of all five new lock entries equal those of the clone run.
+- `dvc status` reports only `register`, which was already stale (`reports/p8_rewriter_val.json`
+  and `register.py` changed after its last run). That is outside this row.
+
+Then `dvc push` uploaded 11 files, and `dvc status -c` now reports *Cache and remote 'local' are
+in sync*. That closes gaps 2 and 3 above. Gap 1, the LLM response cache, remains open.
