@@ -77,9 +77,30 @@
       "source": "`ops_CHFIDSL`"
     },
     "HMM compressor": {
-      "pending": true,
-      "source": "row 5.3.6 not judged",
-      "preserved_by_category": {}
+      "n": 124,
+      "targets": [
+        "Qwen/Qwen2.5-7B-Instruct",
+        "microsoft/Phi-3.5-mini-instruct"
+      ],
+      "median_savings": 0.10935302390998597,
+      "fell_back": 51,
+      "latency_s": null,
+      "preserved": 0.5806451612903226,
+      "preserved_by_category": {
+        "code": 0.4375,
+        "creative": 0.782608695652174,
+        "explain": 0.9285714285714286,
+        "fact": 0.5952380952380952,
+        "reason": 0.5714285714285714,
+        "transform": 0.2857142857142857
+      },
+      "c8_3": false,
+      "preserved_by_target": {
+        "Qwen/Qwen2.5-7B-Instruct": 0.6048387096774194,
+        "microsoft/Phi-3.5-mini-instruct": 0.5564516129032258
+      },
+      "source": "`hmm` (row 5.3.6, 124 shared prompts)",
+      "n_hmm_prompts": 500
     },
     "LLMLingua-2": {
       "n": 285,
@@ -355,6 +376,31 @@
         "microsoft/Phi-3.5-mini-instruct": 0.6771929824561403
       },
       "source": "`sft3bv2`"
+    },
+    "SFT sft7bv2": {
+      "n": 285,
+      "targets": [
+        "Qwen/Qwen2.5-7B-Instruct",
+        "microsoft/Phi-3.5-mini-instruct"
+      ],
+      "median_savings": 0.020000000000000018,
+      "fell_back": 130,
+      "latency_s": 1.7127435107999829,
+      "preserved": 0.7526315789473684,
+      "preserved_by_category": {
+        "code": 0.5686274509803921,
+        "creative": 0.851063829787234,
+        "explain": 0.6571428571428571,
+        "fact": 0.8,
+        "reason": 0.8125,
+        "transform": 0.8061224489795918
+      },
+      "c8_3": false,
+      "preserved_by_target": {
+        "Qwen/Qwen2.5-7B-Instruct": 0.7789473684210526,
+        "microsoft/Phi-3.5-mini-instruct": 0.7263157894736842
+      },
+      "source": "`sft7bv2`"
     }
   },
   "best_operator": {
@@ -424,7 +470,8 @@
     "sft15",
     "sft3b",
     "sft15v2",
-    "sft3bv2"
+    "sft3bv2",
+    "sft7bv2"
   ],
   "rungs_pending": [],
   "c8_4": {
@@ -754,6 +801,71 @@
       "interpolated_gap": null,
       "latency_ok_any": false,
       "pass": false
+    },
+    "sft7bv2": {
+      "levels": [
+        {
+          "level": "llm_low",
+          "pres_diff": 0.16491228070175434,
+          "savings_gap": 0.3811976047904192,
+          "speedup": 0.14797013121212063,
+          "speedup_b1_est": 2.2521582721359694,
+          "matched": false,
+          "savings_ok": false,
+          "latency_ok": false,
+          "pass": false
+        },
+        {
+          "level": "llm_medium",
+          "pres_diff": 0.17719298245614035,
+          "savings_gap": 0.45904191616766465,
+          "speedup": 0.08709840164715907,
+          "speedup_b1_est": 2.0276634017689066,
+          "matched": false,
+          "savings_ok": false,
+          "latency_ok": false,
+          "pass": false
+        },
+        {
+          "level": "llm_high",
+          "pres_diff": 0.22982456140350882,
+          "savings_gap": 0.5317241379310345,
+          "speedup": 0.12524642402516242,
+          "speedup_b1_est": 1.668515975756778,
+          "matched": false,
+          "savings_ok": false,
+          "latency_ok": false,
+          "pass": false
+        },
+        {
+          "level": "llm_max",
+          "pres_diff": 0.24561403508771928,
+          "savings_gap": 0.6439999999999999,
+          "speedup": 0.11386280347761439,
+          "speedup_b1_est": 1.127021925790376,
+          "matched": false,
+          "savings_ok": false,
+          "latency_ok": false,
+          "pass": false
+        },
+        {
+          "level": "llm_min",
+          "pres_diff": 0.25263157894736843,
+          "savings_gap": 0.5017391304347826,
+          "speedup": 0.1670231274992028,
+          "speedup_b1_est": 2.1025319973705705,
+          "matched": false,
+          "savings_ok": false,
+          "latency_ok": false,
+          "pass": false
+        }
+      ],
+      "matched": [],
+      "closest": "llm_low",
+      "interpolated_llm_savings": null,
+      "interpolated_gap": null,
+      "latency_ok_any": false,
+      "pass": false
     }
   },
   "c8_5": {
@@ -791,12 +903,19 @@
       "pres_ok": true,
       "savings_ok": false,
       "pass": false
+    },
+    "sft7bv2": {
+      "pres_diff": 0.4631578947368421,
+      "savings_diff": -0.4872463768115942,
+      "pres_ok": true,
+      "savings_ok": false,
+      "pass": false
     }
   },
   "c8_4_verdict": "fail",
-  "c8_4_reading": "sft05: matched levels none, closest `llm_low` (+8.6 pp preservation, +32.5 pp savings gap), best latency ratio 0.86\u00d7; sft15: matched levels none, closest `llm_low` (+10.5 pp preservation, +32.5 pp savings gap), best latency ratio 0.57\u00d7; sft3b: matched levels none, closest `llm_low` (+16.0 pp preservation, +38.0 pp savings gap), best latency ratio 0.38\u00d7; sft15v2: matched levels llm_medium, closest `llm_medium` (-0.5 pp preservation, +12.9 pp savings gap), best latency ratio 0.65\u00d7; sft3bv2: matched levels none, closest `llm_low` (+12.6 pp preservation, +27.6 pp savings gap), best latency ratio 0.29\u00d7. No level of the provisional 32B baseline is a plain \"rewrite concisely\" prompt, and SFT and 32B latencies come from different batching set-ups, so a batch-1 latency benchmark of both on the same GPU is still needed for a final latency call.",
+  "c8_4_reading": "sft05: matched levels none, closest `llm_low` (+8.6 pp preservation, +32.5 pp savings gap), best latency ratio 0.86\u00d7; sft15: matched levels none, closest `llm_low` (+10.5 pp preservation, +32.5 pp savings gap), best latency ratio 0.57\u00d7; sft3b: matched levels none, closest `llm_low` (+16.0 pp preservation, +38.0 pp savings gap), best latency ratio 0.38\u00d7; sft15v2: matched levels llm_medium, closest `llm_medium` (-0.5 pp preservation, +12.9 pp savings gap), best latency ratio 0.65\u00d7; sft3bv2: matched levels none, closest `llm_low` (+12.6 pp preservation, +27.6 pp savings gap), best latency ratio 0.29\u00d7; sft7bv2: matched levels none, closest `llm_low` (+16.5 pp preservation, +38.1 pp savings gap), best latency ratio 0.17\u00d7. No level of the provisional 32B baseline is a plain \"rewrite concisely\" prompt, and SFT and 32B latencies come from different batching set-ups, so a batch-1 latency benchmark of both on the same GPU is still needed for a final latency call.",
   "c8_5_verdict": "fail",
-  "c8_5_reading": "sft05: preservation +38.4 pp, median savings -43.1 pp; sft15: preservation +40.4 pp, median savings -43.1 pp; sft3b: preservation +45.8 pp, median savings -48.6 pp; sft15v2: preservation +28.1 pp, median savings -15.7 pp; sft3bv2: preservation +42.5 pp, median savings -38.2 pp.",
+  "c8_5_reading": "sft05: preservation +38.4 pp, median savings -43.1 pp; sft15: preservation +40.4 pp, median savings -43.1 pp; sft3b: preservation +45.8 pp, median savings -48.6 pp; sft15v2: preservation +28.1 pp, median savings -15.7 pp; sft3bv2: preservation +42.5 pp, median savings -38.2 pp; sft7bv2: preservation +46.3 pp, median savings -48.7 pp.",
   "generation_logs": [
     "logs/aug_cand.log",
     "logs/p2_candidates_2.log"

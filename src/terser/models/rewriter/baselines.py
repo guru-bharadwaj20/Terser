@@ -16,7 +16,9 @@ Baselines are built from the Phase 2 candidates that were already judged (no new
 * **Zero-shot Qwen2.5-32B-Instruct-AWQ** -- the ``llm_<level>`` candidates. They come from the
   ``rewrite_v1`` instruction (rules plus an aggressiveness level), not a plain "rewrite
   concisely" prompt, so every level is reported and none is claimed to be that prompt.
-* **HMM compressor** -- row 5.3.6 has not been judged; the row stays pending.
+* **HMM compressor** -- the judged row 5.3.6 rewrites (``val_candidates_hmm.jsonl``). Row 5.3.6
+  drew its own 500 val prompts, so the row is scored on the val prompts both sets share and says
+  so; the same fallback rule applies (row 5.3.6 itself counts unchanged rewrites as judged).
 
 A candidate is served only if it is not rejected (row 2.2.1 validation), non-empty and strictly
 shorter than the original on the Qwen2.5 tokenizer; otherwise the system falls back to the
@@ -28,7 +30,9 @@ LLMLingua-2 at equal or better median savings.
 
 Entry point (later runs add v2 rungs by name once their labels exist)::
 
-    python -m terser.models.rewriter.baselines --rungs sft05,sft15,sft3b,sft15v2,sft3bv2
+    python -m terser.models.rewriter.baselines --rungs sft05,sft15,sft3b,sft15v2,sft3bv2,sft7bv2 \\
+        --rung-labels data/interim/rewrites/val_labels_all_v2.jsonl \\
+        data/interim/rewrites/val_labels_7b.jsonl
 """
 
 from __future__ import annotations
@@ -36,7 +40,7 @@ from __future__ import annotations
 import argparse
 import json
 import statistics
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -49,6 +53,7 @@ __all__ = [
     "c8_4",
     "c8_5",
     "candidate_rewrites",
+    "hmm_system",
     "identity_metrics",
     "main",
     "parse_generation_logs",
@@ -64,6 +69,7 @@ RUNG_PATHS: dict[str, str] = {
     "sft3b": f"{R}/sft-qwen3b-lora.val.jsonl",
     "sft15v2": f"{R}/sft15v2.val.jsonl",
     "sft3bv2": f"{R}/sft3bv2.val.jsonl",
+    "sft7bv2": f"{R}/sft7bv2.val.jsonl",
 }
 """Known SFT rung tags and their generate outputs; ``--rungs`` picks from these."""
 
@@ -160,6 +166,52 @@ def identity_metrics(
         for t in targets
     ]
     return system_metrics(rewrites, labels, tag)
+
+
+def hmm_system(
+    val_prompts: Sequence[Mapping[str, Any]],
+    hmm_prompts: Sequence[Mapping[str, Any]],
+    candidates: Iterable[Mapping[str, Any]],
+    labels: Sequence[dict[str, Any]],
+    count: Callable[[str], int],
+    tag: str = "hmm",
+) -> dict[str, Any] | None:
+    """The row 5.3.6 HMM rewrites as a system, on the val prompts both prompt sets share.
+
+    ``count`` is the Qwen2.5 token counter (original and rewrite text are counted the same way).
+    A missing, empty or not strictly shorter rewrite falls back to the original. Returns ``None``
+    when no prompt is shared.
+    """
+    text_of = {str(p["id"]): str(p["prompt"]) for p in hmm_prompts}
+    by_pid = {str(c["prompt_id"]): c for c in candidates if c["method"] == tag}
+    shared = [p for p in val_prompts if str(p["id"]) in text_of]
+    if not shared:
+        return None
+    rewrites = []
+    for p in shared:
+        pid = str(p["id"])
+        n0 = count(text_of[pid])
+        c = by_pid.get(pid)
+        text = "" if c is None else str(c["text"])
+        n1 = count(text) if text.strip() else n0
+        fell_back = n1 >= n0
+        rewrites.append(
+            {
+                "id": pid,
+                "category": p["category"],
+                "savings": 0.0 if fell_back else 1 - n1 / n0,
+                "oracle_savings": 0.0,
+                "fell_back": fell_back,
+                "latency_s": 0.0,
+            }
+        )
+    m = system_metrics(rewrites, labels, tag)
+    return {
+        **m,
+        "source": f"`{tag}` (row 5.3.6, {len(shared)} shared prompts)",
+        "latency_s": None,
+        "n_hmm_prompts": len(text_of),
+    }
 
 
 def phase9_reward(
@@ -390,6 +442,16 @@ def _markdown(res: dict[str, Any]) -> str:
             + ", ".join(f"`{t}`" for t in res["rungs_pending"])
             + ".",
         ]
+    h = systems.get("HMM compressor", {})
+    if not h.get("pending") and "n_hmm_prompts" in h:
+        lines += [
+            "",
+            f"HMM compressor: row 5.3.6 judged its own {h['n_hmm_prompts']} val prompts (seed 0,"
+            f" stratified), of which {h['n']} are in this table's {res['n_prompts']}; its row is"
+            " scored on those only, so it is not directly comparable with the other rows. Here an"
+            " unchanged rewrite falls back and counts as preserved; the full 5.3.6 result is in"
+            " [p5_hmm_compressor.md](p5_hmm_compressor.md).",
+        ]
     lines += [
         "",
         "Latency: SFT rungs are the mean generation time per prompt in batches of 16"
@@ -565,8 +627,12 @@ def build(
     rung_labels: Sequence[dict[str, Any]],
     gen_runs: Mapping[str, Mapping[str, Any]],
     throughput: Mapping[int, float],
+    hmm: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """All baseline metrics, the train choice of operator stack, C8.4 and C8.5."""
+    """All baseline metrics, the train choice of operator stack, C8.4 and C8.5.
+
+    ``hmm`` is the :func:`hmm_system` row; without it the HMM row stays pending.
+    """
     val_ids = {str(p["id"]) for p in val_prompts}
     val_labels = [r for r in labels if r["prompt_id"] in val_ids]
     train_cat: dict[str, str] = {}
@@ -599,7 +665,7 @@ def build(
     for m in (chosen, *(o for o in OPERATOR_METHODS if o != chosen)):
         name = "Best operator" if m == chosen else "Other operator stack"
         systems[name] = {**built[m][1], "source": f"`{m}`", "latency_s": None}
-    systems["HMM compressor"] = {
+    systems["HMM compressor"] = hmm or {
         "pending": True,
         "source": "row 5.3.6 not judged",
         "preserved_by_category": {},
@@ -662,8 +728,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         help=f"comma-separated SFT rung tags from {sorted(RUNG_PATHS)}",
     )
     ap.add_argument("--rung", action="append", default=[], help="extra rung as tag=path")
-    ap.add_argument("--rung-labels", type=Path, default=Path(f"{R}/val_labels_all.jsonl"))
+    ap.add_argument(
+        "--rung-labels", type=Path, nargs="+", default=[Path(f"{R}/val_labels_all.jsonl")]
+    )
     ap.add_argument("--val-prompts", type=Path, default=Path(f"{R}/val_prompts.jsonl"))
+    ap.add_argument("--hmm-prompts", type=Path, default=Path(f"{R}/hmm_val500_prompts.jsonl"))
+    ap.add_argument("--hmm-candidates", type=Path, default=Path(f"{R}/val_candidates_hmm.jsonl"))
+    ap.add_argument("--hmm-labels", type=Path, default=Path(f"{R}/val_labels_hmm.jsonl"))
     ap.add_argument(
         "--candidates",
         type=Path,
@@ -715,16 +786,30 @@ def main(argv: Sequence[str] | None = None) -> int:
     rungs = {t: _jsonl(p) for t, p in paths.items() if p.exists()}
     missing = [t for t, p in paths.items() if not p.exists()]
 
+    val_prompts = _jsonl(args.val_prompts)
+    hmm = None
+    if all(p.exists() for p in (args.hmm_prompts, args.hmm_candidates, args.hmm_labels)):
+        from terser.tokenizers.count import count_tokens
+
+        hmm = hmm_system(
+            val_prompts,
+            _jsonl(args.hmm_prompts),
+            _jsonl(args.hmm_candidates),
+            _jsonl(args.hmm_labels),
+            lambda s: count_tokens(s, args.token_target),
+        )
+
     gen_runs = parse_generation_logs(args.gen_logs)
     res = build(
-        val_prompts=_jsonl(args.val_prompts),
+        val_prompts=val_prompts,
         candidates=[c for p in args.candidates for c in _jsonl(p)],
         labels=[r for p in args.labels for r in _jsonl(p)],
         tokens=_tokens(args.tokens, args.token_target),
         rungs=rungs,
-        rung_labels=_jsonl(args.rung_labels) if args.rung_labels.exists() else [],
+        rung_labels=[r for p in args.rung_labels if p.exists() for r in _jsonl(p)],
         gen_runs=gen_runs,
         throughput=serving_throughput(args.serving_bench),
+        hmm=hmm,
     )
     res["rungs_pending"] += missing
     res["generation_logs"] = sorted({str(v["log"]) for v in gen_runs.values()})
