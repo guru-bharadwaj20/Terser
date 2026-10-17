@@ -1,6 +1,6 @@
 # Checkpoint status
 
-Status of all 63 checkpoints as of 2026-10-16, read from the ✅ / ❌ marks in [CONTRIBUTING.md](../../CONTRIBUTING.md): **32 pass, 31 open**. Open checkpoints are either measured failures (negative results, kept as reports), blocked on human annotation, or waiting on an earlier checkpoint.
+Status of all 63 checkpoints as of 2026-10-17, read from the ✅ / ❌ marks in [CONTRIBUTING.md](../../CONTRIBUTING.md): **32 pass, 31 open**. Open checkpoints are either measured failures (negative results, kept as reports), blocked on human annotation, or waiting on an earlier checkpoint.
 
 | checkpoint | name | status | evidence |
 |---|---|---|---|
@@ -39,7 +39,7 @@ Status of all 63 checkpoints as of 2026-10-16, read from the ✅ / ❌ marks in 
 | C5.3 | Naive Bayes filler detector | ❌ | NB precision 0.594 at recall 0.70 (≥ 0.85) ([p5_naive_bayes.md](../../reports/p5_naive_bayes.md)) |
 | C5.4 | Bayes optimal vs MAP | ❌ | Bayes optimal 0.8 pp below MAP on validation over the 708,589 Phase 1 conjunctions; both below majority ([p5_bayes_optimal.md](../../reports/p5_bayes_optimal.md)) |
 | C5.5 | GMM agreement | ✅ | see the phase checkpoint section |
-| C5.6 | First non-generative compressor | ❌ | pending: HMM / fast tagger + gate on 500 val prompts with the judge |
+| C5.6 | First non-generative compressor | ❌ | fail: HMM 16.5% median savings at 55.4% preserved (58.0% Qwen2.5, 52.8% Phi-3.5; bar ≥ 15% and ≥ 90% on one target); at op_F's 89.5% preservation both save 0% ([p5_hmm_compressor.md](../../reports/p5_hmm_compressor.md)) |
 | C6.1 | Clustering quality | ❌ | best K-means silhouette 0.066 at k = 9 (≥ 0.10) ([p6_results.md](../../reports/p6_results.md)) |
 | C6.2 | K-means ⇔ EM | ✅ | see the phase checkpoint section |
 | C6.3 | Actionable finding | ❌ | riskiest cluster 1.195x the average degradation rate (≥ 1.5x) ([p6_cluster_risk.md](../../reports/p6_cluster_risk.md)) |
@@ -48,11 +48,11 @@ Status of all 63 checkpoints as of 2026-10-16, read from the ✅ / ❌ marks in 
 | C7.4 | Queue | ❌ | partial: queue validates and dry-runs; revised 32B estimate unverified on the RTX 4090 workers ([follow-up](C7/README.md#follow-up)) |
 | C8.1 | TextCNN parameters | ✅ | see the phase checkpoint section |
 | C8.2 | TextCNN tagging | ❌ | TextCNN 0.679 vs best classical 0.658 on the binary task (+0.021, McNemar p < 1e-18; target +0.05) ([p8_textcnn.md](../../reports/p8_textcnn.md)) |
-| C8.3 | **Rewriter main gate (val split)** | ❌ | SFT rungs at 7.6% (0.5B, 1.5B) and 2.1% (3B) median savings, targets capped near 10%; on `sft_v2` targets 1.5B LoRA saves 35.0% at 57.0% preserved and 3B LoRA 12.5% at 71.4% (bar 25% / 92%); 7B QLoRA rung in training ([p8_rewriter_val.md](../../reports/p8_rewriter_val.md)) |
+| C8.3 | **Rewriter main gate (val split)** | ❌ | SFT rungs at 7.6% (0.5B, 1.5B) and 2.1% (3B) median savings, targets capped near 10%; on `sft_v2` targets 1.5B LoRA saves 35.0% at 57.0% preserved, 3B LoRA 12.5% at 71.4% and 7B QLoRA 2.0% at 75.3% (bar 25% / 92%); escalation ladder exhausted ([p8_rewriter_val.md](../../reports/p8_rewriter_val.md)) |
 | C8.4 | vs zero-shot large open LLM | ❌ | fail on every rung: no zero-shot 32B level is matched at equal preservation except `llm_medium` for 1.5B v2 (32B saves 12.9 pp more), and the 32B is not 10x slower ([p8_baselines.md](../../reports/p8_baselines.md)) |
 | C8.5 | vs LLMLingua-2 | ❌ | fail on every rung: rungs preserve 28-46 pp more than LLMLingua-2 but save 16-49 pp less ([p8_baselines.md](../../reports/p8_baselines.md)) |
 | C9.1 | Tabular convergence | ❌ | fail: most settled learner max |dQ| 0.164, net change 0.146 over the last 1,000 of 30,000 episodes (target < 1e-3); still 0.058 at 200,000 episodes, aliased states make the reward stochastic ([p9_convergence.md](../../reports/p9_convergence.md)) |
-| C9.2 | Tabular policy value | ❌ | pending: row 9.2.4 judge verification of the greedy policy |
+| C9.2 | Tabular policy value | ❌ | fail: RL greedy 0.0% median savings at 89.3% preserved vs fixed order FHIS 1.4% at 77.8% on 300 val prompts; preservation equal or better (+11.5 pp), savings 1.4 pp lower ([p9_judge_verification.md](../../reports/p9_judge_verification.md)) |
 | C10.1 | Method comparison | ✅ | 4 GBM methods + 2 MLP methods, 60 trials x 5 seeds ([p10_hpo.md](../../reports/p10_hpo.md)) |
 | C10.2 | Gate improvement | ✅ | +0.0095 AUC, documented plateau ([p10_hpo.md](../../reports/p10_hpo.md)) |
 | C10.3 | Rewriter improvement | ❌ | depends on a rewriter that passes C8.3 |
