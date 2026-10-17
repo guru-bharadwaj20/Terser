@@ -178,13 +178,16 @@ def unigram_surprisal(corpus: Iterable[str], alpha: float = 1.0) -> SurprisalFn:
 def gpt2_surprisal(model_name: str = "gpt2") -> SurprisalFn:  # pragma: no cover - needs torch
     """``-log2 p(word | prefix)`` under a Hugging Face causal LM, summed over the word's sub-tokens.
 
-    The first word is scored after the BOS token. Requires ``torch`` and ``transformers``.
+    The first word is scored after the BOS token. Inputs longer than the model's context are
+    scored in sliding windows that keep at least half a context of prefix; inputs that fit are
+    scored in one pass, as before. Requires ``torch`` and ``transformers``.
     """
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     tok = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(model_name).eval()
+    ctx = int(getattr(model.config, "n_positions", None) or model.config.max_position_embeddings)
 
     def fn(tokens: Sequence[str]) -> list[float]:
         ids: list[int] = [tok.bos_token_id]
@@ -193,12 +196,17 @@ def gpt2_surprisal(model_name: str = "gpt2") -> SurprisalFn:  # pragma: no cover
             piece = tok.encode(word if w == 0 or _is_punct(word) else " " + word)
             ids.extend(piece)
             owner.extend([w] * len(piece))
-        with torch.no_grad():
-            logits = model(torch.tensor([ids])).logits[0]
-        logp = torch.log_softmax(logits[:-1], dim=-1)
         bits = [0.0] * len(tokens)
-        for pos in range(1, len(ids)):
-            bits[owner[pos]] -= float(logp[pos - 1, ids[pos]]) / math.log(2)
+        pos = 1
+        while pos < len(ids):
+            end = min(len(ids), ctx if pos == 1 else pos + ctx // 2)
+            lo = max(0, end - ctx)
+            with torch.no_grad():
+                logits = model(torch.tensor([ids[lo:end]])).logits[0]
+            logp = torch.log_softmax(logits, dim=-1)
+            for q in range(pos, end):
+                bits[owner[q]] -= float(logp[q - 1 - lo, ids[q]]) / math.log(2)
+            pos = end
         return bits
 
     return fn
