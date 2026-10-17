@@ -154,7 +154,9 @@ def cmd_run(args: argparse.Namespace) -> int:
         )
         print(json.dumps({"rep": rep, "best": res.best_value}), flush=True)
     args.out.mkdir(parents=True, exist_ok=True)
-    (args.out / f"{args.model}_{args.method}.json").write_text(json.dumps(out, default=str))
+    (args.out / f"{args.model}_{args.method}.json").write_text(
+        json.dumps(out, default=str), encoding="utf-8"
+    )
     return 0
 
 
@@ -175,7 +177,7 @@ def cmd_report(args: argparse.Namespace) -> int:
     for k, model in enumerate(("gbm", "mlp")):
         ax = fig.add_subplot(1, 2, k + 1)
         for f in sorted(args.out.glob(f"{model}_*.json")):
-            r = json.loads(f.read_text())
+            r = json.loads(f.read_text(encoding="utf-8"))
             curves = np.array([rep["best_so_far"] for rep in r["repeats"]], dtype=float)
             m, s = curves.mean(0), curves.std(0)
             x = np.arange(1, len(m) + 1)
@@ -199,13 +201,14 @@ def cmd_report(args: argparse.Namespace) -> int:
         ax.set(title=f"{model} quality gate", xlabel="trial", ylabel="best-so-far grouped AUC")
         ax.legend(fontsize=8)
     fig.tight_layout()
-    figs = Path("reports/figures")
+    reports = args.out.parent  # --out reports/p10_hpo -> reports/
+    figs = reports / "figures"
     figs.mkdir(parents=True, exist_ok=True)
     fig.savefig(figs / "p10_hpo_methods.png", dpi=150)
     plt.close(fig)
     df = pd.DataFrame(rows)
     tuned = float(df.loc[df.model == "gbm", "best_auc"].max())
-    df.to_csv(Path("reports") / "p10_hpo.csv", index=False)
+    df.to_csv(reports / "p10_hpo.csv", index=False)
     lines = [
         "# Hyperparameter-search methods (rows 10.2, 10.5; C10.1, C10.2)",
         "",
@@ -225,7 +228,7 @@ def cmd_report(args: argparse.Namespace) -> int:
         f"documented plateau): **{'pass' if tuned - base >= 0.01 else 'plateau'}**.",
         "",
     ]
-    (Path("reports") / "p10_hpo.md").write_text("\n".join(lines), encoding="utf-8")
+    (reports / "p10_hpo.md").write_text("\n".join(lines), encoding="utf-8")
     print(json.dumps({"untuned": base, "tuned": tuned}))
     return 0
 

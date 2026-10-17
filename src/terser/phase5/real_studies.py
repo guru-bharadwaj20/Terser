@@ -142,7 +142,9 @@ def study_span_tagger(sp: pd.DataFrame) -> tuple[str, dict[str, Any]]:
     return text, {"span_macro_f1": best, "c3_4": best >= 0.65}
 
 
-def study_naive_bayes(sp: pd.DataFrame, rng: np.random.Generator) -> tuple[str, dict[str, Any]]:
+def study_naive_bayes(
+    sp: pd.DataFrame, rng: np.random.Generator, figs: Path = FIGS
+) -> tuple[str, dict[str, Any]]:
     sp = sp.sort_values(["prompt_id", "position"])
     toks = sp.groupby("prompt_id").token.apply(list).to_dict()
     pick = rng.choice(len(sp), min(40000, len(sp)), replace=False)
@@ -169,7 +171,8 @@ def study_naive_bayes(sp: pd.DataFrame, rng: np.random.Generator) -> tuple[str, 
     ax.set(xlabel="recall", ylabel="precision", title="DROP-token detector, grouped OOF")
     ax.legend()
     fig.tight_layout()
-    fig.savefig(FIGS / "p5_nb_pr.png", dpi=150)
+    figs.mkdir(parents=True, exist_ok=True)
+    fig.savefig(figs / "p5_nb_pr.png", dpi=150)
     plt.close(fig)
     text = (
         "## 5.2.3 Naive Bayes filler detector (C5.3)\n\n"
@@ -262,7 +265,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap.add_argument("--out", type=Path, default=Path("reports"))
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args(argv)
-    rng = np.random.default_rng(args.seed)
     sp = pd.read_parquet(args.spans)
     names = {
         "perceptron": "p4_perceptron.md",
@@ -272,12 +274,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         "baum_welch": "p5_baum_welch.md",
     }
     for s in args.studies:
+        # A fresh generator per study, so each report matches a run of that study alone.
+        rng = np.random.default_rng(args.seed)
         if s == "perceptron":
             text, res = study_perceptron(sp, rng)
         elif s == "span_tagger":
             text, res = study_span_tagger(sp)
         elif s == "naive_bayes":
-            text, res = study_naive_bayes(sp, rng)
+            text, res = study_naive_bayes(sp, rng, args.out / "figures")
         elif s == "gmm":
             text, res = study_gmm(_jsonl(args.labels))
         else:
