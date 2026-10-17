@@ -183,6 +183,10 @@ class System:
     kind: str = "main"  # main | ablation | seed
 
 
+FEATURES: Final = "_pair_features"
+"""Timing key of the pair-feature extraction shared by the LightGBM pair gates."""
+
+
 class GateBank:
     """Gate scorers with a JSON score cache (``{gate|sha(orig)|sha(text)|category|target}``)."""
 
@@ -214,11 +218,19 @@ class GateBank:
         if key in self.cache:
             return self.cache[key]
         g = self.gates[gate]
-        t0 = time.perf_counter()
         if hasattr(g, "score_rows"):
             assert self.featurizer is not None, "pair gates need a featurizer"
-            s = g.score_rows([self.featurizer.features(original, text, category, target)])[0]
+            # features are shared by the pair gates (one cache): time them once, separately
+            t0 = time.perf_counter()
+            calls0 = self.featurizer.calls
+            row = self.featurizer.features(original, text, category, target)
+            if self.featurizer.calls > calls0:
+                self.seconds[FEATURES] += time.perf_counter() - t0
+                self.calls[FEATURES] += 1
+            t0 = time.perf_counter()
+            s = g.score_rows([row])[0]
         else:
+            t0 = time.perf_counter()
             s = float(g.score(original, text))
         self.seconds[gate] += time.perf_counter() - t0
         self.calls[gate] += 1
@@ -229,8 +241,14 @@ class GateBank:
         return bool(self.gates[gate].rejects(score))
 
     def mean_seconds(self, gate: str) -> float | None:
+        """Mean per-request gate time; pair gates add the mean shared feature time."""
         n = self.calls.get(gate, 0)
-        return self.seconds[gate] / n if n else None
+        if not n:
+            return None
+        own = self.seconds[gate] / n
+        if hasattr(self.gates[gate], "score_rows") and self.calls.get(FEATURES, 0):
+            own += self.seconds[FEATURES] / self.calls[FEATURES]
+        return own
 
     def save(self) -> None:
         if self.cache_path is not None:
