@@ -37,6 +37,8 @@ the class changes, i.e. not between two values that are both pure in the same si
 `t` across a run of same-class examples changes the split entropy monotonically (it is concave in
 the run position), so the optimum is at the ends of runs. The implementation therefore evaluates
 only boundary midpoints, and finds the same best cut as scikit-learn, which tries all midpoints.
+That equivalence holds without a leaf-size limit; with `min_samples_leaf > 1` the implementation
+tries every midpoint, because a boundary cut can leave a leaf too small.
 Unlike ID3 attributes, a continuous attribute can be tested again deeper in the tree.
 
 C4.5 normally ranks splits by gain ratio; this implementation uses information gain so it is

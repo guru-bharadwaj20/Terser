@@ -200,9 +200,10 @@ class TokenClassEncoder:
 
     def encode_word(self, word: str) -> int:
         """Observation id of one word."""
-        w = word.lower().strip(".,!?;:\"'")  # "um," and "so," hit the lexicon
+        core = word.strip(".,!?;:\"'") or word  # "?!" stays punctuation
+        w = core.lower()  # "um," and "so," hit the lexicon
         lex = self.lexicon.index(w) + 1 if w in self.lexicon else 0
-        pos = POS_CLASSES.index(self.pos(word))
+        pos = POS_CLASSES.index(self.pos(core))  # "and," is CONJ, like "and"
         c = self.cost(word)
         bucket = next((i for i, e in enumerate(COST_BUCKETS) if c <= e), len(COST_BUCKETS) - 1)
         return (lex * len(POS_CLASSES) + pos) * len(COST_BUCKETS) + bucket

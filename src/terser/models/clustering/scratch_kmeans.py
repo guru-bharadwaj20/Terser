@@ -169,7 +169,11 @@ class BisectingKMeans:
             idx = np.flatnonzero(labels == target)
             km = KMeans(2, n_init=self.n_trials, max_iter=self.max_iter, seed=self.seed + step)
             km.fit(Xa[idx])
-            labels[idx[km.labels_ == 1]] = step
+            right = km.labels_ == 1
+            if right.all() or not right.any():  # identical points: halve the cluster instead
+                right = np.zeros(len(idx), dtype=bool)
+                right[len(idx) // 2 :] = True
+            labels[idx[right]] = step
             self.splits_.append((target, target, step))
         self.labels_ = labels
         self.cluster_centers_ = np.vstack([Xa[labels == c].mean(0) for c in range(self.n_clusters)])
