@@ -25,6 +25,7 @@ Sources (all read-only):
 * **Estimates**: ``configs/experiment/p2_compute_estimates.yaml`` (row 2.4.3 plan; flagged
   ``placeholder: true``), ``reports/p2_full_scale_plan.md`` (smoke-based projection) and the
   ``est_hours`` of the ``gpu_queue/`` job specs.
+* **Optuna** ``experiments/p10_rewriter_hpo/optuna.db``: Phase 10 rewriter-HPO trial durations.
 
 Measures:
 
@@ -37,8 +38,6 @@ Measures:
   GPU-hours x 210 W, the RTX 4500 Ada board power limit (``nvidia-smi power.limit``). That is an
   upper bound on board energy; a 60 s ``nvidia-smi`` sample taken during an (excluded) QLoRA run
   is kept in ``reports/compute_power_sample.csv`` and reported as a sensitivity.
-
-* **Optuna** ``experiments/p10_rewriter_hpo/optuna.db``: Phase 10 rewriter-HPO trial durations.
 
 Coverage: Phases 1, 2, 7, 8 (rungs 1-3, v2 rungs incl. 7B QLoRA, q7 quality chain), 10 (rewriter
 HPO), 11 (quality-path benchmarks, canary) and 12 (test evaluation). Ledger calls are attributed
