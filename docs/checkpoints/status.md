@@ -1,6 +1,6 @@
 # Checkpoint status
 
-Status of all 63 checkpoints as of 2026-10-16, read from the ✅ / ❌ marks in [CONTRIBUTING.md](../../CONTRIBUTING.md): **31 pass, 32 open**. Open checkpoints are either measured failures (negative results, kept as reports), blocked on human annotation, or waiting on an earlier checkpoint.
+Status of all 63 checkpoints as of 2026-10-16, read from the ✅ / ❌ marks in [CONTRIBUTING.md](../../CONTRIBUTING.md): **32 pass, 31 open**. Open checkpoints are either measured failures (negative results, kept as reports), blocked on human annotation, or waiting on an earlier checkpoint.
 
 | checkpoint | name | status | evidence |
 |---|---|---|---|
@@ -57,7 +57,7 @@ Status of all 63 checkpoints as of 2026-10-16, read from the ✅ / ❌ marks in 
 | C10.2 | Gate improvement | ✅ | +0.0095 AUC, documented plateau ([p10_hpo.md](../../reports/p10_hpo.md)) |
 | C10.3 | Rewriter improvement | ❌ | depends on a rewriter that passes C8.3 |
 | C10.4 | No test leakage | ✅ | test-set isolation audit green (`python -m terser.hpo.audit --scan src/terser`) |
-| C11.1 | End-to-end orchestration | ❌ | not run end to end on a fresh clone |
+| C11.1 | End-to-end orchestration | ✅ | fresh clone, CPU: data_flow(label=false) -> train_classical -> evaluate -> promote all Completed unattended in 585 s, after two fixes (dvc unprotect, registry rebuild); 5 DVC outputs missing from the shared remote were pulled from the workstation cache ([p11_ct_and_fresh_clone.md](../../reports/p11_ct_and_fresh_clone.md)) |
 | C11.2 | Fast-path latency | ✅ | see the phase checkpoint section |
 | C11.3 | Quality-path latency | ❌ | pending: quality path needs a rewriter that passes C8.3 |
 | C11.4 | Throughput | ❌ | pending: quality path needs a rewriter that passes C8.3 |
