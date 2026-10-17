@@ -10,8 +10,11 @@ plus the cumulative stacks ``FHC``, ``FHCI``, ``FHCID``, ``FHCIDS``, ``FHCIDSL``
    original prompt's output is generated once and reused by all subsets);
 3. judge (original output, rewrite output) in both A/B orders with
    :class:`terser.judge.pairwise.PairwiseJudge`;
-4. label: ``preserved`` iff tie-or-rewrite-better in both orders (row 2.3.4, judge part, via
-   :func:`terser.judge.labels.label_pair_from_result` with no task metric);
+4. label: with ``protocol: pairwise`` (``pairwise_v1``), ``preserved`` iff tie-or-rewrite-better
+   in both orders (row 2.3.4, judge part, via :func:`terser.judge.labels.label_pair_from_result`
+   with no task metric); with ``protocol: pairwise_avg`` (ADR-0005, which produced the current
+   ``data/pilot/labels.jsonl``), the A/B/tie probabilities of both orders are averaged first and
+   the same rule is applied to the averaged side;
 5. append a record to ``labels.jsonl`` and write ``labels_review.csv`` for human review of every
    label (the CSV lists all rows; ``needs_human_review`` marks the ones to look at first).
 
@@ -50,10 +53,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
+from terser.data.casualise import is_stand_in
+from terser.data.categories import parse_category
 from terser.judge.labels import label_pair, label_pair_from_result
 from terser.judge.pairwise import PairwiseJudge, PairwiseResult
 from terser.judge.protocols import DEFAULT_TOP_LOGPROBS, LOW_MARGIN, order_averaged_side
 from terser.llm import BudgetExceededError, LLMClient, LocalLLMUnavailableError, cache_key
+from terser.phase1.token_study import OP_SETS
 
 if TYPE_CHECKING:
     from omegaconf import DictConfig
@@ -74,20 +80,7 @@ __all__ = [
     "settings_from_config",
 ]
 
-OPERATOR_SUBSETS: tuple[str, ...] = (
-    "F",
-    "H",
-    "D",
-    "I",
-    "L",
-    "C",
-    "S",
-    "FHC",
-    "FHCI",
-    "FHCID",
-    "FHCIDS",
-    "FHCIDSL",
-)
+OPERATOR_SUBSETS: tuple[str, ...] = OP_SETS
 """The 12 operator subsets of row 1.3.6: 7 singletons + cumulative stacks up to all operators."""
 
 Stage = Literal["all", "respond", "judge"]
@@ -115,9 +108,6 @@ REVIEW_COLUMNS: tuple[str, ...] = (
     "reviewer",
     "notes",
 )
-
-# An Ollama tag such as ``qwen2.5:1.5b`` (name:tag, no org/ prefix). vLLM serves HF ids instead.
-_OLLAMA_TAG_RE = re.compile(r"^[A-Za-z0-9._-]+:[A-Za-z0-9._-]+$")
 
 
 class PilotServerUnavailableError(RuntimeError):
@@ -162,7 +152,7 @@ class PilotSettings:
         if self.workers < 1:
             raise ValueError(f"workers must be >= 1, got {self.workers}")
         if not self.stand_in:
-            tags = [m for m in (self.target_model, self.judge_model) if _OLLAMA_TAG_RE.match(m)]
+            tags = [m for m in (self.target_model, self.judge_model) if is_stand_in(m)]
             if tags:
                 raise ValueError(
                     f"stand_in=false but {tags} look like Ollama stand-in tags; real pilot labels "
@@ -274,6 +264,10 @@ def load_prompts(
             if row["id"] in seen:
                 raise ValueError(f"{path}:{lineno}: duplicate id {row['id']!r}")
             seen.add(row["id"])
+            try:  # same category normalisation as terser.phase1.prompts
+                row = {**row, "category": parse_category(row["category"]).value}
+            except ValueError as exc:
+                raise ValueError(f"{path}:{lineno}: {exc}") from None
             cat = str(row["category"])
             if wanted is not None and cat not in wanted:
                 continue
@@ -545,8 +539,9 @@ def run_pilot(
             item_list = list(items)
             summary.n_items = len(item_list)
             texts = dict.fromkeys(t for it in item_list for t in (it.original, it.rewrite))
-            if settings.stage != "judge":
-                list(pool.map(lambda t: _target_output(client, settings, t, counter), texts))
+            # Target reads are counted here, once per unique text, in every stage (in the judge
+            # stage they are cache reads); the per-item reads below go through ``no_count``.
+            list(pool.map(lambda t: _target_output(client, settings, t, counter), texts))
             no_count = _NoCounting()
             seen: set[tuple[str, str, str]] = set()
             futures: list[Future[PairwiseResult | None] | None] = []
