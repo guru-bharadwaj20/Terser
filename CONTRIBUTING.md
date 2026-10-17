@@ -781,7 +781,7 @@ quality?", on the untouched test split.
 | 12.7 | Net savings by prompt length | Savings minus rewriter cost across length percentiles | Figure | ✅ |
 | 12.8 | Error taxonomy | 200 degraded test cases categorised | `reports/final_errors.md` | ✅ |
 | 12.9 | Qualitative gallery | Best and worst casual → rewrite → output pairs | `reports/gallery.md` | ✅ |
-| 12.10 | Compute accounting | Generated tokens, GPU-hours, energy per phase; GPU-seconds per labelled pair (estimate vs actual) | Table | ❌ |
+| 12.10 | Compute accounting | Generated tokens, GPU-hours, energy per phase; GPU-seconds per labelled pair (estimate vs actual) | Table | ✅ |
 | 12.11 | Benchmark release | Prompts, candidates, labels, rubrics, eval code (licence permitting) | Release tag + data card | ❌ |
 | 12.12 | Reproduction | Second contributor reproduces headline numbers from a fresh clone | Within CI bounds | ❌ |
 
