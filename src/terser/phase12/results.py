@@ -766,7 +766,7 @@ def _headline_header(targets: Sequence[str]) -> list[str]:
         *(f"Median savings {t}" for t in ts),
         *(f"Preserved {t}" for t in ts),
         "Preserved pooled",
-        "Worst category",
+        "Worst category (pooled over targets)",
         *(f"Median net {t}" for t in ts),
         *(f"Mean net {t}" for t in ts),
         "Fell back · gate-rejected (" + " / ".join(ts) + ")",
@@ -836,7 +836,17 @@ def build_report(res: Mapping[str, Any]) -> str:
                     "pass" if c["S1"]["pass"] else "fail",
                 ],
                 ["S2 preservation overall", ">= 95%", _pct(c["S2"]["value"]), _pv(c["S2"])],
-                ["S3 worst category", ">= 90%", _pct(c["S3"]["value"]), _pv(c["S3"])],
+                [
+                    "S3 worst category (pooled over targets)",
+                    ">= 90%",
+                    _pct(c["S3"]["value"])
+                    + " (per target: "
+                    + ", ".join(
+                        f"{_short(t)} {_pct(fpt[t]['worst_category_preserved'])}" for t in targets
+                    )
+                    + ")",
+                    _pv(c["S3"]),
+                ],
                 [
                     "S4 net savings at p25 length",
                     "> 0 per target",

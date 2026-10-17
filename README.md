@@ -124,21 +124,25 @@ loses nothing but the savings.
 Test split, evaluated once (row 12.1): 992 prompts in 234 source groups, two
 targets (Qwen2.5-7B, Phi-3.5-mini), 95% cluster-bootstrap CIs over source groups.
 System: Terser full (`sft3bv2` rewriter + quality gate + fallback). Full tables:
-[final_results.md](reports/final_results.md).
+[final_results.md](reports/final_results.md). The evaluated rewriter `sft3bv2`
+(`sft-qwen3b-lora-v2`, registry v8, Archived) is **not** the one the quick start and the
+Docker images serve: they serve v1 `sft-qwen3b-lora` (registry v6, Staging), whose
+test-split numbers are not reported here.
 
 | # | Criterion (test split) | Target | Result |
 | :---: | :--- | :--- | :--- |
 | S1 | Median token savings | ≥ 30% (CI lower bound ≥ 25%) | **fail**: 0.0% [0.0, 0.0] on both targets |
 | S2 | Quality preservation, overall | ≥ 95% | **pass**: 96.7% [95.4, 97.8] |
-| S3 | Preservation, worst category | ≥ 90% | **fail**: 82.8% [77.8, 87.4] (`reason`, Qwen2.5) |
+| S3 | Preservation, worst category | ≥ 90% | **fail**: 82.8% [77.8, 87.4] (`reason`, pooled over both targets; Qwen2.5 alone 68.1%) |
 | S4 | Net savings after rewriter cost | positive at the 25th-percentile length, every target | **fail**: −58.6% (Qwen2.5), −57.5% (Phi-3.5) |
 | S5 | S1–S3 per target model | hold for each target | **fail** on both targets |
 | S7 | Fast-path latency | p95 ≤ 150 ms | **pass**: 20.9 ms at 20 RPS ([C11.2](reports/p11_serving_checks.md)) |
 | S8 | Quality-path latency, one 24 GB GPU | p95 ≤ 400 ms | **fail**: 438 ms at 5 RPS, every request timed out to the fast path ([C11.3](reports/p11_quality_path.md)) |
 
-S2 passes only because the gate rejects almost every rewrite (466 of 992 on
-Qwen2.5 and 589 on Phi-3.5) and the rest fall back to the original, so the median
-prompt is served unchanged. No system reaches S1 and S2 together. The systems
+S2 passes only because few rewrites are served: of the 626 (Qwen2.5) / 627
+(Phi-3.5) rewrites that pass the safeguard, the gate rejects 466 / 589, and the
+other 366 / 365 prompts already fell back, so only 160 / 38 of 992 prompts get a
+rewrite and the median prompt is served unchanged. No system reaches S1 and S2 together. The systems
 that save tokens lose quality: the tuned 1.5B rewriter saves 61.3% at 48.9%
 preserved, zero-shot Qwen2.5-32B 54.3% at 55.3%, and LLMLingua-2 51.4% at 26.5%.
 On the real-prompt slice (WildChat, reported, not gated) the full system
