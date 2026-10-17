@@ -889,12 +889,12 @@ Evaluated once, on the frozen **test** split, in Phase 12.
 | # | Criterion | Target | Status |
 | :---: | :--- | :--- | :---: |
 | S1 | Median token savings on target tokenizers | ≥ 30% (95% CI lower bound ≥ 25%) | ❌ |
-| S2 | Quality preservation, overall | ≥ 95% | ❌ |
+| S2 | Quality preservation, overall | ≥ 95% | ✅ |
 | S3 | Quality preservation, worst task category | ≥ 90% | ❌ |
 | S4 | Net savings after rewriter cost | Positive at the 25th-percentile prompt length for every target | ❌ |
 | S5 | Per-target robustness | S1–S3 hold for **each** target model separately with the single target-agnostic rewriter | ❌ |
 | S6 | Judge validity | Judge–human κ ≥ 0.60 (C2.4) holds on a fresh 100-pair test sample | ❌ |
-| S7 | Fast-path latency | p95 ≤ 150 ms | ❌ |
+| S7 | Fast-path latency | p95 ≤ 150 ms | ✅ |
 | S8 | Quality-path latency on one 24 GB Ada GPU | p95 ≤ 400 ms | ❌ |
 | S9 | Independent reproduction | Headline numbers reproduced from a fresh clone by a second contributor | ❌ |
 | S10 | All four syllabus units demonstrably covered | Every row of the Syllabus Coverage Matrix ✅ | ❌ |
