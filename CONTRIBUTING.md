@@ -612,7 +612,7 @@ together with the quality gate and fallback, reach the main quality/savings gate
 | :---: | :--- | :--- | :--- | :---: |
 | 8.3.1 | SFT data | (casual prompt, oracle preserved rewrite) from train split; one target-agnostic rewriter (C1.5: tokenizers agree) | HF dataset in DVC | ✅ |
 | 8.3.2 | Tiny-config smoke test | Full training loop on a tiny model on CPU | CI test passes; GPU jobs queued | ✅ |
-| 8.3.3 | Rung 1: Qwen2.5-0.5B full FT | bf16, AdamW, grad checkpointing | Model registered; val report | ❌ |
+| 8.3.3 | Rung 1: Qwen2.5-0.5B full FT | bf16, AdamW, grad checkpointing | Model registered; val report | ✅ |
 | 8.3.4 | Rung 2: Qwen2.5-1.5B LoRA | r = 16, α = 32, bf16. Escalate to 3B LoRA, then 7B QLoRA (NF4), only if the previous rung fails C8.3 | Same, per rung trained | ❌ |
 | 8.3.7 | Decoding safeguards | Never longer than input on T; fall back to original if longer | Property test | ✅ |
 | 8.3.8 | Inference-time quality gate | Champion gate rejects risky rewrites ⇒ lighter rewrite or original | Integration test | ✅ |
