@@ -1,0 +1,1571 @@
+{
+  "generated_at": "2026-10-17T18:11:02+00:00",
+  "board_power_w": {
+    "rtx4500ada": 210.0,
+    "rtx4090": 450.0
+  },
+  "stages": [
+    {
+      "id": "p1-pilot-respond",
+      "phase": 1,
+      "row": "1.3.6",
+      "what": "pilot target outputs",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "attempt": "final",
+      "group": "p1",
+      "active_s": 179.00177058000008,
+      "active_source": "mlruns/mlflow.db runs e71803a6: wall_seconds",
+      "generated_tokens": 120832,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 120832,
+      "reported_tokens_source": "mlruns/mlflow.db runs e71803a6: generated_tokens",
+      "labels": 836,
+      "labels_source": "MLflow e71803a6 n_items",
+      "ledger": {
+        "calls": 443,
+        "input_tokens": 41515,
+        "output_tokens": 120832,
+        "busy_s": 161.368618,
+        "window": [
+          "2026-10-01T06:40:00+00:00",
+          "2026-10-01T06:46:00+00:00"
+        ],
+        "window_source": "fixed window (see STAGES)",
+        "first_call": "2026-10-01T06:42:11.517767+00:00",
+        "last_call": "2026-10-01T06:44:52.886385+00:00"
+      },
+      "sessions": [],
+      "note": "no server log kept"
+    },
+    {
+      "id": "p1-pilot-judge",
+      "phase": 1,
+      "row": "1.3.6",
+      "what": "pilot judge (32B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "p1",
+      "active_s": 373.4177201699986,
+      "active_source": "mlruns/mlflow.db runs 6b1831d5, 508e0d17: wall_seconds",
+      "generated_tokens": 25973,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 25973,
+      "reported_tokens_source": "mlruns/mlflow.db runs 6b1831d5, 508e0d17: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 610,
+        "input_tokens": 895436,
+        "output_tokens": 25973,
+        "busy_s": 335.829332,
+        "window": [
+          "2026-10-01T06:46:00+00:00",
+          "2026-10-01T06:56:00+00:00"
+        ],
+        "window_source": "fixed window (see STAGES)",
+        "first_call": "2026-10-01T06:47:23.717191+00:00",
+        "last_call": "2026-10-01T06:52:59.546523+00:00"
+      },
+      "sessions": [],
+      "note": "no server log kept"
+    },
+    {
+      "id": "p2-judgebias-14b",
+      "phase": 2,
+      "row": "2.3.3",
+      "what": "judge-bias study, 14B pairwise + pointwise",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-14B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "",
+      "active_s": 244.33313407100104,
+      "active_source": "mlruns/mlflow.db runs d8b9796c, c96954c4: wall_seconds",
+      "generated_tokens": 61826,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 61826,
+      "reported_tokens_source": "mlruns/mlflow.db runs d8b9796c, c96954c4: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 1150,
+        "input_tokens": 1530670,
+        "output_tokens": 61826,
+        "busy_s": 221.007017,
+        "window": [
+          "2026-10-01T07:19:08+00:00",
+          "2026-10-01T07:24:55+00:00"
+        ],
+        "window_source": "logs/vllm_14b.log span + 30 s",
+        "first_call": "2026-10-01T07:20:33.011914+00:00",
+        "last_call": "2026-10-01T07:24:14.018931+00:00"
+      },
+      "sessions": [
+        "vllm_14b"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p2-judgebias-32b",
+      "phase": 2,
+      "row": "2.3.3",
+      "what": "judge-bias study, 32B pairwise + pointwise",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "",
+      "active_s": 618.8490652149994,
+      "active_source": "mlruns/mlflow.db runs 09d66708, 3494f098: wall_seconds",
+      "generated_tokens": 63510,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 62625,
+      "reported_tokens_source": "mlruns/mlflow.db runs 09d66708, 3494f098: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 1148,
+        "input_tokens": 1528144,
+        "output_tokens": 63510,
+        "busy_s": 589.772129,
+        "window": [
+          "2026-10-01T07:00:00+00:00",
+          "2026-10-01T07:19:00+00:00"
+        ],
+        "window_source": "fixed window (see STAGES)",
+        "first_call": "2026-10-01T07:08:58.401817+00:00",
+        "last_call": "2026-10-01T07:18:48.173946+00:00"
+      },
+      "sessions": [],
+      "note": "server log overwritten by the next 32B start"
+    },
+    {
+      "id": "p2-casualise",
+      "phase": 2,
+      "row": "2.1.4",
+      "what": "casualise 1,680 clean prompts x 5 styles (32B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "p2",
+      "active_s": 3534.996002202999,
+      "active_source": "logs/dvc_casualise.log: wall_seconds",
+      "generated_tokens": 645614,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 590172,
+      "reported_tokens_source": "logs/dvc_casualise.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 17542,
+        "input_tokens": 5967478,
+        "output_tokens": 645614,
+        "busy_s": 3666.697696,
+        "window": [
+          "2026-10-01T07:24:41+00:00",
+          "2026-10-01T08:30:00+00:00"
+        ],
+        "window_source": "fixed window (see STAGES)",
+        "first_call": "2026-10-01T07:27:03.508375+00:00",
+        "last_call": "2026-10-01T08:28:10.206071+00:00"
+      },
+      "sessions": [
+        "vllm_32b"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p2-candidates",
+      "phase": 2,
+      "row": "2.2.1",
+      "what": "LLM rewrite candidates low/medium/high (32B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "p2",
+      "active_s": 4529.0,
+      "active_source": "first-last timestamp of logs/p2_candidates.log + logs/p2_candidates_2.log",
+      "generated_tokens": 321825,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 5400,
+        "input_tokens": 2914482,
+        "output_tokens": 321825,
+        "busy_s": 2973.032886,
+        "window": [
+          "2026-10-01T15:50:00+00:00",
+          "2026-10-01T17:25:00+00:00"
+        ],
+        "window_source": "fixed window (see STAGES)",
+        "first_call": "2026-10-01T15:58:59.956667+00:00",
+        "last_call": "2026-10-01T17:18:27.787193+00:00"
+      },
+      "sessions": [
+        "vllm_32b"
+      ],
+      "note": "two runs (low; medium + high); spans include CPU operator/LLMLingua steps"
+    },
+    {
+      "id": "p2-respond-qwen",
+      "phase": 2,
+      "row": "2.2.3",
+      "what": "target outputs, Qwen2.5-7B",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "attempt": "final",
+      "group": "p2",
+      "active_s": 2518.4301334150005,
+      "active_source": "logs/p2_respond_qwen7b.log: wall_seconds",
+      "generated_tokens": 4748717,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 4748717,
+      "reported_tokens_source": "logs/p2_respond_qwen7b.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 13100,
+        "input_tokens": 1249143,
+        "output_tokens": 4748717,
+        "busy_s": 2502.849902,
+        "window": [
+          "2026-10-01T17:24:48+00:00",
+          "2026-10-02T02:21:19+00:00"
+        ],
+        "window_source": "logs/vllm_7b.log span + 30 s",
+        "first_call": "2026-10-01T17:26:00.742121+00:00",
+        "last_call": "2026-10-01T18:41:46.584873+00:00"
+      },
+      "sessions": [
+        "vllm_7b"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p2-respond-phi",
+      "phase": 2,
+      "row": "2.2.3",
+      "what": "target outputs, Phi-3.5-mini",
+      "hardware": "rtx4500ada",
+      "model": "microsoft/Phi-3.5-mini-instruct",
+      "attempt": "final",
+      "group": "p2",
+      "active_s": 4385.138351971,
+      "active_source": "logs/p2_respond_phi35.log: wall_seconds",
+      "generated_tokens": 5910299,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 5910299,
+      "reported_tokens_source": "logs/p2_respond_phi35.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 13100,
+        "input_tokens": 1014321,
+        "output_tokens": 5910299,
+        "busy_s": 4783.79372,
+        "window": [
+          "2026-10-02T02:35:54+00:00",
+          "2026-10-02T15:02:01+00:00"
+        ],
+        "window_source": "logs/vllm_phi35.log span + 30 s",
+        "first_call": "2026-10-02T02:37:14.169138+00:00",
+        "last_call": "2026-10-02T15:01:15.484306+00:00"
+      },
+      "sessions": [
+        "vllm_phi35"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p2-judge-smoke",
+      "phase": 2,
+      "row": "2.3.3",
+      "what": "label-stage smoke on the full data (32B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "retry",
+      "group": "p2",
+      "active_s": 957.329,
+      "active_source": "logs/p2_label_smoke.log: shell `real`",
+      "generated_tokens": 17997,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 422,
+        "input_tokens": 738492,
+        "output_tokens": 17997,
+        "busy_s": 536.5749030000001,
+        "window": [
+          "2026-10-02T15:00:00+00:00",
+          "2026-10-02T16:10:00+00:00"
+        ],
+        "window_source": "fixed window (see STAGES)",
+        "first_call": "2026-10-02T15:03:47.346161+00:00",
+        "last_call": "2026-10-02T15:27:14.728422+00:00"
+      },
+      "sessions": [],
+      "note": "server log not kept"
+    },
+    {
+      "id": "p2-judge-attempt1",
+      "phase": 2,
+      "row": "2.3.3",
+      "what": "first full-judge attempt (32B), stopped",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "retry",
+      "group": "p2",
+      "active_s": 17283.453976,
+      "active_source": ".cache/llm_ledger.json busy span (logs/vllm_32b_judge.log span + 30 s)",
+      "generated_tokens": 1046039,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 23710,
+        "input_tokens": 39629284,
+        "output_tokens": 1046039,
+        "busy_s": 17283.453976,
+        "window": [
+          "2026-10-02T16:10:23+00:00",
+          "2026-10-03T04:55:16+00:00"
+        ],
+        "window_source": "logs/vllm_32b_judge.log span + 30 s",
+        "first_call": "2026-10-02T16:11:21.734851+00:00",
+        "last_call": "2026-10-03T04:54:29.131343+00:00"
+      },
+      "sessions": [
+        "vllm_32b_judge"
+      ],
+      "note": "no summary (logs/p2_label.log empty); its calls became cache hits of the final run"
+    },
+    {
+      "id": "p2-judge",
+      "phase": 2,
+      "row": "2.3.3",
+      "what": "position-swapped pairwise judge, final run (32B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "p2",
+      "active_s": 13042.482818833001,
+      "active_source": "logs/judge_full.log: wall_seconds",
+      "generated_tokens": 805371,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 805371,
+      "reported_tokens_source": "logs/judge_full.log: generated_tokens",
+      "labels": 20986,
+      "labels_source": "logs/judge_full.log: records",
+      "ledger": {
+        "calls": 17854,
+        "input_tokens": 29824084,
+        "output_tokens": 805371,
+        "busy_s": 12995.613366,
+        "window": [
+          "2026-10-03T18:45:31+00:00",
+          "2026-10-03T22:24:05+00:00"
+        ],
+        "window_source": "logs/judge32.log span + 30 s",
+        "first_call": "2026-10-03T18:46:38.942798+00:00",
+        "last_call": "2026-10-03T22:23:14.556164+00:00"
+      },
+      "sessions": [
+        "judge32"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p2-selfpref",
+      "phase": 2,
+      "row": "2.2.5",
+      "what": "second judge Phi-3.5 on 1,000 pairs",
+      "hardware": "rtx4500ada",
+      "model": "microsoft/Phi-3.5-mini-instruct",
+      "attempt": "final",
+      "group": "",
+      "active_s": 712.0484671760005,
+      "active_source": "logs/selfpref.log: wall_seconds",
+      "generated_tokens": 247359,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 247359,
+      "reported_tokens_source": "logs/selfpref.log: generated_tokens",
+      "labels": 1000,
+      "labels_source": "logs/selfpref.log: records",
+      "ledger": {
+        "calls": 2696,
+        "input_tokens": 5211766,
+        "output_tokens": 247359,
+        "busy_s": 704.807542,
+        "window": [
+          "2026-10-03T22:30:11+00:00",
+          "2026-10-03T22:43:21+00:00"
+        ],
+        "window_source": "logs/judge_phi.log span + 30 s",
+        "first_call": "2026-10-03T22:31:09.986145+00:00",
+        "last_call": "2026-10-03T22:42:54.793687+00:00"
+      },
+      "sessions": [
+        "judge_phi"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p2-smoke-rtx4090",
+      "phase": 2,
+      "row": "2.2.x",
+      "what": "20-prompt hardware smoke on worker-1",
+      "hardware": "rtx4090",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 389.983,
+      "active_source": "reports/p2_gpu_smoke.md: sum of 'Stage seconds'",
+      "generated_tokens": 130313,
+      "tokens_source": "reports/p2_gpu_smoke.md: sum of 'Generated tokens'",
+      "reported_tokens": 130313,
+      "reported_tokens_source": "reports/p2_gpu_smoke.md: sum of 'Generated tokens'",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [],
+      "note": "reserved = 'Server-reserved GPU-hours' column of the same report",
+      "reserved_override_s": 582.6888,
+      "reserved_source": "reports/p2_gpu_smoke.md: sum of 'Server-reserved GPU-hours'"
+    },
+    {
+      "id": "p7-benchmarks",
+      "phase": 7,
+      "row": "7.5-7.7",
+      "what": "vLLM smoke, serving and training benchmarks",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": null,
+      "active_source": "not recorded",
+      "generated_tokens": 8768,
+      "tokens_source": "mlruns/mlflow.db phase=7 (4 runs): generated_tokens",
+      "reported_tokens": 8768,
+      "reported_tokens_source": "mlruns/mlflow.db phase=7 (4 runs): generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [],
+      "note": "GPU time not recorded (runs logged after the fact)"
+    },
+    {
+      "id": "p8-sft-0.5b",
+      "phase": 8,
+      "row": "8.3.3",
+      "what": "SFT Qwen2.5-0.5B full FT, 3,000 steps",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 880.0,
+      "active_source": "first-last timestamp of logs/sft-qwen0.5b-full.log",
+      "generated_tokens": null,
+      "tokens_source": "n/a (training)",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "sft05"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-sft-1.5b",
+      "phase": 8,
+      "row": "8.3.4",
+      "what": "SFT Qwen2.5-1.5B LoRA, 3,000 steps",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 1925.0,
+      "active_source": "first-last timestamp of logs/sft-qwen1.5b-lora.log",
+      "generated_tokens": null,
+      "tokens_source": "n/a (training)",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "sft15"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-sft-3b",
+      "phase": 8,
+      "row": "8.3.4",
+      "what": "SFT Qwen2.5-3B LoRA, 1,000 steps",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 1054.0,
+      "active_source": "first-last timestamp of logs/sft-qwen3b.log",
+      "generated_tokens": null,
+      "tokens_source": "n/a (training)",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [
+        "sft3b"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-gen-0.5b",
+      "phase": 8,
+      "row": "8.3.3",
+      "what": "val rewrites, 285 prompts (0.5B)",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 95.10961917399982,
+      "active_source": "data/interim/rewrites/sft-qwen0.5b-full.val.jsonl: sum latency_s",
+      "generated_tokens": 27442,
+      "tokens_source": "data/interim/rewrites/sft-qwen0.5b-full.val.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "reported_tokens": 27442,
+      "reported_tokens_source": "data/interim/rewrites/sft-qwen0.5b-full.val.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [],
+      "note": ""
+    },
+    {
+      "id": "p8-gen-1.5b",
+      "phase": 8,
+      "row": "8.3.4",
+      "what": "val rewrites, 285 prompts (1.5B)",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 143.23857905500017,
+      "active_source": "data/interim/rewrites/sft-qwen1.5b-lora.val.jsonl: sum latency_s",
+      "generated_tokens": 27047,
+      "tokens_source": "data/interim/rewrites/sft-qwen1.5b-lora.val.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "reported_tokens": 27047,
+      "reported_tokens_source": "data/interim/rewrites/sft-qwen1.5b-lora.val.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [],
+      "note": ""
+    },
+    {
+      "id": "p8-gen-3b",
+      "phase": 8,
+      "row": "8.3.4",
+      "what": "val rewrites, 285 prompts (3B)",
+      "hardware": "rtx4500ada",
+      "model": null,
+      "attempt": "final",
+      "group": "",
+      "active_s": 215.84775665900008,
+      "active_source": "data/interim/rewrites/sft-qwen3b-lora.val.jsonl: sum latency_s",
+      "generated_tokens": 27109,
+      "tokens_source": "data/interim/rewrites/sft-qwen3b-lora.val.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "reported_tokens": 27109,
+      "reported_tokens_source": "data/interim/rewrites/sft-qwen3b-lora.val.jsonl: Qwen2.5 tokens of raw_rewrite",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {},
+      "sessions": [],
+      "note": ""
+    },
+    {
+      "id": "p8-eval-qwen",
+      "phase": 8,
+      "row": "8.3.3-8.3.4",
+      "what": "val target outputs, rungs 1-2 (Qwen2.5-7B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "attempt": "final",
+      "group": "p8-eval",
+      "active_s": 187.5166416889997,
+      "active_source": "logs/eval_resp_qwen.log: wall_seconds",
+      "generated_tokens": 140123,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 140123,
+      "reported_tokens_source": "logs/eval_resp_qwen.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 402,
+        "input_tokens": 38768,
+        "output_tokens": 140123,
+        "busy_s": 178.030905,
+        "window": [
+          "2026-10-15T03:25:31+00:00",
+          "2026-10-15T03:30:12+00:00"
+        ],
+        "window_source": "logs/vllm_eval_qwen.log span + 30 s",
+        "first_call": "2026-10-15T03:26:43.792760+00:00",
+        "last_call": "2026-10-15T03:29:41.823665+00:00"
+      },
+      "sessions": [
+        "vllm_eval_qwen",
+        "vllm_eval_qwen1",
+        "vllm_eval_qwen2"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-eval-phi",
+      "phase": 8,
+      "row": "8.3.3-8.3.4",
+      "what": "val target outputs, rungs 1-2 (Phi-3.5)",
+      "hardware": "rtx4500ada",
+      "model": "microsoft/Phi-3.5-mini-instruct",
+      "attempt": "final",
+      "group": "p8-eval",
+      "active_s": 144.58984814399992,
+      "active_source": "logs/eval_resp_phi.log: wall_seconds",
+      "generated_tokens": 171690,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 171690,
+      "reported_tokens_source": "logs/eval_resp_phi.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 402,
+        "input_tokens": 31496,
+        "output_tokens": 171690,
+        "busy_s": 139.121629,
+        "window": [
+          "2026-10-15T03:30:11+00:00",
+          "2026-10-15T03:33:59+00:00"
+        ],
+        "window_source": "logs/vllm_eval_phi.log span + 30 s",
+        "first_call": "2026-10-15T03:31:10.153886+00:00",
+        "last_call": "2026-10-15T03:33:29.275515+00:00"
+      },
+      "sessions": [
+        "vllm_eval_phi"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-eval-judge",
+      "phase": 8,
+      "row": "8.3.3-8.3.4",
+      "what": "val judge, rungs 1-2 (32B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "p8-eval",
+      "active_s": 1195.575873584,
+      "active_source": "logs/eval_judge.log: wall_seconds",
+      "generated_tokens": 69641,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 69641,
+      "reported_tokens_source": "logs/eval_judge.log: generated_tokens",
+      "labels": 1140,
+      "labels_source": "logs/eval_judge.log: records",
+      "ledger": {
+        "calls": 1582,
+        "input_tokens": 2580570,
+        "output_tokens": 69641,
+        "busy_s": 1182.005642,
+        "window": [
+          "2026-10-15T03:33:41+00:00",
+          "2026-10-15T03:55:01+00:00"
+        ],
+        "window_source": "logs/vllm_eval_judge.log span + 30 s",
+        "first_call": "2026-10-15T03:34:48.730438+00:00",
+        "last_call": "2026-10-15T03:54:30.736080+00:00"
+      },
+      "sessions": [
+        "vllm_eval_judge"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-r3-qwen",
+      "phase": 8,
+      "row": "8.3.4",
+      "what": "val target outputs, rung 3 (Qwen2.5-7B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "attempt": "final",
+      "group": "p8-r3",
+      "active_s": 50.75621959500006,
+      "active_source": "logs/r3_resp_qwen.log: wall_seconds",
+      "generated_tokens": 42029,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 42029,
+      "reported_tokens_source": "logs/r3_resp_qwen.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 122,
+        "input_tokens": 11998,
+        "output_tokens": 42029,
+        "busy_s": 44.13254,
+        "window": [
+          "2026-10-17T02:45:36+00:00",
+          "2026-10-17T02:47:39+00:00"
+        ],
+        "window_source": "logs/vllm_r3_qwen.log span + 30 s",
+        "first_call": "2026-10-17T02:46:25.284920+00:00",
+        "last_call": "2026-10-17T02:47:09.417460+00:00"
+      },
+      "sessions": [
+        "vllm_r3_qwen"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-r3-phi",
+      "phase": 8,
+      "row": "8.3.4",
+      "what": "val target outputs, rung 3 (Phi-3.5)",
+      "hardware": "rtx4500ada",
+      "model": "microsoft/Phi-3.5-mini-instruct",
+      "attempt": "final",
+      "group": "p8-r3",
+      "active_s": 52.876564465,
+      "active_source": "logs/r3_resp_phi.log: wall_seconds",
+      "generated_tokens": 52309,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 52309,
+      "reported_tokens_source": "logs/r3_resp_phi.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 122,
+        "input_tokens": 9976,
+        "output_tokens": 52309,
+        "busy_s": 49.640232,
+        "window": [
+          "2026-10-17T02:47:22+00:00",
+          "2026-10-17T02:49:18+00:00"
+        ],
+        "window_source": "logs/vllm_r3_phi.log span + 30 s",
+        "first_call": "2026-10-17T02:47:58.291867+00:00",
+        "last_call": "2026-10-17T02:48:47.932099+00:00"
+      },
+      "sessions": [
+        "vllm_r3_phi"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-r3-judge",
+      "phase": 8,
+      "row": "8.3.4",
+      "what": "val judge, rung 3 (32B), incl. interrupted first try",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "p8-r3",
+      "active_s": 524.893214,
+      "active_source": ".cache/llm_ledger.json busy span (fixed window (see STAGES))",
+      "generated_tokens": 20966,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 588,
+      "reported_tokens_source": "logs/r3_judge.log: generated_tokens",
+      "labels": 570,
+      "labels_source": "logs/r3_judge.log: records",
+      "ledger": {
+        "calls": 480,
+        "input_tokens": 783578,
+        "output_tokens": 20966,
+        "busy_s": 524.893214,
+        "window": [
+          "2026-10-17T02:49:00+00:00",
+          "2026-10-17T02:59:00+00:00"
+        ],
+        "window_source": "fixed window (see STAGES)",
+        "first_call": "2026-10-17T02:49:56.598348+00:00",
+        "last_call": "2026-10-17T02:58:41.491562+00:00"
+      },
+      "sessions": [
+        "vllm_r3_judge"
+      ],
+      "note": "summary wall_seconds (16 s) covers only the resumed run"
+    },
+    {
+      "id": "p8-aug-candidates",
+      "phase": 8,
+      "row": "8.3.1",
+      "what": "llm_max / llm_min target augmentation (32B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "p8-aug",
+      "active_s": 866.093,
+      "active_source": "logs/aug_cand.log: wall_seconds",
+      "generated_tokens": 169248,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": null,
+      "reported_tokens_source": "",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 3600,
+        "input_tokens": 1920788,
+        "output_tokens": 169248,
+        "busy_s": 850.119974,
+        "window": [
+          "2026-10-17T03:10:07+00:00",
+          "2026-10-17T03:26:10+00:00"
+        ],
+        "window_source": "logs/vllm_aug_gen.log span + 30 s",
+        "first_call": "2026-10-17T03:11:26.289880+00:00",
+        "last_call": "2026-10-17T03:25:36.409854+00:00"
+      },
+      "sessions": [
+        "vllm_aug_gen"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-aug-qwen",
+      "phase": 8,
+      "row": "8.3.1",
+      "what": "augmentation target outputs (Qwen2.5-7B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "attempt": "final",
+      "group": "p8-aug",
+      "active_s": 2729.0257975609998,
+      "active_source": "logs/aug_resp_qwen.log: wall_seconds",
+      "generated_tokens": 3703308,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 3703308,
+      "reported_tokens_source": "logs/aug_resp_qwen.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 10677,
+        "input_tokens": 1165432,
+        "output_tokens": 3703308,
+        "busy_s": 2708.413646,
+        "window": [
+          "2026-10-17T03:26:08+00:00",
+          "2026-10-17T04:13:20+00:00"
+        ],
+        "window_source": "logs/vllm_aug_qwen.log span + 30 s",
+        "first_call": "2026-10-17T03:27:38.582652+00:00",
+        "last_call": "2026-10-17T04:12:46.996298+00:00"
+      },
+      "sessions": [
+        "vllm_aug_qwen"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-aug-phi",
+      "phase": 8,
+      "row": "8.3.1",
+      "what": "augmentation target outputs (Phi-3.5)",
+      "hardware": "rtx4500ada",
+      "model": "microsoft/Phi-3.5-mini-instruct",
+      "attempt": "final",
+      "group": "p8-aug",
+      "active_s": 3521.7072053620004,
+      "active_source": "logs/aug_resp_phi.log: wall_seconds",
+      "generated_tokens": 4638587,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 4638587,
+      "reported_tokens_source": "logs/aug_resp_phi.log: generated_tokens",
+      "labels": null,
+      "labels_source": "",
+      "ledger": {
+        "calls": 10677,
+        "input_tokens": 986144,
+        "output_tokens": 4638587,
+        "busy_s": 3497.374195,
+        "window": [
+          "2026-10-17T04:13:13+00:00",
+          "2026-10-17T05:13:37+00:00"
+        ],
+        "window_source": "logs/vllm_aug_phi.log span + 30 s",
+        "first_call": "2026-10-17T04:14:42.106116+00:00",
+        "last_call": "2026-10-17T05:12:59.480311+00:00"
+      },
+      "sessions": [
+        "vllm_aug_phi"
+      ],
+      "note": ""
+    },
+    {
+      "id": "p8-aug-judge",
+      "phase": 8,
+      "row": "8.3.1",
+      "what": "augmentation judge (32B)",
+      "hardware": "rtx4500ada",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "attempt": "final",
+      "group": "p8-aug",
+      "active_s": 9271.641389019,
+      "active_source": "logs/aug_judge.log: wall_seconds",
+      "generated_tokens": 600425,
+      "tokens_source": ".cache/llm_ledger.json output_tokens",
+      "reported_tokens": 528469,
+      "reported_tokens_source": "logs/aug_judge.log: generated_tokens",
+      "labels": 5770,
+      "labels_source": "logs/aug_judge.log: records",
+      "ledger": {
+        "calls": 13487,
+        "input_tokens": 22249549,
+        "output_tokens": 600425,
+        "busy_s": 10607.471801,
+        "window": [
+          "2026-10-17T05:13:34+00:00",
+          "2026-10-17T08:12:40+00:00"
+        ],
+        "window_source": "logs/vllm_aug_judge.log span + 30 s",
+        "first_call": "2026-10-17T05:15:06.220232+00:00",
+        "last_call": "2026-10-17T08:11:53.692033+00:00"
+      },
+      "sessions": [
+        "vllm_aug_judge"
+      ],
+      "note": "restarted at 05:37; wall_seconds and summary tokens cover the restarted run"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "vllm_14b",
+      "phase": 2,
+      "log": "logs/vllm_14b.log",
+      "start": "2026-10-01T07:19:08+00:00",
+      "end": "2026-10-01T07:24:25+00:00",
+      "reserved_s": 317.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_32b",
+      "phase": 2,
+      "log": "logs/vllm_32b.log",
+      "start": "2026-10-01T07:24:41+00:00",
+      "end": "2026-10-01T17:24:33+00:00",
+      "reserved_s": 35992.0,
+      "note": "casualise + candidates, one server"
+    },
+    {
+      "id": "vllm_7b",
+      "phase": 2,
+      "log": "logs/vllm_7b.log",
+      "start": "2026-10-01T17:24:48+00:00",
+      "end": "2026-10-02T02:20:49+00:00",
+      "reserved_s": 32161.0,
+      "note": "left up after the stage finished"
+    },
+    {
+      "id": "vllm_phi35",
+      "phase": 2,
+      "log": "logs/vllm_phi35.log",
+      "start": "2026-10-02T02:35:54+00:00",
+      "end": "2026-10-02T15:01:31+00:00",
+      "reserved_s": 44737.0,
+      "note": "stage paused and resumed"
+    },
+    {
+      "id": "vllm_32b_judge",
+      "phase": 2,
+      "log": "logs/vllm_32b_judge.log",
+      "start": "2026-10-02T16:10:23+00:00",
+      "end": "2026-10-03T04:54:46+00:00",
+      "reserved_s": 45863.0,
+      "note": "first full-judge attempt"
+    },
+    {
+      "id": "judge32",
+      "phase": 2,
+      "log": "logs/judge32.log",
+      "start": "2026-10-03T18:45:31+00:00",
+      "end": "2026-10-03T22:23:35+00:00",
+      "reserved_s": 13084.0,
+      "note": ""
+    },
+    {
+      "id": "judge_phi",
+      "phase": 2,
+      "log": "logs/judge_phi.log",
+      "start": "2026-10-03T22:30:11+00:00",
+      "end": "2026-10-03T22:42:51+00:00",
+      "reserved_s": 760.0,
+      "note": ""
+    },
+    {
+      "id": "sft05",
+      "phase": 8,
+      "log": "logs/sft-qwen0.5b-full.log",
+      "start": "2026-10-15T01:33:24+00:00",
+      "end": "2026-10-15T01:48:04+00:00",
+      "reserved_s": 880.0,
+      "note": ""
+    },
+    {
+      "id": "sft15",
+      "phase": 8,
+      "log": "logs/sft-qwen1.5b-lora.log",
+      "start": "2026-10-15T01:48:10+00:00",
+      "end": "2026-10-15T02:20:15+00:00",
+      "reserved_s": 1925.0,
+      "note": ""
+    },
+    {
+      "id": "sft3b",
+      "phase": 8,
+      "log": "logs/sft-qwen3b.log",
+      "start": "2026-10-15T03:55:54+00:00",
+      "end": "2026-10-15T04:13:28+00:00",
+      "reserved_s": 1054.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_eval_qwen1",
+      "phase": 8,
+      "log": "logs/vllm_eval_qwen1.log",
+      "start": "2026-10-15T03:23:36+00:00",
+      "end": "2026-10-15T03:23:57+00:00",
+      "reserved_s": 21.0,
+      "note": "failed startup"
+    },
+    {
+      "id": "vllm_eval_qwen2",
+      "phase": 8,
+      "log": "logs/vllm_eval_qwen2.log",
+      "start": "2026-10-15T03:24:06+00:00",
+      "end": "2026-10-15T03:24:27+00:00",
+      "reserved_s": 21.0,
+      "note": "failed startup"
+    },
+    {
+      "id": "vllm_eval_qwen",
+      "phase": 8,
+      "log": "logs/vllm_eval_qwen.log",
+      "start": "2026-10-15T03:25:31+00:00",
+      "end": "2026-10-15T03:29:42+00:00",
+      "reserved_s": 251.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_eval_phi",
+      "phase": 8,
+      "log": "logs/vllm_eval_phi.log",
+      "start": "2026-10-15T03:30:11+00:00",
+      "end": "2026-10-15T03:33:29+00:00",
+      "reserved_s": 198.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_eval_judge",
+      "phase": 8,
+      "log": "logs/vllm_eval_judge.log",
+      "start": "2026-10-15T03:33:41+00:00",
+      "end": "2026-10-15T03:54:31+00:00",
+      "reserved_s": 1250.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_r3_qwen",
+      "phase": 8,
+      "log": "logs/vllm_r3_qwen.log",
+      "start": "2026-10-17T02:45:36+00:00",
+      "end": "2026-10-17T02:47:09+00:00",
+      "reserved_s": 93.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_r3_phi",
+      "phase": 8,
+      "log": "logs/vllm_r3_phi.log",
+      "start": "2026-10-17T02:47:22+00:00",
+      "end": "2026-10-17T02:48:48+00:00",
+      "reserved_s": 86.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_r3_judge",
+      "phase": 8,
+      "log": "logs/vllm_r3_judge.log",
+      "start": "2026-10-17T02:57:24+00:00",
+      "end": "2026-10-17T02:58:42+00:00",
+      "reserved_s": 78.0,
+      "note": "restart; first log lost"
+    },
+    {
+      "id": "vllm_aug_gen",
+      "phase": 8,
+      "log": "logs/vllm_aug_gen.log",
+      "start": "2026-10-17T03:10:07+00:00",
+      "end": "2026-10-17T03:25:40+00:00",
+      "reserved_s": 933.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_aug_qwen",
+      "phase": 8,
+      "log": "logs/vllm_aug_qwen.log",
+      "start": "2026-10-17T03:26:08+00:00",
+      "end": "2026-10-17T04:12:50+00:00",
+      "reserved_s": 2802.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_aug_phi",
+      "phase": 8,
+      "log": "logs/vllm_aug_phi.log",
+      "start": "2026-10-17T04:13:13+00:00",
+      "end": "2026-10-17T05:13:07+00:00",
+      "reserved_s": 3594.0,
+      "note": ""
+    },
+    {
+      "id": "vllm_aug_judge",
+      "phase": 8,
+      "log": "logs/vllm_aug_judge.log",
+      "start": "2026-10-17T05:13:34+00:00",
+      "end": "2026-10-17T08:12:10+00:00",
+      "reserved_s": 10716.0,
+      "note": ""
+    }
+  ],
+  "smoke_rtx4090_reserved_h": 0.161858,
+  "phases": [
+    {
+      "phase": 1,
+      "stage_ids": [
+        "p1-pilot-respond",
+        "p1-pilot-judge"
+      ],
+      "active_s": 552.4194907499987,
+      "gpu_time_recorded": true,
+      "reserved_s": 552.4194907499987,
+      "active_gpu_h": 0.1534498585416663,
+      "reserved_gpu_h": 0.1534498585416663,
+      "energy_active_kwh": 0.03222447029374992,
+      "energy_reserved_kwh": 0.03222447029374992,
+      "tokens": 146805,
+      "sessions": [],
+      "reserved_lower_bound_from": [
+        "p1-pilot-judge",
+        "p1-pilot-respond"
+      ],
+      "hardware": [
+        "rtx4500ada"
+      ]
+    },
+    {
+      "phase": 2,
+      "stage_ids": [
+        "p2-judgebias-14b",
+        "p2-judgebias-32b",
+        "p2-casualise",
+        "p2-candidates",
+        "p2-respond-qwen",
+        "p2-respond-phi",
+        "p2-judge-smoke",
+        "p2-judge-attempt1",
+        "p2-judge",
+        "p2-selfpref",
+        "p2-smoke-rtx4090"
+      ],
+      "active_s": 48216.043948884006,
+      "gpu_time_recorded": true,
+      "reserved_s": 175072.866865215,
+      "active_gpu_h": 13.393345541356668,
+      "reserved_gpu_h": 48.631351907004166,
+      "energy_active_kwh": 2.838601430351567,
+      "energy_reserved_kwh": 10.251429820470875,
+      "tokens": 13998870,
+      "sessions": [
+        "judge32",
+        "judge_phi",
+        "vllm_14b",
+        "vllm_32b",
+        "vllm_32b_judge",
+        "vllm_7b",
+        "vllm_phi35"
+      ],
+      "reserved_lower_bound_from": [
+        "p2-judge-smoke",
+        "p2-judgebias-32b"
+      ],
+      "hardware": [
+        "rtx4090",
+        "rtx4500ada"
+      ]
+    },
+    {
+      "phase": 7,
+      "stage_ids": [
+        "p7-benchmarks"
+      ],
+      "active_s": 0.0,
+      "gpu_time_recorded": false,
+      "reserved_s": 0.0,
+      "active_gpu_h": 0.0,
+      "reserved_gpu_h": 0.0,
+      "energy_active_kwh": 0.0,
+      "energy_reserved_kwh": 0.0,
+      "tokens": 8768,
+      "sessions": [],
+      "reserved_lower_bound_from": [],
+      "hardware": [
+        "rtx4500ada"
+      ]
+    },
+    {
+      "phase": 8,
+      "stage_ids": [
+        "p8-sft-0.5b",
+        "p8-sft-1.5b",
+        "p8-sft-3b",
+        "p8-gen-0.5b",
+        "p8-gen-1.5b",
+        "p8-gen-3b",
+        "p8-eval-qwen",
+        "p8-eval-phi",
+        "p8-eval-judge",
+        "p8-r3-qwen",
+        "p8-r3-phi",
+        "p8-r3-judge",
+        "p8-aug-candidates",
+        "p8-aug-qwen",
+        "p8-aug-phi",
+        "p8-aug-judge"
+      ],
+      "active_s": 22857.871708307,
+      "gpu_time_recorded": true,
+      "reserved_s": 24803.089168888,
+      "active_gpu_h": 6.349408807863056,
+      "reserved_gpu_h": 6.889746991357778,
+      "energy_active_kwh": 1.3333758496512416,
+      "energy_reserved_kwh": 1.4468468681851334,
+      "tokens": 9689924,
+      "sessions": [
+        "sft05",
+        "sft15",
+        "sft3b",
+        "vllm_aug_gen",
+        "vllm_aug_judge",
+        "vllm_aug_phi",
+        "vllm_aug_qwen",
+        "vllm_eval_judge",
+        "vllm_eval_phi",
+        "vllm_eval_qwen",
+        "vllm_eval_qwen1",
+        "vllm_eval_qwen2",
+        "vllm_r3_judge",
+        "vllm_r3_phi",
+        "vllm_r3_qwen"
+      ],
+      "reserved_lower_bound_from": [
+        "p8-gen-0.5b",
+        "p8-gen-1.5b",
+        "p8-gen-3b",
+        "vllm_r3_judge"
+      ],
+      "hardware": [
+        "rtx4500ada"
+      ]
+    }
+  ],
+  "cpu_only_phases": {
+    "0": "scaffolding, CI",
+    "3": "classical models (Compute Allocation: CPU)",
+    "4": "perceptron / MLP studies (CPU)",
+    "5": "ensembles, NB, GMM, HMM (CPU)",
+    "6": "clustering (CPU)",
+    "9": "tabular Q-learning (CPU)",
+    "10": "HPO (MLflow hardware tag cpu)",
+    "11": "serving, fast path (MLflow hardware tag cpu)"
+  },
+  "groups": {
+    "p1": {
+      "stage_ids": [
+        "p1-pilot-respond",
+        "p1-pilot-judge"
+      ],
+      "active_s": 552.4194907499987,
+      "gpu_time_recorded": true,
+      "reserved_s": 552.4194907499987,
+      "active_gpu_h": 0.1534498585416663,
+      "reserved_gpu_h": 0.1534498585416663,
+      "energy_active_kwh": 0.03222447029374992,
+      "energy_reserved_kwh": 0.03222447029374992,
+      "tokens": 146805,
+      "sessions": [],
+      "reserved_lower_bound_from": [
+        "p1-pilot-judge",
+        "p1-pilot-respond"
+      ],
+      "final_active_s": 552.4194907499987,
+      "labels": 836,
+      "gpu_s_per_label": 0.6607888645334912,
+      "final_gpu_s_per_label": 0.6607888645334912,
+      "reserved_gpu_s_per_label": 0.6607888645334912
+    },
+    "p2": {
+      "stage_ids": [
+        "p2-casualise",
+        "p2-candidates",
+        "p2-respond-qwen",
+        "p2-respond-phi",
+        "p2-judge-smoke",
+        "p2-judge-attempt1",
+        "p2-judge"
+      ],
+      "active_s": 46250.830282422,
+      "gpu_time_recorded": true,
+      "reserved_s": 172794.329,
+      "active_gpu_h": 12.847452856228333,
+      "reserved_gpu_h": 47.998424722222225,
+      "energy_active_kwh": 2.6979650998079503,
+      "energy_reserved_kwh": 10.079669191666667,
+      "tokens": 13495862,
+      "sessions": [
+        "judge32",
+        "vllm_32b",
+        "vllm_32b_judge",
+        "vllm_7b",
+        "vllm_phi35"
+      ],
+      "reserved_lower_bound_from": [
+        "p2-judge-smoke"
+      ],
+      "final_active_s": 28010.047306422,
+      "labels": 20986,
+      "gpu_s_per_label": 2.203889749472124,
+      "final_gpu_s_per_label": 1.3347015775479842,
+      "reserved_gpu_s_per_label": 8.233790574668827
+    },
+    "p8-eval": {
+      "stage_ids": [
+        "p8-eval-qwen",
+        "p8-eval-phi",
+        "p8-eval-judge"
+      ],
+      "active_s": 1527.6823634169996,
+      "gpu_time_recorded": true,
+      "reserved_s": 1741.0,
+      "active_gpu_h": 0.4243562120602777,
+      "reserved_gpu_h": 0.4836111111111111,
+      "energy_active_kwh": 0.08911480453265833,
+      "energy_reserved_kwh": 0.10155833333333333,
+      "tokens": 381454,
+      "sessions": [
+        "vllm_eval_judge",
+        "vllm_eval_phi",
+        "vllm_eval_qwen",
+        "vllm_eval_qwen1",
+        "vllm_eval_qwen2"
+      ],
+      "reserved_lower_bound_from": [],
+      "final_active_s": 1527.6823634169996,
+      "labels": 1140,
+      "gpu_s_per_label": 1.3400722486114032,
+      "final_gpu_s_per_label": 1.3400722486114032,
+      "reserved_gpu_s_per_label": 1.5271929824561403
+    },
+    "p8-r3": {
+      "stage_ids": [
+        "p8-r3-qwen",
+        "p8-r3-phi",
+        "p8-r3-judge"
+      ],
+      "active_s": 628.52599806,
+      "gpu_time_recorded": true,
+      "reserved_s": 703.893214,
+      "active_gpu_h": 0.17459055501666668,
+      "reserved_gpu_h": 0.19552589277777777,
+      "energy_active_kwh": 0.0366640165535,
+      "energy_reserved_kwh": 0.04106043748333333,
+      "tokens": 115304,
+      "sessions": [
+        "vllm_r3_judge",
+        "vllm_r3_phi",
+        "vllm_r3_qwen"
+      ],
+      "reserved_lower_bound_from": [
+        "vllm_r3_judge"
+      ],
+      "final_active_s": 628.52599806,
+      "labels": 570,
+      "gpu_s_per_label": 1.1026771895789473,
+      "final_gpu_s_per_label": 1.1026771895789473,
+      "reserved_gpu_s_per_label": 1.2349003754385963
+    },
+    "p8-aug": {
+      "stage_ids": [
+        "p8-aug-candidates",
+        "p8-aug-qwen",
+        "p8-aug-phi",
+        "p8-aug-judge"
+      ],
+      "active_s": 16388.467391942,
+      "gpu_time_recorded": true,
+      "reserved_s": 18045.0,
+      "active_gpu_h": 4.552352053317222,
+      "reserved_gpu_h": 5.0125,
+      "energy_active_kwh": 0.9559939311966166,
+      "energy_reserved_kwh": 1.052625,
+      "tokens": 9111568,
+      "sessions": [
+        "vllm_aug_gen",
+        "vllm_aug_judge",
+        "vllm_aug_phi",
+        "vllm_aug_qwen"
+      ],
+      "reserved_lower_bound_from": [],
+      "final_active_s": 16388.467391942,
+      "labels": 5770,
+      "gpu_s_per_label": 2.8402889760731367,
+      "final_gpu_s_per_label": 2.8402889760731367,
+      "reserved_gpu_s_per_label": 3.1273830155979203
+    }
+  },
+  "estimates": {
+    "p2_plan": {
+      "source": "configs/experiment/p2_compute_estimates.yaml",
+      "placeholder": true,
+      "labelled_pairs": 72000,
+      "stages": {
+        "casualise": {
+          "generated_tokens": 975000,
+          "gpu_seconds": 2440
+        },
+        "candidates": {
+          "generated_tokens": 2160000,
+          "gpu_seconds": 5400
+        },
+        "respond": {
+          "generated_tokens": 25200000,
+          "gpu_seconds": 10080
+        },
+        "judge": {
+          "generated_tokens": 8640000,
+          "gpu_seconds": 21600
+        }
+      },
+      "gpu_seconds": 39520.0,
+      "gpu_s_per_pair": 0.5488888888888889,
+      "tolerance": 0.2
+    },
+    "p2_projection": {
+      "source": "reports/p2_full_scale_plan.md (RTX 4090 smoke x 1,800/20)",
+      "gpu_hours": 9.75,
+      "labels": 21600,
+      "gpu_s_per_pair": 1.625,
+      "rows": [
+        {
+          "Work": "Candidates",
+          "Observed seconds / 20 prompts": "19.200",
+          "Projected hours / 1,800 prompts": "0.480",
+          "Proposed host": "worker-2"
+        },
+        {
+          "Work": "Qwen target",
+          "Observed seconds / 20 prompts": "60.839",
+          "Projected hours / 1,800 prompts": "1.521",
+          "Proposed host": "worker-1"
+        },
+        {
+          "Work": "Phi target",
+          "Observed seconds / 20 prompts": "45.319",
+          "Projected hours / 1,800 prompts": "1.133",
+          "Proposed host": "worker-1"
+        },
+        {
+          "Work": "Judge",
+          "Observed seconds / 20 prompts": "264.625",
+          "Projected hours / 1,800 prompts": "6.616",
+          "Proposed host": "worker-2"
+        }
+      ]
+    },
+    "gpu_queue_est_hours": {
+      "source": "gpu_queue/*.yaml est_hours",
+      "jobs": {
+        "p2-candidates-qwen32b": 3.0,
+        "sft-qwen0.5b-full": 6.0,
+        "sft-qwen1.5b-lora": 8.0,
+        "sft-qwen3b-lora": 3.0
+      }
+    }
+  },
+  "ledger": {
+    "source": ".cache/llm_ledger.json",
+    "cutoff": "2026-10-17T08:20:00",
+    "calls": 138726,
+    "output_tokens": 23623688,
+    "attributed_output_tokens": 23623688,
+    "unattributed_output_tokens": 0,
+    "unattributed_by_model": {},
+    "after_cutoff_calls": 3195,
+    "after_cutoff_output_tokens": 622190,
+    "budget": {
+      "phase1": {
+        "calls": 1053,
+        "tokens": 1083756,
+        "max_tokens": 5000000
+      },
+      "phase2": {
+        "calls": 140868,
+        "tokens": 146227989,
+        "max_tokens": 250000000
+      }
+    }
+  },
+  "power_sample": {
+    "source": "reports/compute_power_sample.csv (nvidia-smi -l 1)",
+    "workload": "sft_qwen7b_qlora_v2 training (excluded run), plus other users' CPU jobs",
+    "n": 60,
+    "first": "2026/10/17 13:24:19.653",
+    "last": "2026/10/17 13:25:19.092",
+    "mean_w": 107.12583333333333,
+    "median_w": 103.49,
+    "min_w": 56.93,
+    "max_w": 172.58,
+    "mean_util_pct": 46.5,
+    "power_limit_w": 210.0
+  },
+  "excluded": [
+    {
+      "id": "sft-qwen1.5b-lora-v2",
+      "evidence": "logs/sft_qwen15b_lora_v2.log"
+    },
+    {
+      "id": "sft15v2 val generation",
+      "evidence": "logs/gen-sft15v2.log"
+    },
+    {
+      "id": "sft-qwen3b-lora-v2",
+      "evidence": "logs/sft_qwen3b_lora_v2.log"
+    },
+    {
+      "id": "sft-qwen7b-qlora-v2",
+      "evidence": "running (experiment=sft_qwen7b_qlora_v2)"
+    },
+    {
+      "id": "v2 validation (targets + judge)",
+      "evidence": "logs/v2_chain.status"
+    }
+  ]
+}
