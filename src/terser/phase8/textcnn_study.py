@@ -213,6 +213,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         .reset_index()
     )
+    top_pool = str(pool.loc[pool.prompt_auc.idxmax(), "pooling"])
 
     # 8.2.4 HMM and GBM on identical folds
     import lightgbm as lgb
@@ -280,9 +281,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         "prompt head = oracle savings above the median.\n\n"
         "## 8.2.3 Max vs average pooling (3 seeds)\n\n" + md(pool) + "\n\n"
         "Max pooling asks *is there any droppable region* (one strong filler n-gram fires the "
-        "head); average pooling asks *how much of the prompt is droppable*. Whether a prompt is "
-        "compressible tracks the *share* of removable text, which is what average pooling "
-        "measures; concatenation lets the head use both.\n\n"
+        "head); average pooling asks *how much of the prompt is droppable*; concatenation lets "
+        f"the head use both. Highest prompt-head AUC: **{top_pool}** "
+        f"({pool.prompt_auc.max():.4f}).\n\n"
         "## 8.2.4 TextCNN vs HMM vs GBM taggers\n\n" + md(comp) + "\n\nMcNemar (exact binomial on "
         "discordant tokens):\n\n" + md(mcd) + "\n\n"
         f"## C8.2\n\nTextCNN token macro-F1 **{cnn_f1:.3f}** vs best classical tagger on the same "
