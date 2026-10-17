@@ -1,0 +1,133 @@
+{
+  "row": "9.2.4",
+  "labels": "data/interim/rewrites/val_labels_rl.jsonl",
+  "fixed_order": "FHIS",
+  "methods": {
+    "fixed_order": {
+      "n_prompts": 300,
+      "targets": [
+        "Qwen/Qwen2.5-7B-Instruct",
+        "microsoft/Phi-3.5-mini-instruct"
+      ],
+      "median_savings": 0.013637490701710886,
+      "mean_savings": 0.029797736422372437,
+      "median_savings_if_preserved": 0.0,
+      "unchanged": 103,
+      "missing_labels": 0,
+      "preserved": 0.7783333333333333,
+      "preserved_by_target": {
+        "Qwen/Qwen2.5-7B-Instruct": 0.7833333333333333,
+        "microsoft/Phi-3.5-mini-instruct": 0.7733333333333333
+      },
+      "preserved_by_category": {
+        "code": 0.7884615384615384,
+        "creative": 0.6777777777777778,
+        "explain": 0.7678571428571429,
+        "fact": 0.753968253968254,
+        "reason": 0.9545454545454546,
+        "transform": 0.75
+      },
+      "preserved_by_category_target": {
+        "code": {
+          "Qwen/Qwen2.5-7B-Instruct": 0.8076923076923077,
+          "microsoft/Phi-3.5-mini-instruct": 0.7692307692307693
+        },
+        "creative": {
+          "Qwen/Qwen2.5-7B-Instruct": 0.7111111111111111,
+          "microsoft/Phi-3.5-mini-instruct": 0.6444444444444445
+        },
+        "explain": {
+          "Qwen/Qwen2.5-7B-Instruct": 0.75,
+          "microsoft/Phi-3.5-mini-instruct": 0.7857142857142857
+        },
+        "fact": {
+          "Qwen/Qwen2.5-7B-Instruct": 0.746031746031746,
+          "microsoft/Phi-3.5-mini-instruct": 0.7619047619047619
+        },
+        "reason": {
+          "Qwen/Qwen2.5-7B-Instruct": 0.9772727272727273,
+          "microsoft/Phi-3.5-mini-instruct": 0.9318181818181818
+        },
+        "transform": {
+          "Qwen/Qwen2.5-7B-Instruct": 0.7352941176470589,
+          "microsoft/Phi-3.5-mini-instruct": 0.7647058823529411
+        }
+      },
+      "n_by_category": {
+        "code": 52,
+        "creative": 45,
+        "explain": 28,
+        "fact": 63,
+        "reason": 44,
+        "transform": 68
+      }
+    },
+    "rl_greedy": {
+      "n_prompts": 300,
+      "targets": [
+        "Qwen/Qwen2.5-7B-Instruct",
+        "microsoft/Phi-3.5-mini-instruct"
+      ],
+      "median_savings": 0.0,
+      "mean_savings": 0.017230461508278366,
+      "median_savings_if_preserved": 0.0,
+      "unchanged": 191,
+      "missing_labels": 0,
+      "preserved": 0.8933333333333333,
+      "preserved_by_target": {
+        "Qwen/Qwen2.5-7B-Instruct": 0.9,
+        "microsoft/Phi-3.5-mini-instruct": 0.8866666666666667
+      },
+      "preserved_by_category": {
+        "code": 0.9423076923076923,
+        "creative": 0.7555555555555555,
+        "explain": 0.9285714285714286,
+        "fact": 0.9365079365079365,
+        "reason": 0.9545454545454546,
+        "transform": 0.8529411764705882
+      },
+      "preserved_by_category_target": {
+        "code": {
+          "Qwen/Qwen2.5-7B-Instruct": 0.9423076923076923,
+          "microsoft/Phi-3.5-mini-instruct": 0.9423076923076923
+        },
+        "creative": {
+          "Qwen/Qwen2.5-7B-Instruct": 0.7777777777777778,
+          "microsoft/Phi-3.5-mini-instruct": 0.7333333333333333
+        },
+        "explain": {
+          "Qwen/Qwen2.5-7B-Instruct": 0.9285714285714286,
+          "microsoft/Phi-3.5-mini-instruct": 0.9285714285714286
+        },
+        "fact": {
+          "Qwen/Qwen2.5-7B-Instruct": 0.9365079365079365,
+          "microsoft/Phi-3.5-mini-instruct": 0.9365079365079365
+        },
+        "reason": {
+          "Qwen/Qwen2.5-7B-Instruct": 0.9772727272727273,
+          "microsoft/Phi-3.5-mini-instruct": 0.9318181818181818
+        },
+        "transform": {
+          "Qwen/Qwen2.5-7B-Instruct": 0.8529411764705882,
+          "microsoft/Phi-3.5-mini-instruct": 0.8529411764705882
+        }
+      },
+      "n_by_category": {
+        "code": 52,
+        "creative": 45,
+        "explain": 28,
+        "fact": 63,
+        "reason": 44,
+        "transform": 68
+      }
+    }
+  },
+  "c9_2": {
+    "tolerance": 0.02,
+    "preservation_diff": 0.11499999999999999,
+    "median_savings_diff": -0.013637490701710886,
+    "equal_preservation": true,
+    "savings_ge_fixed": false,
+    "pass": false
+  }
+}
