@@ -1,5 +1,10 @@
 """Row 2.4.3: compute report, generated tokens and GPU-seconds per Phase 2 stage vs estimates.
 
+**Superseded.** ADR-0004 merged row 2.4.3 into row 12.10; the compute accounting that is reported
+lives in :mod:`terser.phase12.compute_accounting` (``reports/compute_accounting.md``), which also
+reads ``configs/experiment/p2_compute_estimates.yaml``. This module is no longer run by any stage
+and is kept only as the tested Phase 2 implementation.
+
 Stages: ``casualise`` (row 2.1.4), ``candidates`` (2.2.1), ``respond`` (2.2.3), ``judge`` (2.3.3).
 
 Inputs:

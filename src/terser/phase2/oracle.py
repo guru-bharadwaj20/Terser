@@ -89,8 +89,8 @@ LABEL_COLUMNS: tuple[str, ...] = ("prompt_id", "candidate_id", "target", "label"
 PROMPT_COLUMNS: tuple[str, ...] = ("prompt_id", "category")
 
 DEFAULT_METHOD_PRIORITY: tuple[str, ...] = (
-    "operators",
-    "operator_stack",
+    "ops_FHC",
+    "ops_CHFIDSL",
     "llmlingua2",
     "llm_low",
     "llm_medium",

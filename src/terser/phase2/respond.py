@@ -180,6 +180,7 @@ def run_respond(
                 "output": resp.text,
                 "output_tokens": resp.output_tokens,
                 "cached": resp.cached,
+                "usage_reported": resp.usage_reported,
             }
             stats.requests += 1
             stats.cached += int(resp.cached)
@@ -196,7 +197,12 @@ def run_respond(
             ):
                 res = requests[(it.text, temp, seed)]
                 assert res is not None
-                truncated = int(res["output_tokens"]) >= max_tokens
+                # Without server-reported usage output_tokens is 0, so truncation is unknown.
+                truncated = (
+                    int(res["output_tokens"]) >= max_tokens
+                    if res.get("usage_reported", True)
+                    else None
+                )
                 rec = {
                     "prompt_id": it.prompt_id,
                     "candidate_id": it.candidate_id,
@@ -212,7 +218,7 @@ def run_respond(
                 }
                 fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
                 stats.records += 1
-                stats.truncated += int(truncated)
+                stats.truncated += int(bool(truncated))
     stats.wall_seconds = time.perf_counter() - start
     return stats
 
