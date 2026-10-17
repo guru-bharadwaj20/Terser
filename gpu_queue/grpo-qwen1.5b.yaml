@@ -1,0 +1,15 @@
+# Stretch S-9.3 (rows 9.3.1-9.3.4): GRPO on the 1.5B rewriter from the hpo08 adapter (C8.3 failed).
+# One model copy (reference = adapter disabled), 4 prompts x group 8 per step, grad checkpointing.
+# The run stops at TERSER_GRPO_DEADLINE (epoch s); the 32B audit judge runs only after it exits.
+id: grpo-qwen1.5b
+phase: 9
+depends_on: [C7.1, C2.3]
+command: >-
+  MLFLOW_TRACKING_URI=sqlite:///mlruns/mlflow.db
+  python -m terser.models.rl.grpo experiment=grpo_qwen15b_lora hardware=rtx4500ada
+est_vram_gb: 16
+est_hours: 18
+exclusive: true
+priority: 3
+cpu_smoke_test: tests/rl/test_grpo.py
+outputs: [models/rewriter/grpo-qwen1.5b/, mlruns/]

@@ -24,6 +24,7 @@ phases:
   phase7: {max_usd: 0, max_tokens: 0, allow_unpriced: false}
   phase8: {max_usd: 60, max_tokens: 12000000, allow_unpriced: false}
   phase9: {max_usd: 60, max_tokens: 12000000, allow_unpriced: false}
+  phase9_3: {max_usd: 0, max_tokens: 30000000, allow_unpriced: false}  # S-9.3 GRPO: local respond + 32B judge only
   phase10: {max_usd: 0, max_tokens: 0, allow_unpriced: false}
   phase11: {max_usd: 20, max_tokens: 4000000, allow_unpriced: false}
   # phase12 judges ~45k test pairs (both targets, position-swapped, ~1.8k tokens per call).
