@@ -1,0 +1,167 @@
+[
+  {
+    "run": "settled",
+    "alpha": "visits",
+    "gamma": 0.99,
+    "decay": 0.9995,
+    "eps_min": 0.0,
+    "episodes": 30000,
+    "max_update_last_1000": 0.16385699670157147,
+    "net_change_last_1000": 0.14558720824592264,
+    "episodes_with_update_ge_target_last_1000": 405,
+    "q_entries": 9151,
+    "trailing": [
+      {
+        "episode": 3000,
+        "max_dQ_window": 71.67630057803468
+      },
+      {
+        "episode": 6000,
+        "max_dQ_window": 38.540852991720044
+      },
+      {
+        "episode": 9000,
+        "max_dQ_window": 8.540645230769227
+      },
+      {
+        "episode": 12000,
+        "max_dQ_window": 7.334147032394654
+      },
+      {
+        "episode": 15000,
+        "max_dQ_window": 3.4804571428571416
+      },
+      {
+        "episode": 18000,
+        "max_dQ_window": 0.417157778065256
+      },
+      {
+        "episode": 21000,
+        "max_dQ_window": 0.5340007558170468
+      },
+      {
+        "episode": 24000,
+        "max_dQ_window": 0.4599833333333337
+      },
+      {
+        "episode": 27000,
+        "max_dQ_window": 1.0068934691773188
+      },
+      {
+        "episode": 30000,
+        "max_dQ_window": 0.16385699670157147
+      }
+    ],
+    "pass": false
+  },
+  {
+    "run": "best (9.2.3 policy)",
+    "alpha": "visits",
+    "gamma": 0.9,
+    "decay": 0.999,
+    "eps_min": 0.05,
+    "episodes": 30000,
+    "max_update_last_1000": 19.507785714285717,
+    "net_change_last_1000": 19.507785714285717,
+    "episodes_with_update_ge_target_last_1000": 595,
+    "q_entries": 10698,
+    "trailing": [
+      {
+        "episode": 3000,
+        "max_dQ_window": 22.44897959183674
+      },
+      {
+        "episode": 6000,
+        "max_dQ_window": 24.10714285714286
+      },
+      {
+        "episode": 9000,
+        "max_dQ_window": 47.737272727272725
+      },
+      {
+        "episode": 12000,
+        "max_dQ_window": 15.676274509803921
+      },
+      {
+        "episode": 15000,
+        "max_dQ_window": 29.83190282768318
+      },
+      {
+        "episode": 18000,
+        "max_dQ_window": 19.11987058823529
+      },
+      {
+        "episode": 21000,
+        "max_dQ_window": 55.00000000000001
+      },
+      {
+        "episode": 24000,
+        "max_dQ_window": 55.00000000000001
+      },
+      {
+        "episode": 27000,
+        "max_dQ_window": 50.0
+      },
+      {
+        "episode": 30000,
+        "max_dQ_window": 19.507785714285717
+      }
+    ],
+    "pass": false
+  },
+  {
+    "run": "settled, extended",
+    "alpha": "visits",
+    "gamma": 0.99,
+    "decay": 0.9995,
+    "eps_min": 0.0,
+    "episodes": 200000,
+    "max_update_last_1000": 0.05820404003864482,
+    "net_change_last_1000": 0.058204040038644766,
+    "episodes_with_update_ge_target_last_1000": 107,
+    "q_entries": 9151,
+    "trailing": [
+      {
+        "episode": 20000,
+        "max_dQ_window": 0.18151366680468498
+      },
+      {
+        "episode": 40000,
+        "max_dQ_window": 0.1050860786122763
+      },
+      {
+        "episode": 60000,
+        "max_dQ_window": 0.3745816599732262
+      },
+      {
+        "episode": 80000,
+        "max_dQ_window": 0.0336603680427441
+      },
+      {
+        "episode": 100000,
+        "max_dQ_window": 0.2179240953606826
+      },
+      {
+        "episode": 120000,
+        "max_dQ_window": 0.02117100177687559
+      },
+      {
+        "episode": 140000,
+        "max_dQ_window": 0.018457840729262317
+      },
+      {
+        "episode": 160000,
+        "max_dQ_window": 0.35434882235443654
+      },
+      {
+        "episode": 180000,
+        "max_dQ_window": 0.09938250483375244
+      },
+      {
+        "episode": 200000,
+        "max_dQ_window": 0.05820404003864482
+      }
+    ],
+    "pass": false
+  }
+]
