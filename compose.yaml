@@ -1,7 +1,17 @@
-# Row 11.3.7: the serving stack.
-#   docker compose up --build                  # terser-cpu only: fast path on :8080
-#   docker compose --profile gpu up --build    # + terser-gpu: quality path (needs an NVIDIA GPU)
-# The rewriter checkpoint is read from ./models/rewriter (override with TERSER_MODELS_DIR).
+# Rows 11.3.7 and 11.5.5: the serving stack and its dashboard.
+#   dvc pull models/fast models/rewriter      # ONNX fast path (baked into terser-cpu) + rewriter
+#   docker compose up --build                 # both paths + Prometheus + Pushgateway + Grafana
+#   docker compose up --build terser-cpu prometheus pushgateway grafana   # CPU-only host
+#
+#   fast path     http://localhost:8080/rewrite  (mode "fast"; terser-cpu, ONNX tagger + gate)
+#   quality path  http://localhost:8080/rewrite  (mode "quality"; terser-cpu -> terser-gpu vLLM,
+#                 falls back to the fast path while terser-gpu is down or loading)
+#   vLLM direct   http://localhost:8000/v1       (terser-gpu; needs an NVIDIA GPU + toolkit)
+#   Grafana       http://localhost:3000          (dashboard "Terser serving", folder Terser)
+#   Prometheus    http://localhost:9090   Pushgateway http://localhost:9091 (canary, row 11.5.4)
+#
+# The rewriter checkpoint is read from ./models/rewriter (override with TERSER_MODELS_DIR); the
+# default rung and base model are set in docker/Dockerfile.gpu and can be overridden below.
 name: terser
 
 services:
@@ -19,13 +29,17 @@ services:
     restart: unless-stopped
 
   terser-gpu:
-    profiles: ["gpu"]
     build:
       context: .
       dockerfile: docker/Dockerfile.gpu
     image: terser-gpu:latest
     ports:
       - "8000:8000"
+    environment:
+      TERSER_BASE_MODEL: ${TERSER_BASE_MODEL:-Qwen/Qwen2.5-3B-Instruct}
+      TERSER_LORA_PATH: ${TERSER_LORA_PATH:-/models/rewriter/sft-qwen3b-lora}
+      TERSER_GPU_MEM_UTIL: ${TERSER_GPU_MEM_UTIL:-0.85}
+      HF_TOKEN: ${HF_TOKEN:-}
     volumes:
       - ${TERSER_MODELS_DIR:-./models}:/models:ro
       - hf-cache:/root/.cache/huggingface
@@ -39,5 +53,46 @@ services:
               capabilities: [gpu]
     restart: unless-stopped
 
+  prometheus:
+    image: prom/prometheus:v3.7.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./docker/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+
+  pushgateway:
+    image: prom/pushgateway:v1.11.1
+    ports:
+      - "127.0.0.1:9091:9091"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:12.2.0
+    depends_on:
+      - prometheus
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/terser-serving.json
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+    volumes:
+      - ./docker/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docker/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+
 volumes:
   hf-cache:
+  prometheus-data:
+  grafana-data:

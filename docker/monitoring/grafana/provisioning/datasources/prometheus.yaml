@@ -1,0 +1,13 @@
+# Row 11.5.5: the Prometheus datasource. The dashboard and the alert rule reference uid "prometheus".
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: 15s       # = scrape_interval in docker/monitoring/prometheus.yml
