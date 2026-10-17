@@ -1,0 +1,61 @@
+# Row 11.5.5: Grafana-managed alert on the canary's rolling preservation (row 11.5.4). The canary
+# pushes terser_canary_rolling_preservation_ratio to the Pushgateway after each nightly run
+# (terser.monitoring.canary_metrics); the rule fires while the latest value is below 0.92.
+# No data (canary not deployed yet, or the group was deleted) is treated as OK so the rule does
+# not page before the first run; the dashboard's "Last canary run" panel shows staleness.
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: terser-quality
+    folder: Terser
+    interval: 1m
+    rules:
+      - uid: terser-rolling-preservation
+        title: Rolling preservation below 92%
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              refId: A
+              datasource:
+                type: prometheus
+                uid: prometheus
+              expr: min(terser_canary_rolling_preservation_ratio)
+              instant: true
+              range: false
+              intervalMs: 15000
+              maxDataPoints: 43200
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              datasource:
+                type: __expr__
+                uid: __expr__
+              conditions:
+                - evaluator:
+                    type: lt
+                    params: [0.92]
+        noDataState: OK
+        execErrState: Error
+        for: 0s
+        annotations:
+          summary: >-
+            Canary rolling preservation {{ with .Values.A }}{{ humanizePercentage .Value }}{{ else }}(no data){{ end }}
+            is below 92%
+          description: >-
+            The nightly 200-prompt quality canary (row 11.5.4), pooled over the last 7 runs, has
+            fallen below the 92% preservation bar (C8.3). Check recent gate / rewriter changes and
+            the per-category canary breakdown before the next deploy.
+          runbook_url: reports/p11_containers_dashboard.md
+        labels:
+          severity: page
+          service: terser
+          row: "11.5.5"

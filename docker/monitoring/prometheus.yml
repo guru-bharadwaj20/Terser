@@ -1,0 +1,22 @@
+# Row 11.5.5: Prometheus for the compose stack (compose.yaml). Scrapes the API's /metrics
+# (row 11.5.1, terser.serving.metrics), vLLM's own /metrics on terser-gpu, and the Pushgateway
+# that the nightly canary (row 11.5.4, terser.monitoring.canary_metrics) pushes to.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: terser-cpu
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["terser-cpu:8080"]
+
+  - job_name: terser-gpu      # down until the GPU service is up; the dashboard shows it in "Targets up"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["terser-gpu:8000"]
+
+  - job_name: pushgateway
+    honor_labels: true        # keep job="terser_canary" from the pushed group
+    static_configs:
+      - targets: ["pushgateway:9091"]
