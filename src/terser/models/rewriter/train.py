@@ -14,6 +14,17 @@ Models:
   checkpointing on the GPU rungs (8.3.3, 8.3.4, queued in ``gpu_queue/``). ``quant: nf4`` loads
   the base in 4-bit NF4 with double quantisation through ``bitsandbytes`` (QLoRA, the 7B rung).
 
+Learning-rate schedule (row 10.7): ``schedule: constant`` (the default) keeps the rate fixed;
+``schedule: linear`` warms up linearly over ``warmup_steps`` (or ``warmup_ratio`` x ``steps``)
+and then decays linearly towards 0 at ``steps`` (see :func:`lr_factor`). With the default
+(constant, no warmup) no scheduler is built, so existing configs train exactly as before.
+
+Validation hook (row 10.7): with ``val_data`` and ``eval_every`` set, the masked loss on the
+validation pairs (:func:`eval_loss`) is computed every ``eval_every`` steps and after the last
+step, written to ``loss.json`` as ``val_loss`` and passed to ``run(cfg, on_eval=...)``'s
+callback as ``on_eval(steps_done, loss)``. The HPO pruner uses this callback, and it may raise to
+stop training.
+
 Entry point: ``python -m terser.models.rewriter.train experiment=sft_tiny`` (or
 ``sft_qwen05b_full`` / ``sft_qwen15b_lora`` with ``hardware=rtx4090``).
 """
@@ -23,7 +34,7 @@ from __future__ import annotations
 import json
 import logging
 import math
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -37,17 +48,22 @@ if TYPE_CHECKING:
     from torch import nn
 
 __all__ = [
+    "SCHEDULES",
     "ByteTokenizer",
     "Pair",
     "build_tiny_lm",
     "encode_pair",
+    "eval_loss",
     "load_pairs",
+    "lr_factor",
     "run",
     "train_sft",
 ]
 
 log = logging.getLogger(__name__)
 IGNORE = -100
+SCHEDULES: tuple[str, ...] = ("constant", "linear")
+Examples = list[tuple[list[int], list[int]]]
 
 
 @dataclass(frozen=True)
@@ -129,19 +145,93 @@ def build_tiny_lm(vocab_size: int, d_model: int = 64, n_layers: int = 2, n_heads
 
 
 def _batches(
-    examples: list[tuple[list[int], list[int]]], batch_size: int, pad: int, step: int
+    examples: Examples, batch_size: int, pad: int, step: int
 ) -> tuple[list[list[int]], list[list[int]]]:
     start = (step * batch_size) % len(examples)
     chunk = [examples[(start + i) % len(examples)] for i in range(batch_size)]
+    return _pad(chunk, pad)
+
+
+def _pad(chunk: Examples, pad: int) -> tuple[list[list[int]], list[list[int]]]:
     width = max(len(ids) for ids, _ in chunk)
     ids = [x + [pad] * (width - len(x)) for x, _ in chunk]
     labels = [y + [IGNORE] * (width - len(y)) for _, y in chunk]
     return ids, labels
 
 
+def _loss(
+    model: nn.Module, ids_l: list[list[int]], labels_l: list[list[int]], pad_id: int,
+    device: str, hf: bool, reduction: str = "mean",
+) -> torch.Tensor:  # fmt: skip
+    """Masked next-token cross-entropy of one padded batch."""
+    import torch
+
+    ids = torch.tensor(ids_l, device=device)
+    labels = torch.tensor(labels_l, device=device)
+    if hf:
+        logits = model(input_ids=ids, attention_mask=(labels != IGNORE) | (ids != pad_id))
+        logits = logits.logits
+    else:
+        logits = model(ids)
+    # Shift: position t predicts token t+1.
+    out: torch.Tensor = torch.nn.functional.cross_entropy(
+        logits[:, :-1].reshape(-1, logits.shape[-1]).float(),
+        labels[:, 1:].reshape(-1),
+        ignore_index=IGNORE,
+        reduction=reduction,
+    )
+    return out
+
+
+def lr_factor(step: int, steps: int, warmup_steps: int = 0, schedule: str = "constant") -> float:
+    """Multiplier of the base learning rate for optimiser step ``step`` (0-based).
+
+    Warmup: ``(step + 1) / warmup_steps`` while ``step < warmup_steps``. After it ``constant``
+    stays at 1 and ``linear`` decays as ``(steps - step) / (steps - warmup_steps)``: 1 on the
+    first step after warmup, ``1 / (steps - warmup_steps)`` on the last.
+    """
+    if schedule not in SCHEDULES:
+        raise ValueError(f"unknown schedule {schedule!r}; choose from {SCHEDULES}")
+    if warmup_steps < 0:
+        raise ValueError("warmup_steps must be >= 0")
+    if step < warmup_steps:
+        return (step + 1) / warmup_steps
+    if schedule == "constant":
+        return 1.0
+    return max(0.0, (steps - step) / max(1, steps - warmup_steps))
+
+
+def eval_loss(
+    model: nn.Module,
+    examples: Examples,
+    *,
+    batch_size: int,
+    pad_id: int,
+    device: str = "cpu",
+    hf: bool = False,
+) -> float:
+    """Token-weighted masked loss over ``examples`` (each once, in order), in eval mode."""
+    import torch
+
+    if not examples:
+        raise ValueError("no eval examples")
+    was_training = model.training
+    model.eval()
+    total, n = 0.0, 0
+    with torch.no_grad():
+        for i in range(0, len(examples), batch_size):
+            chunk = examples[i : i + batch_size]
+            ids, labels = _pad(chunk, pad_id)
+            total += float(_loss(model, ids, labels, pad_id, device, hf, "sum").item())
+            n += sum(1 for _, y in chunk for t in y[1:] if t != IGNORE)
+    if was_training:
+        model.train()
+    return total / max(n, 1)
+
+
 def train_sft(
     model: nn.Module,
-    examples: list[tuple[list[int], list[int]]],
+    examples: Examples,
     *,
     steps: int,
     lr: float,
@@ -150,41 +240,56 @@ def train_sft(
     device: str = "cpu",
     hf: bool = False,
     seed: int = 0,
+    schedule: str = "constant",
+    warmup_steps: int = 0,
+    eval_examples: Examples | None = None,
+    eval_every: int = 0,
+    on_eval: Callable[[int, float], None] | None = None,
 ) -> list[float]:
-    """AdamW on the masked next-token loss; returns the per-step loss history."""
+    """AdamW on the masked next-token loss; returns the per-step loss history.
+
+    ``schedule`` / ``warmup_steps``: see :func:`lr_factor`; the default (constant, 0) builds no
+    scheduler. With ``eval_examples`` and ``eval_every > 0``, :func:`eval_loss` runs after every
+    ``eval_every`` steps and after the last one, and ``on_eval(steps_done, loss)`` receives it;
+    the callback may raise (e.g. ``optuna.TrialPruned``) to stop training.
+    """
     import torch
 
     if not examples:
         raise ValueError("no training examples")
+    lr_factor(0, steps, warmup_steps, schedule)  # validates schedule and warmup
     torch.manual_seed(seed)
     if not getattr(model, "hf_device_map", None):  # a 4-bit base is placed at load time
         model.to(device)
     model.train()
     params = [p for p in model.parameters() if p.requires_grad]
     opt = torch.optim.AdamW(params, lr=lr)
+    sched = None
+    if schedule != "constant" or warmup_steps > 0:
+        sched = torch.optim.lr_scheduler.LambdaLR(
+            opt, lambda s: lr_factor(s, steps, warmup_steps, schedule)
+        )
+    evaluate = bool(eval_examples) and eval_every > 0
     history: list[float] = []
     for step in range(steps):
         ids_l, labels_l = _batches(examples, batch_size, pad_id, step)
-        ids = torch.tensor(ids_l, device=device)
-        labels = torch.tensor(labels_l, device=device)
-        if hf:
-            logits = model(input_ids=ids, attention_mask=(labels != IGNORE) | (ids != pad_id))
-            logits = logits.logits
-        else:
-            logits = model(ids)
-        # Shift: position t predicts token t+1.
-        loss = torch.nn.functional.cross_entropy(
-            logits[:, :-1].reshape(-1, logits.shape[-1]).float(),
-            labels[:, 1:].reshape(-1),
-            ignore_index=IGNORE,
-        )
+        loss = _loss(model, ids_l, labels_l, pad_id, device, hf)
         opt.zero_grad()
         loss.backward()
         torch.nn.utils.clip_grad_norm_(params, 1.0)
         opt.step()
+        if sched is not None:
+            sched.step()
         history.append(float(loss.item()))
         if not math.isfinite(history[-1]):
             raise FloatingPointError(f"non-finite loss at step {step}")
+        done = step + 1
+        if evaluate and eval_examples and (done % eval_every == 0 or done == steps):
+            v = eval_loss(
+                model, eval_examples, batch_size=batch_size, pad_id=pad_id, device=device, hf=hf
+            )
+            if on_eval is not None:
+                on_eval(done, v)
     return history
 
 
@@ -232,8 +337,18 @@ def _load_hf(p: DictConfig, device: Any) -> tuple[Any, Any]:  # pragma: no cover
     return model, tok
 
 
-def run(cfg: DictConfig) -> dict[str, Any]:
-    """Train per ``cfg.experiment.params``; writes ``loss.json`` (+ weights) to ``output_dir``."""
+def _warmup_steps(p: DictConfig) -> int:
+    if p.get("warmup_steps") is not None:
+        return int(p.warmup_steps)
+    return int(round(float(p.get("warmup_ratio") or 0.0) * int(p.steps)))
+
+
+def run(cfg: DictConfig, on_eval: Callable[[int, float], None] | None = None) -> dict[str, Any]:
+    """Train per ``cfg.experiment.params``; writes ``loss.json`` (+ weights) to ``output_dir``.
+
+    Optional params (row 10.7): ``schedule``, ``warmup_steps`` / ``warmup_ratio``, ``val_data``
+    and ``eval_every``. ``on_eval(steps_done, val_loss)`` is called at every evaluation.
+    """
     from terser.hardware import get_device
     from terser.utils.seed import set_seed
 
@@ -256,6 +371,20 @@ def run(cfg: DictConfig) -> dict[str, Any]:
         pad = tok.pad_token_id if tok.pad_token_id is not None else eos
         hf = True
     examples = [encode_pair(enc(x.prompt), enc(x.rewrite), sep, eos, p.max_len) for x in pairs]
+    val_examples: Examples | None = None
+    if p.get("val_data"):
+        val_pairs = load_pairs(Path(p.val_data))
+        val_examples = [
+            encode_pair(enc(x.prompt), enc(x.rewrite), sep, eos, p.max_len) for x in val_pairs
+        ]
+    val_curve: list[list[float]] = []
+
+    def record(step: int, loss: float) -> None:
+        val_curve.append([step, loss])
+        log.info("step %d val loss %.4f", step, loss)
+        if on_eval is not None:
+            on_eval(step, loss)
+
     history = train_sft(
         model,
         examples,
@@ -266,10 +395,22 @@ def run(cfg: DictConfig) -> dict[str, Any]:
         device=str(device),
         hf=hf,
         seed=int(cfg.seed),
+        schedule=str(p.get("schedule") or "constant"),
+        warmup_steps=_warmup_steps(p),
+        eval_examples=val_examples,
+        eval_every=int(p.get("eval_every") or 0),
+        on_eval=record,
     )
     out = Path(p.output_dir)
     out.mkdir(parents=True, exist_ok=True)
-    result = {"model": p.model, "steps": p.steps, "n_pairs": len(pairs), "loss": history}
+    result: dict[str, Any] = {
+        "model": p.model,
+        "steps": p.steps,
+        "n_pairs": len(pairs),
+        "loss": history,
+    }
+    if val_examples is not None:
+        result["val_loss"] = val_curve
     (out / "loss.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     if p.get("save_weights", False):  # pragma: no cover - GPU rungs
         if hf:

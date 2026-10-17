@@ -1,0 +1,66 @@
+{
+  "calibration": {
+    "a": 1.0058900793760146,
+    "b": -2.0995590346487,
+    "n_labels": 1840
+  },
+  "gate_auc_degraded": 0.5984402452410407,
+  "rungs": {
+    "sft05": {
+      "judged_preserved": 0.6736842105263158,
+      "loro_estimate": 0.6780089964161186,
+      "error": 0.004324785889802785,
+      "median_savings": 0.07581227436823101,
+      "fell_back": 98,
+      "gate_pass_share": 0.07719298245614035,
+      "gated_preserved": 0.9859649122807017,
+      "gated_median_savings": 0.0
+    },
+    "sft15": {
+      "judged_preserved": 0.6929824561403509,
+      "loro_estimate": 0.6846786683528574,
+      "error": -0.008303787787493522,
+      "median_savings": 0.07581227436823101,
+      "fell_back": 101,
+      "gate_pass_share": 0.06666666666666667,
+      "gated_preserved": 0.980701754385965,
+      "gated_median_savings": 0.0
+    },
+    "sft3b": {
+      "judged_preserved": 0.7473684210526316,
+      "loro_estimate": 0.7323979322348629,
+      "error": -0.014970488817768635,
+      "median_savings": 0.02083333333333337,
+      "fell_back": 130,
+      "gate_pass_share": 0.06315789473684211,
+      "gated_preserved": 0.9754385964912281,
+      "gated_median_savings": 0.0
+    },
+    "sft15v2": {
+      "judged_preserved": 0.5701754385964912,
+      "loro_estimate": 0.6225681758449884,
+      "error": 0.052392737248497134,
+      "median_savings": 0.35,
+      "fell_back": 72,
+      "gate_pass_share": 0.042105263157894736,
+      "gated_preserved": 0.9789473684210527,
+      "gated_median_savings": 0.0
+    },
+    "sft3bv2": {
+      "judged_preserved": 0.7140350877192982,
+      "loro_estimate": 0.6832636310351223,
+      "error": -0.030771456684175913,
+      "median_savings": 0.12542372881355934,
+      "fell_back": 104,
+      "gate_pass_share": 0.05964912280701754,
+      "gated_preserved": 0.980701754385965,
+      "gated_median_savings": 0.0
+    }
+  },
+  "constraint_retention_auc_degraded": 0.4877273140812736,
+  "loro_mae": 0.0221526512855476,
+  "loro_max_abs_error": 0.052392737248497134,
+  "loro_spearman": 0.8999999999999998,
+  "gate_threshold": 0.264564,
+  "labels": "data/interim/rewrites/val_labels_all_v2.jsonl"
+}
