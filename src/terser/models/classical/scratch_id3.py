@@ -11,7 +11,9 @@ Plan rows **3.3.1** (ID3), **3.3.2** (continuous values), **3.3.4** (overfitting
   ``x_j <= t`` with ``t`` a midpoint between adjacent sorted distinct values whose classes differ
   (:func:`candidate_thresholds`). Fayyad and Irani (1992) show the entropy-optimal cut always lies
   on such a boundary point, so this finds the same best split as trying every midpoint (which is
-  what scikit-learn does) while evaluating fewer cuts. Features may be reused deeper in the tree.
+  what scikit-learn does) while evaluating fewer cuts. That result assumes no leaf-size limit, so
+  with ``min_samples_leaf > 1`` every midpoint is tried, as in scikit-learn (a boundary cut may
+  leave a leaf too small while a non-boundary cut is valid). Features may be reused deeper.
   The split criterion is information gain (not C4.5's gain ratio) so the tree is comparable with
   scikit-learn ``criterion="entropy"``.
 
@@ -252,7 +254,14 @@ class DecisionTree:
         left = np.cumsum(np.eye(k)[ys], axis=0)  # left[i] = counts of ys[: i + 1]
         n = len(ys)
         best_gain, best_thr = -math.inf, None
-        for t in candidate_thresholds(xs, ys):
+        if self.min_samples_leaf > 1:
+            # Class-boundary midpoints are only sufficient without a leaf-size limit: when every
+            # boundary cut leaves a leaf too small, the best valid cut is a non-boundary one.
+            u = np.unique(xs)
+            thresholds: Sequence[float] = list((u[:-1] + u[1:]) / 2)
+        else:
+            thresholds = candidate_thresholds(xs, ys)
+        for t in thresholds:
             i = int(np.searchsorted(xs, t, side="right"))  # examples with x <= t
             if i < self.min_samples_leaf or n - i < self.min_samples_leaf:
                 continue

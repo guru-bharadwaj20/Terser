@@ -87,8 +87,16 @@ class DirtyTreeError(RuntimeError):
     """The git tree has uncommitted changes, so the logged SHA would not identify the code."""
 
 
-def git_state(repo: Path = Path(".")) -> tuple[str | None, bool | None]:
-    """``(HEAD sha, dirty)`` of ``repo``; ``(None, None)`` outside a git checkout."""
+def git_state(
+    repo: Path = Path("."), exclude: Sequence[Path] = ()
+) -> tuple[str | None, bool | None]:
+    """``(HEAD sha, dirty)`` of ``repo``; ``(None, None)`` outside a git checkout.
+
+    Paths in ``exclude`` do not count towards ``dirty``: the access log is tracked, so appending
+    one entry would otherwise make every later entry report a dirty tree.
+    """
+    specs = [f":(exclude){Path(os.path.relpath(p, repo)).as_posix()}" for p in exclude]
+    pathspec = ["--", ".", *specs] if specs else []
     try:
         sha = subprocess.run(
             ["git", "-C", str(repo), "rev-parse", "HEAD"],
@@ -98,7 +106,15 @@ def git_state(repo: Path = Path(".")) -> tuple[str | None, bool | None]:
         ).stdout.strip()
         dirty = bool(
             subprocess.run(
-                ["git", "-C", str(repo), "status", "--porcelain", "--untracked-files=no"],
+                [
+                    "git",
+                    "-C",
+                    str(repo),
+                    "status",
+                    "--porcelain",
+                    "--untracked-files=no",
+                    *pathspec,
+                ],
                 check=True,
                 capture_output=True,
                 text=True,
@@ -194,7 +210,7 @@ def unlock(
             f"test split already unlocked at {prior.get('when')} by {prior.get('who')} "
             f"(git {prior.get('git_sha')}); the unlock is one-time, see {log_path}"
         )
-    sha, dirty = git_state(repo)
+    sha, dirty = git_state(repo, exclude=[log_path])
     if dirty and not allow_dirty:
         raise DirtyTreeError(
             "uncommitted changes: commit the evaluation code first so the logged SHA identifies "
@@ -226,9 +242,9 @@ def status(
             files[name] = {"lock": "missing"}
             continue
         lock = json.loads(lock_path.read_text(encoding="utf-8"))
-        unlocked = entry is not None and entry["locked"].get(name, {}).get("sha256") == lock.get(
+        unlocked = entry is not None and entry.get("locked", {}).get(name, {}).get(
             "sha256"
-        )
+        ) == lock.get("sha256")
         files[name] = {"sha256": lock.get("sha256"), "unlocked": unlocked}
     reads = [e for e in read_log(log_path) if e.get("event") == "read"]
     return {
@@ -287,7 +303,7 @@ def read_locked(
     with _allow_access():
         assert_no_test_access(path)
         records = read_jsonl(path)
-    sha, dirty = git_state(repo)
+    sha, dirty = git_state(repo, exclude=[log_path])
     _append(
         log_path,
         {

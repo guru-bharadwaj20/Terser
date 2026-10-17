@@ -474,6 +474,7 @@ def test_promote_flow_guards(
     promoted: list[tuple[str, Any, str]] = []
     monkeypatch.setattr(terser.tracking, "promote", lambda n, v, s: promoted.append((n, v, s)))
     monkeypatch.setattr(steps, "_version_at", lambda name, alias: "7")
+    monkeypatch.setattr(steps, "lineage_missing", lambda name, version: [])
     kw: dict[str, Any] = {"report": str(report), "sync_registry": False}
     refused = fl.promote_flow(rung="bad", **kw)
     assert [r.name for r in refused] == ["promotion_guard"] and not refused[0].ok
@@ -554,6 +555,9 @@ class _CT:
             terser.tracking, "promote", lambda n, v, s: self.promoted.append((n, v, s))
         )
         monkeypatch.setattr(steps, "_version_at", version_at)
+        monkeypatch.setattr(steps, "lineage_missing", lambda name, version: self.missing)
+        monkeypatch.setattr(steps, "rung_at", lambda name, alias: None)
+        self.missing: list[str] = []
 
     def run(self, **params: Any) -> Any:
         kw: dict[str, Any] = {
@@ -692,6 +696,28 @@ def test_ct_flow_rejects_unknown_trigger(
     state = ct.run(trigger="sometimes")
     assert state.is_failed() and "trigger must be one of" in str(state.message)
     assert ct.shell == [] and [a["name"] for a in read_alerts(alert_log)] == ["ct_flow"]
+
+
+def test_ct_flow_refuses_a_version_without_lineage(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, alert_log: Path
+) -> None:
+    """Rule 7 runs on the exact version that would move; a missing lineage tag refuses it."""
+    ct = _CT(tmp_path, monkeypatch)
+    ct.missing = ["git_sha"]
+    results: list[StepResult] = ct.run(trigger="force", label=False).result()
+    by = {r.name: r for r in results}
+    assert not by["promote_flow/promotion_guard"].ok
+    assert "lineage incomplete" in by["promote_flow/promotion_guard"].output
+    assert ct.promoted == []
+
+
+def test_ct_flow_promotes_the_version_of_the_guarded_rung(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, alert_log: Path
+) -> None:
+    ct = _CT(tmp_path, monkeypatch)
+    ct.report.write_text(ct.report.read_text().replace('"good"', '"sft3b"'))
+    ct.run(trigger="force", label=False, rung="sft3b").result()
+    assert ct.aliases == ["experiment:sft_qwen3b_lora"]
 
 
 def test_cli_prints_fired_trigger(

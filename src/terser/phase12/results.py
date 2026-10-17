@@ -766,7 +766,7 @@ def _headline_header(targets: Sequence[str]) -> list[str]:
         *(f"Median savings {t}" for t in ts),
         *(f"Preserved {t}" for t in ts),
         "Preserved pooled",
-        "Worst category",
+        "Worst category (pooled over targets)",
         *(f"Median net {t}" for t in ts),
         *(f"Mean net {t}" for t in ts),
         "Fell back · gate-rejected (" + " / ".join(ts) + ")",
@@ -836,7 +836,17 @@ def build_report(res: Mapping[str, Any]) -> str:
                     "pass" if c["S1"]["pass"] else "fail",
                 ],
                 ["S2 preservation overall", ">= 95%", _pct(c["S2"]["value"]), _pv(c["S2"])],
-                ["S3 worst category", ">= 90%", _pct(c["S3"]["value"]), _pv(c["S3"])],
+                [
+                    "S3 worst category (pooled over targets)",
+                    ">= 90%",
+                    _pct(c["S3"]["value"])
+                    + " (per target: "
+                    + ", ".join(
+                        f"{_short(t)} {_pct(fpt[t]['worst_category_preserved'])}" for t in targets
+                    )
+                    + ")",
+                    _pv(c["S3"]),
+                ],
                 [
                     "S4 net savings at p25 length",
                     "> 0 per target",
@@ -1691,6 +1701,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         if unlock_entry() is None:
             raise SystemExit("test results need the row 12.1 unlock first")
     prompts = read_jsonl(args.prompts)
+    if args.split == "test":
+        # The --prompts file is an unlocked copy written by the candidate build; read the locked
+        # split through the logged reader as well, so this run appears in the access log, and
+        # refuse a copy that does not match it.
+        from terser.phase12.candidates import load_split_prompts
+        from terser.phase12.unlock import read_locked
+
+        locked = load_split_prompts(
+            "test", reader=lambda name, _p: read_locked(name, "row 12.2-12.7 evaluation/results")
+        )
+        key = lambda p: (str(p["id"]), str(p["prompt"]))  # noqa: E731
+        if {key(p) for p in prompts} != {key(p) for p in locked}:
+            raise SystemExit(f"{args.prompts} does not match the locked test split")
     pids = {str(p["id"]) for p in prompts}
     keep = lambda r: str(r.get("prompt_id")) in pids  # noqa: E731
     candidates = [c for path in args.candidates for c in read_jsonl(path, keep)]

@@ -37,6 +37,9 @@ class CI:
     estimate: float | None
     low: float | None
     high: float | None
+    dropped: int = 0
+    """Resamples whose statistic was not finite (e.g. an empty length bin); the interval is over
+    the remaining ones, i.e. conditional on the statistic being defined."""
 
     def as_dict(self) -> dict[str, float | None]:
         return {"estimate": self.estimate, "low": self.low, "high": self.high}
@@ -81,11 +84,13 @@ def ci(
     """``stat(indices)`` on all ``n`` rows and its percentile interval over ``resamples``."""
     est = stat(np.arange(n, dtype=np.int64)) if n else float("nan")
     reps = np.asarray([stat(idx) for idx in resamples], dtype=np.float64)
-    reps = reps[np.isfinite(reps)]
+    finite = np.isfinite(reps)
+    dropped = int((~finite).sum())
+    reps = reps[finite]
     if not reps.size:
-        return CI(_f(est), None, None)
+        return CI(_f(est), None, None, dropped)
     lo, hi = np.quantile(reps, [alpha / 2, 1 - alpha / 2])
-    return CI(_f(est), float(lo), float(hi))
+    return CI(_f(est), float(lo), float(hi), dropped)
 
 
 def mcnemar_paired(a: npt.ArrayLike, b: npt.ArrayLike) -> dict[str, float | int]:

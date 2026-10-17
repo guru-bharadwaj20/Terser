@@ -92,7 +92,7 @@ def test_scan_flags_test_reference(tmp_path: Path) -> None:
 
 
 def test_repository_sources_clean() -> None:
-    """CI check (C10.4): nothing outside terser.eval.final / split builders names the test split."""
+    """CI check (C10.4): only phase12.unlock and the split builders name the test split."""
     res = scan_sources(SRC)
     assert res.checked > 50
     assert res.ok, res.violations

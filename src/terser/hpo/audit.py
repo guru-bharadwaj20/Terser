@@ -7,9 +7,13 @@ Two automated checks, both run in CI:
    :func:`terser.data.splits.assert_no_test_access`). The log is written as JSONL next to the
    study's outputs; :func:`audit_access_log` fails if any entry is a test split, i.e. its split
    is not ``train``/``val``.
-2. **Static check.** :func:`scan_sources` greps ``src/terser`` for references to
-   ``data/processed/test*`` (or a ``test.jsonl`` split file) outside ``terser.eval.final``, the
-   only module allowed to read the test split (CONTRIBUTING "Never tune on test").
+2. **Static check.** :func:`scan_sources` greps ``src/terser`` for literal references to
+   ``data/processed/test*`` (or a ``test.jsonl`` split file) outside
+   :mod:`terser.phase12.unlock`, the only sanctioned reader of the test split (CONTRIBUTING
+   "Never tune on test"; ADR-0001 calls it ``terser.eval.final``). It only sees literal paths:
+   code that builds a path from parts (e.g. ``phase12.benchmark`` / ``phase12.candidates``, which
+   read the split through ``read_locked``) is not caught, so the runtime log check and
+   :func:`terser.data.splits.assert_no_test_access` remain the real guard.
 
 CLI::
 
@@ -41,9 +45,10 @@ __all__ = [
 ALLOWED_SPLITS: frozenset[str] = frozenset({"train", "val"})
 _SPLIT_RE = re.compile(r"(?:^|[\\/_.-])(train|val|valid|validation|dev|test)(?:[\\/_.-]|$)")
 _TEST_REF_RE = re.compile(r"""data/processed/[^"'\s]*test|["'/\\]test\.jsonl["']""")
-# eval/final may read test; the split builders write and freeze it; this file names the pattern.
+# phase12/unlock is the logged test reader; the split builders write and freeze it; this file
+# names the pattern.
 _ALLOWED_MODULES: tuple[str, ...] = (
-    "eval/final",
+    "phase12/unlock.py",
     "data/splits.py",
     "data/real_slice.py",
     "hpo/audit.py",
@@ -123,7 +128,7 @@ def audit_access_log(records: Iterable[dict[str, Any]] | str | Path) -> AuditRes
 
 
 def scan_sources(root: str | Path) -> AuditResult:
-    """Static check: no module outside ``terser.eval.final`` references the test split."""
+    """Static check: no module outside the allowlist literally references the test split."""
     root = Path(root)
     n, bad = 0, []
     for f in sorted(root.rglob("*.py")):

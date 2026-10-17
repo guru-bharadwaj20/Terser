@@ -1028,7 +1028,7 @@ Create the environment with an explicit 3.11 or newer interpreter (`uv venv --py
 
 - Every run logs to MLflow with tags `phase`, `row`, `task`, `hardware` (`cpu` / `rtx4090` / `rtx4500ada`), `data_hash`, `git_sha`.
 - Report mean ± std over ≥ 3 seeds (≥ 5 for Phase 4 studies).
-- **Never tune on test.** Code touching `data/processed/test*` outside `terser.eval.final` fails CI.
+- **Never tune on test.** Code touching `data/processed/test*` outside `terser.phase12.unlock` (the logged reader; ADR-0001 called it `terser.eval.final`) fails CI.
 - Every performance table has per-category rows. An aggregate alone is rejected in review.
 - Every new model is compared to the current champion **and** the "original prompt" baseline
   (0% savings, 100% preservation), with McNemar or paired bootstrap for claimed wins.

@@ -25,6 +25,7 @@ Sources (all read-only):
 * **Estimates**: ``configs/experiment/p2_compute_estimates.yaml`` (row 2.4.3 plan; flagged
   ``placeholder: true``), ``reports/p2_full_scale_plan.md`` (smoke-based projection) and the
   ``est_hours`` of the ``gpu_queue/`` job specs.
+* **Optuna** ``experiments/p10_rewriter_hpo/optuna.db``: Phase 10 rewriter-HPO trial durations.
 
 Measures:
 
@@ -37,8 +38,6 @@ Measures:
   GPU-hours x 210 W, the RTX 4500 Ada board power limit (``nvidia-smi power.limit``). That is an
   upper bound on board energy; a 60 s ``nvidia-smi`` sample taken during an (excluded) QLoRA run
   is kept in ``reports/compute_power_sample.csv`` and reported as a sensitivity.
-
-* **Optuna** ``experiments/p10_rewriter_hpo/optuna.db``: Phase 10 rewriter-HPO trial durations.
 
 Coverage: Phases 1, 2, 7, 8 (rungs 1-3, v2 rungs incl. 7B QLoRA, q7 quality chain), 10 (rewriter
 HPO), 11 (quality-path benchmarks, canary) and 12 (test evaluation). Ledger calls are attributed
@@ -554,13 +553,13 @@ CPU_PHASES: dict[int, str] = {
     0: "scaffolding, CI",
     3: "classical models (Compute Allocation: CPU)",
     4: "perceptron / MLP studies (CPU)",
-    5: "ensembles, NB, GMM, HMM (CPU)",
+    5: "ensembles, NB, GMM, HMM (CPU; its HMM rewriter C5.6 val labels ran on the q7 chain, "
+    "counted in Phase 8)",
     6: "clustering (CPU)",
     9: "tabular Q-learning (CPU; its C9.2 val labels ran on the q7 chain, counted in Phase 8)",
 }
 # GPU phases that also had CPU-only work (no GPU time to count).
 CPU_PARTS: dict[int, str] = {
-    5: "HMM rewriter C5.6 val labels ran on the q7 chain, counted in Phase 8",
     10: "GBM / MLP HPO studies (MLflow hardware tag cpu)",
     11: "fast path, ONNX serving (MLflow hardware tag cpu)",
     12: "CPU candidates (logs/p12_cpu_candidates*.log) and results",
