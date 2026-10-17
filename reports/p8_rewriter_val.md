@@ -9,6 +9,7 @@ Val split, greedy decoding, 8.3.7 safeguard on. Savings on the Qwen2.5 tokenizer
 | sft3b | 285 | 2.1% | 10.0% | 130 | 74.7% | 0.76 | fail |
 | sft15v2 | 285 | 35.0% | 10.0% | 72 | 57.0% | 0.44 | fail |
 | sft3bv2 | 285 | 12.5% | 10.0% | 104 | 71.4% | 0.98 | fail |
+| sft7bv2 | 285 | 2.0% | 10.0% | 130 | 75.3% | 1.71 | fail |
 
 Preservation by category:
 
@@ -19,3 +20,4 @@ Preservation by category:
 | sft3b | 57.8% | 75.5% | 85.7% | 80.0% | 82.3% | 70.4% |
 | sft15v2 | 48.0% | 54.3% | 65.7% | 68.2% | 44.8% | 62.2% |
 | sft3bv2 | 61.8% | 70.2% | 80.0% | 80.0% | 63.5% | 74.5% |
+| sft7bv2 | 56.9% | 85.1% | 65.7% | 80.0% | 81.2% | 80.6% |

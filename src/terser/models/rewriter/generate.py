@@ -5,6 +5,9 @@ token, then the model decodes the rewrite up to EOS. Every rewrite goes through 
 :func:`~terser.models.rewriter.safeguards.safeguard`, so the output is never longer than the
 prompt on the base tokenizer.
 
+:func:`load_model` and :func:`generate_rows` are the library form of the CLI (the row 10.7 HPO
+trials call them in-process); the CLI writes one JSON line per row of :func:`generate_rows`.
+
 Entry point::
 
     python -m terser.models.rewriter.generate --base Qwen/Qwen2.5-0.5B-Instruct \
@@ -23,14 +26,15 @@ from typing import Any
 
 from terser.models.rewriter.safeguards import safeguard
 
-__all__ = ["main"]
+__all__ = ["SEP_TEXT", "generate_rows", "load_model", "main"]
 
 SEP_TEXT = "\n### Rewrite:\n"
 
 
-def _load(
+def load_model(
     base: str, model_dir: str, quant: str | None = None
 ) -> tuple[Any, Any]:  # pragma: no cover - GPU only
+    """``(model, tokenizer)`` on CUDA in eval mode; a LoRA adapter dir is merged into ``base``."""
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -60,6 +64,67 @@ def _load(
     return model.to("cuda").eval(), tok
 
 
+_load = load_model  # backwards-compatible private name
+
+
+def generate_rows(
+    model: Any,
+    tok: Any,
+    rows: Sequence[dict[str, Any]],
+    *,
+    batch_size: int = 16,
+    max_new_tokens: int = 512,
+    model_name: str = "",
+    device: str = "cuda",
+) -> list[dict[str, Any]]:  # pragma: no cover - GPU only
+    """Greedy, safeguarded rewrites of ``rows`` (``id``, ``category``, ``prompt``, ``savings``)."""
+    import torch
+
+    sep = tok(SEP_TEXT, add_special_tokens=False)["input_ids"][-1]
+    pad = tok.pad_token_id if tok.pad_token_id is not None else tok.eos_token_id
+
+    def count(text: str) -> int:
+        return len(tok(text, add_special_tokens=False)["input_ids"])
+
+    out: list[dict[str, Any]] = []
+    for i in range(0, len(rows), batch_size):
+        chunk = rows[i : i + batch_size]
+        seqs = [tok(r["prompt"], add_special_tokens=False)["input_ids"] + [sep] for r in chunk]
+        width = max(map(len, seqs))
+        ids = torch.tensor([[pad] * (width - len(s)) + s for s in seqs], device=device)
+        mask = torch.tensor([[0] * (width - len(s)) + [1] * len(s) for s in seqs], device=device)
+        t0 = time.perf_counter()
+        with torch.no_grad():
+            gen = model.generate(
+                input_ids=ids,
+                attention_mask=mask,
+                max_new_tokens=max_new_tokens,
+                do_sample=False,
+                eos_token_id=tok.eos_token_id,
+                pad_token_id=pad,
+            )
+        dt = (time.perf_counter() - t0) / len(chunk)
+        for r, g in zip(chunk, gen[:, width:], strict=True):
+            raw = tok.decode(g, skip_special_tokens=True).strip()
+            text, fell_back = safeguard(r["prompt"], raw, count)
+            n0, n1 = count(r["prompt"]), count(text)
+            out.append(
+                {
+                    "id": r["id"],
+                    "category": r["category"],
+                    "prompt": r["prompt"],
+                    "raw_rewrite": raw,
+                    "rewrite": text,
+                    "fell_back": fell_back,
+                    "savings": 1 - n1 / n0,
+                    "oracle_savings": r["savings"],
+                    "latency_s": dt,
+                    "model": model_name,
+                }
+            )
+    return out
+
+
 def main(argv: Sequence[str] | None = None) -> int:  # pragma: no cover - GPU only
     ap = argparse.ArgumentParser(description="Generate SFT rewriter outputs for a split.")
     ap.add_argument("--base", required=True)
@@ -71,60 +136,21 @@ def main(argv: Sequence[str] | None = None) -> int:  # pragma: no cover - GPU on
     ap.add_argument("--quant", choices=["nf4"], default=None, help="4-bit base (QLoRA rung)")
     args = ap.parse_args(argv)
 
-    import torch
-
-    model, tok = _load(args.base, args.model, args.quant)
-    sep = tok(SEP_TEXT, add_special_tokens=False)["input_ids"][-1]
-    pad = tok.pad_token_id if tok.pad_token_id is not None else tok.eos_token_id
+    model, tok = load_model(args.base, args.model, args.quant)
     rows = [json.loads(x) for x in Path(args.data).read_text(encoding="utf-8").splitlines() if x]
-
-    def count(text: str) -> int:
-        return len(tok(text, add_special_tokens=False)["input_ids"])
-
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     with out.open("w", encoding="utf-8") as fh:
-        for i in range(0, len(rows), args.batch_size):
-            chunk = rows[i : i + args.batch_size]
-            seqs = [tok(r["prompt"], add_special_tokens=False)["input_ids"] + [sep] for r in chunk]
-            width = max(map(len, seqs))
-            ids = torch.tensor([[pad] * (width - len(s)) + s for s in seqs], device="cuda")
-            mask = torch.tensor(
-                [[0] * (width - len(s)) + [1] * len(s) for s in seqs], device="cuda"
-            )
-            t0 = time.perf_counter()
-            with torch.no_grad():
-                gen = model.generate(
-                    input_ids=ids,
-                    attention_mask=mask,
-                    max_new_tokens=args.max_new_tokens,
-                    do_sample=False,
-                    eos_token_id=tok.eos_token_id,
-                    pad_token_id=pad,
-                )
-            dt = (time.perf_counter() - t0) / len(chunk)
-            for r, g in zip(chunk, gen[:, width:], strict=True):
-                raw = tok.decode(g, skip_special_tokens=True).strip()
-                text, fell_back = safeguard(r["prompt"], raw, count)
-                n0, n1 = count(r["prompt"]), count(text)
-                fh.write(
-                    json.dumps(
-                        {
-                            "id": r["id"],
-                            "category": r["category"],
-                            "prompt": r["prompt"],
-                            "raw_rewrite": raw,
-                            "rewrite": text,
-                            "fell_back": fell_back,
-                            "savings": 1 - n1 / n0,
-                            "oracle_savings": r["savings"],
-                            "latency_s": dt,
-                            "model": args.model,
-                        },
-                        ensure_ascii=False,
-                    )
-                    + "\n"
-                )
+        for i in range(0, len(rows), args.batch_size):  # write batch by batch, as before
+            for rec in generate_rows(
+                model,
+                tok,
+                rows[i : i + args.batch_size],
+                batch_size=args.batch_size,
+                max_new_tokens=args.max_new_tokens,
+                model_name=args.model,
+            ):
+                fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
     print(json.dumps({"n": len(rows), "out": str(out)}))
     return 0
 

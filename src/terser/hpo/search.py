@@ -217,8 +217,26 @@ def _gp_propose(
     return cands[int(np.argmax(ei))]
 
 
+def _log_child(mlf: Any, trial: Any, params: Params, value: float | None, parent_exp: Any) -> None:
+    """One nested MLflow run per trial: params, objective, numeric user attrs, pruned flag."""
+    with mlf.start_run(run_name=f"trial-{trial.number}", nested=True, experiment_id=parent_exp):
+        mlf.log_params(params)
+        if value is not None:
+            mlf.log_metric("objective", value)
+        else:
+            mlf.set_tag("pruned", "true")
+        for k, v in trial.user_attrs.items():
+            if isinstance(v, bool):
+                mlf.log_metric(k, float(v))
+            elif isinstance(v, int | float) and math.isfinite(float(v)):
+                mlf.log_metric(k, float(v))
+            elif isinstance(v, list) and v and all(isinstance(x, list | tuple) for x in v):
+                for step, x in v:  # [[step, value], ...] curves, e.g. a val-loss history
+                    mlf.log_metric(k, float(x), step=int(step))
+
+
 def run_search(
-    objective: Callable[[Params], float],
+    objective: Callable[..., float],
     space: SearchSpace,
     method: Method,
     n_trials: int,
@@ -231,6 +249,11 @@ def run_search(
     mlflow: bool = False,
     mlflow_tags: Mapping[str, Any] | None = None,
     data_log: DataAccessLog | None = None,
+    with_trial: bool = False,
+    storage: str | None = None,
+    study_name: str | None = None,
+    enqueue: Sequence[Params] = (),
+    catch: tuple[type[Exception], ...] = (),
 ) -> SearchResult:
     """Run ``n_trials`` of ``method`` on ``objective`` over ``space``.
 
@@ -238,6 +261,20 @@ def run_search(
     smaller). ``mlflow_tags`` are passed to :func:`terser.tracking.start_run` (needs ``phase``,
     ``row``, ``task``, ``run_name``). ``data_log`` is attached to the result as ``extra``
     ``data_access`` so callers can audit it.
+
+    Pruning and long studies (row 10.7):
+
+    * ``with_trial=True`` calls ``objective(params, trial)`` so the objective can
+      ``trial.report`` intermediate values, raise ``optuna.TrialPruned`` and set user attrs
+      (logged to the trial's MLflow child run).
+    * ``storage`` (e.g. ``sqlite:///study.db``) with ``study_name`` persists the study and
+      resumes it: only ``n_trials`` minus the already finished trials are run.
+    * ``enqueue`` fixes the parameters of the first trials of a new study.
+    * ``catch`` exception types mark a trial FAILED instead of stopping the study.
+
+    Only COMPLETE trials enter ``values`` / ``params`` / ``best_*``: Optuna stores a pruned
+    trial's last intermediate value as its value, which is not on the objective's scale. The
+    study is returned in ``extra["study"]``. With no completed trial ``best_value`` is NaN.
     """
     import optuna
 
@@ -256,7 +293,19 @@ def run_search(
         sampler = optuna.samplers.TPESampler(seed=seed, n_startup_trials=n_startup)
     else:
         sampler = optuna.samplers.RandomSampler(seed=seed)
-    study = optuna.create_study(direction=direction, sampler=sampler, pruner=pruner)
+    study = optuna.create_study(
+        direction=direction,
+        sampler=sampler,
+        pruner=pruner,
+        storage=storage,
+        study_name=study_name,
+        load_if_exists=storage is not None,
+    )
+    finished = [t for t in study.trials if t.state.is_finished()]
+    if not study.trials:
+        for p in enqueue:
+            study.enqueue_trial(dict(p))
+    n_trials = max(0, n_trials - len(finished))
     maximize = direction == "maximize"
 
     parent_id: str | None = None
@@ -278,15 +327,18 @@ def run_search(
 
     def wrapped(trial: Any) -> float:
         params = space.suggest(trial)
-        value = float(objective(params))
+        try:
+            value = float(objective(params, trial) if with_trial else objective(params))
+        except optuna.TrialPruned:
+            if mlflow:
+                import mlflow as mlf
+
+                _log_child(mlf, trial, params, None, parent_exp)
+            raise
         if mlflow:
             import mlflow as mlf
 
-            with mlf.start_run(
-                run_name=f"trial-{trial.number}", nested=True, experiment_id=parent_exp
-            ):
-                mlf.log_params(params)
-                mlf.log_metric("objective", value)
+            _log_child(mlf, trial, params, value, parent_exp)
         return value
 
     try:
@@ -295,25 +347,30 @@ def run_search(
             for i in range(n_trials):
                 if i >= n_startup:
                     study.enqueue_trial(_gp_propose(space, history, rng, maximize))
-                study.optimize(wrapped, n_trials=1)
+                study.optimize(wrapped, n_trials=1, catch=catch)
                 t = study.trials[-1]
-                if t.value is not None:
+                if t.value is not None and t.state == optuna.trial.TrialState.COMPLETE:
                     history.append((dict(t.params), float(t.value)))
-        else:
-            study.optimize(wrapped, n_trials=n_trials)
-        done = [t for t in study.trials if t.value is not None]
+        elif n_trials:
+            study.optimize(wrapped, n_trials=n_trials, catch=catch)
+        done = [
+            t
+            for t in study.trials
+            if t.value is not None and t.state == optuna.trial.TrialState.COMPLETE
+        ]
         result = SearchResult(
             method=method,
-            best_params=dict(study.best_params),
-            best_value=float(study.best_value),
+            best_params=dict(study.best_params) if done else {},
+            best_value=float(study.best_value) if done else float("nan"),
             values=[float(t.value) for t in done if t.value is not None],
             params=[dict(t.params) for t in done],
             direction=direction,
             mlflow_run_id=parent_id,
         )
+        result.extra["study"] = study
         if data_log is not None:
             result.extra["data_access"] = data_log.records()
-        if mlflow:
+        if mlflow and done:
             import mlflow as mlf
 
             mlf.log_metric("best_value", result.best_value)

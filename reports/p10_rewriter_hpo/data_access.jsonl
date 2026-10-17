@@ -1,0 +1,6 @@
+{"path": "data/interim/rewrites/val_labels_all_v2.jsonl", "split": "val", "purpose": "read"}
+{"path": "data/interim/rewrites/sft-qwen0.5b-full.val.jsonl", "split": "val", "purpose": "read"}
+{"path": "data/interim/rewrites/sft-qwen1.5b-lora.val.jsonl", "split": "val", "purpose": "read"}
+{"path": "data/interim/rewrites/sft-qwen3b-lora.val.jsonl", "split": "val", "purpose": "read"}
+{"path": "data/interim/rewrites/sft15v2.val.jsonl", "split": "val", "purpose": "read"}
+{"path": "data/interim/rewrites/sft3bv2.val.jsonl", "split": "val", "purpose": "read"}
