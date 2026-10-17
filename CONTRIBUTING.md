@@ -740,7 +740,7 @@ quality monitoring.
 | 11.5.1 | Metrics | Prometheus: RPS, p50/p95/p99 latency per path, fallback rate, gate rejections, tokens saved, net savings, GPU util / VRAM | Exposed at `/metrics` | ✅ |
 | 11.5.2 | Input drift | Evidently daily: embedding drift (PSI / MMD on PCA components), length and category distribution | Report generated | ✅ |
 | 11.5.3 | Tokenizer drift | Re-count fixture set with current tokenizer versions; alert on any change | Alert fires on a pinned-version swap | ✅ |
-| 11.5.4 | Quality canary | Nightly: a fixed 200-prompt canary set goes through the deployed service and the judge; rolling preservation | Metric on dashboard | ❌ |
+| 11.5.4 | Quality canary | Nightly: a fixed 200-prompt canary set goes through the deployed service and the judge; rolling preservation | Metric on dashboard | ✅ |
 | 11.5.5 | Dashboard and alerts | Grafana; alert at rolling preservation < 92% | Dashboard live | ✅ |
 | 11.5.6 | Structured logging | Request IDs; hashes by default, raw text only if consented | Log schema doc | ✅ |
 
@@ -877,7 +877,7 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 | 4 | Model deployment and serving | 11.3 | ✅ |
 | 4 | CI/CD/CT for ML systems | 0.2.9, 11.4 | ❌ |
 | 4 | Inference systems | 11.3.2–11.3.6 | ✅ |
-| 4 | Monitoring, drift and observability | 11.5 | ❌ |
+| 4 | Monitoring, drift and observability | 11.5 | ✅ |
 | 4 | ML orchestration | 11.6 | ✅ |
 
 ---
@@ -922,10 +922,10 @@ which were not, and why.
 | 8 — CNN and Rewriter | Vivian | 14 | 5 | 15 | ❌ |
 | 9 — Reinforcement Learning | Vivian | 7 | 2 | 7 | ❌ |
 | 10 — HPO | Vivian | 5 | 4 | 7 | ❌ |
-| 11 — MLOps | Vivian | 25 | 7 | 26 | ❌ |
+| 11 — MLOps | Vivian | 25 | 7 | 27 | ❌ |
 | 12 — Final Evaluation | Vivian | 11 | — | 0 | ❌ |
 | 13 — Documentation | Guru | 6 | — | 4 | ❌ |
-| **Total** | | **214** | **60** | **222** | ❌ |
+| **Total** | | **214** | **60** | **223** | ❌ |
 
 Stretch rows are not counted.
 
@@ -933,7 +933,7 @@ Stretch rows are not counted.
 
 | Owner | Hardware | Phases | Rows | Done | Remaining |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 170 | 44 |
+| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 171 | 43 |
 | Guru | 1 × RTX 4500 Ada (24 GB) | 0, 1, 13 | 60 | 52 | 8 |
 
 Each phase has one owner, who runs it end to end, including its checkpoint.
