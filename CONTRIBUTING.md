@@ -514,7 +514,7 @@ sanity-checking, and the **first end-to-end non-generative compressor** (an HMM 
 | 5.3.3 | Forward algorithm | Sequence likelihood in log space | Matches brute-force enumeration on length-5 sequences | ✅ |
 | 5.3.4 | Viterbi decoding | Most likely tag sequence → compressed prompt | Matches brute force on length-5 sequences | ✅ |
 | 5.3.5 | Baum-Welch | EM on unlabelled casual prompts from supervised initialisation | F1 before vs after | ✅ |
-| 5.3.6 | End-to-end HMM compressor | Viterbi tags → rewrite → Phase 2 judge on **500 val prompts** | `reports/p5_hmm_compressor.md` | ❌ |
+| 5.3.6 | End-to-end HMM compressor | Viterbi tags → rewrite → Phase 2 judge on **500 val prompts** | `reports/p5_hmm_compressor.md` | ✅ |
 
 ### Checkpoint C5 — Ensembles, Bayes, HMM
 
@@ -613,7 +613,7 @@ together with the quality gate and fallback, reach the main quality/savings gate
 | 8.3.1 | SFT data | (casual prompt, oracle preserved rewrite) from train split; one target-agnostic rewriter (C1.5: tokenizers agree) | HF dataset in DVC | ✅ |
 | 8.3.2 | Tiny-config smoke test | Full training loop on a tiny model on CPU | CI test passes; GPU jobs queued | ✅ |
 | 8.3.3 | Rung 1: Qwen2.5-0.5B full FT | bf16, AdamW, grad checkpointing | Model registered; val report | ✅ |
-| 8.3.4 | Rung 2: Qwen2.5-1.5B LoRA | r = 16, α = 32, bf16. Escalate to 3B LoRA, then 7B QLoRA (NF4), only if the previous rung fails C8.3 | Same, per rung trained | ❌ |
+| 8.3.4 | Rung 2: Qwen2.5-1.5B LoRA | r = 16, α = 32, bf16. Escalate to 3B LoRA, then 7B QLoRA (NF4), only if the previous rung fails C8.3 | Same, per rung trained | ✅ |
 | 8.3.7 | Decoding safeguards | Never longer than input on T; fall back to original if longer | Property test | ✅ |
 | 8.3.8 | Inference-time quality gate | Champion gate rejects risky rewrites ⇒ lighter rewrite or original | Integration test | ✅ |
 | 8.3.9 | Baselines | Original · best operator · HMM compressor · LLMLingua-2 · zero-shot Qwen2.5-32B-Instruct-AWQ "rewrite concisely" | Same val table | ❌ |
@@ -653,7 +653,7 @@ neural rewriter is a [stretch goal](#stretch-goals-never-block-a-checkpoint).
 | 9.2.1 | Q-learning from scratch | ε-greedy; quality gate as cheap reward model (no LLM calls during learning) | Learning curve | ✅ |
 | 9.2.2 | Hyperparameter sweep | α ∈ {0.05, 0.1, 0.3}, γ ∈ {0.9, 0.99}, ε schedule | Table | ✅ |
 | 9.2.3 | Learned policy | Greedy operator order per category | `reports/p9_policy.md` | ✅ |
-| 9.2.4 | Judge verification | Greedy policy on 300 val prompts with the real judge | Savings and preservation table | ❌ |
+| 9.2.4 | Judge verification | Greedy policy on 300 val prompts with the real judge | Savings and preservation table | ✅ |
 
 ### Checkpoint C9 — Reinforcement Learning
 
@@ -796,7 +796,7 @@ quality?", on the untouched test split.
 | :---: | :--- | :--- | :--- | :---: |
 | 13.1 | README | One-paragraph pitch, architecture diagram (casual prompt → fast/quality path → gate → target LLM, with training loop), headline results table with CIs, `docker compose up` quickstart, links to report and benchmark. Start it now and update at every checkpoint | A reader understands the project in 60 seconds | ❌ |
 | 13.2 | Syllabus mapping doc | Unit 1–4 → phase / file / figure links | `docs/syllabus_map.md` | ✅ |
-| 13.4 | Model cards | Gate, tagger, TextCNN, rewriter | Complete | ❌ |
+| 13.4 | Model cards | Gate, tagger, TextCNN, rewriter | Complete | ✅ |
 | 13.6 | Final report | Problem, related work (LLMLingua / LLMLingua-2, Selective Context), method, experiments, results, ablations, negative results (C1.4, C1.5), limitations (creative prompts, multi-turn context, tokenizer drift, judge dependence, synthetic prompts), future work | `docs/report.md` | ❌ |
 | 13.8 | Demo script | Live casual prompt → rewrite → side-by-side outputs + token counter | Rehearsed; cached fallback if GPU unavailable | ✅ |
 | 13.9 | Viva prep | ID3 gain, bias–variance, ROC, backprop, SVM dual, AdaBoost weights, EM, Viterbi, K-means ⇔ EM, Bellman / Q-update, CNN parameters, LoRA rank | `docs/viva.md` | ✅ |
@@ -860,13 +860,13 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 | 3 | Bayes optimal classifier | 5.2.4 | ✅ |
 | 3 | Naive Bayes | 5.2.3 | ✅ |
 | 3 | Expectation maximisation and GMM | 5.2.5, 5.2.6 | ✅ |
-| 3 | Hidden Markov Models | 5.3 | ❌ |
+| 3 | Hidden Markov Models | 5.3 | ✅ |
 | 4 | Hierarchical vs non-hierarchical clustering | 6.4 | ✅ |
 | 4 | Agglomerative and divisive clustering | 6.5, 6.6 | ✅ |
 | 4 | K-means, bisecting K-means | 6.2, 6.3 | ✅ |
 | 4 | K-means as special case of EM | 6.7 | ✅ |
 | 4 | RL: agent, environment, states, actions, rewards, policy, value functions | 9.1.1, 9.1.2, 9.1.4 | ✅ |
-| 4 | Bellman equation and Q-learning | 9.1.1, 9.2 | ❌ |
+| 4 | Bellman equation and Q-learning | 9.1.1, 9.2 | ✅ |
 | 4 | Introduction to deep learning | 8.1.1, 8.3 | ❌ |
 | 4 | Convolution operation and CNNs | 8.1.2, 8.2.1 | ✅ |
 | 4 | CNN parameter calculation, max and avg pooling | 8.2.2, 8.2.3 | ✅ |
@@ -878,7 +878,7 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 | 4 | CI/CD/CT for ML systems | 0.2.9, 11.4 | ❌ |
 | 4 | Inference systems | 11.3.2–11.3.6 | ❌ |
 | 4 | Monitoring, drift and observability | 11.5 | ❌ |
-| 4 | ML orchestration | 11.6 | ❌ |
+| 4 | ML orchestration | 11.6 | ✅ |
 
 ---
 
@@ -913,19 +913,19 @@ which were not, and why.
 | :--- | :--- | :---: | :---: | :---: | :---: |
 | 0 — Foundations | Guru | 22 | 4 | 26 | ✅ |
 | 1 — Framing and Concept Learning | Guru | 23 | 5 | 22 | ❌ |
-| 2 — Data Pipeline and Judge | Vivian | 21 | 9 | 22 | ❌ |
+| 2 — Data Pipeline and Judge | Vivian | 21 | 9 | 23 | ❌ |
 | 3 — Metrics, Trees, LR, KNN | Vivian | 31 | 7 | 36 | ❌ |
 | 4 — ANN and SVM | Vivian | 16 | 5 | 20 | ❌ |
-| 5 — Boosting, Bayes, GMM, HMM | Vivian | 16 | 6 | 16 | ❌ |
+| 5 — Boosting, Bayes, GMM, HMM | Vivian | 16 | 6 | 17 | ❌ |
 | 6 — Clustering | Vivian | 9 | 3 | 10 | ❌ |
 | 7 — GPU Onboarding | Vivian | 8 | 3 | 9 | ❌ |
-| 8 — CNN and Rewriter | Vivian | 14 | 5 | 10 | ❌ |
-| 9 — Reinforcement Learning | Vivian | 7 | 2 | 6 | ❌ |
+| 8 — CNN and Rewriter | Vivian | 14 | 5 | 13 | ❌ |
+| 9 — Reinforcement Learning | Vivian | 7 | 2 | 7 | ❌ |
 | 10 — HPO | Vivian | 5 | 4 | 7 | ❌ |
-| 11 — MLOps | Vivian | 25 | 7 | 18 | ❌ |
+| 11 — MLOps | Vivian | 25 | 7 | 24 | ❌ |
 | 12 — Final Evaluation | Vivian | 11 | — | 0 | ❌ |
-| 13 — Documentation | Guru | 6 | — | 2 | ❌ |
-| **Total** | | **214** | **60** | **204** | ❌ |
+| 13 — Documentation | Guru | 6 | — | 4 | ❌ |
+| **Total** | | **214** | **60** | **218** | ❌ |
 
 Stretch rows are not counted.
 
@@ -933,8 +933,8 @@ Stretch rows are not counted.
 
 | Owner | Hardware | Phases | Rows | Done | Remaining |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 154 | 60 |
-| Guru | 1 × RTX 4500 Ada (24 GB) | 0, 1, 13 | 60 | 50 | 10 |
+| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 166 | 48 |
+| Guru | 1 × RTX 4500 Ada (24 GB) | 0, 1, 13 | 60 | 52 | 8 |
 
 Each phase has one owner, who runs it end to end, including its checkpoint.
 
