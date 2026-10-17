@@ -1,11 +1,11 @@
 """Prefect flows (row 11.6.1), their reliability (row 11.6.2) and continuous training (row 11.4.3).
 
 Runs against an isolated temporary Prefect API (``prefect_test_harness``); no GPU, data or LLM
-server. Covers: (a) every flow's dry-run command plan and the seven registered deployments (with
-the CT drift-alert trigger), (b) an injected transient failure recovering through the retry
-policy, (c) the failure hook (alert log, optional webhook) on a permanent failure, (d) the
-LLM-step cache, (e) ``ct_flow``: no trigger, the drift-alert and new-batch trigger paths, and
-Staging registration only when the promotion guard allows it.
+server. Covers: (a) every flow's dry-run command plan and the eight registered deployments (with
+the CT drift-alert trigger and the nightly canary), (b) an injected transient failure recovering
+through the retry policy, (c) the failure hook (alert log, optional webhook) on a permanent
+failure, (d) the LLM-step cache, (e) ``ct_flow``: no trigger, the drift-alert and new-batch
+trigger paths, and Staging registration only when the promotion guard allows it.
 """
 
 from __future__ import annotations
@@ -47,6 +47,7 @@ NAMES = [
     "promote_flow",
     "drift_flow",
     "ct_flow",
+    "canary_flow",
 ]
 
 
@@ -89,6 +90,10 @@ def test_flows_registered() -> None:
     assert by_name["data_flow"]["entrypoint"] == "terser.flows.flows.data_flow"
     assert by_name["ct_flow"]["schedule"] == "0 4 * * *"
     assert by_name["ct_flow"]["entrypoint"] == "terser.flows.flows.ct_flow"
+    # Row 11.5.4: the quality canary runs nightly.
+    assert by_name["canary_flow"]["schedule"] == "0 2 * * *"
+    assert by_name["canary_flow"]["entrypoint"] == "terser.flows.flows.canary_flow"
+    assert "row-11.5.4" in by_name["canary_flow"]["tags"]
     # The drift alert (a failed drift_flow run) starts CT through a Prefect automation.
     assert register_deployments() == rows  # re-applying is idempotent
     triggers = registered_triggers()
@@ -149,6 +154,13 @@ EXPECTED_PLANS: dict[str, list[tuple[str, str]]] = {
         *_sub("promote_flow", _PROMOTE),
         ("record_ct_cycle", "python"),
     ],
+    "canary_flow": [
+        ("canary:rewrite", "shell"),
+        ("canary:respond:qwen2.5-7b", "shell"),
+        ("canary:respond:phi3.5-mini", "shell"),
+        ("canary:judge", "shell"),
+        ("canary:finalize", "shell"),
+    ],
 }
 _GUARD = {"promote_flow": "promotion_guard", "ct_flow": "promote_flow/promotion_guard"}
 
@@ -190,6 +202,43 @@ def test_every_flow_plans_without_running(name: str, project_root: Path) -> None
             "terser.monitoring.input_drift",
             "--name",
         )
+    if name == "canary_flow":
+        mod = ("python", "-m", "terser.monitoring.canary")
+        assert all(c[:3] == mod for c in cmds.values())
+        rewrite = cmds["canary:rewrite"]
+        assert rewrite[3] == "rewrite" and "--force" in rewrite
+        assert rewrite[rewrite.index("--mode") + 1] == "quality"
+        assert rewrite[rewrite.index("--canary") + 1] == "data/canary/canary_v1.jsonl"
+        run_dir = rewrite[rewrite.index("--run-dir") + 1]
+        assert all(c[c.index("--run-dir") + 1] == run_dir for c in cmds.values())
+        final = cmds["canary:finalize"]
+        assert final[final.index("--gateway") + 1] == "localhost:9091"
+
+
+def test_canary_flow_endpoints() -> None:
+    results = fl.canary_flow(
+        base_url="http://svc:8080",
+        mode="fast",
+        targets=["qwen2.5-7b"],
+        llm_url="http://all:8000/v1",
+        target_urls={"qwen2.5-7b": "http://qwen:8000/v1"},
+        judge_url="http://judge:8000/v1",
+        gateway=None,
+        run_id="r1",
+        dry_run=True,
+    )
+    cmds = {r.name: r.cmd for r in results}
+    assert list(cmds) == [
+        "canary:rewrite",
+        "canary:respond:qwen2.5-7b",
+        "canary:judge",
+        "canary:finalize",
+    ]
+    assert ("--base-url", "http://svc:8080") == cmds["canary:rewrite"][8:10]
+    assert cmds["canary:respond:qwen2.5-7b"][-2:] == ("--llm-url", "http://qwen:8000/v1")
+    assert cmds["canary:judge"][-2:] == ("--judge-url", "http://judge:8000/v1")
+    assert "--gateway" not in cmds["canary:finalize"]
+    assert cmds["canary:finalize"][4:6] == ("--run-dir", "logs/canary/r1")
 
 
 def test_cli_list_and_dry_run(capsys: pytest.CaptureFixture[str]) -> None:
