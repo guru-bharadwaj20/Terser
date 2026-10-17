@@ -2,7 +2,15 @@
 
 from terser.llm.budget import Budget, BudgetExceededError, Ledger, Usage
 from terser.llm.cache import ResponseCache, cache_key
-from terser.llm.client import LLMClient, LLMResponse, ProviderTransport, Transport, TransportResult
+from terser.llm.client import (
+    CACHE_ONLY_ENV,
+    LLMCacheMissError,
+    LLMClient,
+    LLMResponse,
+    ProviderTransport,
+    Transport,
+    TransportResult,
+)
 from terser.llm.providers import (
     LocalLLMError,
     LocalLLMUnavailableError,
@@ -14,6 +22,8 @@ from terser.llm.providers import (
 __all__ = [
     "Budget",
     "BudgetExceededError",
+    "CACHE_ONLY_ENV",
+    "LLMCacheMissError",
     "LLMClient",
     "LLMResponse",
     "Ledger",
