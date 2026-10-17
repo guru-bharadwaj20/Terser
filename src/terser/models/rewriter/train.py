@@ -11,7 +11,8 @@ Models:
   Used by the CPU smoke test (row 8.3.2); never reported.
 * any Hugging Face repo id (``Qwen/Qwen2.5-0.5B-Instruct``, ...) - loaded with ``transformers``;
   full fine-tune or LoRA via ``peft`` (``lora: {r, alpha, dropout}``), bf16 and gradient
-  checkpointing on the GPU rungs (8.3.3, 8.3.4, queued in ``gpu_queue/``).
+  checkpointing on the GPU rungs (8.3.3, 8.3.4, queued in ``gpu_queue/``). ``quant: nf4`` loads
+  the base in 4-bit NF4 with double quantisation through ``bitsandbytes`` (QLoRA, the 7B rung).
 
 Entry point: ``python -m terser.models.rewriter.train experiment=sft_tiny`` (or
 ``sft_qwen05b_full`` / ``sft_qwen15b_lora`` with ``hardware=rtx4090``).
@@ -156,7 +157,9 @@ def train_sft(
     if not examples:
         raise ValueError("no training examples")
     torch.manual_seed(seed)
-    model.to(device).train()
+    if not getattr(model, "hf_device_map", None):  # a 4-bit base is placed at load time
+        model.to(device)
+    model.train()
     params = [p for p in model.parameters() if p.requires_grad]
     opt = torch.optim.AdamW(params, lr=lr)
     history: list[float] = []
@@ -191,7 +194,25 @@ def _load_hf(p: DictConfig, device: Any) -> tuple[Any, Any]:  # pragma: no cover
 
     dtype = torch.bfloat16 if device.precision == "bf16" else torch.float32
     tok = AutoTokenizer.from_pretrained(p.model)
-    model: Any = AutoModelForCausalLM.from_pretrained(p.model, torch_dtype=dtype)
+    model: Any
+    if p.get("quant") == "nf4":  # QLoRA (row 8.3.4, 7B rung): frozen NF4 base, bf16 adapters
+        from peft import prepare_model_for_kbit_training
+        from transformers import BitsAndBytesConfig
+
+        bnb = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_compute_dtype=dtype,
+        )
+        model = AutoModelForCausalLM.from_pretrained(
+            p.model, quantization_config=bnb, torch_dtype=dtype, device_map={"": 0}
+        )
+        model = prepare_model_for_kbit_training(
+            model, use_gradient_checkpointing=p.get("grad_checkpointing", False)
+        )
+    else:
+        model = AutoModelForCausalLM.from_pretrained(p.model, torch_dtype=dtype)
     if p.get("grad_checkpointing", False):
         model.gradient_checkpointing_enable()
         model.config.use_cache = False
