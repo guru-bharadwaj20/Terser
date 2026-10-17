@@ -122,7 +122,10 @@ def build_service(cfg: dict[str, Any], metrics: ServiceMetrics | None = None) ->
     quality = None
     if q.get("base_url") and q.get("model"):
         quality = OpenAICompatibleRewriter(
-            q["base_url"], q["model"], timeout_s=float(q.get("http_timeout_s", 2.0))
+            q["base_url"],
+            q["model"],
+            timeout_s=float(q.get("http_timeout_s", 2.0)),
+            prompt_format=str(q.get("prompt_format", "chat")),
         )
     gate: Gate | None = OnnxGate(resolve_path(cfg["gate_onnx"])) if cfg.get("gate_onnx") else None
     if gate is not None and "gate_threshold" not in cfg:

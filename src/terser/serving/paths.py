@@ -115,24 +115,55 @@ class FastPath:
 
 
 class OpenAICompatibleRewriter:
-    """Quality path: the generative rewriter served by vLLM's OpenAI-compatible API."""
+    """Quality path: the generative rewriter served by vLLM's OpenAI-compatible API.
+
+    ``prompt_format="sft"`` sends the SFT training format of :mod:`terser.models.rewriter.train`
+    (``<prompt>`` + :data:`SFT_SEP` as a raw completion; the server stops at EOS), which is what
+    the Phase 8 rungs were trained on. ``"chat"`` sends an instruction as a system message, for
+    a zero-shot instruct model.
+    """
 
     SYSTEM = (
         "Rewrite the user's prompt to use as few tokens as possible while keeping every "
         "requirement, constraint, code block and piece of data. Output only the rewritten prompt."
     )
+    SFT_SEP = "\n### Rewrite:\n"
 
     def __init__(
-        self, base_url: str, model: str, timeout_s: float = 2.0, max_tokens: int = 512
+        self,
+        base_url: str,
+        model: str,
+        timeout_s: float = 2.0,
+        max_tokens: int = 512,
+        prompt_format: str = "chat",
     ) -> None:
+        if prompt_format not in ("chat", "sft"):
+            raise ValueError(f"prompt_format must be 'chat' or 'sft', got {prompt_format!r}")
         self.base_url = base_url.rstrip("/")
         self.model = model
         self.timeout_s = timeout_s
         self.max_tokens = max_tokens
+        self.prompt_format = prompt_format
 
     def __call__(self, prompt: str, target: str) -> RewriteResult:
         import httpx
 
+        if self.prompt_format == "sft":
+            sft: dict[str, Any] = {
+                "model": self.model,
+                "temperature": 0.0,
+                "max_tokens": self.max_tokens,
+                "prompt": prompt + self.SFT_SEP,
+            }
+            resp = httpx.post(f"{self.base_url}/completions", json=sft, timeout=self.timeout_s)
+            resp.raise_for_status()
+            data = resp.json()
+            usage = data.get("usage") or {}
+            return RewriteResult(
+                str(data["choices"][0]["text"]).strip(),
+                int(usage.get("prompt_tokens", 0)),
+                int(usage.get("completion_tokens", 0)),
+            )
         body: dict[str, Any] = {
             "model": self.model,
             "temperature": 0.0,
