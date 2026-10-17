@@ -48,3 +48,6 @@ Thumbs.db
 
 # Benchmark release builds (row 12.11): packaged from DVC data, never committed
 /release/
+
+# Phase 12 results: gate-score cache (rebuilt by terser.phase12.results)
+reports/.*_gate_cache.json
