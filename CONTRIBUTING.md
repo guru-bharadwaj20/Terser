@@ -701,7 +701,7 @@ quality monitoring.
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
 | 11.1.1 | MLOps overview ADR | Lifecycle diagram + Terser-specific production challenges: judge cost, tokenizer drift, silent over-compression, latency budget, training/serving skew | `docs/decisions/ADR-0010-mlops.md` | ✅ |
-| 11.1.2 | Full DVC pipeline | `collect → casualise → candidates → respond → judge → label → features → split → stratify` | `dvc repro` end to end | ❌ |
+| 11.1.2 | Full DVC pipeline | `collect → casualise → candidates → respond → judge → label → features → split → stratify` | `dvc repro` end to end | ✅ |
 | 11.1.3 | Shared feature code | One `terser.features` used offline and online | Parity test: 100/100 prompts identical | ✅ |
 | 11.1.4 | Data validation | pandera schemas: nulls, token-ratio ranges, category balance | Fails on a corrupted fixture | ✅ |
 
@@ -872,7 +872,7 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 | 4 | CNN parameter calculation, max and avg pooling | 8.2.2, 8.2.3 | ✅ |
 | 4 | Hyperparameter tuning: Grid, Random, Bayesian optimisation | 3.6.4, 10.2, 10.5 | ✅ |
 | 4 | MLOps overview, ML lifecycle and production challenges | 0.3.4, 11.1.1 | ✅ |
-| 4 | Data and feature pipelines | 2.1.7, 11.1 | ❌ |
+| 4 | Data and feature pipelines | 2.1.7, 11.1 | ✅ |
 | 4 | Experiment tracking and model versioning | 0.2.4, 0.2.5, 11.2 | ✅ |
 | 4 | Model deployment and serving | 11.3 | ✅ |
 | 4 | CI/CD/CT for ML systems | 0.2.9, 11.4 | ❌ |
@@ -922,10 +922,10 @@ which were not, and why.
 | 8 — CNN and Rewriter | Vivian | 14 | 5 | 15 | ❌ |
 | 9 — Reinforcement Learning | Vivian | 7 | 2 | 7 | ❌ |
 | 10 — HPO | Vivian | 5 | 4 | 7 | ❌ |
-| 11 — MLOps | Vivian | 25 | 7 | 27 | ❌ |
+| 11 — MLOps | Vivian | 25 | 7 | 28 | ❌ |
 | 12 — Final Evaluation | Vivian | 11 | — | 0 | ❌ |
 | 13 — Documentation | Guru | 6 | — | 4 | ❌ |
-| **Total** | | **214** | **60** | **223** | ❌ |
+| **Total** | | **214** | **60** | **224** | ❌ |
 
 Stretch rows are not counted.
 
@@ -933,7 +933,7 @@ Stretch rows are not counted.
 
 | Owner | Hardware | Phases | Rows | Done | Remaining |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 171 | 43 |
+| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 172 | 42 |
 | Guru | 1 × RTX 4500 Ada (24 GB) | 0, 1, 13 | 60 | 52 | 8 |
 
 Each phase has one owner, who runs it end to end, including its checkpoint.
