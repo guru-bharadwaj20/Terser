@@ -103,7 +103,7 @@ The full per-component tables are in each run's `reports/monitoring/input_drift_
 | B | [input_drift_train_vs_val_code.html](monitoring/input_drift_train_vs_val_code.html) | [json](monitoring/input_drift_train_vs_val_code.evidently.json) | [json](monitoring/input_drift_train_vs_val_code.json) · [md](monitoring/input_drift_train_vs_val_code.md) |
 | C | [input_drift_train_vs_real_slice.html](monitoring/input_drift_train_vs_real_slice.html) | [json](monitoring/input_drift_train_vs_real_slice.evidently.json) | [json](monitoring/input_drift_train_vs_real_slice.json) · [md](monitoring/input_drift_train_vs_real_slice.md) |
 
-The HTML files are tracked with DVC (`reports/monitoring/*.html.dvc`; `dvc pull` fetches them). Each Evidently HTML file is about 4.8 MB, almost all of it Evidently's inlined JS bundle; the data
+The HTML links above work only after `dvc pull`: the files are tracked with DVC (`reports/monitoring/*.html.dvc`) and are not in git. Each Evidently HTML file is about 4.8 MB, almost all of it Evidently's inlined JS bundle; the data
 itself is about 5 KB (see the JSON snapshot). The CLI deletes the HTML and keeps only the JSON
 when a file goes over 5 MB.
 

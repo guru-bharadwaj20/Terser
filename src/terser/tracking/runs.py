@@ -27,6 +27,7 @@ import mlflow
 from mlflow import MlflowClient
 from mlflow.entities import Run
 from mlflow.entities.model_registry import ModelVersion
+from mlflow.exceptions import MlflowException
 
 REPO_ROOT: Path = Path(__file__).resolve().parents[3]
 REQUIRED_TAGS: tuple[str, ...] = ("phase", "row", "task", "hardware", "data_hash", "git_sha")
@@ -156,5 +157,12 @@ def promote(name: str, version: int | str, stage_or_alias: str) -> None:
         if s.lower() in current and s != stage:
             client.delete_registered_model_alias(name, s.lower())
     if stage != "None":
+        # The alias moves here: its previous holder no longer has this stage.
+        try:
+            previous = client.get_model_version_by_alias(name, stage.lower()).version
+        except MlflowException:
+            previous = None
+        if previous is not None and str(previous) != version:
+            client.set_model_version_tag(name, str(previous), "stage", "None")
         client.set_registered_model_alias(name, stage.lower(), version)
     client.set_model_version_tag(name, version, "stage", stage)

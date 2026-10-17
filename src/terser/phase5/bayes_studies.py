@@ -11,7 +11,7 @@
   threshold labels (C5.5).
 
 Each takes in-memory arrays; the real inputs (span texts, Phase 1 hypotheses' predictions, judge
-scores) come from Phase 2 / 3 artefacts that do not exist yet.
+scores) come from the Phase 2 / 3 artefacts and are wired up in :mod:`terser.phase5.real_studies`.
 """
 
 from __future__ import annotations

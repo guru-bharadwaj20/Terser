@@ -181,20 +181,25 @@ def input_digest(paths: Sequence[str], root: Path = REPO_ROOT) -> dict[str, str]
 
 
 def llm_cache_key(context: TaskRunContext | None, parameters: Mapping[str, Any]) -> str:
-    """Cache key of an :func:`llm_step`: step name, command and input content hashes.
+    """Cache key of an :func:`llm_step`: step name, command, input hashes, absent outputs.
 
     A dry run keys on the paths only (no hashing of large inputs) and never shares a key with a
-    real run.
+    real run. An ``outputs`` path that does not exist changes the key, so a deleted output is
+    regenerated instead of the step reporting ``Cached``; once it is back the key is the same as
+    before and the cache hits again.
     """
     del context
     dry_run = bool(parameters.get("dry_run", False))
     paths = [str(p) for p in parameters.get("inputs", ())]
+    absent = sorted(str(p) for p in parameters.get("outputs", ()) if not (REPO_ROOT / p).exists())
     payload = {
         "name": parameters["name"],
         "cmd": [str(c) for c in parameters["cmd"]],
         "dry_run": dry_run,
         "inputs": sorted(paths) if dry_run else input_digest(paths),
     }
+    if absent and not dry_run:
+        payload["absent_outputs"] = absent
     blob = json.dumps(payload, sort_keys=True).encode()
     return "terser-llm-" + hashlib.sha256(blob).hexdigest()
 
@@ -209,9 +214,17 @@ def llm_cache_key(context: TaskRunContext | None, parameters: Mapping[str, Any])
     on_failure=[notify_failure],
 )
 def llm_step(
-    name: str, cmd: Sequence[str], inputs: Sequence[str] = (), dry_run: bool = False
+    name: str,
+    cmd: Sequence[str],
+    inputs: Sequence[str] = (),
+    dry_run: bool = False,
+    outputs: Sequence[str] = (),
 ) -> StepResult:
-    """Run one LLM-calling CLI step; cached on the content of ``inputs``."""
+    """Run one LLM-calling CLI step.
+
+    ``inputs`` and ``outputs`` are not read here: they only feed :func:`llm_cache_key`, which
+    caches the step on the content of ``inputs`` and re-runs it when an output is missing.
+    """
     if dry_run:
         return _plan(name, "llm", cmd)
     return StepResult(name, "llm", tuple(cmd), executed=True, output=run_command(cmd))

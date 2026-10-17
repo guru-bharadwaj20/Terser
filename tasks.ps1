@@ -75,8 +75,8 @@ switch ($Task) {
             Write-Host "No dvc.yaml pipeline yet; nothing to reproduce."
         }
     }
-    "train-classical" { Write-Host "train-classical: not available until Phase 3." }
-    "eval"            { Write-Host "eval: not available until Phase 3." }
+    "train-classical" { Invoke-Step $Py @("-m", "terser.phase3.studies", "--help") }
+    "eval"            { Write-Host "eval: the final evaluation is python -m terser.phase12.results --split test ... (see its --help); it needs the row 12.1 unlock." }
     "mlflow-ui" {
         Invoke-Step $Py @("-m", "mlflow", "ui", "--backend-store-uri", "./mlruns")
     }

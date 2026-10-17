@@ -107,6 +107,7 @@ def test_flows_registered() -> None:
 
 _CLASSICAL = [
     ("unprotect_outputs", "shell"),
+    ("oracle", "shell"),
     ("pair_features", "shell"),
     ("fast_path_onnx", "shell"),
 ]
@@ -117,6 +118,7 @@ _DATA = [
     ("dvc:label_subset", "shell"),
     ("dvc:candidates", "llm"),
     ("dvc:token_counts", "shell"),
+    ("unprotect:responses", "shell"),
     ("respond:qwen2.5-7b", "llm"),
     ("respond:phi3.5-mini", "llm"),
     ("unprotect:labels", "shell"),
@@ -422,6 +424,16 @@ def test_llm_cache_key(tmp_path: Path) -> None:
     assert real != llm_cache_key(None, {**params, "dry_run": False})
 
 
+def test_llm_cache_key_changes_while_an_output_is_missing(tmp_path: Path) -> None:
+    out = tmp_path / "labels.jsonl"
+    params: dict[str, Any] = {"name": "judge", "cmd": ["m"], "inputs": [], "outputs": [str(out)]}
+    missing = llm_cache_key(None, params)
+    out.write_text("x")
+    present = llm_cache_key(None, params)
+    assert missing != present
+    assert present == llm_cache_key(None, {**params, "outputs": []})
+
+
 # flow behaviour (real mode, heavy steps faked) ---------------------------------------------------
 
 
@@ -528,7 +540,9 @@ class _CT:
         self.state = tmp_path / "ct_state.json"
         self.report = _val_report(tmp_path)
 
-        def fake_llm(name: str, cmd: list[str], inputs: Any = (), dry_run: bool = False) -> Any:
+        def fake_llm(
+            name: str, cmd: list[str], inputs: Any = (), dry_run: bool = False, **_: Any
+        ) -> Any:
             self.llm.append(name)
             return StepResult(name, "llm", tuple(cmd), executed=True, output="cached")
 
@@ -618,7 +632,7 @@ def test_ct_flow_drift_alert_runs_full_cycle_and_registers_staging(
     ]
     work = ct.work()
     stages = [c[-1] for c in work if c[:2] == ["dvc", "repro"]]
-    assert stages == ["dedupe", "split", "label_subset", "token_counts"]
+    assert stages == ["dedupe", "split", "label_subset", "token_counts", "oracle"]
     modules = [c[2] for c in work if c[0] == "python"]
     assert modules == [
         "terser.phase3.build_features",

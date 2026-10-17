@@ -87,6 +87,8 @@ def test_register_and_promote(store: str) -> None:
     promote("m", v1.version, "Production")
     assert client.get_model_version_by_alias("m", "production").version == v1.version
     promote("m", v2.version, "Production")
+    # The alias moved: v1 no longer claims Production in its stage tag.
+    assert client.get_model_version("m", v1.version).tags["stage"] == "None"
     promote("m", v1.version, "Archived")
     assert client.get_model_version_by_alias("m", "production").version == v2.version
     mv1 = client.get_model_version("m", v1.version)

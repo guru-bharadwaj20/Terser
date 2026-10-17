@@ -1,5 +1,5 @@
 # Row 8.3.3 (rung 1): Qwen2.5-0.5B full fine-tune, bf16, AdamW, gradient checkpointing.
-# Queued: gpu_queue/sft-qwen0.5b-full.yaml. Data: row 8.3.1 SFT split (not yet built).
+# Queued: gpu_queue/sft-qwen0.5b-full.yaml. Data: row 8.3.1 SFT split (data/processed/sft, DVC-tracked).
 name: sft_qwen05b_full
 phase: 8
 row: "8.3.3"

@@ -17,8 +17,10 @@ Search space (:data:`SPACE`)
 log-uniform [5e-5, 5e-4]; ``warmup_frac`` [0, 0.1] of the steps, with linear warmup then linear
 decay (``schedule: linear`` in :func:`terser.models.rewriter.train.train_sft`); ``epochs`` {1, 2,
 3}, mapped to ``steps = ceil(epochs x n_train / batch_size)`` (1262 pairs, batch 4: 316 / 631 /
-947 steps). Trial 0 is the untuned rung's settings inside the space (r 16, alpha 32, lr 2e-4,
-no warmup, 3 epochs) so the study has its own reference point.
+947 steps). Trial 0 enqueues the untuned rung's hyperparameters (r 16, alpha 32, lr 2e-4, no
+warmup, 3 epochs), but it trains with this study's ``schedule: linear``, so it is not a
+reproduction of the untuned rung (59.5% savings / 48.1% judged preserved vs 35.0% / 57.0% for
+``sft15v2``); the untuned rung itself is the reference.
 
 Stage 1 (``run``): Optuna TPE + MedianPruner
 --------------------------------------------
@@ -285,13 +287,15 @@ def fit_calibration(scores: Sequence[float], preserved: Sequence[bool]) -> Calib
 def estimate_preservation(
     rewrites: Sequence[Mapping[str, Any]], scores: Sequence[float], cal: Calibration
 ) -> dict[str, Any]:
-    """Proxy preservation: fallbacks count 1, other rewrites ``cal(gate score)``."""
+    """Proxy preservation: fallbacks and identity rewrites count 1, others ``cal(gate score)``."""
     if len(rewrites) != len(scores):
         raise ValueError("one score per rewrite")
     probs = cal(scores)
     by_cat: dict[str, list[float]] = defaultdict(list)
     for w, p in zip(rewrites, probs, strict=True):
-        by_cat[str(w["category"])].append(1.0 if w["fell_back"] else float(p))
+        # A fallback or an identity rewrite is preserved by construction.
+        same = w["fell_back"] or ("rewrite" in w and w["rewrite"] == w.get("prompt"))
+        by_cat[str(w["category"])].append(1.0 if same else float(p))
     flat = [x for xs in by_cat.values() for x in xs]
     per_cat = {c: float(np.mean(xs)) for c, xs in sorted(by_cat.items())}
     return {
@@ -1078,12 +1082,18 @@ def _markdown(r: Mapping[str, Any]) -> str:
         f"{'-' if pgain is None else f'{pgain:+.1%}'}.",
         "",
     ]
-    if v["verdict"] != "pass":
+    if v["verdict"] != "pass" and not v["chosen_c8_3"]:
         lines += [
             "Documented plateau: no judged trial reaches the C8.3 box (median savings >= 25%, "
             "preserved >= 92% overall and >= 85% per category). The table above is the "
             "evidence: LoRA rank, alpha, learning rate, warmup and epochs move the "
             "savings/preservation trade-off but do not lift preservation to 0.92.",
+            "",
+        ]
+    elif v["verdict"] != "pass":
+        lines += [
+            "Documented plateau: the chosen trial passes C8.3, but so does the untuned rung, and "
+            "the tuned savings gain is below the 1 pp C10.3 requires.",
             "",
         ]
     if reg:

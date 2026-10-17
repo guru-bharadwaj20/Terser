@@ -147,7 +147,7 @@ Every task row in CONTRIBUTING.md carries one or more tags.
 | :--- | :--- | :--- |
 | `CPU` | Runs on either dev machine | Start immediately |
 | `LLM` | Needs text generation from a local open-source model behind an OpenAI-compatible server (`terser.llm` provider `local`). No paid APIs | Build the code now and smoke-test it on CPU with a tiny model (Qwen2.5-0.5B/1.5B via Ollama or llama.cpp), within the phase token cap in `configs/budget.yaml`. Results that feed labels, metrics or reports come only from GPU-served models (an RTX 4090 worker, or the RTX 4500 Ada) |
-| `GPU` | Needs a 24 GB Ada-class card: `worker-1`, `worker-2`, or the RTX 4500 Ada once connected | Write the code, smoke-test on CPU with `configs/model/tiny.yaml`, add a `gpu_queue/` job. The row stays ❌ until the job has run on a card |
+| `GPU` | Needs a 24 GB Ada-class card: `worker-1`, `worker-2`, or the RTX 4500 Ada once connected | Write the code, smoke-test on CPU with a tiny stand-in model (e.g. `configs/experiment/grpo_tiny.yaml`), add a `gpu_queue/` job. The row stays ❌ until the job has run on a card |
 | `CPU→GPU` | Reduced scale on CPU now, full scale on a GPU host | Run the CPU version, record it as reduced-scale, and queue the full-scale job |
 
 ---

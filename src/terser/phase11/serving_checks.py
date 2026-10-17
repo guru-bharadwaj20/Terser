@@ -49,6 +49,10 @@ async def _load(url: str, prompts: list[str], rps: float, seconds: float) -> dic
     import httpx
 
     n = int(rps * seconds)
+    if len(prompts) < n:  # the report says "distinct": repeats would be cache hits
+        raise ValueError(
+            f"need {n} distinct prompts for {rps:g} RPS x {seconds:g} s, got {len(prompts)}"
+        )
     lat: list[float] = []
     errors = 0
     async with httpx.AsyncClient(timeout=10.0) as client:
@@ -154,7 +158,9 @@ def check_fallback(prompts: list[str]) -> dict[str, Any]:
             if expect == "original":
                 ok += r.rewrite == p + f" #{i}"
             else:
-                ok += r.fallback_used and r.path in ("fast", "original")
+                ok += (
+                    r.fallback_used and r.path == "fast"
+                )  # "original" means the fast path failed too
         rows.append(
             {
                 "scenario": name,

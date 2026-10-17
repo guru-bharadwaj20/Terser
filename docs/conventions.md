@@ -140,16 +140,16 @@ Hydra config groups live in `configs/<group>/<name>.yaml`. Names are `snake_case
 | Group | Examples |
 | :--- | :--- |
 | `hardware` | `cpu.yaml`, `rtx4500ada.yaml`, `rtx4090.yaml`, `auto.yaml` |
-| `model` | `tiny.yaml`, `qwen05b.yaml`, `textcnn.yaml` |
-| `experiment` | `sft_qwen05b_full.yaml`, `gate_lgbm_grid.yaml` |
-| `data` | `pilot.yaml`, `full.yaml` |
+| `model` | `p3_knn.yaml`, `p3_lr.yaml`, `p3_tree.yaml` |
+| `experiment` | `sft_qwen05b_full.yaml`, `grpo_tiny.yaml`, `p1_pilot_labels.yaml` |
+| `serving` | `default.yaml`, `fast_onnx.yaml` |
 | (root) | `budget.yaml` |
 
 Overrides are passed on the command line; no hard-coded paths or hyperparameters in code:
 
 ```powershell
 python -m terser.models.rewriter.train experiment=sft_qwen05b_full hardware=rtx4500ada
-python -m terser.models.classical.train experiment=gate_lgbm_grid hardware=cpu seed=1
+python -m terser.models.rl.grpo experiment=grpo_tiny hardware=cpu
 ```
 
 ## 10. GPU queue job ids
