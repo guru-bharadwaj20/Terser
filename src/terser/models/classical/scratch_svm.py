@@ -10,7 +10,8 @@ Derivation: ``docs/derivations/svm.md`` §3-5. With labels ``y_i in {-1, +1}`` a
 ``G a <= h`` and ``A a = b``, so ``P = (y y^T) * K``, ``q = -1``, ``A = y^T``, ``b = 0`` and ``G``
 stacks ``-I`` (and ``+I`` with ``h = C`` for the soft margin).
 
-Support vectors are the points with ``a_i > sv_tol``. For the linear kernel the weight vector is
+Support vectors are the points with ``a_i > sv_tol * max(a)`` (a threshold relative to the
+largest multiplier). For the linear kernel the weight vector is
 ``w = sum_i a_i y_i x_i``. The bias is averaged over *margin* support vectors (``a_i < C``), for
 which the KKT conditions give ``y_i f(x_i) = 1`` exactly: ``b = mean(y_i - sum_j a_j y_j K_ji)``.
 The geometric margin width is ``2 / ||w||`` (row 4.4.1).

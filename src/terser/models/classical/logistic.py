@@ -81,6 +81,7 @@ class GDLogisticRegression:
         w = np.zeros(Xa.shape[1])
         b = 0.0
         self.loss_history_ = []
+        it = 0  # max_iter = 0 leaves the zero initialisation
         for it in range(1, self.max_iter + 1):
             gw, gb = self._gradient(Xa, ya, w, b)
             w -= self.lr * gw
