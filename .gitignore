@@ -42,3 +42,6 @@ Thumbs.db
 
 # Local server and job logs
 /logs/
+
+# Phase 12 val dry run of the final-evaluation tooling (never a result)
+/reports/_val_dryrun/
