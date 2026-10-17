@@ -62,6 +62,9 @@ jobs:
       - name: Mypy
         run: mypy src
 
+      - name: CPU smoke training (row 8.3.2)
+        run: pytest tests/rewriter/test_train_tiny.py -q
+
       - name: DVC pipeline dry run
         # Raw data is not pulled in CI; --allow-missing still checks the DAG and stage hashes.
         run: dvc repro --dry --allow-missing
