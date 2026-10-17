@@ -718,7 +718,7 @@ quality monitoring.
 | :---: | :--- | :--- | :--- | :---: |
 | 11.3.1 | API | FastAPI `POST /rewrite {prompt, target, mode: fast\|quality}` → `{rewrite, tokens_before, tokens_after, gate_score, fallback_used}` | OpenAPI docs + request/response examples | ✅ |
 | 11.3.2 | Fast path | Span tagger + gate exported to ONNX Runtime | Runs with no GPU | ✅ |
-| 11.3.3 | Quality path | Rewriter on vLLM with continuous batching + gate + fallback | Endpoint live on a GPU worker | ❌ |
+| 11.3.3 | Quality path | Rewriter on vLLM with continuous batching + gate + fallback | Endpoint live on a GPU worker | ✅ |
 | 11.3.4 | Caching | LRU keyed on normalised prompt hash + target | Warm-hit latency measured | ✅ |
 | 11.3.5 | Timeout fallback | Quality path over budget ⇒ fast-path result | Fault-injection test | ✅ |
 | 11.3.6 | Net-savings accounting | Per request: price_T × (tokens_before − tokens_after) − rewriter_cost | Logged per request | ✅ |
@@ -876,7 +876,7 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 | 4 | Experiment tracking and model versioning | 0.2.4, 0.2.5, 11.2 | ✅ |
 | 4 | Model deployment and serving | 11.3 | ❌ |
 | 4 | CI/CD/CT for ML systems | 0.2.9, 11.4 | ❌ |
-| 4 | Inference systems | 11.3.2–11.3.6 | ❌ |
+| 4 | Inference systems | 11.3.2–11.3.6 | ✅ |
 | 4 | Monitoring, drift and observability | 11.5 | ❌ |
 | 4 | ML orchestration | 11.6 | ✅ |
 
@@ -922,10 +922,10 @@ which were not, and why.
 | 8 — CNN and Rewriter | Vivian | 14 | 5 | 15 | ❌ |
 | 9 — Reinforcement Learning | Vivian | 7 | 2 | 7 | ❌ |
 | 10 — HPO | Vivian | 5 | 4 | 7 | ❌ |
-| 11 — MLOps | Vivian | 25 | 7 | 24 | ❌ |
+| 11 — MLOps | Vivian | 25 | 7 | 25 | ❌ |
 | 12 — Final Evaluation | Vivian | 11 | — | 0 | ❌ |
 | 13 — Documentation | Guru | 6 | — | 4 | ❌ |
-| **Total** | | **214** | **60** | **220** | ❌ |
+| **Total** | | **214** | **60** | **221** | ❌ |
 
 Stretch rows are not counted.
 
@@ -933,7 +933,7 @@ Stretch rows are not counted.
 
 | Owner | Hardware | Phases | Rows | Done | Remaining |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 168 | 46 |
+| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 169 | 45 |
 | Guru | 1 × RTX 4500 Ada (24 GB) | 0, 1, 13 | 60 | 52 | 8 |
 
 Each phase has one owner, who runs it end to end, including its checkpoint.
