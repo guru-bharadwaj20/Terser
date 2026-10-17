@@ -60,7 +60,8 @@ flowchart LR
 
 Orchestration is Prefect (11.6): `data_flow`, `train_classical_flow`, `train_rewriter_flow`
 (which only *submits* to `gpu_queue`, never blocks on a GPU), `evaluate_flow`, `promote_flow`,
-`drift_flow`. Every LLM step is cached (`terser.llm` response cache), so a retry re-reads rather
+`drift_flow`, and two added later: `ct_flow` (continuous training) and `canary_flow`
+(`src/terser/flows/flows.py`). Every LLM step is cached (`terser.llm` response cache), so a retry re-reads rather
 than re-generates.
 
 ### Terser-specific production challenges and the control for each
