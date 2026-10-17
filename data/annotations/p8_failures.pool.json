@@ -1,0 +1,29 @@
+{
+  "n_degraded": 144,
+  "n_prompts": 108,
+  "by_category": {
+    "code": 43,
+    "creative": 23,
+    "explain": 10,
+    "fact": 22,
+    "reason": 17,
+    "transform": 29
+  },
+  "by_target": {
+    "Qwen/Qwen2.5-7B-Instruct": 61,
+    "microsoft/Phi-3.5-mini-instruct": 83
+  },
+  "rungs": [
+    "sft3b"
+  ],
+  "n": 100,
+  "seed": 0,
+  "sample_by_category": {
+    "code": 30,
+    "creative": 16,
+    "explain": 7,
+    "fact": 15,
+    "reason": 12,
+    "transform": 20
+  }
+}
