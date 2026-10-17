@@ -75,7 +75,7 @@ def test_build_attributes_ledger_tokens_and_reservations(tmp_path: Path) -> None
             "output_tokens": 99,
         },
         {
-            "timestamp": "2026-10-17T09:00:00+00:00",
+            "timestamp": "2026-10-20T09:00:00+00:00",
             "model": "Qwen/Qwen2.5-7B-Instruct",
             "input_tokens": 5,
             "output_tokens": 7,
@@ -95,5 +95,33 @@ def test_build_attributes_ledger_tokens_and_reservations(tmp_path: Path) -> None
     assert abs(p2["energy_active_kwh"] - 600 / 3600 * 0.210) < 1e-9
     assert report["ledger"]["after_cutoff_output_tokens"] == 7
     assert report["ledger"]["unattributed_by_model"] == {"microsoft/Phi-3.5-mini-instruct": 99}
+    # the seed-run stages have no logs here: pending, not counted, later calls held back
+    pend = {e["id"] for e in report["excluded"]}
+    assert "p12-seed-train-s1" in pend and "p12-seed-judge" in pend
+    assert all(not s["id"].startswith("p12-seed") for s in report["stages"])
     md = render_markdown(report)
-    assert "# Compute accounting (row 12.10)" in md and "Excluded (pending)" in md
+    assert "# Compute accounting (row 12.10)" in md and "## Pending" in md
+
+
+def test_pending_stage_counted_once_complete(tmp_path: Path) -> None:
+    logs = tmp_path / "logs"
+    logs.mkdir()
+    train = logs / "p12_train_sft3bv2_s1.log"
+    train.write_text("[2026-10-20 01:38:03,563][httpx][INFO] - GET\n", encoding="utf-8")
+    assert "p12-seed-train-s1" in {e["id"] for e in build(tmp_path)["excluded"]}
+    train.write_text(
+        "[2026-10-20 01:38:03,563][httpx][INFO] - GET\n"
+        "[2026-10-20 02:38:03,000][__main__][INFO] - trained Qwen/Qwen2.5-3B for 1000 steps\n",
+        encoding="utf-8",
+    )
+    report = build(tmp_path)
+    st = next(s for s in report["stages"] if s["id"] == "p12-seed-train-s1")
+    assert st["active_s"] == 3600.0
+    assert "p12-seed-train-s1" not in {e["id"] for e in report["excluded"]}
+    p12 = next(p for p in report["phases"] if p["phase"] == 12)
+    assert p12["reserved_s"] >= 3600.0
+
+
+def test_single_line_and_nested_summaries() -> None:
+    text = 'x\n{"rewrite": {"wall_seconds": 2}}\n'
+    assert json_blobs(text) == [{"rewrite": {"wall_seconds": 2}}]
