@@ -773,7 +773,7 @@ quality?", on the untouched test split.
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 12.1 | Test-split unlock | Logged, one-time event | Access log entry | ❌ |
+| 12.1 | Test-split unlock | Logged, one-time event | Access log entry | ✅ |
 | 12.2 | Master results table | Every system (original, best operator, Q-learning policy, HMM, GBM tagger+gate, TextCNN+gate, SFT rewriter, LLMLingua-2, zero-shot LLM) × savings × preservation × net savings × latency | `reports/final_results.md` | ❌ |
 | 12.3 | Stratified reporting | Per target × category × high-risk cluster, and separately on the real-prompt slice (2.1.8) | Tables | ❌ |
 | 12.4 | Statistical rigour | 95% bootstrap CIs (1,000 resamples); ≥ 3 seeds; McNemar between top systems | Error bars on every headline number | ❌ |
