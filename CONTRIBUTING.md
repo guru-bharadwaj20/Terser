@@ -779,7 +779,7 @@ quality?", on the untouched test split.
 | 12.4 | Statistical rigour | 95% bootstrap CIs (1,000 resamples); ≥ 3 seeds; McNemar between top systems | Error bars on every headline number | ❌ |
 | 12.6 | **Ablation matrix** | Remove gate / fallback / HPO one at a time; generative rewriter vs operator-only | 4-row ablation table | ✅ |
 | 12.7 | Net savings by prompt length | Savings minus rewriter cost across length percentiles | Figure | ✅ |
-| 12.8 | Error taxonomy | 200 degraded test cases categorised | `reports/final_errors.md` | ❌ |
+| 12.8 | Error taxonomy | 200 degraded test cases categorised | `reports/final_errors.md` | ✅ |
 | 12.9 | Qualitative gallery | Best and worst casual → rewrite → output pairs | `reports/gallery.md` | ✅ |
 | 12.10 | Compute accounting | Generated tokens, GPU-hours, energy per phase; GPU-seconds per labelled pair (estimate vs actual) | Table | ❌ |
 | 12.11 | Benchmark release | Prompts, candidates, labels, rubrics, eval code (licence permitting) | Release tag + data card | ❌ |
