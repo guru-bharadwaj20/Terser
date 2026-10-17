@@ -1,0 +1,33 @@
+# Stretch S-9.3 (rows 9.3.1-9.3.4): GRPO on the 1.5B rewriter. C8.3 failed for every rung, so the
+# start is the best-savings val adapter, row 10.7 hpo08 (54.3% median savings vs 35.0% for
+# sft15v2); it is merged into the base and is the frozen KL reference. Train split prompts only.
+# Queued: gpu_queue/grpo-qwen1.5b.yaml (driver: the p93 chain; deadline via TERSER_GRPO_DEADLINE).
+name: grpo_qwen15b_lora
+phase: 9
+row: "9.3.1"
+task: rewriter_grpo
+params:
+  model: Qwen/Qwen2.5-1.5B-Instruct
+  init_adapter: ${paths.root}/models/rewriter/sft-qwen1.5b-lora-hpo
+  lora: {r: 16, alpha: 32}
+  grad_checkpointing: true
+  device: cuda
+  data: ${paths.data_dir}/processed/sft_v2/train.jsonl
+  limit: null
+  max_prompt_tokens: 768
+  max_new_tokens: 512
+  steps: 3000            # upper bound; the deadline normally ends the run first
+  prompts_per_step: 4
+  group_size: 8
+  micro_batch: 8
+  lr: 1.0e-5
+  beta: 0.04
+  temperature: 1.0
+  gate_onnx: ${paths.root}/models/fast/gate.onnx
+  serving_config: ${paths.root}/configs/serving/fast_onnx.yaml
+  audit_every: 50
+  save_every: 100
+  deadline_epoch: null
+  mlflow: true
+  mlflow_experiment: terser-p9-grpo
+  output_dir: ${paths.root}/models/rewriter/grpo-qwen1.5b

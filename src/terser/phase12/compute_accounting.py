@@ -38,8 +38,14 @@ Measures:
   upper bound on board energy; a 60 s ``nvidia-smi`` sample taken during an (excluded) QLoRA run
   is kept in ``reports/compute_power_sample.csv`` and reported as a sensitivity.
 
-In-progress v2 rewriter runs (``*_v2`` training, ``sft15v2`` generation, 7B QLoRA) are excluded
-and listed as pending.
+* **Optuna** ``experiments/p10_rewriter_hpo/optuna.db``: Phase 10 rewriter-HPO trial durations.
+
+Coverage: Phases 1, 2, 7, 8 (rungs 1-3, v2 rungs incl. 7B QLoRA, q7 quality chain), 10 (rewriter
+HPO), 11 (quality-path benchmarks, canary) and 12 (test evaluation). Ledger calls are attributed
+by model and time window, never by ledger bucket (Phase 12 respond and the first test judge were
+charged to ``phase2``). Stages with ``pending_since`` (the row 12.4 seed run) are counted only
+once their logs are complete; until then they are listed as pending and later ledger calls are
+held back.
 
 CLI::
 
@@ -82,9 +88,10 @@ ROOT = Path(__file__).resolve().parents[3]
 # table; nvidia-smi power.limit in reports/compute_power_sample.csv). RTX 4090: 450 W (NVIDIA
 # reference board power; the worker's limit was not recorded).
 BOARD_POWER_W: dict[str, float] = {"rtx4500ada": 210.0, "rtx4090": 450.0}
-# Ledger calls at or after this instant belong to the in-progress v2 chain (first v2 training
-# log line 2026-10-17 08:23:38; last v1 call, the augmentation judge, 08:11:53).
-LEDGER_CUTOFF = "2026-10-17T08:20:00"
+# Start of the row 12.4 seed run (logs/p12_seeds.status "start 07:07" IST = 01:37 UTC). Ledger
+# calls from the earliest ``pending_since`` of a still-pending stage on are held back; once
+# nothing is pending the whole ledger is counted.
+LEDGER_CUTOFF = "2026-10-20T01:37:00"
 BUSY_GAP_S = 300.0
 LEDGER_GRACE_S = 30.0  # ledger entries are written just after the server logs the response
 LOG_YEAR = 2026
@@ -125,6 +132,11 @@ class Stage:
     group: str = ""  # labelling round this stage belongs to (GPU-seconds per labelled pair)
     attempt: str = "final"  # "final" | "retry" (work redone or interrupted)
     note: str = ""
+    # In-progress work: UTC start of the run. The stage is counted only once ``done`` (a
+    # (path, regex) that must match) holds, or, without ``done``, once ``active`` resolves;
+    # until then it is listed as pending and ledger calls from ``pending_since`` on are held back.
+    pending_since: str | None = None
+    done: tuple[str, str] | None = None
 
 
 def _s(path: str, key: str = "wall_seconds") -> dict[str, Any]:
@@ -158,6 +170,48 @@ SESSIONS: tuple[Session, ...] = (
     Session("vllm_aug_qwen", 8, "logs/vllm_aug_qwen.log", "vllm"),
     Session("vllm_aug_phi", 8, "logs/vllm_aug_phi.log", "vllm"),
     Session("vllm_aug_judge", 8, "logs/vllm_aug_judge.log", "vllm"),
+    # Phase 8 v2 rewriter rungs (v2_chain, then the 7B QLoRA + q7 quality chain)
+    Session("sft15v2", 8, "logs/sft_qwen15b_lora_v2.log", "pylog"),
+    Session("sft3bv2", 8, "logs/sft_qwen3b_lora_v2.log", "pylog"),
+    Session("sft7bv2", 8, "logs/sft_qwen7b_qlora_v2.log", "pylog"),
+    Session("vllm_v2_qwen", 8, "logs/vllm_v2_qwen.log", "vllm"),
+    Session("vllm_v2_phi", 8, "logs/vllm_v2_phi.log", "vllm"),
+    Session("vllm_v2_judge", 8, "logs/vllm_v2_judge.log", "vllm"),
+    Session("vllm_q7_qwen", 8, "logs/vllm_q7_qwen2.5-7b.log", "vllm", "7b + hmm + rl sets"),
+    Session("vllm_q7_phi", 8, "logs/vllm_q7_phi3.5.log", "vllm", "7b + hmm + rl sets"),
+    Session("vllm_q7_judge", 8, "logs/vllm_q7_judge.log", "vllm", "7b + hmm + rl sets"),
+    # Phase 10: rewriter HPO (Optuna trials train LoRA adapters on the GPU)
+    Session(
+        "hpo_trials",
+        10,
+        "experiments/p10_rewriter_hpo/optuna.db",
+        "optuna",
+        "first trial start to last trial end",
+    ),
+    Session("vllm_hpo_qwen", 10, "logs/vllm_hpo_qwen2.5-7b.log", "vllm"),
+    Session("vllm_hpo_phi", 10, "logs/vllm_hpo_phi3.5.log", "vllm"),
+    Session("vllm_hpo_judge", 10, "logs/vllm_hpo_judge.log", "vllm"),
+    # Phase 11: quality-path load benchmarks and the canary
+    Session("vllm_qb_3b", 11, "logs/vllm_qb_3b.log", "vllm"),
+    Session("vllm_qb_15v2", 11, "logs/vllm_qb_15v2.log", "vllm"),
+    Session("vllm_qraw_3b", 11, "logs/vllm_qraw_3b.log", "vllm"),
+    Session("vllm_qraw_15v2", 11, "logs/vllm_qraw_15v2.log", "vllm"),
+    Session("vllm_canary_rw", 11, "logs/vllm_canary_rewriter.log", "vllm"),
+    Session("vllm_canary_qwen", 11, "logs/vllm_canary_qwen2.5-7b.log", "vllm"),
+    Session("vllm_canary_phi", 11, "logs/vllm_canary_phi3.5-mini.log", "vllm"),
+    Session("vllm_canary_judge", 11, "logs/vllm_canary_judge.log", "vllm"),
+    # Phase 12: test-split evaluation
+    Session("vllm_p12_zs", 12, "logs/vllm_p12_zs.log", "vllm"),
+    Session("vllm_p12_qwen", 12, "logs/vllm_p12_qwen2.5-7b.log", "vllm"),
+    Session("vllm_p12_phi", 12, "logs/vllm_p12_phi3.5.log", "vllm"),
+    Session("vllm_p12_judge", 12, "logs/vllm_p12_judge.log", "vllm", "stopped by the token cap"),
+    Session("vllm_p12_judge2", 12, "logs/vllm_p12_judge2.log", "vllm", "resumed judge"),
+    # Phase 12 row 12.4 seed run (logs/p12_seeds.status); pending until its logs are complete
+    Session("p12s_train_s1", 12, "logs/p12_train_sft3bv2_s1.log", "pylog"),
+    Session("p12s_train_s2", 12, "logs/p12_train_sft3bv2_s2.log", "pylog"),
+    Session("vllm_p12s_qwen", 12, "logs/vllm_p12s_qwen2.5-7b.log", "vllm"),
+    Session("vllm_p12s_phi", 12, "logs/vllm_p12s_phi3.5.log", "vllm"),
+    Session("vllm_p12s_judge", 12, "logs/vllm_p12s_judge.log", "vllm"),
 )
 
 RW = "data/interim/rewrites"
@@ -329,16 +383,172 @@ STAGES: tuple[Stage, ...] = (
           labels={"kind": "summary", "path": "logs/aug_judge.log", "key": "records"},
           sessions=("vllm_aug_judge",), group="p8-aug",
           note="restarted at 05:37; wall_seconds and summary tokens cover the restarted run"),
+    # ---- Phase 8 v2: retrained rungs on sft_v2 data (logs/v2_chain.status, q7_chain.status)
+    Stage("p8-sft-1.5b-v2", 8, "8.3.4", "SFT Qwen2.5-1.5B LoRA v2, 3,000 steps",
+          active={"kind": "log_span", "paths": ["logs/sft_qwen15b_lora_v2.log"]}, tokens="none",
+          sessions=("sft15v2",)),
+    Stage("p8-sft-3b-v2", 8, "8.3.4", "SFT Qwen2.5-3B LoRA v2, 1,000 steps",
+          active={"kind": "log_span", "paths": ["logs/sft_qwen3b_lora_v2.log"]}, tokens="none",
+          sessions=("sft3bv2",)),
+    Stage("p8-sft-7b-v2", 8, "8.3.5", "SFT Qwen2.5-7B QLoRA v2, 1,000 steps",
+          active={"kind": "log_span", "paths": ["logs/sft_qwen7b_qlora_v2.log"]}, tokens="none",
+          sessions=("sft7bv2",)),
+    Stage("p8-gen-1.5b-v2", 8, "8.3.4", "val rewrites, 285 prompts (1.5B v2)",
+          active={"kind": "latency_sum", "path": f"{RW}/sft15v2.val.jsonl"}, tokens="tokenize",
+          reported_tokens={"kind": "tokenize", "path": f"{RW}/sft15v2.val.jsonl"}),
+    Stage("p8-gen-3b-v2", 8, "8.3.4", "val rewrites, 285 prompts (3B v2)",
+          active={"kind": "latency_sum", "path": f"{RW}/sft3bv2.val.jsonl"}, tokens="tokenize",
+          reported_tokens={"kind": "tokenize", "path": f"{RW}/sft3bv2.val.jsonl"}),
+    Stage("p8-gen-7b-v2", 8, "8.3.5", "val rewrites, 285 prompts (7B QLoRA v2)",
+          active={"kind": "latency_sum", "path": f"{RW}/sft7bv2.val.jsonl"}, tokens="tokenize",
+          reported_tokens={"kind": "tokenize", "path": f"{RW}/sft7bv2.val.jsonl"}),
+    Stage("p8-v2-qwen", 8, "8.3.4", "val target outputs, v2 rungs (Qwen2.5-7B)", model=M7,
+          window="@vllm_v2_qwen", active=_s("logs/v2_resp_qwen.log"),
+          reported_tokens=_s("logs/v2_resp_qwen.log", "generated_tokens"),
+          sessions=("vllm_v2_qwen",), group="p8-v2"),
+    Stage("p8-v2-phi", 8, "8.3.4", "val target outputs, v2 rungs (Phi-3.5)", model=PHI,
+          window="@vllm_v2_phi", active=_s("logs/v2_resp_phi.log"),
+          reported_tokens=_s("logs/v2_resp_phi.log", "generated_tokens"),
+          sessions=("vllm_v2_phi",), group="p8-v2"),
+    Stage("p8-v2-judge", 8, "8.3.4", "val judge, v2 rungs (32B)", model=M32,
+          window="@vllm_v2_judge", active=_s("logs/v2_judge.log"),
+          reported_tokens=_s("logs/v2_judge.log", "generated_tokens"),
+          labels={"kind": "summary", "path": "logs/v2_judge.log", "key": "records"},
+          sessions=("vllm_v2_judge",), group="p8-v2"),
+    *(
+        Stage(f"p8-q7-{s}-{t}", 8, row, f"val target outputs, {what} ({tn})", model=m,
+              window=f"@vllm_q7_{t}" if s == "7b" else None,
+              active=_s(f"logs/q7_resp_{s}_{lg}.log"), tokens="reported",
+              reported_tokens=_s(f"logs/q7_resp_{s}_{lg}.log", "generated_tokens"),
+              sessions=(f"vllm_q7_{t}",), group="p8-q7",
+              note="one server per target ran the 7b, hmm and rl sets; its ledger window "
+              "(all three sets) is on the 7b stage" if s == "7b" else "shares the 7b server")
+        for s, row, what in (("7b", "8.3.5", "7B v2 rung"), ("hmm", "C5.6", "HMM rewriter set"),
+                             ("rl", "C9.2", "RL (Q-learning) operator set"))
+        for t, m, tn, lg in (("qwen", M7, "Qwen2.5-7B", "qwen2.5-7b"),
+                             ("phi", PHI, "Phi-3.5", "phi3.5"))
+    ),
+    *(
+        Stage(f"p8-q7-judge-{s}", 8, row, f"val judge, {what} (32B)", model=M32,
+              window=win, active=_s(f"logs/q7_judge_{s}.log"),
+              reported_tokens=_s(f"logs/q7_judge_{s}.log", "generated_tokens"),
+              labels={"kind": "summary", "path": f"logs/q7_judge_{s}.log", "key": "records"},
+              sessions=("vllm_q7_judge",), group="p8-q7")
+        for s, row, what, win in (
+            ("7b", "8.3.5", "7B v2 rung", ("2026-10-17T18:16:00", "2026-10-17T18:24:30")),
+            ("hmm", "C5.6", "HMM rewriter set", ("2026-10-17T18:24:30", "2026-10-17T18:48:30")),
+            ("rl", "C9.2", "RL operator set", ("2026-10-17T18:48:30", "2026-10-17T18:58:20")),
+        )
+    ),
+    # ---- Phase 10: rewriter HPO (logs/hpo_chain.status; Optuna study p10_rewriter_hpo)
+    Stage("p10-hpo-trials", 10, "10.x", "Optuna LoRA HPO, 12 trials (5 complete, 7 pruned)",
+          active={"kind": "optuna_sum", "path": "experiments/p10_rewriter_hpo/optuna.db"},
+          tokens="none", sessions=("hpo_trials",),
+          note="val rewrites of hpo00/02/08 generated inside the trials"),
+    Stage("p10-hpo-qwen", 10, "10.x", "val target outputs, HPO candidates (Qwen2.5-7B)",
+          model=M7, window="@vllm_hpo_qwen", active=_s("logs/hpo_resp_qwen2.5-7b.log"),
+          reported_tokens=_s("logs/hpo_resp_qwen2.5-7b.log", "generated_tokens"),
+          sessions=("vllm_hpo_qwen",), group="p10-hpo"),
+    Stage("p10-hpo-phi", 10, "10.x", "val target outputs, HPO candidates (Phi-3.5)", model=PHI,
+          window="@vllm_hpo_phi", active=_s("logs/hpo_resp_phi3.5.log"),
+          reported_tokens=_s("logs/hpo_resp_phi3.5.log", "generated_tokens"),
+          sessions=("vllm_hpo_phi",), group="p10-hpo"),
+    Stage("p10-hpo-judge", 10, "10.x", "val judge, HPO candidates (32B)", model=M32,
+          window="@vllm_hpo_judge", active=_s("logs/hpo_judge.log"),
+          reported_tokens=_s("logs/hpo_judge.log", "generated_tokens"),
+          labels={"kind": "summary", "path": "logs/hpo_judge.log", "key": "records"},
+          sessions=("vllm_hpo_judge",), group="p10-hpo"),
+    # ---- Phase 11: quality path (vLLM-served rewriter) benchmarks and the canary
+    *(
+        Stage(f"p11-{k}-{r}", 11, row, f"{what}, rewriter {r}", tokens="none",
+              active={"kind": "session_span", "session": f"vllm_{k}_{r}"},
+              sessions=(f"vllm_{k}_{r}",),
+              note="no stage timer; active = server span (rewriter calls not ledgered)")
+        for k, row, what in (("qb", "11.x", "quality-path load benchmark (C11.3/C11.4)"),
+                             ("qraw", "11.x", "raw quality-path benchmark"))
+        for r in ("3b", "15v2")
+    ),
+    Stage("p11-canary-rewrite", 11, "11.x", "canary, 400 prompts via the quality path",
+          active=_s("logs/canary_rewrite.log", "rewrite.wall_seconds"), tokens="none",
+          sessions=("vllm_canary_rw",), group="p11-canary"),
+    Stage("p11-canary-qwen", 11, "11.x", "canary target outputs (Qwen2.5-7B)", model=M7,
+          active=_s("logs/canary_respond_qwen2.5-7b.log"), tokens="reported",
+          reported_tokens=_s("logs/canary_respond_qwen2.5-7b.log", "generated_tokens"),
+          sessions=("vllm_canary_qwen",), group="p11-canary", note="not ledgered"),
+    Stage("p11-canary-phi", 11, "11.x", "canary target outputs (Phi-3.5)", model=PHI,
+          active=_s("logs/canary_respond_phi3.5-mini.log"), tokens="reported",
+          reported_tokens=_s("logs/canary_respond_phi3.5-mini.log", "generated_tokens"),
+          sessions=("vllm_canary_phi",), group="p11-canary", note="not ledgered"),
+    Stage("p11-canary-judge", 11, "11.x", "canary judge (32B)", model=M32,
+          active=_s("logs/canary_judge.log"), tokens="reported",
+          reported_tokens=_s("logs/canary_judge.log", "generated_tokens"),
+          labels={"kind": "summary", "path": "logs/canary_judge.log", "key": "records"},
+          sessions=("vllm_canary_judge",), group="p11-canary", note="not ledgered"),
+    # ---- Phase 12: test split (logs/p12_chain.status). The ledger charged respond and the first
+    # judge run to bucket "phase2" and the resumed judge to "phase12"; attribution is by model and
+    # time window, so all of it lands here.
+    *(
+        Stage(f"p12-gen-{tag}", 12, "12.x", f"test rewrites, 1,992 prompts ({tag})",
+              active={"kind": "latency_sum", "path": f"data/interim/final/test_{tag}.jsonl"},
+              tokens="tokenize",
+              reported_tokens={"kind": "tokenize", "path": f"data/interim/final/test_{tag}.jsonl"})
+        for tag in ("sft3bv2", "sft15v2", "sfthpo")
+    ),
+    Stage("p12-zeroshot-32b", 12, "12.x", "zero-shot 32B candidates low/medium/high, 1,992 prompts",
+          model=M32, window="@vllm_p12_zs", active=_s("logs/p12_llm.log"),
+          sessions=("vllm_p12_zs",)),
+    Stage("p12-resp-qwen", 12, "12.x", "test target outputs (Qwen2.5-7B)", model=M7,
+          window="@vllm_p12_qwen", active=_s("logs/p12_resp_qwen2.5-7b.log"),
+          reported_tokens=_s("logs/p12_resp_qwen2.5-7b.log", "generated_tokens"),
+          sessions=("vllm_p12_qwen",), group="p12", note="ledger bucket phase2"),
+    Stage("p12-resp-phi", 12, "12.x", "test target outputs (Phi-3.5)", model=PHI,
+          window="@vllm_p12_phi", active=_s("logs/p12_resp_phi3.5.log"),
+          reported_tokens=_s("logs/p12_resp_phi3.5.log", "generated_tokens"),
+          sessions=("vllm_p12_phi",), group="p12", note="ledger bucket phase2"),
+    Stage("p12-judge-run1", 12, "12.x", "test judge (32B), stopped by the phase2 token cap",
+          model=M32, window="@vllm_p12_judge", active={"kind": "ledger_busy"},
+          sessions=("vllm_p12_judge",), group="p12", attempt="retry",
+          note="BudgetExceededError (logs/p12_judge.log); ledger bucket phase2; its calls are "
+          "cache hits of the resumed run"),
+    Stage("p12-judge", 12, "12.x", "test judge (32B), resumed run", model=M32,
+          window="@vllm_p12_judge2", active=_s("logs/p12_judge2.log"),
+          reported_tokens=_s("logs/p12_judge2.log", "generated_tokens"),
+          labels={"kind": "summary", "path": "logs/p12_judge2.log", "key": "records"},
+          sessions=("vllm_p12_judge2",), group="p12", note="ledger bucket phase12"),
+    # ---- Phase 12 row 12.4 seeds (/home/temp/p12_seeds.sh, logs/p12_seeds.status)
+    *(
+        st
+        for k in (1, 2)
+        for st in (
+            Stage(f"p12-seed-train-s{k}", 12, "12.4", f"SFT Qwen2.5-3B LoRA v2, seed {k}",
+                  active={"kind": "log_span", "paths": [f"logs/p12_train_sft3bv2_s{k}.log"]},
+                  tokens="none", sessions=(f"p12s_train_s{k}",), pending_since=LEDGER_CUTOFF,
+                  done=(f"logs/p12_train_sft3bv2_s{k}.log", r"\]\[__main__\]\[INFO\] - trained ")),
+            Stage(f"p12-seed-gen-s{k}", 12, "12.4", f"test rewrites, 1,992 prompts (seed {k})",
+                  active={"kind": "latency_sum",
+                          "path": f"data/interim/final/test_sft3bv2_s{k}.jsonl"},
+                  tokens="tokenize",
+                  reported_tokens={"kind": "tokenize",
+                                   "path": f"data/interim/final/test_sft3bv2_s{k}.jsonl"},
+                  pending_since=LEDGER_CUTOFF,
+                  done=("logs/p12_seeds.status", rf"^generate sft3bv2_s{k} rc=0")),
+        )
+    ),
+    Stage("p12-seed-resp-qwen", 12, "12.4", "seed test target outputs (Qwen2.5-7B)", model=M7,
+          window="@vllm_p12s_qwen", active=_s("logs/p12s_resp_qwen2.5-7b.log"),
+          reported_tokens=_s("logs/p12s_resp_qwen2.5-7b.log", "generated_tokens"),
+          sessions=("vllm_p12s_qwen",), pending_since=LEDGER_CUTOFF),
+    Stage("p12-seed-resp-phi", 12, "12.4", "seed test target outputs (Phi-3.5)", model=PHI,
+          window="@vllm_p12s_phi", active=_s("logs/p12s_resp_phi3.5.log"),
+          reported_tokens=_s("logs/p12s_resp_phi3.5.log", "generated_tokens"),
+          sessions=("vllm_p12s_phi",), pending_since=LEDGER_CUTOFF),
+    Stage("p12-seed-judge", 12, "12.4", "seed test judge (32B)", model=M32,
+          window="@vllm_p12s_judge", active=_s("logs/p12s_judge.log"),
+          reported_tokens=_s("logs/p12s_judge.log", "generated_tokens"),
+          sessions=("vllm_p12s_judge",), pending_since=LEDGER_CUTOFF,
+          note="summary records = whole test_labels.jsonl, so no label count"),
 )
 # fmt: on
-
-EXCLUDED: tuple[dict[str, str], ...] = (
-    {"id": "sft-qwen1.5b-lora-v2", "evidence": "logs/sft_qwen15b_lora_v2.log"},
-    {"id": "sft15v2 val generation", "evidence": "logs/gen-sft15v2.log"},
-    {"id": "sft-qwen3b-lora-v2", "evidence": "logs/sft_qwen3b_lora_v2.log"},
-    {"id": "sft-qwen7b-qlora-v2", "evidence": "running (experiment=sft_qwen7b_qlora_v2)"},
-    {"id": "v2 validation (targets + judge)", "evidence": "logs/v2_chain.status"},
-)
 
 CPU_PHASES: dict[int, str] = {
     0: "scaffolding, CI",
@@ -346,9 +556,14 @@ CPU_PHASES: dict[int, str] = {
     4: "perceptron / MLP studies (CPU)",
     5: "ensembles, NB, GMM, HMM (CPU)",
     6: "clustering (CPU)",
-    9: "tabular Q-learning (CPU)",
-    10: "HPO (MLflow hardware tag cpu)",
-    11: "serving, fast path (MLflow hardware tag cpu)",
+    9: "tabular Q-learning (CPU; its C9.2 val labels ran on the q7 chain, counted in Phase 8)",
+}
+# GPU phases that also had CPU-only work (no GPU time to count).
+CPU_PARTS: dict[int, str] = {
+    5: "HMM rewriter C5.6 val labels ran on the q7 chain, counted in Phase 8",
+    10: "GBM / MLP HPO studies (MLflow hardware tag cpu)",
+    11: "fast path, ONNX serving (MLflow hardware tag cpu)",
+    12: "CPU candidates (logs/p12_cpu_candidates*.log) and results",
 }
 
 # ---------------------------------------------------------------- parsing helpers
@@ -368,7 +583,14 @@ def json_blobs(text: str) -> list[dict[str, Any]]:
     blobs: list[dict[str, Any]] = []
     buf: list[str] | None = None
     for line in text.splitlines():
-        if line == "{":
+        if buf is None and line.startswith("{") and line.rstrip().endswith("}") and line != "{":
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(obj, dict):
+                blobs.append(obj)
+        elif line == "{":
             buf = [line]
         elif buf is not None:
             buf.append(line)
@@ -440,6 +662,27 @@ def md_table(text: str, header: str) -> list[dict[str, str]]:
                 rows.append(dict(zip(cells, vals, strict=False)))
             return rows
     return []
+
+
+def _optuna_trials(p: Path) -> list[tuple[datetime, datetime]]:
+    """(start, complete) of every finished trial in an Optuna SQLite study (naive UTC times)."""
+    if not p.exists():
+        return []
+    db = sqlite3.connect(f"file:{p.as_posix()}?mode=ro", uri=True)
+    try:
+        rows = db.execute(
+            "select datetime_start, datetime_complete from trials "
+            "where datetime_start is not null and datetime_complete is not null"
+        ).fetchall()
+    finally:
+        db.close()
+    return [
+        (
+            datetime.fromisoformat(a).replace(tzinfo=UTC),
+            datetime.fromisoformat(b).replace(tzinfo=UTC),
+        )
+        for a, b in rows
+    ]
 
 
 def _num(s: str) -> float:
@@ -526,6 +769,11 @@ class Evidence:
         return (sum(float(r[0]) for r in rows) if rows else None), len(rows)
 
     def span(self, session: Session) -> tuple[datetime, datetime] | None:
+        if session.id not in self._spans and session.kind == "optuna":
+            rows = _optuna_trials(self.path(session.log))
+            self._spans[session.id] = (
+                (min(a for a, _ in rows), max(b for _, b in rows)) if rows else None
+            )
         if session.id not in self._spans:
             txt = self.text(session.log)
             if txt is None:
@@ -565,9 +813,24 @@ def _value(src: dict[str, Any] | None, ev: Evidence, stage: Stage) -> tuple[floa
         if txt is None:
             return None, f"{src['path']} (missing)"
         for blob in reversed(json_blobs(txt)):
-            if src["key"] in blob:
-                return float(blob[src["key"]]), f"{src['path']}: {src['key']}"
+            val: Any = blob
+            for part in src["key"].split("."):
+                val = val.get(part) if isinstance(val, dict) else None
+            if isinstance(val, int | float):
+                return float(val), f"{src['path']}: {src['key']}"
         return None, f"{src['path']}: no {src['key']}"
+    if kind == "optuna_sum":
+        trials = _optuna_trials(ev.path(src["path"]))
+        if not trials:
+            return None, f"{src['path']} (missing)"
+        total = sum((b - a).total_seconds() for a, b in trials)
+        return total, f"{src['path']}: sum of trial datetime_complete - datetime_start"
+    if kind == "session_span":
+        sess = _SESSIONS[src["session"]]
+        sp = ev.span(sess)
+        if sp is None:
+            return None, f"{sess.log} (missing)"
+        return (sp[1] - sp[0]).total_seconds(), f"{sess.log}: server span"
     if kind == "mlflow":
         v = ev.mlflow_metric(src["runs"], src["metric"])
         return v, f"mlruns/mlflow.db runs {', '.join(src['runs'])}: {src['metric']}"
@@ -697,7 +960,7 @@ def _power_sample(ev: Evidence) -> dict[str, Any] | None:
     limit = float(rows[0][3].split()[0])
     return {
         "source": "reports/compute_power_sample.csv (nvidia-smi -l 1)",
-        "workload": "sft_qwen7b_qlora_v2 training (excluded run), plus other users' CPU jobs",
+        "workload": "sft_qwen7b_qlora_v2 training (stage p8-sft-7b-v2), plus other users' CPU jobs",
         "n": len(watts),
         "first": rows[0][0],
         "last": rows[-1][0],
@@ -756,9 +1019,26 @@ def _sum(xs: Iterable[float | None]) -> float | None:
 def build(root: Path = ROOT) -> dict[str, Any]:
     """Collect every number of the report into one JSON-serialisable dict."""
     ev = Evidence(root)
-    stages = [_stage_record(s, ev) for s in STAGES]
+    counted: list[Stage] = []
+    pending: list[Stage] = []
+    for stg in STAGES:
+        (pending if _is_pending(stg, ev) else counted).append(stg)
+    stages = [_stage_record(stg, ev) for stg in counted]
+    pending_sessions = {x for stg in pending for x in stg.sessions} - {
+        x for stg in counted for x in stg.sessions
+    }
+    excluded = [
+        {
+            "id": stg.id,
+            "evidence": (stg.done[0] if stg.done else _src_path(stg.active)) or "n/a",
+            "since": stg.pending_since or "",
+        }
+        for stg in pending
+    ]
     sessions: list[dict[str, Any]] = []
     for s in SESSIONS:
+        if s.id in pending_sessions:
+            continue
         sp = ev.span(s)
         sessions.append(
             {
@@ -806,7 +1086,12 @@ def build(root: Path = ROOT) -> dict[str, Any]:
         g["final_gpu_s_per_label"] = g["final_active_s"] / lab if lab else None
         g["reserved_gpu_s_per_label"] = g["reserved_s"] / lab if lab else None
 
-    cutoff = _utc(LEDGER_CUTOFF)
+    since = [s.pending_since for s in pending if s.pending_since]
+    cutoff_s = min(since) if since else None
+    if cutoff_s:  # completed stages of the same run keep their calls: cut after their windows
+        ends = [st["ledger"]["window"][1][:19] for st in stages if st["ledger"]]
+        cutoff_s = max([cutoff_s, *ends])
+    cutoff = _utc(cutoff_s) if cutoff_s else datetime.max.replace(tzinfo=UTC)
     kept = [c for c in ev.ledger if c[0] < cutoff]
     late = [c for c in ev.ledger if c[0] >= cutoff]
     attributed = sum(st["ledger"].get("output_tokens", 0) for st in stages)
@@ -834,11 +1119,12 @@ def build(root: Path = ROOT) -> dict[str, Any]:
         "smoke_rtx4090_reserved_h": smoke_reserved_h,
         "phases": [phases[k] for k in sorted(phases)],
         "cpu_only_phases": CPU_PHASES,
+        "cpu_parts": CPU_PARTS,
         "groups": groups,
         "estimates": _estimates(ev),
         "ledger": {
             "source": ".cache/llm_ledger.json",
-            "cutoff": LEDGER_CUTOFF,
+            "cutoff": cutoff_s,
             "calls": len(kept),
             "output_tokens": sum(c[3] for c in kept),
             "attributed_output_tokens": attributed,
@@ -849,8 +1135,26 @@ def build(root: Path = ROOT) -> dict[str, Any]:
             "budget": budget,
         },
         "power_sample": _power_sample(ev),
-        "excluded": list(EXCLUDED),
+        "excluded": excluded,
     }
+
+
+def _src_path(src: dict[str, Any]) -> str | None:
+    if "path" in src:
+        return str(src["path"])
+    if src.get("paths"):
+        return str(src["paths"][0])
+    return None
+
+
+def _is_pending(stage: Stage, ev: Evidence) -> bool:
+    """An in-progress stage stays pending until its completion evidence exists."""
+    if stage.pending_since is None:
+        return False
+    if stage.done is not None:
+        txt = ev.text(stage.done[0])
+        return txt is None or re.search(stage.done[1], txt, re.M) is None
+    return _value(stage.active, ev, stage)[0] is None
 
 
 def _aggregate(sts: list[dict[str, Any]], sess_by_id: dict[str, dict[str, Any]]) -> dict[str, Any]:
@@ -941,8 +1245,17 @@ def render_markdown(r: dict[str, Any]) -> str:
         "summaries are shown alongside as a cross-check. **Energy is an estimate**: no power was "
         f"logged during the runs, so kWh = GPU-hours x board power limit ({w['rtx4500ada']:.0f} W "
         f"for the RTX 4500 Ada, {w['rtx4090']:.0f} W for the RTX 4090 smoke), an upper bound. "
-        f"Ledger calls from {r['ledger']['cutoff']} UTC on belong to the in-progress v2 chain and "
-        "are excluded."
+        "Ledger calls are attributed by model and time window, not by the ledger's budget bucket: "
+        "the Phase 12 test respond runs and the first test judge run were charged to bucket "
+        "`phase2` (which their spend pushed to its cap) and the resumed judge to `phase12`; all "
+        "of it is counted under Phase 12. All times are UTC (the `*.status` files print IST, "
+        "UTC+5:30)."
+        + (
+            f" Ledger calls from {r['ledger']['cutoff']} UTC on belong to in-progress work and "
+            "are held back."
+            if r["ledger"]["cutoff"]
+            else ""
+        )
     )
     a("")
     a("## Per phase")
@@ -976,8 +1289,11 @@ def render_markdown(r: dict[str, Any]) -> str:
     )
     a("")
     cpu = "; ".join(f"{p}: {w_}" for p, w_ in sorted(r["cpu_only_phases"].items()))
+    parts = "; ".join(f"{p}: {w_}" for p, w_ in sorted(r.get("cpu_parts", {}).items()))
     a(
-        f"CPU-only phases (no GPU work): {cpu}. Phase 7 benchmark runs logged tokens but not "
+        f"CPU-only phases (no GPU work): {cpu}. CPU work inside GPU phases, not counted: {parts}. "
+        "Phase 11 benchmark stages have no stage timer, so their active time is the server span. "
+        "Phase 7 benchmark runs logged tokens but not "
         "their GPU time. Phase 2 reserved hours include the RTX 4090 smoke's server-reserved "
         f"{_f(r['smoke_rtx4090_reserved_h'], 3)} h from `reports/p2_gpu_smoke.md`. Reserved "
         "hours are a lower bound where a server log was lost: "
@@ -1019,11 +1335,12 @@ def render_markdown(r: dict[str, Any]) -> str:
         f"which {_i(led['attributed_output_tokens'])} fall in a stage window "
         f"({_i(led['unattributed_output_tokens'])} unattributed"
         + "".join(f", {m.split('/')[-1]} {_i(v)}" for m, v in led["unattributed_by_model"].items())
-        + f"); {_i(led['after_cutoff_calls'])} later v2 calls with "
-        f"{_i(led['after_cutoff_output_tokens'])} output tokens are excluded. Where the "
+        + f"); {_i(led['after_cutoff_calls'])} later calls of in-progress work with "
+        f"{_i(led['after_cutoff_output_tokens'])} output tokens are held back. Where the "
         "stage-reported count differs from the ledger, the ledger also holds calls of an "
         "interrupted or repeated run in the same window (casualise, rung-3 and augmentation "
-        "judges)."
+        "judges), or the stage's own count includes work the ledger never saw (canary stages "
+        "are not ledgered, so they use the stage-reported count)."
     )
     a("")
     a("## GPU reservations")
@@ -1061,6 +1378,11 @@ def render_markdown(r: dict[str, Any]) -> str:
         "p8-aug": "Actual: Phase 8 augmentation round (candidates -> respond -> judge)",
         "p8-eval": "Actual: Phase 8 val labels, rungs 1-2 (respond -> judge)",
         "p8-r3": "Actual: Phase 8 val labels, rung 3 (respond -> judge)",
+        "p8-v2": "Actual: Phase 8 val labels, v2 rungs (respond -> judge)",
+        "p8-q7": "Actual: Phase 8 val labels, 7B v2 + HMM + RL sets (respond -> judge)",
+        "p10-hpo": "Actual: Phase 10 HPO val labels (respond -> judge)",
+        "p11-canary": "Actual: Phase 11 canary (rewrite -> respond -> judge)",
+        "p12": "Actual: Phase 12 test labels (respond -> judge)",
     }
     for gid, g in r["groups"].items():
         a(
@@ -1144,20 +1466,24 @@ def render_markdown(r: dict[str, Any]) -> str:
             a(f"| {name} | {_i(b['calls'])} | {_i(b['tokens'])} | {_i(cap)} | {used} |")
         a("")
         a(
-            "All LLM calls after Phase 1 were ledgered under the `phase2` key, including the "
-            "Phase 8 validation and augmentation rounds; this table reads the ledger's own running "
-            "totals, so it also includes the excluded v2 calls."
+            "LLM calls after Phase 1 were ledgered under the `phase2` key up to the Phase 12 test "
+            "judge, which hit that key's cap and resumed under `phase12`; Phase 8, 10 and 12 work "
+            "is therefore inside the `phase2` totals. This table reads the ledger's own running "
+            "totals, so it also includes calls of in-progress work."
         )
         a("")
-    a("## Excluded (pending)")
+    a("## Pending")
     a("")
-    a(
-        "In-progress v2 rewriter runs are not counted; they will be added when the GPU chain "
-        "finishes:"
-    )
-    a("")
-    for e in r["excluded"]:
-        a(f"- `{e['id']}` ({e['evidence']})")
+    if r["excluded"]:
+        a(
+            "In-progress stages are not counted yet; they are added automatically when their "
+            "logs are complete and the report is regenerated:"
+        )
+        a("")
+        for e in r["excluded"]:
+            a(f"- `{e['id']}` (waiting for `{e['evidence']}`)")
+    else:
+        a("None: every GPU stage on record is counted.")
     a("")
     return "\n".join(out)
 

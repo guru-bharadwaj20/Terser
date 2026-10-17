@@ -1,0 +1,24 @@
+# Row 9.3.1: CPU smoke test of the GRPO loop on the tiny byte-level LM (stand-in gate).
+# python -m terser.models.rl.grpo experiment=grpo_tiny
+name: grpo_tiny
+phase: 9
+row: "9.3.1"
+task: rewriter_grpo
+params:
+  model: tiny
+  tiny: {d_model: 32, n_layers: 1, n_heads: 2, max_len: 1024}
+  data: ${paths.root}/tests/fixtures/casual_prompts.jsonl
+  limit: 6
+  max_new_tokens: 24
+  steps: 3
+  prompts_per_step: 2
+  group_size: 4
+  micro_batch: 4
+  lr: 1.0e-3
+  beta: 0.04
+  temperature: 1.0
+  audit_every: 2
+  save_every: 0
+  deadline_epoch: null
+  mlflow: false
+  output_dir: ${paths.root}/models/rewriter/grpo-tiny
