@@ -49,8 +49,8 @@ Status of all 63 checkpoints as of 2026-10-16, read from the ✅ / ❌ marks in 
 | C8.1 | TextCNN parameters | ✅ | see the phase checkpoint section |
 | C8.2 | TextCNN tagging | ❌ | TextCNN 0.679 vs best classical 0.658 on the binary task (+0.021, McNemar p < 1e-18; target +0.05) ([p8_textcnn.md](../../reports/p8_textcnn.md)) |
 | C8.3 | **Rewriter main gate (val split)** | ❌ | SFT rungs at 7.6% (0.5B, 1.5B) and 2.1% (3B) median savings, targets capped near 10%; on `sft_v2` targets 1.5B LoRA saves 35.0% at 57.0% preserved and 3B LoRA 12.5% at 71.4% (bar 25% / 92%); 7B QLoRA rung in training ([p8_rewriter_val.md](../../reports/p8_rewriter_val.md)) |
-| C8.4 | vs zero-shot large open LLM | ❌ | depends on a rewriter that passes C8.3 |
-| C8.5 | vs LLMLingua-2 | ❌ | depends on a rewriter that passes C8.3 |
+| C8.4 | vs zero-shot large open LLM | ❌ | fail on every rung: no zero-shot 32B level is matched at equal preservation except `llm_medium` for 1.5B v2 (32B saves 12.9 pp more), and the 32B is not 10x slower ([p8_baselines.md](../../reports/p8_baselines.md)) |
+| C8.5 | vs LLMLingua-2 | ❌ | fail on every rung: rungs preserve 28-46 pp more than LLMLingua-2 but save 16-49 pp less ([p8_baselines.md](../../reports/p8_baselines.md)) |
 | C9.1 | Tabular convergence | ❌ | most settled learner max |dQ| 0.164 (< 1e-3); aliased states make the reward stochastic ([p9_qlearning.md](../../reports/p9_qlearning.md)) |
 | C9.2 | Tabular policy value | ❌ | pending: row 9.2.4 judge verification of the greedy policy |
 | C10.1 | Method comparison | ✅ | 4 GBM methods + 2 MLP methods, 60 trials x 5 seeds ([p10_hpo.md](../../reports/p10_hpo.md)) |
