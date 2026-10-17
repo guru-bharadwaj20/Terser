@@ -24,9 +24,9 @@ is cheap and resumable.
 
 CLI::
 
-    python -m terser.phase2.label_stage --prompts data/interim/casual_dedup.jsonl \\
+    python -m terser.phase2.label_stage --prompts data/interim/label_prompts.jsonl \\
         --responses data/interim/responses/qwen2.5-7b.jsonl \\
-        data/interim/responses/llama3.1-8b.jsonl \\
+        data/interim/responses/phi3.5-mini.jsonl \\
         --judge-model Qwen/Qwen2.5-32B-Instruct-AWQ --out data/processed/labels.jsonl
 """
 
@@ -253,7 +253,9 @@ def run_labels(
 
     # 2) task metrics on the greedy sample, concurrently (code runs in a sandbox subprocess).
     mcache = _MetricCache(metric_cache)
-    metric_jobs: dict[tuple[str, str], tuple[str, str, Any]] = {}
+    # Keyed by the reference as well: two prompts can share a byte-identical output (an empty
+    # answer, a refusal) while having different references.
+    metric_jobs: dict[tuple[str, str, str], tuple[str, str, Any]] = {}
     for target, pid, cid in pairs:
         p = by_prompt[pid]
         cat = str(p["category"])
@@ -263,10 +265,10 @@ def run_labels(
         for c in (ORIGINAL_ID, cid):
             out = outputs.get((target, pid, c), {}).get(0)
             if out is not None:
-                metric_jobs[(cat, out)] = (cat, out, ref)
-    metrics: dict[tuple[str, str], Any] = {}
+                metric_jobs[(cat, out, repr(ref))] = (cat, out, ref)
+    metrics: dict[tuple[str, str, str], Any] = {}
 
-    def metric_one(key: tuple[str, str]) -> None:
+    def metric_one(key: tuple[str, str, str]) -> None:
         cat, out, ref = metric_jobs[key]
         res = mcache.compute(cat, out, ref)
         with lock:
@@ -324,8 +326,9 @@ def run_labels(
                 top, second = sorted(avg.values(), reverse=True)[:2]
                 margin = top - second
             task_nw: bool | None = None
-            m_orig = metrics.get((cat, orig.get(0, "\0")))
-            m_cand = metrics.get((cat, cand.get(0, "\0")))
+            ref_key = repr(references.get(str(p["source_id"])) if references else None)
+            m_orig = metrics.get((cat, orig.get(0, "\0"), ref_key))
+            m_cand = metrics.get((cat, cand.get(0, "\0"), ref_key))
             if m_orig is not None and m_cand is not None:
                 task_nw = not_worse(m_orig, m_cand)
                 if m_orig.value is None and m_cand.value is None:

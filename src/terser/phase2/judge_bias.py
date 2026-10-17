@@ -58,7 +58,8 @@ __all__ = [
     "target_output",
 ]
 
-DEFAULT_LABELS = Path("data/pilot/labels.jsonl")
+# The original pilot verdicts; data/pilot/labels.jsonl now holds the pairwise_avg relabel.
+DEFAULT_LABELS = Path("data/pilot/labels_pairwise_v1.jsonl")
 DEFAULT_OUT_DIR = Path("data/pilot/judge_bias")
 TARGET_MAX_TOKENS = 512
 

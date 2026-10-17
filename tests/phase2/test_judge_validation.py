@@ -324,3 +324,22 @@ def test_cli_errors(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     write_jsonl(judge[1:], judge_path)
     assert main([*base, "--n-boot", "10", "--allow-stand-in"]) == 1
     assert "no judge record" in capsys.readouterr().err
+
+
+def test_raw_order_sides_reads_pairwise_avg_samples() -> None:
+    from terser.phase2.judge_validation import raw_order_sides
+
+    rec = {
+        "id": "x",
+        "judge_protocol": "pairwise_avg",
+        "verdicts": {"original_first": "tie", "rewrite_first": "tie"},
+        "samples": [
+            {"sample": 0, "identical": False, "original_first": "original", "rewrite_first": "tie"},
+            {"sample": 1, "identical": True},
+            {"sample": 2, "identical": False, "original_first": "tie", "rewrite_first": "tie"},
+        ],
+    }
+    # The averaged side sits in both verdict slots; the raw per-order verdicts are used instead.
+    assert raw_order_sides(rec) == [("original", "tie"), ("tie", "tie")]
+    pilot = {"id": "y", "verdicts": {"original_first": "rewrite", "rewrite_first": "tie"}}
+    assert raw_order_sides(pilot) == [("rewrite", "tie")]
