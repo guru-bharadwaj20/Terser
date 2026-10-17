@@ -949,10 +949,10 @@ only if they work, so each ends in a report whether or not it succeeds.
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 9.3.1 | GRPO setup | Start from C8.3 model; LoRA; group size 4–8; KL penalty to SFT reference | Tiny CPU smoke test + queued job | ❌ |
-| 9.3.2 | Reward | `tokens_saved_pct × gate_pass` | Reward logged per step | ❌ |
+| 9.3.1 | GRPO setup | Start from C8.3 model; LoRA; group size 4–8; KL penalty to SFT reference | Tiny CPU smoke test + queued job | ✅ |
+| 9.3.2 | Reward | `tokens_saved_pct × gate_pass` | Reward logged per step | ✅ |
 | 9.3.3 | Reward-hacking audits | Every N steps sample rewrites → 32B judge in a time-shared vLLM slot, never colocated with training | Audit log | ❌ |
-| 9.3.4 | Degenerate-output monitor | Empty / truncated / non-natural-language rate | Metric logged | ❌ |
+| 9.3.4 | Degenerate-output monitor | Empty / truncated / non-natural-language rate | Metric logged | ✅ |
 | 9.3.5 | RL vs SFT comparison | Same val table as C8.3 | `reports/p9_rl_vs_sft.md` | ❌ |
 
 | # | Check | Target | Status |
