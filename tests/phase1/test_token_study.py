@@ -139,7 +139,7 @@ def test_load_prompt_dir_missing_and_mismatch(
 ) -> None:
     _write_dir(tmp_path, prompts)
     (tmp_path / "fact.jsonl").unlink()
-    with pytest.raises(FileNotFoundError, match="fact.jsonl"):
+    with pytest.raises(FileNotFoundError, match=r"fact\.jsonl"):
         load_prompt_dir(tmp_path)
     _write_dir(
         tmp_path,
