@@ -206,7 +206,7 @@ def best_single_operator(df: pd.DataFrame, op_codes: Sequence[str] = OP_CODES) -
 
 
 def all_ops_by(df: pd.DataFrame, by: str, op_set: str = ALL_OPS) -> pd.DataFrame:
-    """Median and mean savings of ``op_set`` per ``by`` value (e.g. category or style) × target."""
+    """Median savings of ``op_set`` per ``by`` value (e.g. category or style) × target."""
     sub = df[df["op_set"] == op_set]
     out = sub.pivot_table(index=by, columns="target", values="savings", aggfunc="median")
     return out.reindex(columns=[t for t in TARGETS if t in out.columns] or list(out.columns))

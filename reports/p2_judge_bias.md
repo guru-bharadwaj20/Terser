@@ -92,6 +92,7 @@ parsed per-order verdict pairs, [p2_label_stats.json](p2_label_stats.json)).
 ## Pilot relabel (row 1.3.6, still awaiting human review)
 
 The pilot was relabelled with `pairwise_avg` (all 1,672 judge requests served from the cache, 0
-new tokens; MLflow `508e0d17bce8`). Old labels are kept as
+new tokens; MLflow `508e0d17bce8`). The cached verdicts are those of the `pairwise_32b` re-run
+above, not the original pilot verdicts. Old labels are kept as
 `data/pilot/labels_pairwise_v1.jsonl` / `labels_review_pairwise_v1.csv`. See
 [p1_pilot_labels.md](p1_pilot_labels.md).
