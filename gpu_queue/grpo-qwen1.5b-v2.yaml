@@ -1,0 +1,15 @@
+# GRPO v2 ablation (not a CONTRIBUTING row): preservation-aware reward (soft gate x CPU bge-small
+# cosine ramp x protected-item retention x capped savings). Same start / KL ref as grpo-qwen1.5b.
+# Stops at TERSER_GRPO_DEADLINE; the 32B audit judge runs only after it exits.
+id: grpo-qwen1.5b-v2
+phase: 9
+depends_on: [C7.1, C2.3]
+command: >-
+  MLFLOW_TRACKING_URI=sqlite:///mlruns/mlflow.db
+  python -m terser.models.rl.grpo experiment=grpo_qwen15b_lora_v2 hardware=rtx4500ada
+est_vram_gb: 16
+est_hours: 20
+exclusive: true
+priority: 3
+cpu_smoke_test: tests/rl/test_grpo.py
+outputs: [models/rewriter/grpo-qwen1.5b-v2/, mlruns/]
