@@ -945,6 +945,10 @@ Each phase has one owner, who runs it end to end, including its checkpoint.
 Attempt only after C8.3 passes and Phase 11 is on track. Outside the syllabus; valuable on a resume
 only if they work, so each ends in a report whether or not it succeeds.
 
+> **Exception recorded:** S-9.3 (GRPO) was run although C8.3 fails. It was started once Phase 11 was
+> done and the GPU was otherwise idle; its checks C9.3–C9.5 all fail and no RL policy was promoted,
+> so nothing in the required plan depends on it.
+
 ### S-9.3 Policy Optimisation of the Neural Rewriter (GRPO)
 
 | # | Task | Detail | Definition of Done | Status |
