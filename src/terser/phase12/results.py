@@ -1691,6 +1691,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         if unlock_entry() is None:
             raise SystemExit("test results need the row 12.1 unlock first")
     prompts = read_jsonl(args.prompts)
+    if args.split == "test":
+        # The --prompts file is an unlocked copy written by the candidate build; read the locked
+        # split through the logged reader as well, so this run appears in the access log, and
+        # refuse a copy that does not match it.
+        from terser.phase12.candidates import load_split_prompts
+        from terser.phase12.unlock import read_locked
+
+        locked = load_split_prompts(
+            "test", reader=lambda name, _p: read_locked(name, "row 12.2-12.7 evaluation/results")
+        )
+        key = lambda p: (str(p["id"]), str(p["prompt"]))  # noqa: E731
+        if {key(p) for p in prompts} != {key(p) for p in locked}:
+            raise SystemExit(f"{args.prompts} does not match the locked test split")
     pids = {str(p["id"]) for p in prompts}
     keep = lambda r: str(r.get("prompt_id")) in pids  # noqa: E731
     candidates = [c for path in args.candidates for c in read_jsonl(path, keep)]

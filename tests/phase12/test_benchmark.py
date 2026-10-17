@@ -114,7 +114,7 @@ def _label(pid: str, split: str, judge: str = "Qwen/Qwen2.5-32B-Instruct-AWQ") -
 @pytest.fixture
 def env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Env:
     monkeypatch.delenv(ALLOW_TEST_ENV, raising=False)
-    monkeypatch.setattr(U, "git_state", lambda repo=Path("."): ("abc123", False))
+    monkeypatch.setattr(U, "git_state", lambda repo=Path("."), exclude=(): ("abc123", False))
     splits = tmp_path / "splits"
     rows = {
         "train": [_prompt("dolly", 1, "texting", "fact"), _prompt("dolly", 1, "hedging", "fact")],
