@@ -10,14 +10,12 @@ fallback rate               ``terser_fallbacks_total / terser_requests_total``
 gate rejections             ``terser_gate_rejections_total``
 tokens saved                ``terser_tokens_saved_total`` (by ``target``)
 net savings                 ``terser_net_savings_usd_total`` (by ``target``)
-GPU util / VRAM             ``terser_gpu_utilization_ratio``, ``terser_gpu_memory_used_bytes``
-                            (sampled at scrape time via NVML; absent on CPU-only hosts)
+GPU (quality path)          vLLM's own ``/metrics`` on terser-gpu (scraped by Prometheus); this
+                            CPU service has no GPU, so it exports no GPU series itself
 ==========================  ============================================================
 """
 
 from __future__ import annotations
-
-from typing import Any
 
 __all__ = ["LATENCY_BUCKETS", "ServiceMetrics"]
 
@@ -39,32 +37,10 @@ LATENCY_BUCKETS: tuple[float, ...] = (
 )
 
 
-class _GpuCollector:
-    """Scrape-time GPU utilisation and memory via NVML; yields nothing without a GPU."""
-
-    def collect(self) -> Any:
-        from prometheus_client.core import GaugeMetricFamily
-
-        try:
-            import pynvml
-
-            pynvml.nvmlInit()
-        except Exception:  # no NVML / no driver: CPU host
-            return
-        util = GaugeMetricFamily("terser_gpu_utilization_ratio", "GPU utilisation", labels=["gpu"])
-        mem = GaugeMetricFamily("terser_gpu_memory_used_bytes", "GPU memory used", labels=["gpu"])
-        for i in range(pynvml.nvmlDeviceGetCount()):
-            h = pynvml.nvmlDeviceGetHandleByIndex(i)
-            util.add_metric([str(i)], pynvml.nvmlDeviceGetUtilizationRates(h).gpu / 100.0)
-            mem.add_metric([str(i)], float(pynvml.nvmlDeviceGetMemoryInfo(h).used))
-        yield util
-        yield mem
-
-
 class ServiceMetrics:
     """Counters and histograms updated once per request."""
 
-    def __init__(self, gpu: bool = True) -> None:
+    def __init__(self) -> None:
         from prometheus_client import CollectorRegistry, Counter, Histogram
 
         self.registry = CollectorRegistry()
@@ -101,8 +77,6 @@ class ServiceMetrics:
             ["target"],
             registry=r,
         )
-        if gpu:
-            r.register(_GpuCollector())
 
     def observe(
         self,

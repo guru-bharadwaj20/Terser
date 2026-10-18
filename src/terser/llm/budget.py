@@ -6,6 +6,10 @@ import json
 import os
 import tempfile
 import threading
+import time
+import uuid
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -88,7 +92,15 @@ class Usage:
 
 
 class Ledger:
-    """JSON ledger of spend per phase plus per-call entries; every mutation is atomic."""
+    """JSON ledger of spend per phase plus per-call entries; every mutation is atomic.
+
+    Mutations hold a cross-process lock (``<ledger>.lock``, created with ``O_EXCL``), so several
+    worker processes sharing one ledger cannot lose each other's writes. In-flight calls are
+    *reserved* (``reserved``) at check time and released when recorded, so concurrent workers
+    see each other's pending spend and cannot jointly exceed a cap.
+    """
+
+    LOCK_STALE_S = 60.0
 
     def __init__(self, path: Path) -> None:
         self.path = Path(path)
@@ -114,14 +126,63 @@ class Ledger:
             return json.loads(self.path.read_text(encoding="utf-8"))
         return {"phases": {}}
 
+    @contextmanager
+    def locked(self) -> Iterator[dict[str, Any]]:
+        """Thread and process lock; yields the current on-disk data (written back by callers)."""
+        lock_path = self.path.with_name(self.path.name + ".lock")
+        with self._lock:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            while True:
+                try:
+                    fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                    break
+                except FileExistsError:
+                    try:
+                        if time.time() - lock_path.stat().st_mtime > self.LOCK_STALE_S:
+                            lock_path.unlink()  # a crashed holder left it behind
+                            continue
+                    except FileNotFoundError:
+                        continue
+                    time.sleep(0.01)
+            try:
+                os.close(fd)
+                yield self._read()
+            finally:
+                lock_path.unlink(missing_ok=True)
+
+    def _write(self, data: dict[str, Any]) -> None:
+        try:
+            atomic_write_json(self.path, data, compact=True)
+        except BaseException:
+            self._stamp = None  # in-memory data now differs from disk: re-read next time
+            raise
+        self._stamp = self._file_stamp()
+        self.data = data
+
     def reload(self) -> None:
         with self._lock:
             self.data = self._read()
 
+    def reserved(self, phase: str) -> dict[str, float]:
+        """Summed tokens / USD of the phase's in-flight (reserved, not yet recorded) calls."""
+        res = self.data.get("reserved", {}).get(phase, {})
+        return {
+            "tokens": float(sum(r["tokens"] for r in res.values())),
+            "usd": float(sum(r["usd"] or 0.0 for r in res.values())),
+        }
+
+    def release(self, phase: str, reservation: str) -> None:
+        """Drop a reservation without recording spend (the call failed before it was made)."""
+        with self.locked() as data:
+            data.setdefault("reserved", {}).get(phase, {}).pop(reservation, None)
+            self._write(data)
+
     def spent(self, phase: str) -> dict[str, Any]:
         return self.data["phases"].get(phase, {"tokens": 0, "usd": 0.0, "calls": []})
 
-    def add(self, phase: str, usage: Usage, usd: float | None) -> dict[str, Any]:
+    def add(
+        self, phase: str, usage: Usage, usd: float | None, reservation: str | None = None
+    ) -> dict[str, Any]:
         entry = {
             "timestamp": datetime.now(UTC).isoformat(),
             "provider": usage.provider,
@@ -132,19 +193,14 @@ class Ledger:
             "cache_key": usage.cache_key,
             "usage_reported": usage.usage_reported,
         }
-        with self._lock:
-            data = self._read()  # merge with whatever is on disk now
+        with self.locked() as data:  # merge with whatever is on disk now
             rec = data["phases"].setdefault(phase, {"tokens": 0, "usd": 0.0, "calls": []})
             rec["tokens"] += usage.input_tokens + usage.output_tokens
             rec["usd"] += usd or 0.0
             rec["calls"].append(entry)
-            try:
-                atomic_write_json(self.path, data, compact=True)
-            except BaseException:
-                self._stamp = None  # in-memory data now differs from disk: re-read next time
-                raise
-            self._stamp = self._file_stamp()
-            self.data = data
+            if reservation is not None:
+                data.setdefault("reserved", {}).get(phase, {}).pop(reservation, None)
+            self._write(data)
         return entry
 
 
@@ -217,10 +273,36 @@ class Budget:
         """Raise ``BudgetExceededError`` if ``estimate`` would break a cap; return est. USD.
 
         Free (self-hosted) providers skip the USD cap and ``allow_unpriced`` rules; the token cap
-        still applies because it bounds compute time.
+        still applies because it bounds compute time. Spend reserved by in-flight calls (see
+        :meth:`reserve`) counts as spent.
         """
         self.ledger.reload()
-        spent = self.ledger.spent(self.phase)
+        return self._check(estimate)
+
+    def reserve(self, estimate: Usage) -> str:
+        """Check ``estimate`` and reserve it in one locked step; returns the reservation id.
+
+        Pass the id to :meth:`record` (or :meth:`release` if the call fails), so the cap check
+        and the spend recording cannot interleave across workers.
+        """
+        with self.ledger.locked() as data:
+            self.ledger.data = data
+            usd = self._check(estimate)
+            rid = uuid.uuid4().hex
+            tokens = estimate.input_tokens + estimate.output_tokens
+            phase_res = data.setdefault("reserved", {}).setdefault(self.phase, {})
+            phase_res[rid] = {"tokens": tokens, "usd": usd}
+            self.ledger._write(data)
+        return rid
+
+    def release(self, reservation: str) -> None:
+        self.ledger.release(self.phase, reservation)
+
+    def _check(self, estimate: Usage) -> float | None:
+        spent = dict(self.ledger.spent(self.phase))
+        pending = self.ledger.reserved(self.phase)
+        spent["tokens"] = spent["tokens"] + pending["tokens"]
+        spent["usd"] = spent["usd"] + pending["usd"]
         tokens = estimate.input_tokens + estimate.output_tokens
         free = self.is_free(estimate.provider)
         if self.max_tokens <= 0 or (not free and self.max_usd <= 0):
@@ -246,8 +328,9 @@ class Budget:
             )
         return usd
 
-    def record(self, actual: Usage) -> float | None:
-        """Record an actual call's usage in the ledger; return its USD cost (None if unpriced)."""
+    def record(self, actual: Usage, reservation: str | None = None) -> float | None:
+        """Record an actual call's usage in the ledger (releasing ``reservation`` in the same
+        write); return its USD cost (None if unpriced)."""
         usd = self.cost(actual)
-        self.ledger.add(self.phase, actual, usd)
+        self.ledger.add(self.phase, actual, usd, reservation)
         return usd

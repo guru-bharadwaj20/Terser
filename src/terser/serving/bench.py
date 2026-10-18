@@ -20,10 +20,13 @@ from typing import Any
 
 import numpy as np
 
+from terser.config import project_root
 from terser.serving.accounting import Pricing
 from terser.serving.service import RewriteService
 
-FIXTURE = Path(__file__).resolve().parents[3] / "tests" / "fixtures" / "casual_prompts.jsonl"
+# Default prompt set for the load test; pass --prompts for real traffic. It is a test fixture,
+# so a deployment benchmark should always pass its own file.
+FIXTURE = project_root() / "tests" / "fixtures" / "casual_prompts.jsonl"
 
 
 def _pct(xs: Sequence[float]) -> dict[str, float]:
@@ -70,10 +73,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path, required=True, help="output stem (.json and .md)")
     ap.add_argument("--repeats", type=int, default=50)
+    ap.add_argument("--prompts", type=Path, default=FIXTURE, help="JSONL with a prompt field")
     args = ap.parse_args(argv)
-    prompts = [
-        json.loads(x)["prompt"] for x in FIXTURE.read_text(encoding="utf-8").split("\n") if x
-    ]
+    lines = args.prompts.read_text(encoding="utf-8").split("\n")
+    prompts = [json.loads(x)["prompt"] for x in lines if x]
     res = run(prompts, repeats=args.repeats)
     res["git_sha"] = get_git_sha()
     args.out.parent.mkdir(parents=True, exist_ok=True)

@@ -205,7 +205,9 @@ def test_unreachable_server_clear_error(tmp_path: Path) -> None:
         c.complete("local", "m", MSGS, max_tokens=8)
     assert "llama-server" in str(info.value) and "vLLM" in str(info.value)
     assert "localhost:11434" in str(info.value)
-    assert not (tmp_path / "ledger.json").exists()
+    # the reservation is released: nothing spent, nothing left pending
+    data = json.loads((tmp_path / "ledger.json").read_text(encoding="utf-8"))
+    assert data["phases"] == {} and not any(data["reserved"].values())
 
 
 def test_timeout_is_unavailable_error(tmp_path: Path) -> None:

@@ -51,7 +51,7 @@ jobs:
           # CPU-only torch (~200 MB vs ~2.5 GB CUDA) so torch tests (rows 4.1.3, 8.2.x, 8.3.2) run, not skip.
           python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
           # orchestrate: Prefect, so tests/test_flows.py (rows 11.6.x) runs rather than skips.
-          python -m pip install -e ".[dev,hpo,serve,mlops,orchestrate]"
+          python -m pip install -e ".[dev,hpo,serve,export,mlops,orchestrate]"
 
       - name: Ruff
         run: ruff check .
