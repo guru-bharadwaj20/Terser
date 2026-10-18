@@ -189,8 +189,9 @@ def test_gate_cache_keeps_scores_and_timing(tmp_path: Path) -> None:
 
 def test_pair_gates_share_feature_time() -> None:
     class Feat:
-        calls = 0
-        seen: set[tuple[str, str]] = set()
+        def __init__(self) -> None:
+            self.calls = 0
+            self.seen: set[tuple[str, str]] = set()
 
         def features(self, o: str, t: str, c: str, tgt: str) -> dict[str, float]:
             if (o, t) not in self.seen:

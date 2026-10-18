@@ -6,6 +6,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from terser.models.classical.hmm import DiscreteHMM, TokenClassEncoder
 from terser.phase5 import bayes_studies, ensembles, hmm_tagger
@@ -103,8 +104,17 @@ def test_bayes_optimal_vs_map() -> None:
     p_tr = np.stack([flip(y_tr, s) for s in range(3)])
     p_va = np.stack([flip(y_va, s + 10) for s in range(3)])
     res = bayes_studies.bayes_optimal_vs_map(p_tr, y_tr, p_va, y_va, noise=0.3)
-    assert 0 <= res["acc_map"] <= 1 and 0 <= res["acc_bayes_optimal"] <= 1
-    assert 0 < res["map_posterior"] <= 1
+    # Recompute by hand: likelihood prod over train of (1 - noise) if right else noise, uniform
+    # prior; MAP = argmax posterior; Bayes-optimal = posterior-weighted vote.
+    right = (p_tr == y_tr).sum(1)
+    loglik = right * np.log(0.7) + (len(y_tr) - right) * np.log(0.3)
+    post = np.exp(loglik - loglik.max())
+    post /= post.sum()
+    k = int(np.argmax(post))
+    assert res["map_posterior"] == pytest.approx(post[k])
+    assert res["acc_map"] == pytest.approx(np.mean(p_va[k] == y_va))
+    vote = (post[:, None] * p_va).sum(0) > 0.5
+    assert res["acc_bayes_optimal"] == pytest.approx(np.mean(vote.astype(int) == y_va))
 
 
 def test_gmm_on_deltas_separates_modes() -> None:
