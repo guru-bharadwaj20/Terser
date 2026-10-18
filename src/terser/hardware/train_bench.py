@@ -174,6 +174,7 @@ def run(args: argparse.Namespace) -> TrainResult:
 def _log_mlflow(result: TrainResult) -> None:
     import mlflow
 
+    from terser.hardware.tags import hardware_tag
     from terser.tracking.runs import start_run
 
     with start_run(
@@ -181,7 +182,7 @@ def _log_mlflow(result: TrainResult) -> None:
         row="7.7",
         task="trainbench",
         run_name=run_name(result.model, result.mode, result.weights_dtype),
-        hardware="rtx4500ada",
+        hardware=hardware_tag(),
         params={
             "model": result.model,
             "mode": result.mode,
