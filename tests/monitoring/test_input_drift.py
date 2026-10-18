@@ -80,8 +80,14 @@ def test_same_distribution_no_drift() -> None:
 def test_embedding_mean_shift_flagged() -> None:
     result = _detect(_window(500, seed=2, shift=1.0))
     assert result.alert
-    assert "pc_1" in result.drifted and result.mmd_p < 0.01
+    assert any(k.startswith("pc_") for k in result.drifted) and result.mmd_p < 0.01
     assert "length_words" not in result.drifted and "category" not in result.drifted
+
+
+def test_small_window_without_drift_does_not_alert() -> None:
+    """At n=50 sampling noise alone is near PSI 0.2; the null correction absorbs it."""
+    alerts = sum(_detect(_window(50, seed=s)).alert for s in range(20))
+    assert alerts <= 3  # was 20 of 20 before the correction
 
 
 def test_longer_prompts_flagged() -> None:

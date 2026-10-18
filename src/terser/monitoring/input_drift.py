@@ -79,7 +79,12 @@ FloatArray = npt.NDArray[np.float64]
 
 @dataclass(frozen=True)
 class DriftThresholds:
-    """Alert when any PSI exceeds ``psi`` or the MMD permutation p-value is below ``mmd_p``."""
+    """Alert when any PSI exceeds ``psi`` or the MMD permutation p-value is below ``mmd_p``.
+
+    The PSI threshold is raised by each feature's expected PSI under no drift,
+    ``(k - 1) * (1/n_ref + 1/n_cur)`` for ``k`` bins (:func:`null_psi`): on a 50-prompt window
+    sampling noise alone is near 0.2, so a fixed 0.2 fired on every small window.
+    """
 
     psi: float = 0.2
     mmd_p: float = 0.01
@@ -115,6 +120,11 @@ def psi(reference: npt.ArrayLike, current: npt.ArrayLike, bins: int = 10) -> flo
     r = np.bincount(np.searchsorted(edges, ref, side="right"), minlength=len(edges) + 1)
     c = np.bincount(np.searchsorted(edges, cur, side="right"), minlength=len(edges) + 1)
     return _psi_from_counts(r.astype(np.float64), c.astype(np.float64))
+
+
+def null_psi(n_bins: int, n_reference: int, n_current: int) -> float:
+    """Expected PSI between two samples of one distribution (chi-square approximation)."""
+    return max(0, n_bins - 1) * (1.0 / n_reference + 1.0 / n_current)
 
 
 def categorical_psi(reference: Sequence[str], current: Sequence[str]) -> float:
@@ -192,22 +202,28 @@ class DriftResult:
     mmd2: float
     mmd_p: float
     mmd_sigma: float
-    mmd_samples: int
+    mmd_samples: dict[str, int]
+    """Rows per side used by the MMD test (``reference`` / ``current``; each capped separately)."""
     length: dict[str, dict[str, float]]
     category: dict[str, dict[str, float]]
     thresholds: DriftThresholds = field(default_factory=DriftThresholds)
     n_skipped: int = 0
     evidently: dict[str, Any] = field(default_factory=dict)
     artifacts: dict[str, str] = field(default_factory=dict)
+    psi_null: dict[str, float] = field(default_factory=dict)
+    """Expected PSI under no drift per feature (:func:`null_psi`), added to the threshold."""
+
+    def psi_threshold(self, feature: str) -> float:
+        return self.thresholds.psi + self.psi_null.get(feature, 0.0)
 
     @property
     def drifted(self) -> list[str]:
         """Features whose PSI exceeds the threshold (components first, then length, category)."""
-        return [k for k, v in self.psi.items() if v > self.thresholds.psi]
+        return [k for k, v in self.psi.items() if v > self.psi_threshold(k)]
 
     @property
     def reasons(self) -> list[str]:
-        out = [f"PSI {k} = {self.psi[k]:.3f} > {self.thresholds.psi}" for k in self.drifted]
+        out = [f"PSI {k} = {self.psi[k]:.3f} > {self.psi_threshold(k):.3f}" for k in self.drifted]
         if self.mmd_p < self.thresholds.mmd_p:
             out.append(f"MMD p = {self.mmd_p:.4f} < {self.thresholds.mmd_p}")
         return out
@@ -246,7 +262,7 @@ class DriftResult:
             ),
             f"- PCA: {self.n_components} components fitted on the reference, "
             f"{self.explained_variance:.1%} of embedding variance",
-            f"- MMD² (RBF, σ = {self.mmd_sigma:.3f}, {self.mmd_samples} rows per side): "
+            f"- MMD² (RBF, σ = {self.mmd_sigma:.3f}, {self.mmd_samples['reference']} reference / {self.mmd_samples['current']} current rows): "
             f"{self.mmd2:.5f}, permutation p = {self.mmd_p:.4f}",
         ]
         if self.evidently:
@@ -264,7 +280,7 @@ class DriftResult:
         for name, value in self.psi.items():
             ev = ev_psi.get(name)
             ev_s = f"{ev:.3f}" if ev is not None else "n/a"
-            flag = "yes" if value > self.thresholds.psi else ""
+            flag = "yes" if value > self.psi_threshold(name) else ""
             ev_flag = "yes" if ev is not None and ev > self.thresholds.psi else ""
             lines.append(f"| {name} | {value:.3f} | {flag} | {ev_s} | {ev_flag} |")
         ref_l, cur_l = self.length["reference"], self.length["current"]
@@ -339,9 +355,16 @@ def detect_input_drift(
     mean, axes, explained = _pca(ref, n_components)
     ref_pc = (ref - mean) @ axes.T
     cur_pc = (cur - mean) @ axes.T
-    scores = {f"pc_{i + 1}": psi(ref_pc[:, i], cur_pc[:, i]) for i in range(axes.shape[0])}
-    scores["length_words"] = psi(ref_len, cur_len)
+    # About 10 rows per bin in the smaller window (3-10 bins): with 10 bins on 50 prompts most
+    # bins hold a handful of rows and empty ones hit the 1e-4 floor, so noise alone looks like
+    # drift.
+    bins = int(np.clip(min(len(ref), len(cur)) // 10, 3, 10))
+    scores = {f"pc_{i + 1}": psi(ref_pc[:, i], cur_pc[:, i], bins) for i in range(axes.shape[0])}
+    scores["length_words"] = psi(ref_len, cur_len, bins)
     scores["category"] = categorical_psi(reference_categories, current_categories)
+    n_levels = len(set(reference_categories) | set(current_categories))
+    psi_null = {k: null_psi(bins, len(ref), len(cur)) for k in scores if k != "category"}
+    psi_null["category"] = null_psi(n_levels, len(ref), len(cur))
     mmd2, mmd_p, sigma = mmd_permutation_test(
         ref_pc, cur_pc, n_permutations=n_permutations, max_samples=max_mmd_samples, seed=seed
     )
@@ -354,7 +377,11 @@ def detect_input_drift(
         mmd2=mmd2,
         mmd_p=mmd_p,
         mmd_sigma=sigma,
-        mmd_samples=min(max_mmd_samples, len(ref), len(cur)),
+        mmd_samples={
+            "reference": min(max_mmd_samples, len(ref)),
+            "current": min(max_mmd_samples, len(cur)),
+        },
+        psi_null=psi_null,
         length={"reference": _length_stats(ref_len), "current": _length_stats(cur_len)},
         category={
             "reference": _shares(reference_categories),
