@@ -120,6 +120,7 @@ def _null(category: Category, reason: str, **details: Any) -> MetricResult:
 
 _ASCII_PUNCT = frozenset(string.punctuation)
 _ARTICLES_RE = re.compile(r"\b(?:a|an|the)\b")
+_NUMBER_RE = re.compile(r"(?<![\w.])[-−]?\d+(?:\.\d+)?")
 
 
 def _is_punct(ch: str) -> bool:
@@ -133,8 +134,14 @@ def normalize_answer(text: str) -> str:
     ``°`` are kept.
     """
     text = unicodedata.normalize("NFKC", text).lower()
+    # Protect a number's sign and decimal point: "-5" must not normalise to "5", nor "3.5" to "35".
+    text = _NUMBER_RE.sub(
+        lambda m: m.group(0).replace("-", "").replace("−", "").replace(".", ""),
+        text,
+    )
     text = "".join(" " if _is_punct(ch) and ch in "-–—/" else ch for ch in text)
     text = "".join(ch for ch in text if not _is_punct(ch))
+    text = text.replace("", "-").replace("", ".")
     text = _ARTICLES_RE.sub(" ", text)
     return " ".join(text.split())
 

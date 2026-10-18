@@ -36,15 +36,30 @@ def tidy(text: str) -> str:
     lines = []
     for line in text.split("\n"):
         line = re.sub(r"[ \t]+", " ", line)
-        line = re.sub(r"\s+([,.;:!?])", r"\1", line)
+        # Only a space before *trailing* punctuation: "in .NET" and "the ! operator" keep theirs.
+        line = re.sub(r"\s+([,.;:])(?=\s|$)", r"\1", line)
+        line = re.sub(r"\s+([!?])(?=$|\s+[A-Z])", r"\1", line)
         line = re.sub(r"([,;:])(?:\s*[,;:])+", r"\1", line)
         line = re.sub(r",\s*([.!?])", r"\1", line)
         line = re.sub(r"^[\s,;:]+(?=\S)", "", line)
         line = line.strip()
-        if line[:1].isalpha() and line[:1].islower() and not line.startswith(("http", "e.g")):
+        first = line.split(" ", 1)[0]
+        if (
+            line[:1].isalpha()
+            and line[:1].islower()
+            and not line.startswith(("http", "e.g", "i.e"))
+            and not _MIXED_CASE.match(first)
+        ):
             line = line[0].upper() + line[1:]
         lines.append(line)
     out = re.sub(r"\n{3,}", "\n\n", "\n".join(lines))
-    # Capitalise sentence starts exposed by deletions.
-    out = re.sub(r"([.!?]\s+)([a-z])", lambda m: m.group(1) + m.group(2).upper(), out)
+    # Capitalise sentence starts exposed by deletions, but not after an abbreviation ("e.g. the")
+    # and not a mixed-case word ("iPhone").
+    out = _SENTENCE_START.sub(lambda m: m.group(1) + m.group(2).upper(), out)
     return out.strip()
+
+
+_MIXED_CASE = re.compile(r"[a-z]+[A-Z]")
+_SENTENCE_START = re.compile(
+    r"(?<!\be\.g)(?<!\bi\.e)(?<!\betc)(?<!\bvs)(?<!\bcf)(?<!\s)([.!?]\s+)([a-z])(?![a-z]*[A-Z])"
+)
