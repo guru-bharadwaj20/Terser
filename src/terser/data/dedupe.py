@@ -108,16 +108,19 @@ _WHITESPACE = re.compile(r"\s+", flags=re.UNICODE)
 def record_text(record: Record) -> str:
     """Return the text used for duplicate detection.
 
-    ``prompt`` when present (casual / pilot records), else ``instruction`` followed by ``input``
-    (normalised source records), else ``text``; empty string if none exists.
+    ``instruction`` followed by ``input`` when present (source records, and casual records, which
+    keep the clean instruction they were made from), else ``prompt`` (pilot records), else
+    ``text``; empty string if none exists. Casual records are compared on the clean instruction:
+    two copies of the same task get different seeded casual wordings, which can fall below the
+    Jaccard threshold and land in different splits.
     """
-    prompt = record.get("prompt")
-    if isinstance(prompt, str) and prompt:
-        return prompt
     parts = [record.get("instruction"), record.get("input")]
     joined = "\n".join(p for p in parts if isinstance(p, str) and p)
     if joined:
         return joined
+    prompt = record.get("prompt")
+    if isinstance(prompt, str) and prompt:
+        return prompt
     text = record.get("text")
     return text if isinstance(text, str) else ""
 

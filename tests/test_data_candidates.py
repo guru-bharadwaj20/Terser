@@ -361,7 +361,7 @@ def test_settings_from_config() -> None:
     assert s.stand_in is True and s.rewrite_model == "qwen2.5:1.5b"
     assert s.output_path.as_posix().endswith("data/interim/pilot_candidates.jsonl")
     assert "smoke" in s.smoke_output_path.as_posix()
-    assert s.length_targets == ("gpt-4o", "qwen2.5", "llama-3.1")
+    assert s.length_targets == ("gpt-4o", "qwen2.5", "llama-3.1", "phi3.5")
 
     cfg = load_config(
         ["experiment=p2_candidates", "experiment.params.methods=[ops_FHC,llmlingua2]"]
