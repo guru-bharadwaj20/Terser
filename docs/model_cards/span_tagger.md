@@ -107,7 +107,7 @@ held-out estimate and do not include gate rejections. After the gate at its row 
 (0.264564), 298 of the 300 rewrites are rejected and median savings are 0.0% (mean 0.1%; at the
 old 0.5: 199 rejected, median 0.0%, mean 8.5%; grouped-OOF gate scores,
 [p11_fast_path.md](../../reports/p11_fast_path.md)). The judged end-to-end run of tagger + gate
-on 500 val prompts is checkpoint C5.6, still pending ([status.md](../checkpoints/status.md)).
+on 500 val prompts is checkpoint C5.6, measured as a fail: 16.5% median savings at 55.4% preserved ([p5_hmm_compressor.md](../../reports/p5_hmm_compressor.md)).
 
 ### 5.2 Per category
 

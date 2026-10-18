@@ -168,7 +168,7 @@ reaches the 85% per-category bar.
 | quality (offline batch 16, HF `generate`, not vLLM) | GPU (type not recorded in the report) | offline | val prompts | mean 0.33 / 0.50 / 0.76 s (sft05 / sft15 / sft3b) | not reported | not reported |
 | quality (served) | RTX 4500 Ada | — | ≤ 256 tokens | not measured | not measured | not measured |
 
-C11.3 (quality-path latency) and C11.4 (throughput) are pending on a rewriter that passes C8.3
+C11.3 (quality-path latency) and C11.4 (throughput) were measured and fail: p95 438 ms at 5 RPS with 0% quality-served, and 20 RPS sustained but every request answered by the fallback ([p11_quality_path.md](../../reports/p11_quality_path.md))
 ([status.md](../checkpoints/status.md)).
 
 ### 5.4 Cross-model generalisation

@@ -1,8 +1,8 @@
 # Phase 6: unsupervised structure of prompts
 
-Rows 6.2–6.8. Code: `src/terser/models/clustering/`. Measured sections (2 onward) are filled in
-once the Phase 2 train split and its bge-small embeddings (row 6.1) exist; no numbers are reported
-before then.
+Rows 6.2–6.8. Code: `src/terser/models/clustering/`. This file holds the method comparison
+(section 1) only; the measured results are in [p6_results.md](p6_results.md) (rows 6.2–6.8, C6.1,
+C6.2) and [p6_cluster_risk.md](p6_cluster_risk.md) (row 6.9, C6.3).
 
 ## 1. Hierarchical vs non-hierarchical clustering (row 6.4)
 

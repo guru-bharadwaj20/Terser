@@ -30,8 +30,9 @@ the failure modes specific to Terser that a generic MLOps stack would miss. Cons
 ```mermaid
 flowchart LR
   subgraph Data["Data (DVC, row 11.1.2)"]
-    C[collect] --> CA[casualise] --> CD[candidates] --> R[respond] --> J[judge] --> L[label]
-    L --> F[features] --> S[split] --> ST[stratify]
+    C[collect] --> CA[casualise] --> DD[dedupe] --> S[split] --> LS[label_subset]
+    LS --> CD[candidates] --> TK[token_counts] --> R[respond] --> J[label: judge + label] --> O[oracle]
+    S --> ST[features]
   end
   subgraph Train["Train (MLflow, 11.2)"]
     TC[gate / tagger<br/>CPU] --> EV[evaluate<br/>checkpoints]
