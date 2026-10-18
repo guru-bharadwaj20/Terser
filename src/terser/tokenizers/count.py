@@ -58,8 +58,12 @@ TARGETS: dict[str, Target] = {
 
 
 def cache_dir() -> Path:
-    """Directory for cached Claude counts (read from ``TERSER_CACHE`` at call time)."""
-    return Path(os.environ.get("TERSER_CACHE", ".cache")) / "token_counts"
+    """Directory for cached Claude counts: ``$TERSER_CACHE/token_counts``, else
+    ``<project root>/.cache/token_counts`` (not relative to the current directory)."""
+    from terser.config import project_root
+
+    base = os.environ.get("TERSER_CACHE")
+    return (Path(base) if base else project_root() / ".cache") / "token_counts"
 
 
 def claude_model() -> str:

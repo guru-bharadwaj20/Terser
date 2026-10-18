@@ -25,7 +25,7 @@ from typing import Literal
 import numpy as np
 import numpy.typing as npt
 
-__all__ = ["DualSVM", "kernel_matrix"]
+__all__ = ["DualSVM"]
 
 FloatArray = npt.NDArray[np.float64]
 Kernel = Literal["linear", "poly"]

@@ -57,12 +57,16 @@ def get_git_sha(cwd: Path = REPO_ROOT) -> str:
     """Return ``git rev-parse HEAD`` (read-only) or ``unknown`` if git/the repo is unavailable."""
     try:
         out = subprocess.run(
-            ["git", "rev-parse", "HEAD"], cwd=cwd, capture_output=True, text=True, timeout=10
+            ["git", "rev-parse", "HEAD"],
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=True,
         )
-    except (OSError, subprocess.SubprocessError):
+    except (OSError, subprocess.SubprocessError):  # includes CalledProcessError (not a repo)
         return "unknown"
-    sha = out.stdout.strip()
-    return sha if out.returncode == 0 and sha else "unknown"
+    return out.stdout.strip() or "unknown"
 
 
 def data_hash(root: Path = REPO_ROOT) -> str:

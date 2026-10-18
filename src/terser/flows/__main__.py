@@ -39,7 +39,9 @@ def _list() -> int:
 def _parse_params(items: Sequence[str]) -> dict[str, Any]:
     out: dict[str, Any] = {}
     for item in items:
-        key, _, raw = item.partition("=")
+        key, sep, raw = item.partition("=")
+        if not sep or not key:
+            raise SystemExit(f"--param expects key=value, got {item!r}")
         try:
             out[key] = json.loads(raw)
         except json.JSONDecodeError:

@@ -209,17 +209,19 @@ def _scale(factor: float) -> _Converter:
     return lambda v: v * factor
 
 
-# (pattern, unit key, dimension, converter to the dimension's base unit). Order matters: longer
-# and more specific patterns first. Base units: kelvin, degree, m/s, m^2, m^3, m, kg, s.
+# (pattern, unit key, dimension, converter to the dimension's base unit). The ambiguous one-letter
+# units c, f and l count when written against the number ("30c") or in capitals ("212 F"), not
+# as "3 f". Order matters: longer and more specific patterns first. Base units: kelvin, degree,
+# m/s, m^2, m^3, m, kg, s.
 _UNIT_TABLE: tuple[tuple[str, str, str, _Converter], ...] = (
     (
-        r"°\s*c|º\s*c|degrees?\s+c(?:elsius)?|celsius|centigrade|c",
+        r"°\s*c|º\s*c|degrees?\s+c(?:elsius)?|celsius|centigrade|(?<=\d)c|(?-i:C)",
         "celsius",
         "temperature",
         lambda v: v + 273.15,
     ),
     (
-        r"°\s*f|º\s*f|degrees?\s+f(?:ahrenheit)?|fahrenheit|f",
+        r"°\s*f|º\s*f|degrees?\s+f(?:ahrenheit)?|fahrenheit|(?<=\d)f|(?-i:F)",
         "fahrenheit",
         "temperature",
         lambda v: (v - 32.0) * 5.0 / 9.0 + 273.15,
@@ -243,7 +245,7 @@ _UNIT_TABLE: tuple[tuple[str, str, str, _Converter], ...] = (
     ),
     (r"m\s*³|m\s*\^\s*3|cubic\s+met(?:er|re)s?", "m3", "volume", _scale(1.0)),
     (r"ml|millilit(?:er|re)s?", "ml", "volume", _scale(1e-6)),
-    (r"l|lit(?:er|re)s?", "l", "volume", _scale(1e-3)),
+    (r"(?<=\d)l|(?-i:L)|lit(?:er|re)s?", "l", "volume", _scale(1e-3)),
     (r"gal(?:lons?)?", "gal", "volume", _scale(3.785411784e-3)),
     (r"degrees?|°|deg", "degree", "angle", _scale(1.0)),
     (r"km|kilomet(?:er|re)s?", "km", "length", _scale(1000.0)),

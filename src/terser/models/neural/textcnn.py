@@ -35,7 +35,7 @@ from typing import TYPE_CHECKING, Any, Final
 if TYPE_CHECKING:
     from torch import nn
 
-__all__ = ["POOLINGS", "TextCNNConfig", "build_textcnn", "textcnn_param_count"]
+__all__ = ["TextCNNConfig", "build_textcnn", "textcnn_param_count"]
 
 POOLINGS: Final[tuple[str, ...]] = ("max", "avg", "concat")
 

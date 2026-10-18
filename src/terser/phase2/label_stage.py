@@ -216,7 +216,7 @@ def run_labels(
     lock = threading.Lock()
     start = time.perf_counter()
     by_prompt = {str(p["id"]): p for p in prompts}
-    # outputs[(target, prompt_id, candidate_id)][sample] = output
+    # Keyed by (target, prompt id, candidate id), then by sample index; values are outputs.
     outputs: dict[tuple[str, str, str], dict[int, str]] = defaultdict(dict)
     for r in responses:
         if r.get("stand_in") in (True, "True", "true"):

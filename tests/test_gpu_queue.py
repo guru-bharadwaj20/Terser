@@ -274,3 +274,12 @@ def test_run_gates_file_unblocks_and_skips_done(
     logs: list[str] = []
     run(root / "gpu_queue", root, log=logs.append)
     assert any("already done" in line for line in logs)
+
+
+def test_committed_queue_specs_are_valid() -> None:
+    """Every committed job spec in gpu_queue/ passes validate(), and gates.yaml parses."""
+    from terser.gpu_queue.queue import passed_gates
+
+    root = Path(__file__).resolve().parents[1]
+    assert validate(root / "gpu_queue", root) == []
+    assert "C7.1" in passed_gates(root / "gpu_queue")

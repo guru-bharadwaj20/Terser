@@ -34,7 +34,9 @@ services:
       dockerfile: docker/Dockerfile.gpu
     image: terser-gpu:latest
     ports:
-      - "8000:8000"
+      # Loopback only: vLLM has no API key here. terser-cpu reaches it as terser-gpu:8000 on the
+      # compose network; the host port is for local debugging.
+      - "127.0.0.1:8000:8000"
     environment:
       TERSER_BASE_MODEL: ${TERSER_BASE_MODEL:-Qwen/Qwen2.5-3B-Instruct}
       TERSER_LORA_PATH: ${TERSER_LORA_PATH:-/models/rewriter/sft-qwen3b-lora}
@@ -80,8 +82,10 @@ services:
       - "127.0.0.1:3000:3000"
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
-      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      # No default password: set GRAFANA_ADMIN_PASSWORD (e.g. in .env) before `docker compose up`.
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD in .env}
+      # Anonymous viewing off by default; GRAFANA_ANONYMOUS=true turns it on for a local demo.
+      GF_AUTH_ANONYMOUS_ENABLED: ${GRAFANA_ANONYMOUS:-false}
       GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
       GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/terser-serving.json
       GF_ANALYTICS_REPORTING_ENABLED: "false"

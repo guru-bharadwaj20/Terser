@@ -25,6 +25,7 @@ search never read the test split.
 from __future__ import annotations
 
 import math
+import sys
 import warnings
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
@@ -117,7 +118,8 @@ class SearchSpace:
                 continue
             lo, hi = (math.log(d.low), math.log(d.high)) if d.log else (d.low, d.high)
             raw = np.linspace(lo, hi, grid_points)
-            vals = np.exp(raw) if d.log else raw
+            # exp(log(x)) can land a hair outside [low, high]; clip back onto the bounds.
+            vals = np.clip(np.exp(raw) if d.log else raw, d.low, d.high)
             if isinstance(d, Int):
                 out[name] = sorted({round(float(v)) for v in vals})
             else:
@@ -343,9 +345,16 @@ def run_search(
 
     try:
         if method == "gp":
-            history: list[tuple[Params, float]] = []
+            # A resumed study (same storage and name) starts from the trials it already has.
+            history: list[tuple[Params, float]] = [
+                (dict(t.params), float(t.value))
+                for t in study.trials
+                if t.value is not None and t.state == optuna.trial.TrialState.COMPLETE
+            ]
             for i in range(n_trials):
-                if i >= n_startup:
+                # Propose only with something to fit: if every start-up trial failed, the
+                # study's own sampler picks the next point instead of the GP crashing.
+                if i >= n_startup and history:
                     study.enqueue_trial(_gp_propose(space, history, rng, maximize))
                 study.optimize(wrapped, n_trials=1, catch=catch)
                 t = study.trials[-1]
@@ -376,7 +385,11 @@ def run_search(
             mlf.log_metric("best_value", result.best_value)
             for step, v in enumerate(result.best_so_far):
                 mlf.log_metric("best_so_far", v, step=step)
-    finally:
+    except BaseException:
+        # Close the MLflow parent run as FAILED, not FINISHED.
         if ctx is not None:
-            ctx.__exit__(None, None, None)
+            ctx.__exit__(*sys.exc_info())
+        raise
+    if ctx is not None:
+        ctx.__exit__(None, None, None)
     return result

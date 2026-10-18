@@ -323,9 +323,12 @@ def train_rewriter_flow(
     priority: int = 2,
     queue_dir: str = "gpu_queue",
     dry_run: bool = False,
+    hardware: str = "rtx4500ada",
 ) -> list[StepResult]:
     """Smoke-test on CPU, then submit the rewriter job to ``gpu_queue/`` for the GPU worker."""
-    job = rewriter_job(experiment, job_id, est_vram_gb, est_hours, depends_on, priority)
+    job = rewriter_job(
+        experiment, job_id, est_vram_gb, est_hours, depends_on, priority, hardware=hardware
+    )
     smoke = ["python", "-m", "pytest", "-q", job["cpu_smoke_test"]]
     out = [shell_step("cpu_smoke_test", smoke, dry_run)]
     out.append(submit_gpu_job(job, queue_dir, dry_run))

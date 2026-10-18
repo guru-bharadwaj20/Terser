@@ -58,6 +58,8 @@ POLICY_TASKS = (
     steps.input_drift_check,
     steps.promotion_guard,
     steps.registry_promote,
+    steps.new_data_check,
+    steps.record_ct_cycle,
 )
 
 

@@ -74,21 +74,29 @@ def run_name(model: str, quantization: str | None, smoke: bool) -> str:
 
 
 class PeakVramSampler:
-    """Poll device-wide used memory (MiB) via NVML in a background thread."""
+    """Poll used memory (MiB) via NVML in a background thread, summed over every visible GPU.
 
-    def __init__(self, index: int = 0, interval_s: float = 0.05) -> None:
+    vLLM with tensor parallelism spreads the model over several GPUs, so device 0 alone
+    under-reports the peak. NVML is shut down on exit.
+    """
+
+    def __init__(self, index: int = -1, interval_s: float = 0.05) -> None:
+        """``index=-1`` samples every GPU; a device index samples that one only."""
         import pynvml
 
         self._nvml = pynvml
         pynvml.nvmlInit()
-        self._handle = pynvml.nvmlDeviceGetHandleByIndex(index)
+        count = pynvml.nvmlDeviceGetCount()
+        indices = range(count) if index < 0 else [index]
+        self._handles = [pynvml.nvmlDeviceGetHandleByIndex(i) for i in indices]
         self._interval = interval_s
         self._stop = threading.Event()
         self.peak_mib = self.used_mib()
         self._thread = threading.Thread(target=self._run, daemon=True)
 
     def used_mib(self) -> float:
-        return float(self._nvml.nvmlDeviceGetMemoryInfo(self._handle).used) / 2**20
+        used = sum(self._nvml.nvmlDeviceGetMemoryInfo(h).used for h in self._handles)
+        return float(used) / 2**20
 
     def _run(self) -> None:
         while not self._stop.is_set():
@@ -103,6 +111,7 @@ class PeakVramSampler:
         self._stop.set()
         self._thread.join()
         self.peak_mib = max(self.peak_mib, self.used_mib())
+        self._nvml.nvmlShutdown()
 
 
 def _measure(llm: Any, batch_size: int, max_tokens: int) -> BatchResult:
@@ -176,6 +185,7 @@ def run(args: argparse.Namespace) -> ServingResult:
 def _log_mlflow(result: ServingResult, smoke: bool) -> None:
     import mlflow
 
+    from terser.hardware.tags import hardware_tag
     from terser.tracking.runs import start_run
 
     with start_run(
@@ -183,7 +193,7 @@ def _log_mlflow(result: ServingResult, smoke: bool) -> None:
         row="7.5" if smoke else "7.6",
         task="vllmsmoke" if smoke else "servingbench",
         run_name=run_name(result.model, result.quantization, smoke),
-        hardware="rtx4500ada",
+        hardware=hardware_tag(),
         params={
             "model": result.model,
             "quantization": result.quantization or "none",

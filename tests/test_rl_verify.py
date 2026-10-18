@@ -103,7 +103,7 @@ def _synthetic() -> tuple[list[dict], list[dict], list[dict]]:
     fx = {"p1": "a b c d e f g h i", "p2": "a b c d e f g h i", "p3": "a b c", "p4": "a b c d"}
     cands = build_candidates(prompts, {RL_METHOD: rl, FIXED_METHOD: fx})
     preserved = {
-        # (prompt, method, target)
+        # keys are (prompt id, method, target)
         ("p1", RL_METHOD, QWEN): True,
         ("p1", RL_METHOD, PHI): True,
         ("p2", RL_METHOD, QWEN): True,
