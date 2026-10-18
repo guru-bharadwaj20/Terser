@@ -1,5 +1,11 @@
 # Terser task runner (POSIX). Mirror of tasks.ps1.
 PY ?= python
+# The project venv's interpreter: install and the targets below run inside .venv.
+ifeq ($(OS),Windows_NT)
+VENV_PY := .venv/Scripts/python
+else
+VENV_PY := .venv/bin/python
+endif
 
 .PHONY: help install test test-all lint format typecheck hooks data \
         train-classical eval mlflow-ui gpu-queue hello clean
@@ -7,7 +13,7 @@ PY ?= python
 help:
 	@echo "Usage: make <target>"
 	@echo "  help             List available targets (default)"
-	@echo "  install          Create .venv if missing and pip install -e .[dev]"
+	@echo "  install          Create .venv if missing and install the CI extras into it"
 	@echo "  test             Run CPU tests (not gpu, not api)"
 	@echo "  test-all         Run the full test suite"
 	@echo "  lint             ruff check + black --check"
@@ -24,46 +30,47 @@ help:
 
 install:
 	test -d .venv || $(PY) -m venv .venv
-	$(PY) -m pip install -e ".[dev]"
+	# The same extras as CI, so a local `make test` runs the tests CI runs.
+	$(VENV_PY) -m pip install -e ".[dev,hpo,serve,mlops,orchestrate]"
 
 test:
-	$(PY) -m pytest -m "not gpu and not api"
+	$(VENV_PY) -m pytest -m "not gpu and not api"
 
 test-all:
-	$(PY) -m pytest
+	$(VENV_PY) -m pytest
 
 lint:
-	$(PY) -m ruff check .
-	$(PY) -m black --check .
+	$(VENV_PY) -m ruff check .
+	$(VENV_PY) -m black --check .
 
 format:
-	$(PY) -m ruff check --fix .
-	$(PY) -m black .
+	$(VENV_PY) -m ruff check --fix .
+	$(VENV_PY) -m black .
 
 typecheck:
-	$(PY) -m mypy src
+	$(VENV_PY) -m mypy src
 
 hooks:
-	$(PY) -m pre_commit run --all-files
+	$(VENV_PY) -m pre_commit run --all-files
 
 data:
-	@if [ -f dvc.yaml ]; then $(PY) -m dvc repro; \
+	@if [ -f dvc.yaml ]; then $(VENV_PY) -m dvc repro; \
 	else echo "No dvc.yaml pipeline yet; nothing to reproduce."; fi
 
 train-classical:
-	$(PY) -m terser.phase3.studies --help
+	$(VENV_PY) -m terser.phase3.studies --help
 
 eval:
 	@echo "eval: the final evaluation is python -m terser.phase12.results --split test ... (see its --help); it needs the row 12.1 unlock."
 
 mlflow-ui:
-	$(PY) -m mlflow ui --backend-store-uri ./mlruns
+	$(VENV_PY) -m mlflow ui --backend-store-uri ./mlruns
 
 gpu-queue:
-	$(PY) -m terser.gpu_queue dry-run
+	$(VENV_PY) -m terser.gpu_queue dry-run
 
 hello:
-	$(PY) -m terser.hello
+	$(VENV_PY) -m terser.hello
 
 clean:
 	find . \( -path ./.venv -o -path ./.git -o -path ./data -o -path ./mlruns \) -prune -o \

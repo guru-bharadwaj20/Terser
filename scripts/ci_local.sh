@@ -12,6 +12,8 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 if [[ -x .venv/bin/python ]]; then
   export PATH="$PWD/.venv/bin:$PATH"
+elif [[ -x .venv/Scripts/python.exe ]]; then  # Windows venv (Git Bash)
+  export PATH="$PWD/.venv/Scripts:$PATH"
 fi
 export HF_HUB_DISABLE_SYMLINKS_WARNING=1 PYTHONUTF8=1
 
@@ -36,11 +38,13 @@ step() {
 step "Ruff" ruff check .
 step "Black" black --check .
 step "Mypy" mypy src
+step "CPU smoke training (row 8.3.2)" pytest tests/rewriter/test_train_tiny.py -q
 step "DVC pipeline dry run" dvc repro --dry --allow-missing
 step "Test-set isolation audit (row 10.8)" python -m terser.hpo.audit --scan src/terser
 step "Feature parity (row 11.1.3)" pytest tests/features -q
 step "Tokenizer drift (row 11.5.3)" python -m terser.monitoring.tokenizer_drift
-step "Tests (CPU)" pytest -m "not gpu and not api" --cov=terser --cov-report=term
+step "Tests (CPU)" pytest -m "not gpu and not api" --cov=terser --cov-report=term \
+  --ignore=tests/features --ignore=tests/rewriter/test_train_tiny.py
 
 if ((${#failed[@]})); then
   echo "failed: ${failed[*]}"

@@ -81,7 +81,8 @@ def test_cpu_serving_config_matches_fast_onnx(compose: dict[str, Any]) -> None:
     # the quality path points at the terser-gpu service under the name vLLM serves the LoRA as
     url = cfg["quality"]["base_url"]
     host, port = re.match(r"http://([\w-]+):(\d+)/v1$", url).groups()  # type: ignore[union-attr]
-    assert host == "terser-gpu" and f"{port}:{port}" in compose["services"][host]["ports"]
+    ports = compose["services"][host]["ports"]
+    assert host == "terser-gpu" and f"127.0.0.1:{port}:{port}" in ports  # loopback only
     assert cfg["quality"]["model"] == _dockerfile_env("Dockerfile.gpu")["TERSER_SERVED_NAME"]
 
 

@@ -58,8 +58,12 @@ jobs:
         run: python3 scripts/cd_smoke.py --url http://127.0.0.1:8080 --requests 200 --p95-ms 150
 
       - name: Push to GHCR
+        env:
+          # Passed through the environment, not interpolated into the script text.
+          GHCR_TOKEN: ${{ github.token }}
+          GHCR_USER: ${{ github.actor }}
         run: |
-          echo "${{ github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
           for t in "$GITHUB_REF_NAME" latest; do
             docker tag terser-cpu:ci "$IMAGE:$t"
             docker push "$IMAGE:$t"
