@@ -124,7 +124,7 @@ threshold the same run rejects 199 of 300 rewrites (median 0.0%, mean 8.5%). Wit
 `gate.onnx`, which was refit on these prompts' pairs, the counts are 298 of 300 at 0.264564 and
 179 of 300 at 0.5 (mean 0.1% and 9.9%). The tagger was trained on these prompts too
 ([p11_fast_path.md](../../reports/p11_fast_path.md)). The fast path (tagger + gate) has never been judged end to end. That
-run is checkpoint C5.6 (500 val prompts with the judge), still pending
+run is checkpoint C5.6 (500 val prompts with the judge), measured as a fail ([p5_hmm_compressor.md](../../reports/p5_hmm_compressor.md))
 ([status.md](../checkpoints/status.md)).
 
 ### 5.2 Per category

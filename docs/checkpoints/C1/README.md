@@ -38,4 +38,4 @@ Options for the project owner:
 
 ## Decision
 
-`FAIL` (C1.4), with C1.1 pending human review and C1.3 blocked on the GPU. Phase 2 CPU work continues in parallel as it does not depend on C1.4; the owner should pick option A, B or C.
+`FAIL` (C1.4), with C1.1 pending human review and C1.3 provisional on the GPU judge labels (see the C1.3 row above). Phase 2 CPU work continues in parallel as it does not depend on C1.4; the owner should pick option A, B or C.
