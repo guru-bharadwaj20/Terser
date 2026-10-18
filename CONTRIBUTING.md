@@ -729,7 +729,7 @@ quality monitoring.
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
 | 11.4.1 | CI | Every PR: lint, types, unit tests, CPU smoke training, `dvc repro --dry`, feature parity | Median ≤ 15 min | ✅ run 39890354266 green on 4 jobs, median 8.8 min |
-| 11.4.2 | CD | Tag `v*`: build + scan images → push to GHCR → start the container in CI → smoke + latency tests | Release images published by the workflow | ❌ |
+| 11.4.2 | CD | Tag `v*`: build + scan images → push to GHCR → start the container in CI → smoke + latency tests | Release images published by the workflow | ✅ tag v1.0.2: CD run 39895658827 built, Trivy-scanned, started terser-cpu, smoke + p95 1.8 ms, pushed ghcr.io/guru-bharadwaj20/terser-cpu:v1.0.2 (GPU image built locally, needs a GPU to test) |
 | 11.4.3 | CT | On drift alert or a new data batch: judge labels → retrain gate/tagger (CPU) → queue rewriter retrain (GPU) → evaluate → register as Staging if checkpoints pass | One full cycle completed | ✅ |
 | 11.4.4 | Promotion guard | CT refuses promotion when a synthetic regression is injected | Test green | ✅ |
 
@@ -782,7 +782,7 @@ quality?", on the untouched test split.
 | 12.8 | Error taxonomy | 200 degraded test cases categorised | `reports/final_errors.md` | ✅ |
 | 12.9 | Qualitative gallery | Best and worst casual → rewrite → output pairs | `reports/gallery.md` | ✅ |
 | 12.10 | Compute accounting | Generated tokens, GPU-hours, energy per phase; GPU-seconds per labelled pair (estimate vs actual) | Table | ✅ |
-| 12.11 | Benchmark release | Prompts, candidates, labels, rubrics, eval code (licence permitting) | Release tag + data card | ❌ |
+| 12.11 | Benchmark release | Prompts, candidates, labels, rubrics, eval code (licence permitting) | Release tag + data card | ✅ [v1.0.2 release](https://github.com/guru-bharadwaj20/Terser/releases/tag/v1.0.2): terser-bench-v1 (CC-BY-SA-4.0 data, NOTICE, data card; LLMLingua-2 Apache-2.0), code MIT |
 | 12.12 | Reproduction | Second contributor reproduces headline numbers from a fresh clone | Within CI bounds | ⏭️ waived by owner |
 
 ---
@@ -830,7 +830,7 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 
 | Unit | Requirement | Where It Lives | Status |
 | :--- | :--- | :--- | :---: |
-| 1 | Introduction to ML, ML models | 1.1.1 (sub-problem taxonomy) | ❌ |
+| 1 | Introduction to ML, ML models | 1.1.1 (sub-problem taxonomy) | ✅ |
 | 1 | Concept learning: hypotheses, version space | 1.3.2–1.3.7 | ❌ |
 | 1 | Inductive bias | 1.3.8, 3.3.6 | ✅ |
 | 1 | Accuracy, Precision, Recall, Sensitivity, Specificity | 3.2.1 | ✅ |
@@ -875,7 +875,7 @@ Hard gates on the critical path: **C7.1** (GPU environment, needed for all label
 | 4 | Data and feature pipelines | 2.1.7, 11.1 | ✅ |
 | 4 | Experiment tracking and model versioning | 0.2.4, 0.2.5, 11.2 | ✅ |
 | 4 | Model deployment and serving | 11.3 | ✅ |
-| 4 | CI/CD/CT for ML systems | 0.2.9, 11.4 | ❌ |
+| 4 | CI/CD/CT for ML systems | 0.2.9, 11.4 | ✅ |
 | 4 | Inference systems | 11.3.2–11.3.6 | ✅ |
 | 4 | Monitoring, drift and observability | 11.5 | ✅ |
 | 4 | ML orchestration | 11.6 | ✅ |
