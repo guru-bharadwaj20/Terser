@@ -40,7 +40,10 @@ def test_experiment_differs_across_seeds() -> None:
 
 
 def test_set_seed_repeats_random_and_numpy(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("PYTHONHASHSEED", raising=False)
+    # setenv first so monkeypatch records the original state; delenv of an absent variable
+    # records nothing, and the value set_seed writes would leak into later tests.
+    monkeypatch.setenv("PYTHONHASHSEED", "0")
+    monkeypatch.delenv("PYTHONHASHSEED")
     assert set_seed(7) == 7
     a = ([random.random() for _ in range(5)], np.random.rand(5))
     set_seed(7)

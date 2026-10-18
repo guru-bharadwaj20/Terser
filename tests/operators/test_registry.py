@@ -97,6 +97,7 @@ def test_full_stack_idempotent_on_pilot_prompts() -> None:
     assert failures == []
 
 
+@pytest.mark.network  # tiktoken downloads o200k_base on first use
 @pytest.mark.parametrize("row", CASUAL, ids=CASUAL_IDS)
 def test_full_stack_never_longer_on_gpt4o(row: dict[str, Any]) -> None:
     text = row["prompt"]
@@ -120,6 +121,7 @@ def test_c1_2_full_stack_noop_on_efficient(row: dict[str, Any]) -> None:
     assert apply_ops(text, CANONICAL_ORDER) == text
 
 
+@pytest.mark.network
 @pytest.mark.parametrize("row", EFFICIENT, ids=EFFICIENT_IDS)
 @pytest.mark.parametrize("target", ["gpt-4o", "qwen2.5", "llama-3.1"])
 def test_c1_2_substitute_and_stack_noop_per_target(target: str, row: dict[str, Any]) -> None:

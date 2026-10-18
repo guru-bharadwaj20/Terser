@@ -7,6 +7,9 @@ import pytest
 from terser.concept import attributes as at
 from terser.tokenizers import count_tokens
 
+# Every test here counts gpt-4o tokens; tiktoken downloads o200k_base on first use.
+pytestmark = pytest.mark.network
+
 
 def _words(n: int) -> str:
     text = " ".join(["word"] * n)

@@ -37,6 +37,7 @@ def test_substitutes_without_target(raw: str, expected: str) -> None:
     assert OPERATOR(raw) == expected
 
 
+@pytest.mark.network
 @pytest.mark.parametrize("target", TOKENIZERS)
 def test_in_order_to_becomes_to_on_every_tokenizer(target: str) -> None:
     assert substitute("Sort it in order to find the median.", target) == (
@@ -77,12 +78,14 @@ def test_ties_keep_original() -> None:
     assert choose("", "Approximately", " how many?", "gpt-4o") == "Approximately"
 
 
+@pytest.mark.network
 def test_efficient_text_is_noop() -> None:
     text = "Write a Python function that returns the nth Fibonacci number."
     for target in (None, *TOKENIZERS):
         assert OPERATOR(text, target) == text
 
 
+@pytest.mark.network
 def test_tokenizer_divergent_fixture() -> None:
     """DoD 1.2.7: S chooses differently for two tokenizers on a fixture."""
     kept = substitute(TOKENIZER_DIVERGENT_EXAMPLE, "gpt-4o")
@@ -94,6 +97,7 @@ def test_tokenizer_divergent_fixture() -> None:
     assert count_tokens(rewritten, "qwen2.5") < count_tokens(kept, "qwen2.5")
 
 
+@pytest.mark.network
 def test_exhaustive_search_tokenizer_dependence() -> None:
     """Record the module-docstring finding: only ``approximately`` diverges across tokenizers."""
     divergent: set[str] = set()
