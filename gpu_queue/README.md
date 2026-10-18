@@ -1,7 +1,8 @@
 # GPU job queue
 
-GPU work is never a blocker. Until the RTX 4500 Ada (24 GB, 22 GB usable budget) is connected, every
-GPU job is written, CPU-smoke-tested with a tiny config, and queued here as one YAML spec per job.
+GPU work is never a blocker. Every GPU job is written, CPU-smoke-tested with a tiny config, and
+queued here as one YAML spec per job, then run on a 24 GB card (22 GB usable budget): an RTX 4090
+worker or the RTX 4500 Ada.
 See CONTRIBUTING.md, "Compute Allocation".
 
 ## Spec format
@@ -26,8 +27,8 @@ One file per job, `gpu_queue/<id>.yaml`. All fields are required; unknown fields
 id: sft-qwen0.5b-full
 phase: 8
 depends_on: [C7.1, C2.3]
-command: python -m terser.models.rewriter.train experiment=sft_qwen05b_full hardware=rtx4500ada
-est_vram_gb: 14
+command: python -m terser.models.rewriter.train experiment=sft_qwen05b_full hardware=rtx4090
+est_vram_gb: 17
 est_hours: 6
 exclusive: true
 priority: 2

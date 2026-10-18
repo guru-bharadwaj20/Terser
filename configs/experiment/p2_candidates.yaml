@@ -33,8 +33,9 @@ params:
   prompt_version: rewrite_v1    # src/terser/data/prompts/<version>.txt
   temperature: 0.0
   max_rewrite_tokens: 1024
-  # A rewrite is rejected if it costs more tokens than the original on any of these.
-  length_targets: [gpt-4o, qwen2.5, llama-3.1]
+  # A rewrite is rejected if it costs more tokens than the original on any of these
+  # (phi3.5: the second respond target, ADR-0011; added after the frozen candidates were built).
+  length_targets: [gpt-4o, qwen2.5, llama-3.1, phi3.5]
   llmlingua_model: microsoft/llmlingua-2-bert-base-multilingual-cased-meetingbank
   # larger: microsoft/llmlingua-2-xlm-roberta-large-meetingbank
   llmlingua_rate: 0.5
