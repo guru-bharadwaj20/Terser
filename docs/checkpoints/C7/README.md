@@ -14,8 +14,8 @@
 | # | Check | Target | Measured | Result |
 | :---: | :--- | :--- | :--- | :---: |
 | C7.1 🚧 | Environment | Verification script all green on ≥ 1 worker | `python -m terser.hardware.verify`: capability 8.9, 23.99 GiB, bf16 114.9 TFLOP/s, bf16-vs-fp32 max relative error 4.83e-3. **All green** ([hardware.md](hardware.md)). Measured on the RTX 4500 Ada, a 24 GB Ada-class card like the RTX 4090 workers (ADR-0004 evidence 3 notes they share compute capability 8.9; it does not itself rule on C7.1) | ✅ |
-| C7.2 | Memory plan | VRAM table replaced with measured values | Measured on the RTX 4500 Ada (2026-10-01): 32B judge (original config), Qwen2.5-7B target, 0.5B full FT, 1.5B LoRA. Measured on the RTX 4090 workers (2026-10-24/25, [serving.md](serving.md#rtx-4090-re-measurement-2026-10-2425-rows-76-c72-c74), [training.md](training.md)): 32B judge queued config (startup peak 22.39 GiB net, serving 19.9–20.3), Qwen2.5-14B-AWQ fallback judge (20.22, util 0.90), Llama-3.1-8B AWQ judge (20.69, util 0.90), 3B LoRA (15.98 reserved), 7B QLoRA (18.92 reserved), bge-small (3.52 fp32 / 1.71 fp16 reserved, batch 256×512), TextCNN (0.35 reserved). **Still estimates:** Llama-3.1-8B bf16 target (gated, needs an HF token), GRPO and production serving (their checkpoints are not on the shared DVC remote) | ❌ partial |
-| C7.4 | Queue | Dry-run orders all jobs without dependency errors; every declared `est_vram_gb` ≤ the configured ceiling (23 GB since [ADR-0006](../../decisions/ADR-0006-gpu-queue-ceiling-23gb.md); 22 GB before), with hardware evidence before a full pass | Measured on both RTX 4090 workers 2026-10-24/25: the 32B judge job peaks at **22.39 GiB net** (startup weight processing, unchanged by every serving flag tested; serving 19.9–20.3 GiB, 48/48 requests). The queue file declares the measured 22.4. On 2026-10-25, after ADR-0006: `validate --dir gpu_queue` → `queue OK`; `dry-run` orders all six jobs (22.4, 17, 13, 20, 16, 16 GB) without dependency errors. Every other declared estimate is at or above its measured peak where one exists (3B LoRA 15.98, 1.5B LoRA 12.19, 0.5B full 16.32 reserved) | ✅ |
+| C7.2 | Memory plan | VRAM table replaced with measured values | Measured on the RTX 4500 Ada (2026-10-01): 32B judge (original config), Qwen2.5-7B target, 0.5B full FT, 1.5B LoRA. Measured on the RTX 4090 workers (2026-10-24/25, [serving.md](serving.md#rtx-4090-re-measurement-2026-10-2425-rows-76-c72-c74), [training.md](training.md)): 32B judge queued config (startup peak 22.39 GiB net, serving 19.9–20.3), Qwen2.5-14B-AWQ fallback judge (20.22, util 0.90), Llama-3.1-8B AWQ judge (20.69, util 0.90), 3B LoRA (15.98 reserved), 7B QLoRA (18.92 reserved), bge-small (3.52 fp32 / 1.71 fp16 reserved, batch 256×512), TextCNN (0.35 reserved). **Measured on the RTX 4500 Ada (2026-10-28, [raw_2026-10-28](raw_2026-10-28/)):** Llama-3.1-8B-Instruct bf16 (ungated `unsloth` mirror; 20.81 GiB net at util 0.90), GRPO v2 on the 1.5B LoRA (22.87 GiB net, 30 steps), production serving (3B + LoRA on vLLM at util 0.85 under 5 and 20 RPS: 20.28 GiB net, 0 errors, vLLM alive afterwards) | ✅ |
+| C7.4 | Queue | Dry-run orders all jobs without dependency errors; every declared `est_vram_gb` ≤ the configured ceiling (23 GB since [ADR-0006](../../decisions/ADR-0006-gpu-queue-ceiling-23gb.md); 22 GB before), with hardware evidence before a full pass | Measured on both RTX 4090 workers 2026-10-24/25: the 32B judge job peaks at **22.39 GiB net** (startup weight processing, unchanged by every serving flag tested; serving 19.9–20.3 GiB, 48/48 requests). The queue file declares the measured 22.4. On 2026-10-25, after ADR-0006: `validate --dir gpu_queue` → `queue OK`; `dry-run` orders all six jobs (22.4, 17, 13, 20, 16, 16 GB; the two GRPO jobs were raised to the measured 22.9 on 2026-10-28) without dependency errors. Every other declared estimate is at or above its measured peak where one exists (3B LoRA 15.98, 1.5B LoRA 12.19, 0.5B full 16.32 reserved) | ✅ |
 
 ## Queue verification (2026-10-03, CPU only)
 
@@ -81,8 +81,7 @@ or the peak breaches the ceiling, revise and re-measure; do not mark C7.4 passed
 host). The peak breaches the ceiling: 22.39 GiB net, a startup transient that no serving flag
 tested moves ([serving.md](serving.md#rtx-4090-re-measurement-2026-10-2425-rows-76-c72-c74)). The
 queue file now carries the measured 22.4, which failed `validate` against 22. Decision (owner: Vivian, 2026-10-25): [ADR-0006](../../decisions/ADR-0006-gpu-queue-ceiling-23gb.md)
-raises the single-job ceiling to 23 GB; the queue validates and C7.4 passes. C7.2's last three estimates need an HF token (Llama-3.1-8B
-bf16) or the GRPO / production-serving checkpoints on the shared remote.
+raises the single-job ceiling to 23 GB; the queue validates and C7.4 passes. C7.2's last three estimates were measured on the RTX 4500 Ada on 2026-10-28 (see below).
 
 ## Findings
 
@@ -107,3 +106,15 @@ bf16) or the GRPO / production-serving checkpoints on the shared remote.
 
 Not taken. All Phase 7 task rows are ✅, but C7.2 and C7.4 are open, and a reviewer who did not do
 the work has not re-run a headline number (checkpoint protocol step 3).
+
+## RTX 4500 Ada, 2026-10-28: the last three C7.2 rows
+
+Peak device VRAM sampled with `nvidia-smi` every 500 ms over each process, net of the 476 MiB idle baseline. Evidence in [raw_2026-10-28](raw_2026-10-28/).
+
+| Workload | Config | Peak (net) | Notes |
+| :--- | :--- | ---: | :--- |
+| Llama-3.1-8B-Instruct bf16 | `serving_bench`, util 0.90, max length 4096 | 20.81 GiB | ungated `unsloth/Meta-Llama-3.1-8B-Instruct` mirror, same weights; load 225 s |
+| GRPO v2, Qwen2.5-1.5B LoRA | `grpo_qwen15b_lora_v2`, 30 steps, output to `/tmp` | 22.87 GiB | 0.13 GiB under the 23 GB ceiling; queue estimate raised 16 → 22.9 |
+| Production serving | vLLM 3B + `sft-qwen3b-lora`, util 0.85, max length 2048; API + `quality_bench` 300 s at 5 RPS, 600 s at 20 RPS | 20.28 GiB | 5.85 GiB weights; 0 errors, vLLM alive afterwards |
+
+vLLM's LoRA start-up JIT-compiles FlashInfer's sampler, which fails on this host (no system CUDA toolkit, and the wheel's `nvcc` mismatches the bundled headers). `VLLM_USE_FLASHINFER_SAMPLER=0` avoids it. The serving run also re-measured the quality path: 16.1% of requests quality-served at 5 RPS (p95 416 ms) and 9.3% at 20 RPS, so C11.3 / C11.4 still fail.

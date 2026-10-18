@@ -667,7 +667,7 @@ the fallback).
 | Checkpoint | State | Cause |
 | :--- | :--- | :--- |
 | C2.6 position bias | fail: 40.9% raw A/B disagreement on the pilot | § 3.2; labels use order averaging |
-| C7.2 memory plan, C7.4 queue | partial | Several VRAM rows are still estimates; the revised 32B queue estimate is unverified on the RTX 4090 workers ([C7 README](checkpoints/C7/README.md)) |
+| C7.2 memory plan, C7.4 queue | pass | Every VRAM row measured; the last three (Llama-3.1-8B bf16, GRPO, production serving) on the RTX 4500 Ada on 2026-10-28 ([C7 README](checkpoints/C7/README.md)) |
 | C9.3–C9.5 (stretch GRPO) | ❌ measured, all fail | See § 6.10 |
 
 Infrastructure findings that do not map to one checkpoint:
