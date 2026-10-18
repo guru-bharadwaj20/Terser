@@ -15,7 +15,7 @@ Output record (``data/interim/clean.jsonl``)::
 
 CLI::
 
-    python -m terser.data.collect --out data/interim/clean.jsonl --per-category 240
+    python -m terser.data.collect --out data/interim/clean.jsonl --per-category 280
 """
 
 from __future__ import annotations
@@ -100,7 +100,8 @@ def collect(
                 "instruction": instruction,
                 "input": input_text,
                 "reference": rec.get("reference"),
-            }
+            },
+            skip=("id", "source_id", "source", "category"),
         )
         for result in results:
             counts.update({f"pii:{kind}": count for kind, count in result.counts.items()})
