@@ -54,7 +54,8 @@ class QLearner:
         return float(self.alpha)
 
     def greedy(self, state: Hashable, legal: Sequence[str]) -> str:
-        return max(legal, key=lambda a: (self.q[(state, a)], -legal.index(a)))
+        # .get: reading an unseen pair must not insert it (q_entries counts visited pairs).
+        return max(legal, key=lambda a: (self.q.get((state, a), 0.0), -legal.index(a)))
 
     def fit(
         self,
@@ -76,9 +77,9 @@ class QLearner:
                 target = (
                     r
                     if done
-                    else r + self.gamma * max(self.q[(s2, b)] for b in env.legal_actions())
+                    else r + self.gamma * max(self.q.get((s2, b), 0.0) for b in env.legal_actions())
                 )
-                change = self.step_size(s, a) * (target - self.q[(s, a)])
+                change = self.step_size(s, a) * (target - self.q.get((s, a), 0.0))
                 self.q[(s, a)] += change
                 delta = max(delta, abs(change))
                 total += r

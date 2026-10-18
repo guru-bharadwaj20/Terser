@@ -1,0 +1,38 @@
+# Checkpoint gates that have passed (docs/checkpoints/status.md), read by
+# `python -m terser.gpu_queue run`. A job whose depends_on lists an unmet gate is held.
+# C2.3 (human-human agreement) is not met: it needs human annotation, so jobs that depend on
+# it are held until it is, or are run by hand as recorded in their reports.
+- C0.1
+- C0.2
+- C0.3
+- C0.4
+- C1.2
+- C1.5
+- C2.1
+- C2.2
+- C2.7
+- C2.8
+- C2.9
+- C3.1
+- C3.2
+- C3.3
+- C3.6
+- C3.7
+- C4.1
+- C4.2
+- C4.3
+- C4.4
+- C5.5
+- C6.2
+- C7.1
+- C7.4
+- C8.1
+- C10.1
+- C10.2
+- C10.3
+- C10.4
+- C11.1
+- C11.2
+- C11.5
+- C11.6
+- C11.7
