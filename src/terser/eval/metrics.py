@@ -118,6 +118,8 @@ def per_category_metrics(
         raise ValueError(
             f"lengths differ: y_true {len(t)}, y_pred {len(p)}, categories {len(categories)}"
         )
+    if "overall" in set(categories):
+        raise ValueError('"overall" is reserved for the pooled metrics; rename that category')
     cats = np.asarray(list(categories), dtype=object)
     out: dict[Hashable, ClassificationMetrics] = {}
     for cat in sorted(set(categories), key=str):

@@ -41,6 +41,8 @@ def _probs(p: npt.ArrayLike, n: int) -> FloatArray:
 def brier_score(y_true: ArrayLike, p: npt.ArrayLike) -> float:
     """Mean squared error between probabilities and 0/1 outcomes."""
     y = _as_binary_array(y_true)
+    if len(y) == 0:
+        raise ValueError("brier_score needs at least one example")
     return float(np.mean((_probs(p, len(y)) - y) ** 2))
 
 
@@ -73,6 +75,8 @@ def reliability_curve(y_true: ArrayLike, p: npt.ArrayLike, n_bins: int = 10) -> 
 def expected_calibration_error(y_true: ArrayLike, p: npt.ArrayLike, n_bins: int = 10) -> float:
     """Bin-weighted mean of ``|observed rate - mean probability|``."""
     c = reliability_curve(y_true, p, n_bins)
+    if c.counts.sum() == 0:
+        raise ValueError("expected_calibration_error needs at least one example")
     return float(np.sum(c.counts * np.abs(c.prob_true - c.prob_pred)) / c.counts.sum())
 
 
