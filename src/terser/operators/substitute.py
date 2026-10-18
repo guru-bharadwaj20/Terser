@@ -79,10 +79,21 @@ PHRASE_SUBSTITUTIONS: dict[str, tuple[str, ...]] = {
     "in a timely manner": ("promptly", "quickly"),
     "in the absence of": ("without",),
     "has a tendency to": ("tends to",),
-    "is required to": ("must",),
-    "are required to": ("must",),
 }
-"""Phrase (lower case) -> meaning-preserving alternatives, in order of preference."""
+"""Phrase (lower case) -> meaning-preserving alternatives, in order of preference.
+
+"is/are required to" -> "must" is deliberately absent: it breaks questions such as "What is
+required to install Python?" where no subject precedes the phrase.
+"""
+
+_DETERMINERS = "the these those this that their our your my his her its them us all".split()
+for _det in _DETERMINERS:
+    # "the majority of the votes" -> "most of the votes", not "most the votes".
+    for _lead in ("the vast majority of", "the majority of", "a majority of"):
+        PHRASE_SUBSTITUTIONS[f"{_lead} {_det}"] = (f"most of {_det}",)
+
+KEEP_PHRASES: tuple[str, ...] = ("make a decision tree", "make a decision trees")
+"""Phrases that contain a table entry but must stay as written (a longer match wins)."""
 
 TOKENIZER_DIVERGENT_EXAMPLE = "Approximately how many people live in Tokyo?"
 """Kept on gpt-4o; becomes "About how many people live in Tokyo?" on qwen2.5 and llama-3.1."""
@@ -98,7 +109,7 @@ SEARCH_CONTEXTS: tuple[tuple[str, str], ...] = (
 )
 """Sentence contexts ``(left, right)`` used by the exhaustive tokenizer-dependence search."""
 
-_PHRASES = sorted(PHRASE_SUBSTITUTIONS, key=len, reverse=True)  # longest match wins
+_PHRASES = sorted([*PHRASE_SUBSTITUTIONS, *KEEP_PHRASES], key=len, reverse=True)  # longest wins
 _SCAN = re.compile(rf"\b(?:{'|'.join(map(re.escape, _PHRASES))})\b", re.IGNORECASE)
 _BOUNDARY = re.compile(r"[.!?\n]")
 
@@ -144,6 +155,9 @@ def substitute(text: str, target: str | None = None) -> str:
         for m in _SCAN.finditer(masked):
             out.append(masked[pos : m.start()])
             pos = m.end()
+            if m.group(0).lower() in KEEP_PHRASES:
+                out.append(m.group(0))
+                continue
             done = "".join(out)
             starts = [b.end() for b in _BOUNDARY.finditer(done)]
             left = done[starts[-1] :] if starts else done
