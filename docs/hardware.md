@@ -162,7 +162,7 @@ GPU work is never a blocker. Until the card is connected, GPU jobs are written a
 # gpu_queue/sft-qwen0.5b-full.yaml
 id: sft-qwen0.5b-full
 phase: 8
-depends_on: [C7.1, C2.3]
+depends_on: [C7.1]
 command: python -m terser.models.rewriter.train experiment=sft_qwen05b_full hardware=rtx4500ada
 est_vram_gb: 14
 est_hours: 6

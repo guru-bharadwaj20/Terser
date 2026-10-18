@@ -70,8 +70,8 @@ stages:
       size: 2015817
     - path: src/terser/data/casualise.py
       hash: md5
-      md5: b38a9827522d6e7106d51c19346655f3
-      size: 17506
+      md5: 1ba73d74937846f7c6edc08429dae5ba
+      size: 17764
     - path: src/terser/data/prompts/casualise_check_v1.txt
       hash: md5
       md5: 1a7822dd351306db663d35865db3acfb
@@ -80,6 +80,15 @@ stages:
       hash: md5
       md5: 77987fa3ca70ebcb2cb10d753158f483
       size: 2391
+    - path: src/terser/judge/pairwise.py
+      hash: md5
+      md5: fcba8ab3af44ca891b3d67ad24fa2b6d
+      size: 16280
+    - path: src/terser/llm
+      hash: md5
+      md5: 9048d9599f9bfccebe844f4eb039afa7.dir
+      size: 32081
+      nfiles: 5
     params:
       params.yaml:
         casualise.max_ratio: 4.0
@@ -164,6 +173,10 @@ stages:
       md5: d14a09789965490c9a919d1c81a4921c.dir
       size: 16559882
       nfiles: 5
+    - path: src/terser/data/dedupe.py
+      hash: md5
+      md5: 99f5d0f19882d920c552ee99a8f073b9
+      size: 23524
     - path: src/terser/data/label_subset.py
       hash: md5
       md5: 161043d486618cb4467b92f1315200a2
@@ -188,28 +201,42 @@ stages:
     deps:
     - path: configs/experiment/p2_candidates.yaml
       hash: md5
-      md5: bf7337886212c32ecf355f4598ca745e
-      size: 2286
+      md5: be8979bc521e34b5ab48ccc7fc0fae45
+      size: 2390
     - path: data/interim/label_prompts.jsonl
       hash: md5
       md5: 334923879c540cc283ff61641a5fb73b
       size: 4238888
     - path: src/terser/data/candidates.py
       hash: md5
-      md5: 211ee654c72de48741db2b824d9f08af
-      size: 31253
+      md5: d691425684f5a40e429ed09012f0f7f0
+      size: 32227
+    - path: src/terser/data/casualise.py
+      hash: md5
+      md5: 1ba73d74937846f7c6edc08429dae5ba
+      size: 17764
     - path: src/terser/data/prompts/rewrite_v1.txt
       hash: md5
       md5: 594911562dc6894217f12f3988cf9623
       size: 3066
+    - path: src/terser/llm
+      hash: md5
+      md5: 9048d9599f9bfccebe844f4eb039afa7.dir
+      size: 32081
+      nfiles: 5
+    - path: src/terser/operators
+      hash: md5
+      md5: 0b875211ebbb0bf4604d9d02e9321b63.dir
+      size: 44220
+      nfiles: 11
     params:
       params.yaml:
         candidates.model: Qwen/Qwen2.5-32B-Instruct-AWQ
     outs:
     - path: data/interim/candidates.jsonl
       hash: md5
-      md5: 3a84861bfd7b23dce7191e524740e2fa
-      size: 5941103
+      md5: db81cecf2048cfd02c44c871c1b1d5a0
+      size: 5941539
   token_counts:
     cmd: python -m terser.data.token_counts --prompts 
       data/interim/label_prompts.jsonl --candidates 
@@ -217,60 +244,64 @@ stages:
     deps:
     - path: data/interim/candidates.jsonl
       hash: md5
-      md5: 3a84861bfd7b23dce7191e524740e2fa
-      size: 5941103
+      md5: db81cecf2048cfd02c44c871c1b1d5a0
+      size: 5941539
     - path: data/interim/label_prompts.jsonl
       hash: md5
       md5: 334923879c540cc283ff61641a5fb73b
       size: 4238888
     - path: src/terser/data/token_counts.py
       hash: md5
-      md5: 7bddce591d39c335cc5eb88005f2bed7
-      size: 10474
+      md5: a0127c03f68b461c4a95ff518ceda247
+      size: 11319
+    - path: src/terser/llm/budget.py
+      hash: md5
+      md5: 9d2ad19737c106632ba812c0f90c25ca
+      size: 13628
     - path: src/terser/tokenizers/count.py
       hash: md5
-      md5: e4770ddb1d8b2121826791aa451d7a63
-      size: 6816
+      md5: b2310030d04e7be137555a76b37d389e
+      size: 6971
     outs:
     - path: data/interim/token_counts.parquet
       hash: md5
-      md5: b2fe3fd1dee0a5f61ba762ee03350f8d
-      size: 271448
+      md5: 9f45a503065659e07b5d32c75353d72b
+      size: 271480
   register:
     cmd: python -m terser.phase11.register
     deps:
     - path: models/fast
       hash: md5
-      md5: 9a0cd36b04ad789e706282c2aa304d05.dir
-      size: 134782
+      md5: c1dcaa06d93e11ab0149635031c9c294.dir
+      size: 132999
       nfiles: 2
     - path: models/rewriter/sft-qwen0.5b-full
       hash: md5
-      md5: db6457ff56acd778cba8b46edf69bd89.dir
-      size: 988176083
+      md5: 0ab647858055332d16e86d345fb98259.dir
+      size: 988175802
       nfiles: 4
     - path: models/rewriter/sft-qwen1.5b-lora
       hash: md5
-      md5: 12c0ba167f9ac82af6383d4a3daaf464.dir
-      size: 73994373
+      md5: 0d19537e948308239306786f39b34e07.dir
+      size: 73994120
       nfiles: 4
     - path: models/rewriter/sft-qwen3b-lora
       hash: md5
-      md5: 4b7256a1f6f23decc58e2cbf5fffdb53.dir
-      size: 119832993
+      md5: 93196778281d5b05b35bcf7fc8276d74.dir
+      size: 119832994
       nfiles: 4
     - path: reports/p11_fast_path.json
       hash: md5
-      md5: a5958bf0d55482154385b210e04ab789
-      size: 6397
+      md5: b429c8ce7b09cae8bc5cbb1b77c345f1
+      size: 6431
     - path: reports/p8_rewriter_val.json
       hash: md5
-      md5: 2d9d8f9546b9ed2e5495cb360c5d0c10
-      size: 3460
+      md5: 259666e3dd97c53f324baef897f4484e
+      size: 3639
     - path: src/terser/phase11/register.py
       hash: md5
-      md5: cef2a15fbf89b38ac4edbc8f5a574159
-      size: 7676
+      md5: c31c2ebc03af95dd59eeb5e8227992fd
+      size: 8392
     - path: src/terser/tracking/lineage.py
       hash: md5
       md5: ac1c2fce59355c1923eabbee81987147
@@ -278,8 +309,8 @@ stages:
     outs:
     - path: reports/p11_registry.md
       hash: md5
-      md5: e92bb91517156442bd8431acda4006ff
-      size: 2531
+      md5: afb0f53efd8f9fe8400355b976b4b1d5
+      size: 1804
   respond@qwen2.5-7b:
     cmd: python -m terser.phase2.respond --prompts 
       data/interim/label_prompts.jsonl --candidates 
@@ -289,16 +320,21 @@ stages:
     deps:
     - path: data/interim/candidates.jsonl
       hash: md5
-      md5: 3a84861bfd7b23dce7191e524740e2fa
-      size: 5941103
+      md5: db81cecf2048cfd02c44c871c1b1d5a0
+      size: 5941539
     - path: data/interim/label_prompts.jsonl
       hash: md5
       md5: 334923879c540cc283ff61641a5fb73b
       size: 4238888
+    - path: src/terser/llm
+      hash: md5
+      md5: 9048d9599f9bfccebe844f4eb039afa7.dir
+      size: 32081
+      nfiles: 5
     - path: src/terser/phase2/respond.py
       hash: md5
-      md5: f45fc7aefcf7d87003ef87accc784886
-      size: 10511
+      md5: 2c4266e43043a76c6095e1c9dd18376e
+      size: 10792
     params:
       params.yaml:
         respond.creative_samples: 3
@@ -307,8 +343,8 @@ stages:
     outs:
     - path: data/interim/responses/qwen2.5-7b.jsonl
       hash: md5
-      md5: 30a74339eb48fdd1640de3cdba501913
-      size: 31954377
+      md5: c8aba36d15dbedacc832d2a4d39058ed
+      size: 31901809
   respond@phi3.5-mini:
     cmd: python -m terser.phase2.respond --prompts 
       data/interim/label_prompts.jsonl --candidates 
@@ -318,16 +354,21 @@ stages:
     deps:
     - path: data/interim/candidates.jsonl
       hash: md5
-      md5: 3a84861bfd7b23dce7191e524740e2fa
-      size: 5941103
+      md5: db81cecf2048cfd02c44c871c1b1d5a0
+      size: 5941539
     - path: data/interim/label_prompts.jsonl
       hash: md5
       md5: 334923879c540cc283ff61641a5fb73b
       size: 4238888
+    - path: src/terser/llm
+      hash: md5
+      md5: 9048d9599f9bfccebe844f4eb039afa7.dir
+      size: 32081
+      nfiles: 5
     - path: src/terser/phase2/respond.py
       hash: md5
-      md5: f45fc7aefcf7d87003ef87accc784886
-      size: 10511
+      md5: 2c4266e43043a76c6095e1c9dd18376e
+      size: 10792
     params:
       params.yaml:
         respond.creative_samples: 3
@@ -336,8 +377,8 @@ stages:
     outs:
     - path: data/interim/responses/phi3.5-mini.jsonl
       hash: md5
-      md5: 76112b2ad62cff01b5e91bce0db93fac
-      size: 33671161
+      md5: 070809f5144c33283d23ae4d736cae72
+      size: 33622050
   label:
     cmd: python -m terser.phase2.label_stage --prompts 
       data/interim/label_prompts.jsonl --responses 
@@ -352,12 +393,12 @@ stages:
       size: 4238888
     - path: data/interim/responses/phi3.5-mini.jsonl
       hash: md5
-      md5: 76112b2ad62cff01b5e91bce0db93fac
-      size: 33671161
+      md5: 070809f5144c33283d23ae4d736cae72
+      size: 33622050
     - path: data/interim/responses/qwen2.5-7b.jsonl
       hash: md5
-      md5: 30a74339eb48fdd1640de3cdba501913
-      size: 31954377
+      md5: c8aba36d15dbedacc832d2a4d39058ed
+      size: 31901809
     - path: data/processed/splits
       hash: md5
       md5: d14a09789965490c9a919d1c81a4921c.dir
@@ -375,28 +416,28 @@ stages:
       nfiles: 5
     - path: src/terser/judge/code_runner.py
       hash: md5
-      md5: baf2ffd207028caaccbd3f407ae2bdc6
-      size: 32227
+      md5: 92785c886bdb560e3c5bc5b56cec2696
+      size: 32499
     - path: src/terser/judge/labels.py
       hash: md5
-      md5: 10698461af564cdfa35e5cc3587ce746
-      size: 12179
+      md5: 576a09f599c30e2bd3db6834d472f57a
+      size: 11626
     - path: src/terser/judge/metrics.py
       hash: md5
-      md5: 34fd9b7eb946ea0d8bd2cc8fd4e55585
-      size: 33420
+      md5: eeb6fae48673699529c459e8fd9207b9
+      size: 33951
     - path: src/terser/judge/pairwise.py
       hash: md5
-      md5: edb020c5bbaf55cec311f6010c36177b
-      size: 15736
+      md5: fcba8ab3af44ca891b3d67ad24fa2b6d
+      size: 16280
     - path: src/terser/judge/prompts/pairwise_v1.txt
       hash: md5
       md5: 8f2b1e48e673e1dc379e0cfbcf843001
       size: 777
     - path: src/terser/judge/protocols.py
       hash: md5
-      md5: 9145e5aad9c03434a37288716aefff57
-      size: 6222
+      md5: 2e7cefda3dc1623af46c8e6116461a4f
+      size: 6314
     - path: src/terser/judge/rubrics
       hash: md5
       md5: bc252d6e74e9c9d5873b1ce149daa8c9.dir
@@ -404,20 +445,25 @@ stages:
       nfiles: 6
     - path: src/terser/judge/rubrics.py
       hash: md5
-      md5: 9adb80ace1c5e5f5f9241bb4d5489f4d
-      size: 12499
+      md5: ffba104516b089043da84cae959e0675
+      size: 13232
+    - path: src/terser/llm
+      hash: md5
+      md5: 9048d9599f9bfccebe844f4eb039afa7.dir
+      size: 32081
+      nfiles: 5
     - path: src/terser/phase2/label_stage.py
       hash: md5
-      md5: 2bfdb68540a99c2738a29c3325ba35dd
-      size: 18772
+      md5: 0a95f33dc28806652f10b9e7923178d6
+      size: 19085
     params:
       params.yaml:
         label.judge_model: Qwen/Qwen2.5-32B-Instruct-AWQ
     outs:
     - path: data/processed/labels.jsonl
       hash: md5
-      md5: c5a38491cbd84f4094d4a46ada4ca47b
-      size: 38748659
+      md5: ebf7b6768890250c813009055f287a02
+      size: 38679165
   oracle:
     cmd: python -m terser.phase2.oracle --candidates 
       data/interim/candidates.jsonl --token-counts 
@@ -428,29 +474,33 @@ stages:
     deps:
     - path: data/interim/candidates.jsonl
       hash: md5
-      md5: 3a84861bfd7b23dce7191e524740e2fa
-      size: 5941103
+      md5: db81cecf2048cfd02c44c871c1b1d5a0
+      size: 5941539
     - path: data/interim/label_prompts.jsonl
       hash: md5
       md5: 334923879c540cc283ff61641a5fb73b
       size: 4238888
     - path: data/interim/token_counts.parquet
       hash: md5
-      md5: b2fe3fd1dee0a5f61ba762ee03350f8d
-      size: 271448
+      md5: 9f45a503065659e07b5d32c75353d72b
+      size: 271480
     - path: data/processed/labels.jsonl
       hash: md5
-      md5: c5a38491cbd84f4094d4a46ada4ca47b
-      size: 38748659
+      md5: ebf7b6768890250c813009055f287a02
+      size: 38679165
+    - path: src/terser/eval/labels.py
+      hash: md5
+      md5: 84a79a5db504573e92cb914b51ece9fe
+      size: 5249
     - path: src/terser/phase2/oracle.py
       hash: md5
-      md5: e390e3fadcd36e03102f6c3e8656dd45
-      size: 22214
+      md5: d2b0b9084ece34283cedbdd685d46638
+      size: 22209
     outs:
     - path: data/processed/oracle.csv
       hash: md5
-      md5: 1fef5d14404ca0e37b3e332776854254
-      size: 462290
+      md5: 1c68ce43c3834dccce6ba55efd97c9fb
+      size: 461291
   features:
     cmd: python -m terser.phase3.build_features --device cpu
     deps:
@@ -460,36 +510,36 @@ stages:
       size: 1745
     - path: data/interim/candidates.jsonl
       hash: md5
-      md5: 3a84861bfd7b23dce7191e524740e2fa
-      size: 5941103
+      md5: db81cecf2048cfd02c44c871c1b1d5a0
+      size: 5941539
     - path: data/interim/label_prompts.jsonl
       hash: md5
       md5: 334923879c540cc283ff61641a5fb73b
       size: 4238888
     - path: data/processed/labels.jsonl
       hash: md5
-      md5: c5a38491cbd84f4094d4a46ada4ca47b
-      size: 38748659
+      md5: ebf7b6768890250c813009055f287a02
+      size: 38679165
     - path: data/processed/oracle.csv
       hash: md5
-      md5: 1fef5d14404ca0e37b3e332776854254
-      size: 462290
+      md5: 1c68ce43c3834dccce6ba55efd97c9fb
+      size: 461291
     - path: src/terser/features/alignment.py
       hash: md5
-      md5: 6e76986c7c245f72989ec2e4e72bf6bc
-      size: 3271
+      md5: e9bd4da4dd13efae3ee4a2fd7e09ee93
+      size: 3374
     - path: src/terser/features/embeddings.py
       hash: md5
       md5: 4f19afda0ad391ea2d82373c09448544
       size: 3203
     - path: src/terser/features/lexicons.py
       hash: md5
-      md5: 9dea26d14959e3aadcf498fea4a8726f
-      size: 3998
+      md5: fa713b919b052ae5be3b8a1623cedbe4
+      size: 4094
     - path: src/terser/features/pair.py
       hash: md5
-      md5: e434b80775d469bcea659ec0db0e46ca
-      size: 5734
+      md5: 32b77cd81697c3fd497ba1cd9e911368
+      size: 5996
     - path: src/terser/features/span.py
       hash: md5
       md5: 88694327bf176c3bc3e7286800d267db
@@ -500,14 +550,14 @@ stages:
       size: 7573
     - path: src/terser/tokenizers/count.py
       hash: md5
-      md5: e4770ddb1d8b2121826791aa451d7a63
-      size: 6816
+      md5: b2310030d04e7be137555a76b37d389e
+      size: 6971
     outs:
     - path: data/processed/pair_features.parquet
       hash: md5
-      md5: e8e6f6eea8a2aa23f79b33b4da1a41c3
-      size: 560594
+      md5: 2652600a70e3f2eb6d51202b992d9ce2
+      size: 542192
     - path: data/processed/span_features.parquet
       hash: md5
-      md5: 0fbf27fc45f6677c770005d283a08b9f
-      size: 2333834
+      md5: 1e73d0ce226199df6d3c0fa8825cf20e
+      size: 2286983

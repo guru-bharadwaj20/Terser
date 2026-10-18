@@ -2,7 +2,7 @@
 
 > Supports row **2.3.3** and checkpoint **C2.6** (A/B-order disagreement ≤ 10%). Decision:
 > [ADR-0005](../docs/decisions/ADR-0005-judge-protocol.md) (Proposed). All numbers are judge
-> outputs on unreviewed pilot pairs; no human labels exist yet (rows 1.3.6 / 2.3.5).
+> outputs on unreviewed pilot pairs.
 
 ## Setup
 

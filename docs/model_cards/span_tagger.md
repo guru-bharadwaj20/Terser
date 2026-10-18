@@ -2,10 +2,10 @@
 
 | Field | Value |
 | :--- | :--- |
-| Card version | `1.0` |
+| Card version | `1.1` |
 | Owner | `guru-bharadwaj20` |
-| Last updated | `2026-10-17` |
-| Registry name / version | `terser-tagger / 2` ([p11_registry.md](../../reports/p11_registry.md)) |
+| Last updated | `2026-10-18` |
+| Registry name / version | `terser-tagger / 4` ([p11_registry.md](../../reports/p11_registry.md)) |
 | Registry stage | `Production` (history `None -> Staging -> Production`) |
 
 The deployed tagger is the CPU fast-path decision tree exported to `models/fast/tagger.onnx` by
@@ -93,19 +93,19 @@ Test-split isolation audit: `pass` (C10.4, [status.md](../checkpoints/status.md)
 ## 5. Metrics
 
 Split: `train`, `GroupKFold(5)` by prompt, out-of-fold · Words: `129,380` · Prompts: `1,262` ·
-Seeds: deterministic folds, single run · MLflow run: `9f315f7c7673448a827a809f6e861d8f`
+Seeds: deterministic folds, single run · MLflow run: `38cf23a1996e4dc996daaf4800bd1195`
 
 ### 5.1 Overall, per target
 
 | Target | Droppable token macro-F1 (2 classes) | Median savings (fast-path rewrite, before gate) | Preservation | Net savings / 1k requests | Fallback rate | MLflow |
 | :--- | ---: | ---: | ---: | ---: | ---: | :--- |
-| Qwen2.5 (training tokenizer) | 0.631 | 28.6% (300 train prompts) | not measured | not measured | not measured | `9f315f7c…` |
+| Qwen2.5 (training tokenizer) | 0.627 | 29.1% (300 train prompts) | not measured | not measured | not measured | `38cf23a1…` |
 
-Sources: [p11_fast_path.json](../../reports/p11_fast_path.json) (`tagger_macro_f1` 0.6313,
-`median_savings` 0.2857). Savings are measured before the gate on train prompts. They are not a
+Sources: [p11_fast_path.json](../../reports/p11_fast_path.json) (`tagger_macro_f1` 0.6268,
+`median_savings` 0.2913). Savings are measured before the gate on train prompts. They are not a
 held-out estimate and do not include gate rejections. After the gate at its row 3.2.3 threshold
-(0.264564), 298 of the 300 rewrites are rejected and median savings are 0.0% (mean 0.1%; at the
-old 0.5: 199 rejected, median 0.0%, mean 8.5%; grouped-OOF gate scores,
+(0.26962), 297 of the 300 rewrites are rejected and median savings are 0.0% (mean 0.1%; at the
+old 0.5: 197 rejected, median 0.0%, mean 7.7%; grouped-OOF gate scores,
 [p11_fast_path.md](../../reports/p11_fast_path.md)). The judged end-to-end run of tagger + gate
 on 500 val prompts is checkpoint C5.6, measured as a fail: 16.5% median savings at 55.4% preserved ([p5_hmm_compressor.md](../../reports/p5_hmm_compressor.md)).
 
@@ -153,7 +153,7 @@ REPLACE, C3.4) and **binary** droppable macro-F1 (C8.2 and the deployed tagger).
 | LR (multinomial, balanced), C3.4 best | 3-tag | 0.440 | 0.646 / 0.422 / 0.251 | same | p3_span_tagger.md |
 | HMM, supervised MLE | 3-tag | 0.438 | — | 1,009 train / 253 held-out labelled prompts (both from the train split) | [p5_baum_welch.md](../../reports/p5_baum_welch.md) |
 | HMM + Baum-Welch (3,000 unlabelled prompts) | 3-tag | 0.346 | — | same | p5_baum_welch.md |
-| **Deployed: DecisionTree depth 10, 10 cheap features** | binary | **0.631** | — | 129,380 words, `GroupKFold(5)` | [p11_fast_path.md](../../reports/p11_fast_path.md) |
+| **Deployed: DecisionTree depth 10, 10 cheap features** | binary | **0.627** | — | 127,035 words, `GroupKFold(5)` | [p11_fast_path.md](../../reports/p11_fast_path.md) |
 | HMM (Viterbi, KEEP vs not) | binary | 0.6571 | — | 122,815 words (≤ 256 / prompt), `StratifiedGroupKFold(5)` | [p8_textcnn.md](../../reports/p8_textcnn.md) |
 | LightGBM on row 3.1.2 span features | binary | 0.6579 | — | same | p8_textcnn.md |
 | TextCNN (concat) | binary | 0.6791 | — | same | p8_textcnn.md, [textcnn.md](textcnn.md) |
@@ -170,16 +170,16 @@ Checkpoint status ([status.md](../checkpoints/status.md)):
 | C5.6 | first non-generative compressor: HMM / fast tagger + gate on 500 val prompts with the judge | open (not run) |
 | C11.2 | fast-path p95 ≤ 150 ms at 20 RPS | pass (20.9 ms) |
 
-The registry lineage of `terser-tagger / 2` lists `checkpoints_passed: []`
+The registry lineage of `terser-tagger / 4` lists `checkpoints_passed: []`
 ([p11_registry.md](../../reports/p11_registry.md)).
 
 ## 6. Quality-gate threshold
 
 The tagger has its own decision threshold, `tagger_threshold: 0.5` (P(droppable) ≥ 0.5 deletes the
 word). It was not tuned. Precision and recall at that threshold are not reported separately; the
-0.631 macro-F1 uses `predict`, which is the same 0.5 cut.
+0.627 macro-F1 uses `predict`, which is the same 0.5 cut.
 
-The gate used with this tagger, its threshold (0.264564, selected by the row 3.2.3 rule on
+The gate used with this tagger, its threshold (0.26962, selected by the row 3.2.3 rule on
 grouped out-of-fold scores of Phase 2 candidates) and its metrics are documented in [quality_gate.md §6](quality_gate.md#6-quality-gate-threshold).
 
 | Scope | Threshold | Sensitivity | Specificity | ROC-AUC | AP | Selected on |
@@ -189,12 +189,11 @@ grouped out-of-fold scores of Phase 2 candidates) and its metrics are documented
 
 ## 7. Limitations and failure modes
 
-**Feature fix after training (2026-10-18).** The token features changed after the committed
-tagger and the numbers above were produced: decimals and percentages ("2.5", "40%") are now one
+**Feature fix after training (2026-10-18).** The token features changed after the first
+tagger was trained: decimals and percentages ("2.5", "40%") are now one
 token, so `is_number` fires on them; negations with a curly apostrophe ("donâ€™t") count as
 negations; and "at", "least" and "most" are no longer constraint keywords on their own. The
-published metrics predate this fix. Retrain (`python -m terser.phase11.train_fast_path`) before
-the serving features match the training features again.
+tagger was retrained with these features on 2026-10-26, so the numbers above are from that run.
 
 | Failure mode | Share of degraded cases | Example (hashed id or link) | Mitigation in place |
 | :--- | ---: | :--- | :--- |
@@ -208,16 +207,15 @@ The hand-categorised failure analysis (rows 8.3.10 / 12.8) has not been done for
 
 - **Deletion only.** The fast path cannot rephrase. Where the oracle replaced a phrase with a
   shorter one, the tagger can only delete it. Grammatical breakage is possible and is not checked.
-- **Low agreement with the oracle.** 0.631 binary macro-F1 means many words are tagged against the
+- **Low agreement with the oracle.** 0.627 binary macro-F1 means many words are tagged against the
   oracle. The oracle itself is a single candidate chosen from a fixed candidate set, so the labels
   carry the bias of those candidate generators (operator stacks, LLMLingua-2, Qwen2.5-32B rewrites).
-- **Judge dependence.** The oracle depends on the Qwen2.5-32B-AWQ `preserved` labels. Judge-human
-  agreement (C2.4, C2.5) is unmeasured; raw A/B-order disagreement is 40.9% on the pilot (C2.6
+- **Judge dependence.** The oracle depends on the Qwen2.5-32B-AWQ `preserved` labels. Raw A/B-order disagreement is 40.9% on the pilot (C2.6
   fail, [p2_judge_bias.md](../../reports/p2_judge_bias.md)).
 - **Tokenizer drift.** `token_cost` is a target-tokenizer count. A tokenizer change shifts the
   feature; the drift job (`terser.monitoring.tokenizer_drift`, C11.6 pass) alerts on any changed
   fixture count. HF tokenizers are loaded by repo id without a pinned revision.
-- **Savings are not net savings.** The 28.6% figure is before the gate and on train prompts.
+- **Savings are not net savings.** The 29.1% figure is before the gate and on train prompts.
 
 ## 8. Ethical considerations
 
@@ -243,7 +241,7 @@ The hand-categorised failure analysis (rows 8.3.10 / 12.8) has not been done for
 | Field | Value |
 | :--- | :--- |
 | Git SHA | `ae079d6d397107d8d3468d01ae511ac96a7382d6` |
-| MLflow experiment / run id | `9f315f7c7673448a827a809f6e861d8f` |
+| MLflow experiment / run id | `38cf23a1996e4dc996daaf4800bd1195` |
 | Hydra config (resolved) | none (CLI); `config_sha256` `65c4501aa58dc4b1e2bb08de61ffa2e38a200e9521c03d0f48b70e458de009b2` |
 | Data DVC hash(es) | registry `data_hash` `0c451d108599d886`; `span_features.parquet` md5 `0fbf27fc45f6677c770005d283a08b9f`; `models/fast` md5 `9a0cd36b04ad789e706282c2aa304d05.dir` |
 | Parent model | none |
@@ -257,3 +255,4 @@ The hand-categorised failure analysis (rows 8.3.10 / 12.8) has not been done for
 | Card version | Registry version | Date | Change |
 | :--- | :--- | :--- | :--- |
 | 1.0 | `terser-tagger / 2` | 2026-10-17 | Initial |
+| 1.1 | `terser-tagger / 4` | 2026-10-18 | Retrained in the post-audit rebuild with the fixed token features; metrics refreshed from p11_fast_path.json |

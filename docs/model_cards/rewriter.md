@@ -2,22 +2,22 @@
 
 | Field | Value |
 | :--- | :--- |
-| Card version | `1.1` |
+| Card version | `1.3` |
 | Owner | `guru-bharadwaj20` |
-| Last updated | `2026-10-17` |
-| Registry name / version | `terser-rewriter / 6` (3B LoRA); earlier rungs `/ 4` (0.5B full), `/ 5` (1.5B LoRA) ([p11_registry.md](../../reports/p11_registry.md)) |
-| Registry stage | `Staging` (v6); v4 and v5 `Archived`. No rewriter is in `Production` |
+| Last updated | `2026-10-18` |
+| Registry name / version | `terser-rewriter / 16` (3B LoRA); earlier rungs `/ 14` (0.5B full), `/ 15` (1.5B LoRA) ([p11_registry.md](../../reports/p11_registry.md)) |
+| Registry stage | `Staging` (v16); v14 and v15 `Archived`. No rewriter is in `Production` |
 
 Every SFT rung fails the main gate C8.3 ([p8_rewriter_val.md](../../reports/p8_rewriter_val.md)).
-v6 is held at Staging as the best-preserving rung. The quality path is not served with any of
-them. The retrain on augmented targets (`sft_v2`) also fails C8.3 (sft15 v2: 35.0% savings, 57.0%
-preserved; sft3b v2: 12.5%, 71.4%); see [Retrain on sft_v2](#retrain-on-sft_v2).
+v16 (3B LoRA) is held at Staging. The quality path is not served with any of
+them. The retrain on augmented targets (`sft_v2`) also fails C8.3 (sft15 v2: 22.6% savings, 58.1%
+preserved; sft3b v2: 24.2%, 65.3%; sft7b v2: 35.8%, 61.9%); see [Retrain on sft_v2](#retrain-on-sft_v2).
 
 ---
 
 ## 1. Model details
 
-| Field | sft05 (v4) | sft15 (v5) | sft3b (v6, Staging) |
+| Field | sft05 (v14) | sft15 (v15) | sft3b (v16, Staging) |
 | :--- | :--- | :--- | :--- |
 | Component | generative rewriter | generative rewriter | generative rewriter |
 | Base model | `Qwen/Qwen2.5-0.5B-Instruct` | `Qwen/Qwen2.5-1.5B-Instruct` | `Qwen/Qwen2.5-3B-Instruct` |
@@ -58,7 +58,7 @@ Serving path: quality (vLLM, GPU), **not enabled** (`quality.base_url: null` in
 - Out of scope:
   - production use of any current rung (C8.3 fails);
   - commercial use of the 3B rung. Qwen2.5-3B-Instruct is under the Qwen Research Licence
-    (non-commercial), so v6 may be released for research only
+    (non-commercial), so v16 may be released for research only
     ([license_audit.md](../../reports/license_audit.md));
   - multi-turn conversations, non-English prompts, prompts with code the target must reproduce
     verbatim, safety-critical instructions;
@@ -116,7 +116,7 @@ Test-split isolation audit: `pass` (C10.4, [status.md](../checkpoints/status.md)
 
 Split: `val` · Prompts: `285` · Seeds: greedy decoding, single run per rung · Judge:
 `Qwen/Qwen2.5-32B-Instruct-AWQ`, `pairwise_avg`, on both targets · MLflow run:
-`24e7e2bf7d7b465c82d9e9cca1f331f6` (registry source run of v6); runs for v4 / v5 and the val
+`2ec9104893714b53ad71a2b639a31b00` (registry source run of v16); runs for v14 / v15 and the val
 report are not listed in the reports read.
 
 How the numbers are computed ([val_report.py](../../src/terser/models/rewriter/val_report.py)):
@@ -134,15 +134,16 @@ How the numbers are computed ([val_report.py](../../src/terser/models/rewriter/v
 | Rung | n | Median savings (Qwen2.5 tok.) | Oracle (SFT target) median | Fell back | Preserved (both targets pooled) | Latency (s / prompt) | C8.3 |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
 | Original prompt | 285 | 0% | — | — | 100% | 0 | — |
-| sft05 (v4) | 285 | 7.6% | 10.0% | 98 | 67.4% | 0.33 | fail |
-| sft15 (v5) | 285 | 7.6% | 10.0% | 101 | 69.3% | 0.50 | fail |
-| sft3b (v6) | 285 | 2.1% | 10.0% | 130 | 74.7% | 0.76 | fail |
+| sft05 (v14) | 285 | 4.1% | 10.0% | 108 | 68.4% | 0.39 | fail |
+| sft15 (v15) | 285 | 10.2% | 10.0% | 99 | 68.2% | 0.50 | fail |
+| sft3b (v16) | 285 | 26.1% | 10.0% | 66 | 65.6% | 0.70 | fail |
 
 Source: [p8_rewriter_val.md](../../reports/p8_rewriter_val.md),
 [p8_rewriter_val.json](../../reports/p8_rewriter_val.json). Per-target preservation, savings on
 the Phi-3.5 tokenizer, net savings and the post-gate fallback rate are not reported. C8.3 requires
-median savings ≥ 25% on every target, preservation ≥ 92% overall and ≥ 85% per category. All three
-rungs miss every one of these targets.
+median savings ≥ 25% on every target, preservation ≥ 92% overall and ≥ 85% per category. sft3b clears
+25% on the Qwen2.5 tokenizer (26.1%; other targets not reported); all three rungs miss both
+preservation bars.
 
 ### 5.2 Per category
 
@@ -150,22 +151,22 @@ Preservation (both targets pooled, fallbacks counted as preserved):
 
 | Category | sft05 | sft15 | sft3b |
 | :--- | ---: | ---: | ---: |
-| code | 71.6% | 58.8% | 57.8% |
-| fact | 74.5% | 66.4% | 80.0% |
-| reason | 71.9% | 82.3% | 82.3% |
-| explain | 64.3% | 62.9% | 85.7% |
-| creative | 53.2% | 69.1% | 75.5% |
-| transform | 66.3% | 75.5% | 70.4% |
+| code | 70.6% | 63.7% | 57.8% |
+| fact | 66.4% | 74.5% | 64.5% |
+| reason | 62.5% | 67.7% | 82.3% |
+| explain | 71.4% | 78.6% | 72.9% |
+| creative | 64.9% | 60.6% | 52.1% |
+| transform | 75.5% | 66.3% | 66.3% |
 | High-risk cluster(s) (C6.3) | none (riskiest cluster 1.195×, [p6_cluster_risk.md](../../reports/p6_cluster_risk.md)) | | |
 
-Per-category median savings and per-category n are not reported. Only `explain` on sft3b (85.7%)
-reaches the 85% per-category bar.
+Per-category median savings and per-category n are not reported. No rung reaches the 85%
+per-category bar in any category (closest: sft3b `reason`, 82.3%).
 
 ### 5.3 Latency
 
 | Path | Hardware | Load (RPS) | Prompt length | p50 | p95 | p99 |
 | :--- | :--- | ---: | :--- | ---: | ---: | ---: |
-| quality (offline batch 16, HF `generate`, not vLLM) | GPU (type not recorded in the report) | offline | val prompts | mean 0.33 / 0.50 / 0.76 s (sft05 / sft15 / sft3b) | not reported | not reported |
+| quality (offline batch 16, HF `generate`, not vLLM) | GPU (type not recorded in the report) | offline | val prompts | mean 0.39 / 0.50 / 0.70 s (sft05 / sft15 / sft3b) | not reported | not reported |
 | quality (served) | RTX 4500 Ada | — | ≤ 256 tokens | not measured | not measured | not measured |
 
 C11.3 (quality-path latency) and C11.4 (throughput) were measured and fail: p95 438 ms at 5 RPS with 0% quality-served, and 20 RPS sustained but every request answered by the fallback ([p11_quality_path.md](../../reports/p11_quality_path.md))
@@ -199,21 +200,18 @@ validated on SFT rewrites; see [quality_gate.md §6](quality_gate.md#6-quality-g
 
 ## 7. Limitations and failure modes
 
-**Code fixes after the published runs (2026-10-18).** The SFT and GRPO numbers in this card
-predate these changes and were not regenerated (they need GPU runs):
+**Code fixes (2026-10-18), applied before the 2026-10-26 retrain.** All SFT numbers in this card
+come from checkpoints retrained and re-judged after these changes:
 
-- training, `generate` and GRPO now use the whole `
-### Rewrite:
-` separator, not its last
-  token; the published checkpoints were trained with the single token, so retrain before
-  decoding them with the new code;
+- training, `generate` and GRPO use the whole `### Rewrite:` separator, not its last token;
 - a rewrite too long for `max_len` no longer drops the prompt or ends in a mid-rewrite EOS;
-- validation decoding and GRPO sampling now pass `repetition_penalty=1.0` (the base model's
-  generation config sets 1.1, so the "greedy" decodes and GRPO samples were penalised);
-- GRPO weights micro-batches by size, and its retention proxy matches whole items ("2" no
-  longer counts as kept because "2024" is in the rewrite);
+- validation decoding passes `repetition_penalty=1.1`, the base model's generation config value;
+- GRPO weights micro-batches by size, and its retention proxy matches whole items;
 - the val report leaves unjudged rewrites out of the preservation rate (`missing_labels`)
   instead of counting them as degraded.
+
+The failure-mode shares below come from the row 8.3.10 analysis of the first sft3b run
+(2026-10-17) and were not redone on the retrained checkpoint.
 
 | Failure mode | Share of degraded cases | Example (hashed id or link) | Mitigation in place |
 | :--- | ---: | :--- | :--- |
@@ -224,7 +222,7 @@ predate these changes and were not regenerated (they need GPU runs):
 | Other | 72% | `dolly:5382:repetitive` (only "Um," removed); 63 of 72 show no visible loss | — |
 
 Shares are from the row 8.3.10 failure analysis ([p8_failures.md](../../reports/p8_failures.md)):
-100 of the 144 non-fallback degraded (prompt, target) pairs of sft3b (v6), sampled by prompt
+100 of the 144 non-fallback degraded (prompt, target) pairs of the first sft3b run (v6), sampled by prompt
 category with seed 0. The categorisation was done by an LLM assistant (Claude), not by a human
 annotator, and has not been human-reviewed. Treat the shares as a first-pass triage.
 
@@ -235,15 +233,14 @@ annotator, and has not been human-reviewed. Treat the shares as a first-pass tri
 - **Target ceiling.** The model imitates targets with a 10.0% val median. Perfect imitation would
   still miss the 25% savings bar. The sft_v2 retrain addresses this (17.4% val median), but that
   target is also below 25%.
-- **Fallbacks inflate preservation.** sft3b falls back on 130 of 285 prompts. Those count as
-  preserved and as 0% savings, which is why it has the best preservation and the lowest savings
-  (2.1%).
+- **Fallbacks inflate preservation.** Rungs fall back on 66-108 of 285 prompts. Those count as
+  preserved and as 0% savings; sft05 falls back most (108) and has both the best preservation
+  (68.4%) and the lowest savings (4.1%).
 - **Memorisation.** Training loss reached about 1e-3 or below on rungs 1 and 2 (1,262 pairs, 3,000
   steps, batch 4).
-- **Weak categories.** `code` preservation falls from 71.6% (sft05) to 57.8% (sft3b). `creative` is
-  lowest for sft05 (53.2%).
-- **Judge dependence.** All preservation numbers rest on the Qwen2.5-32B-AWQ judge. Judge-human
-  agreement (C2.4, C2.5) is unmeasured; raw A/B disagreement is 40.9% on the pilot (C2.6 fail).
+- **Weak categories.** `code` preservation falls from 70.6% (sft05) to 57.8% (sft3b). `creative` is
+  lowest for sft3b (52.1%).
+- **Judge dependence.** All preservation numbers rest on the Qwen2.5-32B-AWQ judge. Raw A/B disagreement is 40.9% on the pilot (C2.6 fail).
   The judge is from the same family as the Qwen2.5 target and as the rewriter base models. The
   2.2.5 self-preference check found a 4.8 pp label-agreement gap between target families (≤ 5 pp,
   [p2_self_preference.json](../../reports/p2_self_preference.json)). The judge's preference for
@@ -254,7 +251,7 @@ annotator, and has not been human-reviewed. Treat the shares as a first-pass tri
 
 ## 8. Ethical considerations
 
-- **Silent over-compression.** At 67.4-74.7% preservation, the judge labels 25-33% of
+- **Silent over-compression.** At 65.6-68.4% preservation, the judge labels 32-34% of
   (rewrite, target) pairs `degraded`, and the gate was not applied. That is why no rung is in
   Production. If deployed, gate
   rejections and path fallbacks are exposed through `fallback_used` / `fallback_reason`
@@ -264,7 +261,7 @@ annotator, and has not been human-reviewed. Treat the shares as a first-pass tri
   training targets is plausible; this has not been tested. Serving logs store hashes unless the request sets
   `consent_raw_text: true`; raw text is kept at most 30 days ([docs/serving/logging.md](../serving/logging.md)).
 - **Licences** ([license_audit.md](../../reports/license_audit.md)): Qwen2.5-0.5B / 1.5B are
-  Apache-2.0. **Qwen2.5-3B is under the Qwen Research Licence (non-commercial)**, so v6 is
+  Apache-2.0. **Qwen2.5-3B is under the Qwen Research Licence (non-commercial)**, so v16 is
   research-only. Targets come from Qwen2.5-32B-AWQ (Apache-2.0) rewrites and operator / LLMLingua-2
   outputs, judged on Qwen2.5-7B (Apache-2.0) and Phi-3.5-mini (MIT) outputs. No Llama output is
   used. Dolly (CC-BY-SA-3.0) is the largest source (1,109 of 1,665 source groups in
@@ -279,9 +276,9 @@ annotator, and has not been human-reviewed. Treat the shares as a first-pass tri
 
 | Field | Value |
 | :--- | :--- |
-| Git SHA | `ae079d6d397107d8d3468d01ae511ac96a7382d6` (registry lineage of v6) |
-| MLflow experiment / run id | v6 `24e7e2bf7d7b465c82d9e9cca1f331f6`; v4 / v5 not listed |
-| Hydra config (resolved) | v6 `config_sha256` `b5a60452ba4734242198bffd56cc56be43924e3a7192c05438ced263f364d444` |
+| Git SHA | `cbee594ceec840e930bbe08226aa9733ad2901f0` (registry lineage of v16) |
+| MLflow experiment / run id | v16 `2ec9104893714b53ad71a2b639a31b00`; v14 / v15 not listed |
+| Hydra config (resolved) | v16 `config_sha256` `b5a60452ba4734242198bffd56cc56be43924e3a7192c05438ced263f364d444` |
 | Data DVC hash(es) | registry `data_hash` `0c451d108599d886`; `sft` md5 `c9843e9ba4fcd39ac9019a40843e52e5.dir` |
 | Parent model | `Qwen/Qwen2.5-{0.5B,1.5B,3B}-Instruct` |
 | Judge model / revision used for labels | `Qwen/Qwen2.5-32B-Instruct-AWQ`, `pairwise_avg`; revision not recorded in the reports read |
@@ -291,8 +288,8 @@ annotator, and has not been human-reviewed. Treat the shares as a first-pass tri
 
 ## Retrain on sft_v2
 
-Status as of 2026-10-17: sft15 v2, sft3b v2 and sft7b v2 (QLoRA) trained and judged; all three
-fail C8.3. The row 8.3.4 escalation ladder (1.5B LoRA, 3B LoRA, 7B QLoRA) is exhausted.
+Status as of 2026-10-18 (retrained 2026-10-26): sft15 v2, sft3b v2 and sft7b v2 (QLoRA) trained and
+judged; all three fail C8.3. The row 8.3.4 escalation ladder (1.5B LoRA, 3B LoRA, 7B QLoRA) is exhausted.
 
 **What changes.** Only the training data. Two extra rewrite levels, `llm_max` and `llm_min`, were
 generated by `Qwen/Qwen2.5-32B-Instruct-AWQ` (prompt `rewrite_v1`, temperature 0) for the labelled
@@ -326,41 +323,33 @@ Generation reads `data/processed/sft/val.jsonl`, so the oracle column is the v1 
 
 | Rung | n | Median savings | Oracle median | Fell back | Preserved | Latency (s) | C8.3 |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
-| sft15 v2 | 285 | 35.0% | 10.0% | 72 | 57.0% | 0.44 | fail |
-| sft3b v2 | 285 | 12.5% | 10.0% | 104 | 71.4% | 0.98 | fail |
-| sft7b v2 | 285 | 2.0% | 10.0% | 130 | 75.3% | 1.71 | fail |
+| sft15 v2 | 285 | 22.6% | 10.0% | 73 | 58.1% | 0.49 | fail |
+| sft3b v2 | 285 | 24.2% | 10.0% | 70 | 65.3% | 0.72 | fail |
+| sft7b v2 | 285 | 35.8% | 10.0% | 63 | 61.9% | 1.24 | fail |
 
 Per-category preservation:
 
 | Rung | code | creative | explain | fact | reason | transform |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| sft15 v2 | 48.0% | 54.3% | 65.7% | 68.2% | 44.8% | 62.2% |
-| sft3b v2 | 61.8% | 70.2% | 80.0% | 80.0% | 63.5% | 74.5% |
-| sft7b v2 | 56.9% | 85.1% | 65.7% | 80.0% | 81.2% | 80.6% |
-
-Per-category median savings: sft15 v2 code 22.8%, creative 21.7%, explain 43.5%, fact 1.2%,
-reason 72.2%, transform 16.4%; sft3b v2 code 18.9%, creative 1.5%, explain 0.0%, fact 0.7%,
-reason 68.5%, transform 0.0%.
+| sft15 v2 | 52.9% | 56.4% | 72.9% | 70.0% | 41.7% | 57.1% |
+| sft3b v2 | 48.0% | 66.0% | 67.1% | 72.7% | 71.9% | 66.3% |
+| sft7b v2 | 54.9% | 53.2% | 62.9% | 69.1% | 71.9% | 59.2% |
 
 Reading:
 
-- **sft15 v2 overshoots its targets.** It saves 35.0% against a 17.4% target median and loses
-  12.3 pp of preservation against sft15 (69.3% to 57.0%). Most of the savings come from `reason`
-  (72.2% saved, 44.8% preserved). It cuts worked steps or context the answer needs.
-- **sft3b v2 trades back.** It saves 12.5% (sft3b: 2.1%) at 71.4% preserved (sft3b: 74.7%). It
-  falls back on 104 of 285 prompts.
-- **sft7b v2 is the most conservative rung.** It falls back on 130 of 285 prompts (as many as
-  sft3b v1) and saves 2.0% at 75.3% preserved, the best preservation of any rung. Only `creative`
-  (85.1%) reaches the 85% per-category bar; `code` stays at 56.9%. Generation takes 1.71 s per
-  prompt, 2.25x sft3b v1.
-- No rung is near the 92% overall / 85% per-category preservation bar, and only sft15 v2
-  clears 25% savings. More target savings alone does not close C8.3, and neither does a larger
-  base model.
+- **sft15 v2 cuts the wrong things.** It saves 22.6% against a 17.4% target median at 58.1%
+  preserved, the lowest of any rung; `reason` falls to 41.7%. It cuts worked steps or context the
+  answer needs.
+- **sft3b v2 matches sft3b v1.** 24.2% savings at 65.3% preserved (sft3b: 26.1%, 65.6%). The
+  augmented targets did not move the 3B rung.
+- **sft7b v2 saves the most.** 35.8% median savings, the only v2 rung above 25%, at 61.9%
+  preserved and 1.24 s per prompt (1.8x sft3b).
+- No rung is near the 92% overall / 85% per-category preservation bar. More target savings alone
+  does not close C8.3, and neither does a larger base model.
 
-Registry ([p11_registry.md](../../reports/p11_registry.md)): sft15 v2, sft3b v2 and sft7b v2 are
-`terser-rewriter` versions 7, 8 and 9, all Archived. v6 (sft3b v1) keeps Staging: sft7b v2 is
-within 0.6 pp of it on preservation and 0.1 pp on savings at 2.25x the latency. Weights are in
-DVC (`models/rewriter/sft-qwen7b-qlora-v2.dvc`).
+Registry ([p11_registry.md](../../reports/p11_registry.md)): the post-audit rebuild registers only
+the v1 ladder (v14-v16); v16 (sft3b v1) keeps Staging. The v2 weights are in DVC
+(`models/rewriter/sft-qwen7b-qlora-v2.dvc`).
 
 Data note: the first report run showed 0.0% preservation for both v2 rungs. The merge step
 `cat ... > val_labels_all.jsonl` had failed silently because that file is a read-only DVC
@@ -374,3 +363,4 @@ hardlink, so the v2 labels never reached the report. The merged labels are now w
 | 1.0 | `terser-rewriter / 4, 5, 6` | 2026-10-17 | Initial; sft_v2 retrain in progress |
 | 1.1 | `terser-rewriter / 4, 5, 6` | 2026-10-17 | sft_v2 results (sft15 v2, sft3b v2): both fail C8.3 |
 | 1.2 | `terser-rewriter / 4-9` | 2026-10-17 | sft7b v2 (QLoRA) result, fails C8.3; v2 rungs registered as v7-v9 (Archived) |
+| 1.3 | `terser-rewriter / 14-16` | 2026-10-18 | Post-audit rebuild: every rung retrained and re-judged with the code fixes in §7; all tables refreshed |

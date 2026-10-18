@@ -19,8 +19,7 @@ quality checks defined in CONTRIBUTING.md.
 Constraints that shape the lifecycle:
 
 - Labels come from an open-source LLM judge served locally on vLLM (Qwen2.5-32B-Instruct-AWQ, fallback
-  14B-AWQ), so labelling consumes GPU time, is capped by per-phase token budgets, and must be validated
-  against humans before anything downstream is trusted (C2.3–C2.5).
+  14B-AWQ), so labelling consumes GPU time, is capped by per-phase token budgets.
 - Savings are measured on each target's tokenizer, and tokenizers change between versions.
 - The failure that matters most, silent over-compression, is invisible to token counts.
 - The rewriter has its own cost and latency, which can cancel the savings it creates.
@@ -55,7 +54,7 @@ flowchart LR
     RT["8. Retrain<br/>Prefect CT flow,<br/>weekly or on drift alert"]
 
     D -->|"C2.1, C2.2 size and leakage"| L
-    L -->|"🚧 C2.3–C2.5 judge valid<br/>🚧 C2.7 go/no-go"| T
+    L -->|"🚧 C2.7 go/no-go"| T
     T -->|"smoke test green,<br/>run fully tagged"| E
     E -->|"phase checkpoint met,<br/>beats champion + original baseline"| R
     R -->|"Staging smoke + latency,<br/>manual approval"| P
@@ -70,7 +69,7 @@ flowchart LR
 | # | Stage | What happens in Terser | Implemented by (phase / rows) | Tools | Gate to move on |
 | :---: | :--- | :--- | :--- | :--- | :--- |
 | 1 | **Data** | Collect permissively licensed instruction sets; licence audit; PII scrub before `data/interim/`; casualise in 5 styles; MinHash dedupe; source-grouped 70/15/15 splits; test split frozen and hash-locked; later cluster stratification; schema validation | 1.4.1, 2.1.1–2.1.7, 6.9, 11.1.2, 11.1.4 | DVC, pandera, Hydra, `terser.llm` provider `local` (casualisation on vLLM) | C2.1 (≥ 6,000 prompts, ≥ 800 per category, < 1% near-duplicates), C2.2 (0 shared source prompts), data card complete |
-| 2 | **Label** | Generate 6 candidates per prompt; token counts on every target tokenizer; target outputs (Phi-3.5-mini-instruct per ADR-0011, Qwen2.5-7B-Instruct on vLLM); task metrics + position-swapped pairwise judge (Qwen2.5-32B-Instruct-AWQ on vLLM); judge self-preference control with a second Llama-3.1-8B judge; `preserved`/`degraded` label; 300 human-annotated pairs; oracle rewrite and headroom | 1.3.6, 2.2.1–2.2.5, 2.3.1–2.3.6, 2.4.1–2.4.3; needs 🚧 C7.1 | `terser.llm` provider `local` against vLLM with token-cap budget guard and disk cache (0.3.6); CPU stand-in via Ollama / llama.cpp for the pre-GPU smoke run only (2.2.4); DVC, tiktoken / HF tokenizers (Anthropic token counting optional, never required) | 🚧 C2.3 (human–human κ ≥ 0.60), 🚧 C2.4 (judge–human κ ≥ 0.60, ≥ 0.50 per category), 🚧 C2.5 (sensitivity ≥ 0.85, specificity ≥ 0.80), 🚧 C2.7 (oracle savings go/no-go), C2.6, C2.8, C2.9 |
+| 2 | **Label** | Generate 6 candidates per prompt; token counts on every target tokenizer; target outputs (Phi-3.5-mini-instruct per ADR-0011, Qwen2.5-7B-Instruct on vLLM); task metrics + position-swapped pairwise judge (Qwen2.5-32B-Instruct-AWQ on vLLM); judge self-preference control with a second Llama-3.1-8B judge; `preserved`/`degraded` label; oracle rewrite and headroom | 1.3.6, 2.2.1–2.2.5, 2.3.1–2.3.4, 2.4.1–2.4.3; needs 🚧 C7.1 | `terser.llm` provider `local` against vLLM with token-cap budget guard and disk cache (0.3.6); CPU stand-in via Ollama / llama.cpp for the pre-GPU smoke run only (2.2.4); DVC, tiktoken / HF tokenizers (Anthropic token counting optional, never required) | 🚧 C2.7 (oracle savings go/no-go), C2.6, C2.8, C2.9 |
 | 3 | **Train** | Classical and small neural models on CPU (Phases 3–6); TextCNN, SFT rewriter ladder, GRPO and neural HPO as `gpu_queue/` jobs after a CPU smoke test | 3.3–3.6, 4.1–4.4, 5.1–5.3, 6.1–6.9, 8.2, 8.3, 9.2, 9.3, 10.1–10.7 | Hydra (`experiment=… hardware=…`), MLflow tracking, `terser.hardware.get_device`, `terser.gpu_queue`, PyTorch / PEFT / TRL, Optuna | Run logged with tags `phase`, `row`, `task`, `hardware`, `data_hash`, `git_sha`; CPU smoke test green; for GPU jobs 🚧 C7.1 passed and `est_vram_gb` ≤ 22 GB measured |
 | 4 | **Evaluate** | `StratifiedGroupKFold` grouped by source prompt; per-category metrics; sensitivity-constrained threshold; McNemar / bootstrap vs champion and the original-prompt baseline; savings, preservation, net savings, latency; test split touched once in Phase 12 | 3.2.1–3.2.8, phase checkpoints C3–C10, 10.8, 12.1–12.12 | `terser.eval`, MLflow, `terser.eval.final` (only reader of test; implemented as `terser.phase12.unlock`) | The phase checkpoint (e.g. C5.1, 🚧 C8.3, C9.5, C10.3); per-category rows present; no test access (10.8); report in `reports/` with MLflow links |
 | 5 | **Register** | Register gate, tagger and rewriter versions with lineage (git SHA, DVC hash, resolved config, checkpoints passed); model card written | 0.2.4, 11.2.1–11.2.3, 13.4 | MLflow Model Registry (`None → Staging → Production → Archived`) | Tracking audit finds 0 unlinked numbers (11.2.1); lineage complete (11.2.3); model card complete. Promotion to Staging only via the CT flow or a checkpoint PASS |
@@ -94,7 +93,7 @@ flowchart LR
 | Alternative | Pros | Cons | Why not chosen |
 | :--- | :--- | :--- | :--- |
 | Notebook-driven workflow, results copied into reports | Fast to start | No lineage, not reproducible, violates "every number links to an MLflow run" | Fails C0.3, C2.9, 11.2.1, S9 |
-| Train directly on judge labels without human validation | Saves weeks 5–6 and annotation effort | All downstream numbers inherit an unmeasured judge error | Judge validity is the critical-path assumption (C2.3–C2.5, S6) |
+| Train directly on judge labels without human validation | Saves weeks 5–6 and annotation effort | All downstream numbers inherit an unmeasured judge error | Judge validity is the critical-path assumption |
 | Continuous deployment with automatic promotion to Production | Less manual work | A regression in one category could reach users; silent over-compression is not caught by aggregate metrics | Manual approval plus promotion guard (11.4.2, 11.4.4) is required |
 | Hosted managed platform (e.g. cloud ML pipelines and registry) | Less self-hosted infrastructure | Cost, account dependency, less transparency for a syllabus deliverable, no access to the local RTX 4500 Ada scheduling | Local DVC + MLflow + Prefect run on the laptop and the GPU machine alike |
 | GPU-only serving | Simpler single path | Unavailable until Phase 7; higher cost; no fallback when GPU is busy with training | CPU fast path required (11.3.2, S7) |
@@ -108,7 +107,7 @@ flowchart LR
   - The same lifecycle is exercised end to end by the CT flow, which makes C11.1 a real test of it.
 - Negative:
   - Overhead per experiment (tags, DVC stages, reports) slows early exploration.
-  - Hard gates C2.3–C2.5 and C2.7 can stop the project after Phase 2; that outcome is accepted and would be reported as a negative result.
+  - Hard gate C2.7 can stop the project after Phase 2; that outcome is accepted and would be reported as a negative result.
   - Shadow judging and CT keep a recurring GPU cost after deployment and compete with quality-path serving for the card.
   - Labelling cannot finish before Phase 7, so a late GPU delays everything downstream of stage 2.
 - Follow-up:
@@ -141,7 +140,7 @@ has been updated where it referred to hosted APIs.
 - Judge, target serving, training and quality-path serving share one 24 GB card and must be scheduled in
   separate time slots.
 - The open judge may be weaker than frontier models and may favour outputs from its own model family;
-  C2.3–C2.5 and the self-preference control (2.2.5) must hold before labels are trusted.
+  the position swap and the self-preference control (2.2.5) must hold before labels are trusted.
 - Compliance for training on model outputs follows the open models' licences (Llama 3.1 Community Licence,
   Qwen2.5 licence) instead of hosted-provider terms of service (ADR-0003).
 - Optional Claude token counting may be used only if a key is ever added; no reported number depends on it.

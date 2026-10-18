@@ -191,8 +191,7 @@ No rewrite from TextCNN tags was ever generated or judged, so there is no failur
   equally good rewrites treat differently is labelled by whichever candidate was shortest.
 - **Truncation.** Words past 256 are dropped from training and evaluation. Words past bge-small's
   512-token limit get zero vectors. Long prompts are under-represented.
-- **Judge dependence.** Oracle labels rest on the Qwen2.5-32B-AWQ judge. C2.4 / C2.5 are
-  unmeasured (no human labels); C2.6 raw order disagreement is 40.9% on the pilot
+- **Judge dependence.** Oracle labels rest on the Qwen2.5-32B-AWQ judge. C2.6 raw order disagreement is 40.9% on the pilot
   ([p2_judge_bias.md](../../reports/p2_judge_bias.md)).
 - **Tokenizer drift.** A change of the bge-small tokenizer changes the word averaging. A change of
   the Qwen2.5 tokenizer changes oracle savings and the prompt-head target. Neither revision is

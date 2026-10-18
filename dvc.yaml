@@ -69,6 +69,11 @@ stages:
           cache: false
 
   dedupe:
+    # Frozen with the test set (2026-10-18): dedupe now compares the clean instruction (5d9b754),
+    # which removes 55 records instead of 28 and would change the frozen test split
+    # (split.test_sha256). The locked outputs are kept; unfreeze both stages for a new dataset
+    # version, which needs relabelling.
+    frozen: true
     cmd: >-
       python -m terser.data.dedupe --in data/interim/casual.jsonl
       --out data/interim/casual_dedup.jsonl --report reports/p2_duplicates.md
@@ -86,6 +91,8 @@ stages:
           cache: false
 
   split:
+    # Frozen with dedupe (see the dedupe stage).
+    frozen: true
     # Also the "stratify" step of row 11.1.2; there is no separate stage. Whole source groups
     # go to train / val / test by a seeded hash, which stratifies by category and by source in
     # expectation without reshuffling existing groups when data is added (splits.py

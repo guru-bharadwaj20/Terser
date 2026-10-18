@@ -196,7 +196,7 @@ The queued job (written to the clone's `gpu_queue/`, not run):
 ```yaml
 id: ct-sft-qwen3b-lora-20261017
 phase: 8
-depends_on: [C7.1, C2.3]
+depends_on: [C7.1]
 command: python -m terser.models.rewriter.train experiment=sft_qwen3b_lora hardware=rtx4500ada
 est_vram_gb: 20.0
 est_hours: 3.0

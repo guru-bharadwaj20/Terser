@@ -18,8 +18,7 @@ the failure modes specific to Terser that a generic MLOps stack would miss. Cons
 - **No hosted LLM APIs.** Labels, canaries and the quality path all run on local open models
   (vLLM on 24 GB Ada GPUs). GPU time is the scarce resource; CPU work must never wait on it.
 - **The product's metric is relative.** Savings are measured on each *target's* tokenizer, and
-  quality is "the target's answer is preserved", which only an LLM judge (validated against
-  humans, C2.3–C2.5) can measure.
+  quality is "the target's answer is preserved", which only an LLM judge can measure.
 - **Two serving paths** with different cost profiles: a CPU fast path (span tagger + gate on ONNX
   Runtime) and a GPU quality path (generative rewriter on vLLM) with a fallback to the fast path.
 

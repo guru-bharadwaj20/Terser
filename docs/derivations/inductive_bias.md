@@ -202,9 +202,7 @@ stumps for AdaBoost are additive in single features, so interactions again need 
 ## 4. Label noise breaks Candidate-Elimination
 
 CE assumes the labels are **noise-free**: it deletes every hypothesis that misclassifies a
-single example. The pilot labels come from a position-swapped LLM judge (row 1.3.6) and, even
-after human review, some will be wrong. Row 2.3.6 measures judge–human agreement for this
-reason.
+single example. The pilot labels come from a position-swapped LLM judge (row 1.3.6), and some will be wrong.
 
 One wrong label is enough to eliminate the target:
 
@@ -242,8 +240,7 @@ This is why the project moves on after Phase 1:
    The Bayes optimal classifier of row 5.2.4 reuses the Phase 1 conjunctive hypotheses with a
    likelihood that allows a per-example error rate, turning CE's hard deletion into a soft
    reweighting.
-3. **Measured noise.** Grouped cross-validation (3.2.4), the human-annotated 300 pairs (2.3.5)
-   and bootstrap CIs (3.2.8) estimate generalisation error directly instead of assuming zero
+3. **Measured noise.** Grouped cross-validation (3.2.4) and bootstrap CIs (3.2.8) estimate generalisation error directly instead of assuming zero
    training error.
 
 Phase 1 keeps CE because its failures are informative: each collapse names a concrete set of

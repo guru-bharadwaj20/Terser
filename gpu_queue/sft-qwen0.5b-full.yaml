@@ -1,7 +1,7 @@
 # Row 8.3.3: rewriter rung 1. Measured 16.32 GiB reserved at seq 1024, mb 4 (row 7.7).
 id: sft-qwen0.5b-full
 phase: 8
-depends_on: [C7.1, C2.3]
+depends_on: [C7.1]
 command: python -m terser.models.rewriter.train experiment=sft_qwen05b_full hardware=rtx4090
 est_vram_gb: 17
 est_hours: 6

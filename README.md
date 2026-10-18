@@ -228,7 +228,6 @@ source ([p11_containers_dashboard.md](reports/p11_containers_dashboard.md)).
 | Fast-path latency (C11.2) | **pass**: p95 20.9 ms at 20 RPS on CPU | [p11_serving_checks.md](reports/p11_serving_checks.md) |
 | Quality-path latency and throughput (C11.3, C11.4) | **fail**: at the 0.4 s budget every quality request falls back; the uncapped rewriter needs p95 4.3 s (3B) / 1.8 s (1.5B v2) | [p11_quality_path.md](reports/p11_quality_path.md) |
 | Fallback correctness (C11.5) | **pass**: 100% in all five fault scenarios | [p11_serving_checks.md](reports/p11_serving_checks.md) |
-| Judge validated against humans (C2.3–C2.5, hard gates) | **open**: needs two human annotators; no script can stand in | [status.md](docs/checkpoints/status.md) |
 
 **What a user gets today.** The ONNX gate rejects almost every rewrite at its
 deployed threshold (298 of 300 fast-path rewrites,

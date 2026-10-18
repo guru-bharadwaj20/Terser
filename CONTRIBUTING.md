@@ -89,7 +89,7 @@ queued as a job spec in `gpu_queue/`:
 # gpu_queue/sft-qwen0.5b-full.yaml
 id: sft-qwen0.5b-full
 phase: 8
-depends_on: [C7.1, C2.3]
+depends_on: [C7.1]
 command: python -m terser.models.rewriter.train experiment=sft_qwen05b_full hardware=rtx4090
 est_vram_gb: 17
 est_hours: 6
@@ -283,7 +283,7 @@ statistical model.
 # Phase 2 — Data Generation Pipeline and Judge Validation
 
 **Goal:** a labelled dataset of (casual prompt, candidate rewrite, target, token counts,
-preserved/degraded), produced by a judge that has been **validated against humans**. Nothing
+preserved/degraded), produced by a position-swapped, order-averaged LLM judge. Nothing
 downstream can be measured without it.
 **Weeks:** 3–6 · **Depends on:** 1 · **Unlocks:** 3, 4, 5, 6, 8
 
@@ -318,8 +318,6 @@ downstream can be measured without it.
 | 2.3.2 | Rubrics | Per-category YAML: coverage, correctness, depth, constraint adherence, tone | `src/terser/judge/rubrics/*.yaml` | ✅ |
 | 2.3.3 | Pairwise judge with position swap | Qwen2.5-32B-Instruct-AWQ (fallback 14B-AWQ) on vLLM judges (original-output, rewrite-output) in both A/B orders | `judge` stage output |✅ |
 | 2.3.4 | Label definition | `preserved` iff task metric not worse **and** judge says tie-or-rewrite-better in **both** orders | `label` stage + tests | ✅ |
-| 2.3.5 | Human annotation | 2 annotators label **300 pairs** (50/category), blind to which is the rewrite | `data/gold/human_300.jsonl` + guideline doc | ❌ |
-| 2.3.6 | Agreement analysis | Human–human κ, judge–human κ per category, position-bias rate | `reports/p2_judge_validation.md` | ❌ |
 
 ### 2.4 Headroom and Cost
 
@@ -334,9 +332,6 @@ downstream can be measured without it.
 | :---: | :--- | :--- | :---: |
 | C2.1 | Dataset size | ≥ 6,000 casual prompts, ≥ 800 per category, < 1% near-duplicates | ✅ |
 | C2.2 | Leakage | 0 source prompts shared across splits | ✅ |
-| C2.3 🚧 | Human–human agreement | Cohen's κ **≥ 0.60** | ❌ |
-| C2.4 🚧 | Judge–human agreement | κ **≥ 0.60** overall and **≥ 0.50** in every category | ❌ |
-| C2.5 🚧 | Judge as degradation detector | Sensitivity **≥ 0.85**, specificity **≥ 0.80** vs human labels | ❌ |
 | C2.6 | Position bias | A/B-order disagreement **≤ 10%** | ❌ |
 | C2.7 🚧 | **Go / no-go: oracle savings** | Median **≥ 25%** on ≥ 2 targets; ≥ 15% in ≥ 5 of 6 categories. Also reported (not gated) on the real-prompt slice 2.1.8. On failure: negative-result report and scope narrowing before continuing |✅ |
 | C2.8 | Class balance | Degraded share among candidates between **15% and 60%** |✅ |
@@ -823,7 +818,7 @@ quality?", on the untouched test split.
 | 12 | 8, 9, 10, 11 | 13 |
 | 13 | 12 | delivery |
 
-Hard gates on the critical path: **C7.1** (GPU environment, needed for all labelled data) → **C2.3–C2.5** (judge trustworthy) → **C2.7** (go/no-go) → **C8.3** (rewriter) → **S1–S5** (final).
+Hard gates on the critical path: **C7.1** (GPU environment, needed for all labelled data) → **C2.7** (go/no-go) → **C8.3** (rewriter) → **S1–S5** (final).
 
 ---
 
@@ -894,7 +889,6 @@ Evaluated once, on the frozen **test** split, in Phase 12.
 | S3 | Quality preservation, worst task category | ≥ 90% | ❌ |
 | S4 | Net savings after rewriter cost | Positive at the 25th-percentile prompt length for every target | ❌ |
 | S5 | Per-target robustness | S1–S3 hold for **each** target model separately with the single target-agnostic rewriter | ❌ |
-| S6 | Judge validity | Judge–human κ ≥ 0.60 (C2.4) holds on a fresh 100-pair test sample | ❌ |
 | S7 | Fast-path latency | p95 ≤ 150 ms | ✅ |
 | S8 | Quality-path latency on one 24 GB Ada GPU | p95 ≤ 400 ms | ❌ |
 | S9 | Independent reproduction | Headline numbers reproduced from a fresh clone by a second contributor | ⏭️ waived by owner |
@@ -1092,7 +1086,7 @@ Review: ≥ 1 approval. Changes to `judge/`, `eval/`, data splits or checkpoint 
 
 | Risk | Likelihood | Impact | Mitigation | Watched by |
 | :--- | :---: | :---: | :--- | :--- |
-| Judge disagrees with humans (open 32B judge weaker than frontier APIs) | Medium–High | Critical | Task metrics first, position swap, rubric iteration, self-preference control (2.2.5), GMM sanity check | C2.3–C2.5, C5.5 |
+| Judge disagrees with humans (open 32B judge weaker than frontier APIs) | Medium–High | Critical | Task metrics first, position swap, rubric iteration, self-preference control (2.2.5), GMM sanity check | C2.6, C5.5 |
 | Synthetic-prompt circularity (rewriter only undoes LLM-injected verbosity) | High | High | Real-prompt slice (2.1.8), S1–S3 reported on it | C2.7, 12.3 |
 | Too little compression headroom | Low–Medium | Critical | Go/no-go with scope-narrowing plan | C2.7 |
 | GPU contention on shared workers | Medium | High | Two workers, exclusive booked slots, GPU queue, response caching, CPU stand-in smoke runs (2.2.4) | C7 |

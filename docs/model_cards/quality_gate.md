@@ -2,10 +2,10 @@
 
 | Field | Value |
 | :--- | :--- |
-| Card version | `1.1` |
+| Card version | `1.2` |
 | Owner | `guru-bharadwaj20` |
-| Last updated | `2026-10-17` |
-| Registry name / version | `terser-gate / 2` ([p11_registry.md](../../reports/p11_registry.md)) |
+| Last updated | `2026-10-18` |
+| Registry name / version | `terser-gate / 4` ([p11_registry.md](../../reports/p11_registry.md)) |
 | Registry stage | `Production` (history `None -> Staging -> Production`) |
 
 This card describes the gate that is **deployed**: the scikit-learn gradient-boosting model exported
@@ -32,16 +32,16 @@ comparison only.
 | Hardware / GPU-hours | CPU only; 0 GPU-hours for training (labels came from GPU judge runs, see §8) |
 | Serving path | fast (ONNX Runtime, `CPUExecutionProvider`), [configs/serving/fast_onnx.yaml](../../configs/serving/fast_onnx.yaml) |
 
-ONNX vs scikit-learn parity: max |dP| 1.0e-07 on 2,000 training rows
-([p11_fast_path.json](../../reports/p11_fast_path.json): `gate_parity` 9.99e-08).
+ONNX vs scikit-learn parity: max |dP| 9.6e-08 on 2,000 training rows
+([p11_fast_path.json](../../reports/p11_fast_path.json): `gate_parity` 9.61e-08).
 
 ## 2. Intended use
 
 - Primary use: in the CPU fast path, score each rewrite made by the span tagger
-  ([span_tagger.md](span_tagger.md)). If `P(degraded) > gate_threshold` (0.264564 in
+  ([span_tagger.md](span_tagger.md)). If `P(degraded) > gate_threshold` (0.26962 in
   `configs/serving/fast_onnx.yaml`, the row 3.2.3 operating point, §6), the service returns the
   original prompt (`terser.serving.service`, line `rejected = score > self.gate_threshold`).
-- At that threshold the gate passes 23.7% of the labelled train candidates and rejects 298 of 300
+- At that threshold the gate passes 24.2% of the labelled train candidates and rejects 298 of 300
   tagger rewrites of train prompts, so the fast path currently saves almost nothing after the
   gate (median 0.0%, mean 0.1%; §5.1).
 - Users: `POST /rewrite` in fast mode, and the fast-path fallback when the quality path crashes or
@@ -52,7 +52,7 @@ ONNX vs scikit-learn parity: max |dP| 1.0e-07 on 2,000 training rows
   - acting as the C5.1 champion gate (it fails C5.1, like every other gate);
   - a quality guarantee: the sensitivity ≥ 0.95 operating point (§6) holds on grouped
     out-of-fold scores of Phase 2 candidates, pooled over categories. Sensitivity on tagger
-    rewrites is unmeasured, and in the `reason` category it is 0.794 at the pooled threshold;
+    rewrites is unmeasured, and in the `reason` category it is 0.784 at the pooled threshold;
   - multi-turn conversations, non-English prompts, prompts with code that the target must
     reproduce verbatim, safety-critical instructions;
   - real user prompts: it was trained and scored only on synthetic casual prompts; the WildChat
@@ -104,25 +104,25 @@ Test-split isolation audit: `pass` (C10.4, `python -m terser.hpo.audit --scan sr
 ## 5. Metrics
 
 Split: `train`, grouped 5-fold out-of-fold · Pairs: `14,732` (1,262 prompts) · Seeds: `0` only ·
-MLflow run: `930498fc3b7343abb9b510a7e4a8e6a2` (registry `source_run_id`)
+MLflow run: `e2e6f708d19c4cb8ae0c16f8febcb73a` (registry `source_run_id`)
 
 Only one seed was run for the deployed gate, so no spread is available. The research gates in
 §5.5 report mean ± sd over 3 or 5 seeds.
 
 ### 5.1 Overall, per target
 
-| Target | Grouped-CV ROC-AUC | Median savings (fast path, before gate) | Median savings after gate (0.264564) | Preservation | Net savings / 1k requests | Fallback rate | MLflow |
+| Target | Grouped-CV ROC-AUC | Median savings (fast path, before gate) | Median savings after gate (0.26962) | Preservation | Net savings / 1k requests | Fallback rate | MLflow |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
-| Pooled (Qwen2.5 + Phi-3.5 labels) | 0.760 | 28.6% (300 train prompts, Qwen2.5 tokenizer) | 0.0% (mean 0.1%; 298 of 300 rewrites rejected) | not measured | not measured | not measured | `930498fc…` |
+| Pooled (Qwen2.5 + Phi-3.5 labels) | 0.766 | 29.1% (300 train prompts, Qwen2.5 tokenizer) | 0.0% (mean 0.1%; 297 of 300 rewrites rejected) | not measured | not measured | not measured | `e2e6f708…` |
 | Qwen2.5-7B-Instruct | not reported separately | — | — | not measured | — | — | — |
 | Phi-3.5-mini-instruct | not reported separately | — | — | not measured | — | — | — |
 
-Source: [p11_fast_path.json](../../reports/p11_fast_path.json) (`gate_auc` 0.7605,
-`median_savings` 0.2857, `operating_point.savings_oof`). The after-gate savings use, for each
+Source: [p11_fast_path.json](../../reports/p11_fast_path.json) (`gate_auc` 0.7657,
+`median_savings` 0.2913, `operating_point.savings_oof`). The after-gate savings use, for each
 prompt, the grouped-CV fold model that did not see that prompt's labelled pairs. At the old 0.5
-threshold the same run rejects 199 of 300 rewrites (median 0.0%, mean 8.5%). With the deployed
-`gate.onnx`, which was refit on these prompts' pairs, the counts are 298 of 300 at 0.264564 and
-179 of 300 at 0.5 (mean 0.1% and 9.9%). The tagger was trained on these prompts too
+threshold the same run rejects 197 of 300 rewrites (median 0.0%, mean 7.7%). With the deployed
+`gate.onnx`, which was refit on these prompts' pairs, the counts are 298 of 300 at 0.26962 and
+194 of 300 at 0.5 (mean 0.1% and 8.9%). The tagger was trained on these prompts too
 ([p11_fast_path.md](../../reports/p11_fast_path.md)). The fast path (tagger + gate) has never been judged end to end. That
 run is checkpoint C5.6 (500 val prompts with the judge), measured as a fail ([p5_hmm_compressor.md](../../reports/p5_hmm_compressor.md))
 ([status.md](../checkpoints/status.md)).
@@ -136,17 +136,17 @@ pairs (grouped OOF for LR and KNN, leave-one-category-out for the tree):
 
 | Category | Deployed GB gate, grouped OOF | LR, grouped OOF ([p3_cv_leakage.md](../../reports/p3_cv_leakage.md)) | KNN k = 25, manhattan, distance ([p3_knn_grid.md](../../reports/p3_knn_grid.md)) | Tree depth 4, leave-category-out ([p3_loco.md](../../reports/p3_loco.md)) | n pairs | Degraded share |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| code | 0.751 | 0.753 ± 0.001 | 0.731 ± 0.003 | 0.735 | 2,620 | 0.458 |
-| fact | 0.756 | 0.732 ± 0.001 | 0.751 ± 0.003 | 0.730 | 2,242 | 0.430 |
-| reason | 0.710 | 0.669 ± 0.001 | 0.731 ± 0.008 | 0.689 | 2,556 | 0.237 |
-| explain | 0.699 | 0.692 ± 0.000 | 0.698 ± 0.003 | 0.697 | 2,534 | 0.472 |
-| creative | 0.700 | 0.705 ± 0.000 | 0.700 ± 0.005 | 0.702 | 2,546 | 0.502 |
+| code | 0.753 | 0.753 ± 0.001 | 0.731 ± 0.003 | 0.735 | 2,620 | 0.458 |
+| fact | 0.761 | 0.732 ± 0.001 | 0.751 ± 0.003 | 0.730 | 2,242 | 0.430 |
+| reason | 0.731 | 0.669 ± 0.001 | 0.731 ± 0.008 | 0.689 | 2,556 | 0.237 |
+| explain | 0.708 | 0.692 ± 0.000 | 0.698 ± 0.003 | 0.697 | 2,534 | 0.472 |
+| creative | 0.705 | 0.705 ± 0.000 | 0.700 ± 0.005 | 0.702 | 2,546 | 0.502 |
 | transform | 0.792 | 0.782 ± 0.001 | 0.775 ± 0.003 | 0.763 | 2,234 | 0.493 |
 | High-risk cluster(s) (C6.3) | none: riskiest cluster 1.195× the mean degradation rate (< 1.5×) | | | | | |
 
 n and degraded share are the leave-one-category-out held-out counts from p3_loco.md. C4.5 (every
 category ≥ 0.70) fails for every Phase 3/4 gate ([status.md](../checkpoints/status.md)). The
-deployed gate is also below 0.70 on `explain` (0.699).
+deployed gate is at or above 0.70 in every category (lowest: `creative`, 0.705).
 
 ### 5.3 Latency
 
@@ -172,7 +172,7 @@ where reported.
 | System | ROC-AUC | Specificity at sens. 0.95 | Source |
 | :--- | ---: | ---: | :--- |
 | Majority / always-preserved baseline | 0.500 ± 0.000 | 0.000 | [p3_gate_checkpoint.md](../../reports/p3_gate_checkpoint.md) |
-| **Deployed: GradientBoosting, 30 surface features** | **0.760** (seed 0) | **0.380** (seed 0) | [p11_fast_path.md](../../reports/p11_fast_path.md) |
+| **Deployed: GradientBoosting, 30 surface features** | **0.766** (seed 0) | **0.388** (seed 0) | [p11_fast_path.md](../../reports/p11_fast_path.md) |
 | LR (l2, C = 1) | 0.748 ± 0.000 | 0.303 ± 0.005 | p3_gate_checkpoint.md |
 | Tree C4.5 depth 4, min leaf 10 (C3.3 choice) | 0.758 ± 0.002 | 0.405 ± 0.004 | p3_gate_checkpoint.md |
 | KNN k = 51, manhattan, distance | 0.763 ± 0.001 | 0.377 ± 0.003 | p3_gate_checkpoint.md |
@@ -199,12 +199,12 @@ Checkpoint status ([status.md](../checkpoints/status.md)):
 | C10.2 | tuning gain ≥ +0.01 or plateau | pass (+0.0095, documented plateau) |
 | C11.2 | fast-path p95 ≤ 150 ms at 20 RPS | pass (20.9 ms) |
 
-The registry lineage of `terser-gate / 2` lists `checkpoints_passed: ['C3.1']` only
+The registry lineage of `terser-gate / 4` lists `checkpoints_passed: ['C3.1']` only
 ([p11_registry.md](../../reports/p11_registry.md)).
 
 ## 6. Quality-gate threshold
 
-All rates are on the grouped 5-fold out-of-fold scores of the 14,732 train pairs (seed 0), with
+All rates are on the grouped 5-fold out-of-fold scores of the 14,708 train pairs (seed 0), with
 the service's rule: reject when `P(degraded) > gate_threshold`. Sensitivity = share of degraded
 rewrites rejected, specificity = share of preserved rewrites passed. Source:
 [p11_fast_path.md](../../reports/p11_fast_path.md), `operating_point` in
@@ -212,16 +212,16 @@ rewrites rejected, specificity = share of preserved rewrites passed. Source:
 
 | Scope | Threshold | Sensitivity | Specificity | Rewrites passed | ROC-AUC | AP | Selected on |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
-| **Overall (deployed)** | **0.264564** | **0.950** | **0.380** | 23.7% | 0.760 | 0.680 | grouped OOF, train split, row 3.2.3 rule |
-| Overall, old default | 0.5 | 0.646 | 0.708 | 55.6% | 0.760 | 0.680 | fixed in config, not selected |
-| code | 0.264564 | 0.966 | 0.298 | 17.7% | 0.751 | 0.730 | pooled threshold |
-| fact | 0.264564 | 0.974 | 0.337 | 20.3% | 0.756 | 0.693 | pooled threshold |
-| reason | 0.264564 | 0.794 | 0.517 | 44.3% | 0.710 | 0.406 | pooled threshold |
-| explain | 0.264564 | 0.974 | 0.333 | 18.8% | 0.699 | 0.629 | pooled threshold |
-| creative | 0.264564 | 0.969 | 0.341 | 18.5% | 0.700 | 0.651 | pooled threshold |
-| transform | 0.264564 | 0.952 | 0.393 | 22.3% | 0.792 | 0.749 | pooled threshold |
+| **Overall (deployed)** | **0.26962** | **0.950** | **0.388** | 24.2% | 0.766 | 0.685 | grouped OOF, train split, row 3.2.3 rule |
+| Overall, old default | 0.5 | 0.647 | 0.715 | 55.9% | 0.766 | 0.685 | fixed in config, not selected |
+| code | 0.26962 | 0.962 | 0.302 | 18.1% | 0.753 | 0.733 | pooled threshold |
+| fact | 0.26962 | 0.963 | 0.339 | 21.0% | 0.761 | 0.695 | pooled threshold |
+| reason | 0.26962 | 0.784 | 0.537 | 46.1% | 0.731 | 0.434 | pooled threshold |
+| explain | 0.26962 | 0.981 | 0.330 | 18.3% | 0.708 | 0.637 | pooled threshold |
+| creative | 0.26962 | 0.976 | 0.339 | 18.1% | 0.705 | 0.656 | pooled threshold |
+| transform | 0.26962 | 0.955 | 0.413 | 23.2% | 0.792 | 0.750 | pooled threshold |
 
-The serving threshold `gate_threshold: 0.264564` in `configs/serving/fast_onnx.yaml` is the row
+The serving threshold `gate_threshold: 0.26962` in `configs/serving/fast_onnx.yaml` is the row
 3.2.3 rule (maximise specificity subject to sensitivity ≥ 0.95,
 `terser.eval.threshold.choose_threshold`) applied to the out-of-fold scores, written as the
 shortest decimal that flags the same pairs under the service's strict `>`
@@ -231,11 +231,11 @@ shortest decimal that flags the same pairs under the service's strict `>`
 `ConstraintGate` (`gate_onnx: null`), not to this model; `terser.serving.api.build_service` now
 refuses an ONNX gate without an explicit `gate_threshold`.
 
-At the old 0.5 the gate passed 35.4% of degraded rewrites (sensitivity 0.646), and 27.5% of the
-rewrites it passed were degraded. At 0.264564, 9.0% of the rewrites it passes are degraded, at
-the cost of rejecting 62.0% of preserved ones. Specificity 0.380 is below the C3.3 floor of 0.40
+At the old 0.5 the gate passed 35.3% of degraded rewrites (sensitivity 0.647), and 27.2% of the
+rewrites it passed were degraded. At 0.26962, 8.9% of the rewrites it passes are degraded, at
+the cost of rejecting 61.2% of preserved ones. Specificity 0.388 is below the C3.3 floor of 0.40
 that the Phase 3 tree met (0.405). The threshold is pooled: `reason` (degraded share 0.237) stays
-below the floor at 0.794, the other five categories are at or above 0.95. The risk-table
+below the floor at 0.784, the other five categories are at or above 0.95. The risk-table
 mitigation "gate at sensitivity 0.95" therefore holds for pooled Phase 2 candidates only; it is
 unmeasured on tagger rewrites (C5.6), and the threshold was fitted on fold-model scores and is
 applied to the refit `gate.onnx`.
@@ -244,9 +244,8 @@ applied to the refit `gate.onnx`.
 
 **Feature fix after training (2026-10-18).** `has_code` used to count blank lines as
 indentation, so plain prose with paragraph breaks was flagged as code. It now needs four spaces
-or a tab before text. The committed gate and the numbers above predate this fix; retrain
-(`python -m terser.phase11.train_fast_path`) so that training and serving use the same
-definition.
+or a tab before text. The gate was retrained with the fixed feature on 2026-10-26, so training and serving use the
+same definition and the numbers above are from that run.
 
 | Failure mode | Share of degraded cases | Example (hashed id or link) | Mitigation in place |
 | :--- | ---: | :--- | :--- |
@@ -268,8 +267,7 @@ AdaBoost highest-weight pairs from [p5_ensembles.md](../../reports/p5_ensembles.
   (0.689 tree, 0.659 LR, [p3_loco.md](../../reports/p3_loco.md)) and a different base rate (0.237).
 - **Target-agnostic.** See §3. Degraded share differs by target: 41.3% Qwen2.5, 44.9% Phi-3.5
   ([p2_headroom.md](../../reports/p2_headroom.md), all 1,800 labelled prompts).
-- **Judge dependence.** Labels are only as valid as the Qwen2.5-32B-AWQ judge. Judge-human
-  agreement (C2.4, C2.5) is unmeasured because no human labels exist. Raw A/B-order disagreement
+- **Judge dependence.** Labels are only as valid as the Qwen2.5-32B-AWQ judge. Raw A/B-order disagreement
   is 40.9% on the pilot (C2.6 fail); `pairwise_avg` removes the order dependence of the label but
   not the judge's uncertainty (209 of 342 order-inconsistent pilot pairs have margin < 0.2,
   [p2_judge_bias.md](../../reports/p2_judge_bias.md)). Self-preference check (row 2.2.5, Phi-3.5 as
@@ -310,7 +308,7 @@ AdaBoost highest-weight pairs from [p5_ensembles.md](../../reports/p5_ensembles.
 | Field | Value |
 | :--- | :--- |
 | Git SHA | `ae079d6d397107d8d3468d01ae511ac96a7382d6` |
-| MLflow experiment / run id | `930498fc3b7343abb9b510a7e4a8e6a2` |
+| MLflow experiment / run id | `e2e6f708d19c4cb8ae0c16f8febcb73a` |
 | Hydra config (resolved) | none (CLI); `config_sha256` `2f65400f92ec96e7896fd3c6971410c5edc47a62f329e7cde52e7aca8d4f64c6` |
 | Data DVC hash(es) | registry `data_hash` `0c451d108599d886`; `labels.jsonl` md5 `c5a38491cbd84f4094d4a46ada4ca47b`; `models/fast` md5 `9a0cd36b04ad789e706282c2aa304d05.dir` |
 | Parent model | none |
@@ -325,3 +323,4 @@ AdaBoost highest-weight pairs from [p5_ensembles.md](../../reports/p5_ensembles.
 | :--- | :--- | :--- | :--- |
 | 1.0 | `terser-gate / 2` | 2026-10-17 | Initial |
 | 1.1 | `terser-gate / 2` | 2026-10-17 | Row 3.2.3 operating point measured and applied (`gate_threshold` 0.5 -> 0.264564 in `fast_onnx.yaml`); per-category OOF AUC/AP; savings after gate. Model file unchanged |
+| 1.2 | `terser-gate / 4` | 2026-10-18 | Retrained in the post-audit rebuild with the fixed `has_code` feature; `gate_threshold` 0.264564 -> 0.26962; all metrics refreshed from p11_fast_path.json |
