@@ -60,7 +60,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             roc_auc(y, out_of_fold_scores(_lgbm(s), X, y, cats, groups, seed=s).scores)
             for s in range(args.seeds)
         ]
-        rows.append({"features": name, "auc": float(np.mean(aucs)), "sd": float(np.std(aucs))})
+        sd = float(np.std(aucs, ddof=1))
+        rows.append({"features": name, "auc": float(np.mean(aucs)), "sd": sd})
     gain = rows[1]["auc"] - rows[0]["auc"]
     corr = float(np.corrcoef(df.si_removed_share, y)[0, 1])
     text = (
@@ -73,8 +74,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         + "".join(f"| {r['features']} | {r['auc']:.4f} ± {r['sd']:.4f} |\n" for r in rows)
         + f"\nChange: **{gain:+.4f}** AUC. Point-biserial correlation of `si_removed_share` with "
         f"`degraded`: {corr:.3f}.\n\n"
-        "The gain is within noise: depth-3 trees already approximate the ratio by splitting on "
-        "`sum_si_removed` and `prompt_words` together. The feature stays because it is the one "
+        + (
+            f"The gain is within noise (|change| {abs(gain):.4f} < 2 seed-sd "
+            f"{2 * rows[0]['sd']:.4f}): depth-3 trees already approximate the ratio by splitting "
+            "on `sum_si_removed` and `prompt_words` together. "
+            if abs(gain) < 2 * rows[0]["sd"]
+            else f"The gain exceeds 2 seed-sd ({2 * rows[0]['sd']:.4f}). "
+        )
+        + "The feature stays because it is the one "
         "length-invariant view of removed information and serves the gates that cannot form "
         "ratios (LR, KNN, SVM).\n"
     )
