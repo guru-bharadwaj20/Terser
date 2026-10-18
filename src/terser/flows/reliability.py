@@ -26,6 +26,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from terser.config import project_root
+
 __all__ = [
     "ALERT_LOG_ENV",
     "LLM_RETRIES",
@@ -41,7 +43,7 @@ __all__ = [
     "read_alerts",
 ]
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = project_root()
 ALERT_LOGGER = "terser.alerts"
 ALERT_LOG_ENV = "TERSER_ALERT_LOG"
 WEBHOOK_ENV = "TERSER_ALERT_WEBHOOK"

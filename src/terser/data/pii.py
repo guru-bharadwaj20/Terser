@@ -51,6 +51,8 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
+from terser.config import project_root
+
 __all__ = [
     "DEFAULT_POLICY",
     "Action",
@@ -1231,7 +1233,7 @@ def _load_policy(path: str | None) -> dict[str, str] | None:
 
 def _git_provenance() -> tuple[str, bool]:
     """Read local revision metadata; git is optional outside a checkout."""
-    root = Path(__file__).resolve().parents[3]
+    root = project_root()
     try:
         sha = subprocess.run(
             ["git", "rev-parse", "HEAD"], cwd=root, check=True, capture_output=True, text=True

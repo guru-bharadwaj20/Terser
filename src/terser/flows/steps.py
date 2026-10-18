@@ -50,6 +50,7 @@ from prefect import task
 from prefect.cache_policies import NO_CACHE
 from prefect.context import TaskRunContext
 
+from terser.config import project_root
 from terser.flows.reliability import (
     LLM_RETRIES,
     LLM_RETRY_DELAYS,
@@ -83,7 +84,7 @@ __all__ = [
     "submit_gpu_job",
 ]
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = project_root()
 OUTPUT_TAIL = 2000
 VAL_REPORT = "reports/p8_rewriter_val.json"
 
