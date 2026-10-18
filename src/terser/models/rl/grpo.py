@@ -485,7 +485,7 @@ def train_grpo(
             last_dt,
         )
         if on_step is not None:
-            samples = []
+            samples: list[Row] = []
             for j, s in enumerate(scored):
                 src = batch[j // group_size]
                 samples.append(
@@ -647,7 +647,10 @@ def run(cfg: DictConfig) -> dict[str, Any]:
             return scorer(rows)
 
         threshold = gate_threshold(Path(p.serving_config))
-        similarity = _cpu_similarity(str(p.get("reward_v2", {}).get("encoder", _ENCODER)))
+        cpu_similarity = _cpu_similarity(str(p.get("reward_v2", {}).get("encoder", _ENCODER)))
+
+        def similarity(rows: list[Row]) -> list[float]:
+            return cpu_similarity(rows)
 
         def ref_logprobs(ids: torch.Tensor, attn: torch.Tensor, width: int) -> torch.Tensor:
             with policy.disable_adapter():
