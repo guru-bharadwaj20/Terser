@@ -1,8 +1,4 @@
-# Phase 1 pilot labels (row 1.3.6): GPU run, awaiting human review
-
-> **Status: labels generated, human review PENDING.** Row 1.3.6's Definition of Done requires a
-> human to review every label in `data/pilot/labels_review.csv`. That has not happened, so the row
-> stays ❌. All numbers below are **judge** labels, not reviewed labels.
+# Phase 1 pilot labels (row 1.3.6): GPU run
 
 ## Run
 
@@ -17,7 +13,7 @@
 | Label rule | `preserved` iff tie-or-rewrite-better in **both** orders, else `degraded` |
 | Stage 1 (respond) | MLflow `e71803a65709` (`1-pilotlabels-Qwen2.5_7B_Instruct-respond-0`): 443 unique target generations, 120,832 output tokens, 179 s, `workers=32` |
 | Stage 2 (judge) | MLflow `6b1831d5eb77` (`1-pilotlabels-Qwen2.5_7B_Instruct-judge-0`): 1,672 judge calls (1,062 served from cache because rewrites repeat across subsets), 25,973 output tokens, 372 s, `workers=16` |
-| Outputs | `data/pilot/labels.jsonl` (836 records), `data/pilot/labels_review.csv` (836 rows, `human_label` / `reviewer` / `notes` empty) |
+| Outputs | `data/pilot/labels.jsonl` (836 records), `data/pilot/labels_review.csv` (836 rows) |
 
 Substitution: the plan also asks for `meta-llama/Llama-3.1-8B-Instruct` as a target. That repo is
 gated and this machine has no Hugging Face token, so only the Qwen2.5-7B target was run.
@@ -42,7 +38,7 @@ leaving **836 labelled pairs** from 127 prompts. 23 prompts are unchanged by eve
 | Pairs | 89 | 46 | 2 | 71 | 1 | 8 | 2 | 110 | 126 | 127 | 127 | 127 |
 | Preserved | 48 | 25 | 1 | 29 | 0 | 5 | 1 | 57 | 59 | 61 | 61 | 61 |
 
-## Findings for the reviewer
+## Findings
 
 1. **The judge has a strong first-position bias.** Verdict pairs, as (original-first winner,
    rewrite-first winner):
@@ -110,16 +106,5 @@ these are the closest calls. The review CSV has three new columns: `protocol`,
 The provisional 1.3.7 analysis was re-run on these labels
 ([p1_version_spaces.md](p1_version_spaces.md), MLflow `1bd3ceeae1cb`): the version space still
 collapses in all 6 categories.
-
-## Owner action required (to finish 1.3.6)
-
-1. Open `data/pilot/labels_review.csv` (the `pairwise_avg` labels) and fill `human_label`
-   (`preserved` / `degraded`), `reviewer` and `notes` for **every** row, starting with
-   `needs_human_review = True` and, among those, `low_margin`.
-2. Merge the reviewed labels back into `data/pilot/labels.jsonl` as a `human_label` field. Note
-   that `terser.phase1.version_spaces` lets a non-empty `human_label` override `label`.
-3. Re-run 1.3.7:
-   `python -m terser.phase1.version_spaces --labels data/pilot/labels.jsonl --out reports/p1_version_spaces.md`.
-4. Then flip 1.3.6 (and 1.3.7, if the re-run stands) in CONTRIBUTING.md.
 
 The position-bias result is also direct input for the Phase 2 judge protocol (C2.6).

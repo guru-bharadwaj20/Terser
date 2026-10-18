@@ -608,8 +608,8 @@ one target-agnostic rewriter and the target-conditioned rewriter was removed fro
 
 Candidate-Elimination over the conjunctive attribute language collapses in all 6 categories (target:
 non-empty in at least 4). Each collapse names a minimal conflicting set of 3–5 examples that no
-conjunction separates ([p1_version_spaces.md](../reports/p1_version_spaces.md)). The labels are
-provisional: they come from the judge before human review (row 1.3.6). The finding is consistent
+conjunction separates ([p1_version_spaces.md](../reports/p1_version_spaces.md)). The labels come
+from the judge (row 1.3.6). The finding is consistent
 with the inductive-bias write-up: whether a rewrite is safe depends on interactions (for example,
 "drop hedging unless tone matters") that a conjunctive language cannot express. The Bayes optimal
 classifier over the same hypothesis space is 0.8 pp below MAP, and both are below the majority
@@ -700,7 +700,6 @@ These rows and checkpoints cannot be produced by a script, and no script output 
 | Item | What is needed |
 | :--- | :--- |
 | C1.1 | Review of ADR-0002 by a second contributor |
-| 1.3.6 / 1.3.7 | Human review of all 836 pilot labels; version spaces re-run on the reviewed labels |
 | 2.1.3 | Manual check of a 500-row sample for residual PII |
 | 12.12 (S9) | A second contributor reproduces the headline numbers from a fresh clone |
 

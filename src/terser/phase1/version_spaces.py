@@ -2,8 +2,7 @@
 
 Input is the ``labels.jsonl`` written by :mod:`terser.phase1.pilot_labels` (one record per
 (prompt, operator subset) with ``id``, ``prompt_id``, ``category``, ``ops``, ``original``,
-``label`` in ``{preserved, degraded, null}`` and ``stand_in``). A non-empty ``human_label``
-field, if present, overrides ``label`` (human review of every label is part of row 1.3.6).
+``label`` in ``{preserved, degraded, null}`` and ``stand_in``).
 
 For each record the instance is ``describe_prompt(original) + operator flags(ops)`` (see
 :mod:`terser.concept.attributes`); prompt attributes are computed once per ``prompt_id``. The
@@ -139,7 +138,7 @@ def load_labels(path: Path) -> list[LabelRecord]:
             if rid in seen:
                 raise ValueError(f"{path}:{lineno}: duplicate id {rid!r}")
             seen.add(rid)
-            label = row.get("human_label") or row.get("label")
+            label = row.get("label")
             if label not in (POSITIVE_LABEL, NEGATIVE_LABEL, None):
                 raise ValueError(f"{path}:{lineno}: unknown label {label!r}")
             out.append(

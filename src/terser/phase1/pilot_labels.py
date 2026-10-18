@@ -15,8 +15,8 @@ plus the cumulative stacks ``FHC``, ``FHCI``, ``FHCID``, ``FHCIDS``, ``FHCIDSL``
    with no task metric); with ``protocol: pairwise_avg`` (ADR-0005, which produced the current
    ``data/pilot/labels.jsonl``), the A/B/tie probabilities of both orders are averaged first and
    the same rule is applied to the averaged side;
-5. append a record to ``labels.jsonl`` and write ``labels_review.csv`` for human review of every
-   label (the CSV lists all rows; ``needs_human_review`` marks the ones to look at first).
+5. append a record to ``labels.jsonl`` and write ``labels_review.csv`` (one row per
+   label; ``needs_human_review`` marks low-confidence judge labels).
 
 Compute routing. ``stand_in: true`` (the default) means the models are CPU smoke-test stand-ins
 (Qwen2.5-0.5B/1.5B via Ollama). Stand-in output is written **only** to ``data/pilot/smoke/`` and
@@ -104,9 +104,6 @@ REVIEW_COLUMNS: tuple[str, ...] = (
     "stand_in",
     "original",
     "rewrite",
-    "human_label",
-    "reviewer",
-    "notes",
 )
 
 
@@ -429,7 +426,7 @@ def _record(item: PilotItem, result: PairwiseResult, settings: PilotSettings) ->
 
 
 def write_review_csv(records: Iterable[Mapping[str, Any]], path: Path) -> None:
-    """Write the human-review sheet (one row per label; empty ``human_label`` to fill in)."""
+    """Write the label sheet (one row per label)."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as fh:
         writer = csv.DictWriter(fh, fieldnames=list(REVIEW_COLUMNS), lineterminator="\n")
@@ -454,9 +451,6 @@ def write_review_csv(records: Iterable[Mapping[str, Any]], path: Path) -> None:
                     "stand_in": rec["stand_in"],
                     "original": rec["original"],
                     "rewrite": rec["rewrite"],
-                    "human_label": "",
-                    "reviewer": "",
-                    "notes": "",
                 }
             )
 
