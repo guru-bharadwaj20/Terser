@@ -239,7 +239,7 @@ def trial_settings(params: Mapping[str, Any], n_train: int, batch_size: int) -> 
         "alpha": rank * int(params["alpha_mult"]),
         "lr": float(params["lr"]),
         "steps": steps,
-        "warmup_steps": int(round(float(params["warmup_frac"]) * steps)),
+        "warmup_steps": round(float(params["warmup_frac"]) * steps),
         "epochs": int(params["epochs"]),
     }
 

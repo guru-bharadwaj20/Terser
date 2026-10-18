@@ -193,7 +193,7 @@ def cuda_available() -> bool:
         return False
     try:
         return bool(torch.cuda.is_available())
-    except Exception:  # noqa: BLE001 - broken driver installs count as "no GPU"
+    except Exception:  # broken driver installs count as "no GPU"
         return False
 
 

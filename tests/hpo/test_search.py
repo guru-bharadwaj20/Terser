@@ -8,7 +8,7 @@ import pytest
 
 pytest.importorskip("optuna")
 
-from terser.hpo import Categorical, Float, Int, SearchSpace, run_search  # noqa: E402
+from terser.hpo import Categorical, Float, Int, SearchSpace, run_search
 
 SPACE = SearchSpace({"x": Float(-3.0, 3.0), "k": Int(1, 5), "c": Categorical(("a", "b"))})
 

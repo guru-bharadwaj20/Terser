@@ -355,7 +355,7 @@ def _load_hf(p: DictConfig, device: Any) -> tuple[Any, Any]:  # pragma: no cover
 def _warmup_steps(p: DictConfig) -> int:
     if p.get("warmup_steps") is not None:
         return int(p.warmup_steps)
-    return int(round(float(p.get("warmup_ratio") or 0.0) * int(p.steps)))
+    return round(float(p.get("warmup_ratio") or 0.0) * int(p.steps))
 
 
 def run(cfg: DictConfig, on_eval: Callable[[int, float], None] | None = None) -> dict[str, Any]:

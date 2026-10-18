@@ -241,7 +241,7 @@ class Grids:
 
 # --------------------------------------------------------------------- reporting
 def _fmt(x: float) -> str:
-    return "n/a" if x != x else f"{x:.3f}"  # noqa: PLR0124 - NaN check
+    return "n/a" if x != x else f"{x:.3f}"  # NaN check
 
 
 def _md_table(df: pd.DataFrame) -> str:
@@ -393,7 +393,7 @@ def study_tree(
         fit_i, prune_i = tr[g_tr], tr[g_pr]
         Xf, yf, Xp, yp = data.X[fit_i], data.y[fit_i], data.X[prune_i], data.y[prune_i]
         full = DecisionTree("c45").fit(Xf, yf)
-        alphas, trees = full.cost_complexity_path()
+        _alphas, trees = full.cost_complexity_path()
         ccp = max(trees, key=lambda t: _f1(yp, t.predict(Xp)))
         variants: dict[str, Any] = {
             "unpruned": full,

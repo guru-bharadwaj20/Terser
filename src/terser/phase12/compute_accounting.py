@@ -1219,7 +1219,7 @@ def _f(x: float | None, nd: int = 2) -> str:
 
 
 def _i(x: int | float | None) -> str:
-    return "n/a" if x is None else f"{int(round(x)):,}"
+    return "n/a" if x is None else f"{round(x):,}"
 
 
 def render_markdown(r: dict[str, Any]) -> str:

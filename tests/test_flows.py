@@ -21,23 +21,23 @@ import pytest
 
 pytest.importorskip("prefect")
 
-from terser.flows import flows as fl  # noqa: E402
-from terser.flows import steps  # noqa: E402
-from terser.flows.__main__ import main as cli  # noqa: E402
-from terser.flows.demo import isolated_prefect, llm_cache_demo, task_states  # noqa: E402
-from terser.flows.registry import (  # noqa: E402
+from terser.flows import flows as fl
+from terser.flows import steps
+from terser.flows.__main__ import main as cli
+from terser.flows.demo import isolated_prefect, llm_cache_demo, task_states
+from terser.flows.registry import (
     build_deployments,
     register_deployments,
     registered_triggers,
 )
-from terser.flows.reliability import (  # noqa: E402
+from terser.flows.reliability import (
     ALERT_LOG_ENV,
     WEBHOOK_ENV,
     counter_command,
     flaky_command,
     read_alerts,
 )
-from terser.flows.steps import StepResult, llm_cache_key  # noqa: E402
+from terser.flows.steps import StepResult, llm_cache_key
 
 NAMES = [
     "data_flow",
@@ -346,7 +346,7 @@ def _fake_input_drift(
     monkeypatch.setattr(steps, "_counter", lambda t: len)  # tokenizer drift: no network
     import terser.monitoring.tokenizer_drift as td
 
-    strings, snapshot = td.load_fixture()
+    strings, _snapshot = td.load_fixture()
     monkeypatch.setattr(
         td, "load_fixture", lambda: (strings, {"gpt-4o": [len(s) for s in strings]})
     )

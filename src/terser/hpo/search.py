@@ -119,7 +119,7 @@ class SearchSpace:
             raw = np.linspace(lo, hi, grid_points)
             vals = np.exp(raw) if d.log else raw
             if isinstance(d, Int):
-                out[name] = sorted({int(round(float(v))) for v in vals})
+                out[name] = sorted({round(float(v)) for v in vals})
             else:
                 out[name] = [float(v) for v in vals]
         return out

@@ -481,8 +481,8 @@ def load_prompts(path: Path, category: str | None = None) -> tuple[list[PromptRe
 
     records: list[PromptRecord] = []
     skipped = 0
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
         if not line.startswith("{"):
             continue
         row = json.loads(line)
