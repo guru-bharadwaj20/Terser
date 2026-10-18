@@ -97,6 +97,10 @@ class _Sentence:
         self.words = _words(_NEGATION.sub(" ", text))
         self.affirmed = _words(text[: negation.start()]) if negation else self.words
         """Content words stated before any negation, i.e. outside its scope."""
+        self.negated_words = (
+            _words(_NEGATION.sub(" ", text[negation.start() :])) if negation else set()
+        )
+        """Content words inside the negation's scope (from the negation to the end)."""
 
 
 def _words(text: str) -> set[str]:
@@ -114,7 +118,12 @@ def _covered_by(a: _Sentence, b: _Sentence) -> bool:
     if len(core) < 2 and BREVITY not in core:
         return False
     if a.negated:
-        return b.negated and not core - b.words
+        # Each word must sit on the same side of the negation in both sentences: "do not use
+        # numpy for plotting" is not covered by "use numpy ... and do not use matplotlib".
+        if not b.negated:
+            return False
+        neg = a.negated_words - _EMPHASIS
+        return not neg - b.negated_words and not (a.affirmed - _EMPHASIS) - b.affirmed
     # "Use X." is covered by "Use X and do not use Y." but not by "Do not use X for Y.":
     # the shared words must sit outside the negation's scope.
     return not core - b.affirmed

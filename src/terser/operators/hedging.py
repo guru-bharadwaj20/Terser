@@ -21,7 +21,12 @@ _I = re.IGNORECASE
 _APOS = "['’]"
 
 _PLEASE = re.compile(
-    r"(?:,[ \t]*)?(?<!\bto )(?<!\bpretty )\bplease\b(?![-'’])(?:[ \t]*,)?(?![ \t]*[-'’])", _I
+    r"(?:,[ \t]*)?(?<!\bto )(?<!\bpretty )\bplease\b(?![-'’])"
+    # "please" as a verb with an object ("how do I please my boss") is content, not courtesy.
+    r"(?![ \t]+(?:my|me|him|her|them|us|his|their|our|your|everyone|everybody|people|users"
+    r"|customers|readers|clients)\b)"
+    r"(?:[ \t]*,)?(?![ \t]*[-'’])",
+    _I,
 )
 
 # "thanks ..." only as its own clause: bounded by start/sentence end/comma on both sides.
