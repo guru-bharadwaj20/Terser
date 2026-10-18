@@ -254,12 +254,19 @@ class DriftResult:
                 f"- Evidently DataDriftPreset (PSI, threshold {self.thresholds.psi}): "
                 f"{self.evidently.get('drifted_count', 0):g} of {len(ev_psi)} columns drifted"
             )
-        lines += ["", "| Feature | PSI | Evidently PSI | > threshold |", "|---|---:|---:|:---:|"]
+        # One flag per method: the verdict uses the in-house PSI, the Evidently count above uses
+        # Evidently's own PSI, and the two can disagree near the threshold.
+        lines += [
+            "",
+            "| Feature | PSI | PSI > threshold | Evidently PSI | Evidently > threshold |",
+            "|---|---:|:---:|---:|:---:|",
+        ]
         for name, value in self.psi.items():
             ev = ev_psi.get(name)
             ev_s = f"{ev:.3f}" if ev is not None else "n/a"
             flag = "yes" if value > self.thresholds.psi else ""
-            lines.append(f"| {name} | {value:.3f} | {ev_s} | {flag} |")
+            ev_flag = "yes" if ev is not None and ev > self.thresholds.psi else ""
+            lines.append(f"| {name} | {value:.3f} | {flag} | {ev_s} | {ev_flag} |")
         ref_l, cur_l = self.length["reference"], self.length["current"]
         lines += [
             "",

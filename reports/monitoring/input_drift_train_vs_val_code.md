@@ -6,26 +6,26 @@
 - MMD² (RBF, σ = 0.600, 220 rows per side): 0.27024, permutation p = 0.0020
 - Evidently DataDriftPreset (PSI, threshold 0.2): 17 of 18 columns drifted
 
-| Feature | PSI | Evidently PSI | > threshold |
-|---|---:|---:|:---:|
-| pc_1 | 6.854 | 7.184 | yes |
-| pc_2 | 1.945 | 2.071 | yes |
-| pc_3 | 1.776 | 1.865 | yes |
-| pc_4 | 1.998 | 1.820 | yes |
-| pc_5 | 0.204 | 0.381 | yes |
-| pc_6 | 1.218 | 1.239 | yes |
-| pc_7 | 2.476 | 1.959 | yes |
-| pc_8 | 1.205 | 1.092 | yes |
-| pc_9 | 1.018 | 0.977 | yes |
-| pc_10 | 0.521 | 0.741 | yes |
-| pc_11 | 0.106 | 0.177 |  |
-| pc_12 | 0.188 | 0.384 |  |
-| pc_13 | 0.280 | 0.455 | yes |
-| pc_14 | 0.089 | 0.269 |  |
-| pc_15 | 0.266 | 0.237 | yes |
-| pc_16 | 1.222 | 1.006 | yes |
-| length_words | 0.460 | 0.503 | yes |
-| category | 7.315 | 7.315 | yes |
+| Feature | PSI | PSI > threshold | Evidently PSI | Evidently > threshold |
+|---|---:|:---:|---:|:---:|
+| pc_1 | 6.854 | yes | 7.184 | yes |
+| pc_2 | 1.945 | yes | 2.071 | yes |
+| pc_3 | 1.776 | yes | 1.865 | yes |
+| pc_4 | 1.998 | yes | 1.820 | yes |
+| pc_5 | 0.204 | yes | 0.381 | yes |
+| pc_6 | 1.218 | yes | 1.239 | yes |
+| pc_7 | 2.476 | yes | 1.959 | yes |
+| pc_8 | 1.205 | yes | 1.092 | yes |
+| pc_9 | 1.018 | yes | 0.977 | yes |
+| pc_10 | 0.521 | yes | 0.741 | yes |
+| pc_11 | 0.106 |  | 0.177 |  |
+| pc_12 | 0.188 |  | 0.384 | yes |
+| pc_13 | 0.280 | yes | 0.455 | yes |
+| pc_14 | 0.089 |  | 0.269 | yes |
+| pc_15 | 0.266 | yes | 0.237 | yes |
+| pc_16 | 1.222 | yes | 1.006 | yes |
+| length_words | 0.460 | yes | 0.503 | yes |
+| category | 7.315 | yes | 7.315 | yes |
 
 | Length (words) | median | p90 | mean |
 |---|---:|---:|---:|
