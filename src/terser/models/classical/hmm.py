@@ -36,7 +36,6 @@ import numpy.typing as npt
 from scipy.special import logsumexp
 
 __all__ = [
-    "FILLER_LEXICON",
     "POS_CLASSES",
     "TAGS",
     "DiscreteHMM",
