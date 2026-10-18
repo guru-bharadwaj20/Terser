@@ -51,7 +51,7 @@ from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from terser.judge.pairwise import _json_candidates
+from terser.judge.pairwise import json_candidates
 
 if TYPE_CHECKING:
     from terser.llm import LLMClient
@@ -94,6 +94,7 @@ OPENINGS: tuple[str, ...] = (
 )
 """Opening moves, one picked per (source, style) by :func:`sample_seed` for variety."""
 
+# An Ollama tag such as ``qwen2.5:1.5b`` (name:tag, no org/ prefix). vLLM serves HF ids instead.
 _OLLAMA_TAG_RE = re.compile(r"^[A-Za-z0-9._-]+:[A-Za-z0-9._-]+$")
 _NUMBER_RE = re.compile(r"\d+(?:[.,]\d+)*")
 _QUOTED_RE = re.compile(r'"([^"\n]{1,200})"|`([^`\n]{1,200})`')
@@ -189,7 +190,7 @@ def check_casual(
 
 def parse_meaning_check(text: str) -> tuple[bool, list[str], list[str]] | None:
     """Parse ``{"same_task", "added", "missing"}``; None if unparseable."""
-    for candidate in _json_candidates(text or ""):
+    for candidate in json_candidates(text or ""):
         try:
             obj = json.loads(candidate)
         except json.JSONDecodeError:
@@ -446,12 +447,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
     else:
         stats = run_casualise(records, client, **kwargs)
-    summary = {**stats.to_dict(), **summarise(args.out, args.rejected)}
+    stable = summarise(args.out, args.rejected)
+    summary = {**stats.to_dict(), **stable}
     if args.stats is not None:
         args.stats.parent.mkdir(parents=True, exist_ok=True)
         # Accounting (wall time, cache hits, tokens) varies between runs and is logged to
         # MLflow; the stats file holds only dataset counts so `dvc repro` reproduces it.
-        stable = summarise(args.out, args.rejected)
         args.stats.write_text(json.dumps(stable, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(summary, indent=2))
     return 0

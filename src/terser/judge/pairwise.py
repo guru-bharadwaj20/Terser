@@ -45,6 +45,7 @@ __all__ = [
     "PairwiseResult",
     "Side",
     "Verdict",
+    "json_candidates",
     "label_from_sides",
     "load_prompt_template",
     "parse_verdict",
@@ -144,7 +145,7 @@ def _normalise_verdict(raw: Any) -> Verdict | None:
     return None
 
 
-def _json_candidates(text: str) -> list[str]:
+def json_candidates(text: str) -> list[str]:
     """Substrings of ``text`` that may be a JSON object: fenced blocks, then balanced ``{...}``."""
     candidates = [m.group(1).strip() for m in _FENCE_RE.finditer(text)]
     depth, start = 0, -1
@@ -181,7 +182,7 @@ def parse_verdict(text: str) -> tuple[Verdict, str] | None:
     """
     if not isinstance(text, str) or not text.strip():
         return None
-    for candidate in _json_candidates(text):
+    for candidate in json_candidates(text):
         try:
             obj = json.loads(candidate)
         except json.JSONDecodeError:

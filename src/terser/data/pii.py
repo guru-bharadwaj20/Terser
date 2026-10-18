@@ -1008,10 +1008,17 @@ def scrub_text(text: str, detector: Detector = detect_regex, backend: str = "reg
 
 
 def scrub_record(
-    record: Mapping[str, Any], detector: Detector = detect_regex, backend: str = "regex"
+    record: Mapping[str, Any],
+    detector: Detector = detect_regex,
+    backend: str = "regex",
+    skip: Iterable[str] = (),
 ) -> tuple[dict[str, Any], list[ScrubResult]]:
-    """Scrub every string value recursively, leaving keys and non-text values unchanged."""
+    """Scrub every string value recursively, leaving keys and non-text values unchanged.
+
+    Top-level fields named in ``skip`` (ids, source and category labels) are kept verbatim.
+    """
     results: list[ScrubResult] = []
+    skipped = set(skip)
 
     def visit(value: Any) -> Any:
         if isinstance(value, str):
@@ -1024,7 +1031,7 @@ def scrub_record(
             return [visit(item) for item in value]
         return value
 
-    return visit(dict(record)), results
+    return {k: v if k in skipped else visit(v) for k, v in record.items()}, results
 
 
 # --------------------------------------------------------------------------------------------
