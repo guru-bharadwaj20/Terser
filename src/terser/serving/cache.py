@@ -40,11 +40,6 @@ class CacheStats:
     misses: int = 0
     evictions: int = 0
 
-    @property
-    def hit_rate(self) -> float:
-        total = self.hits + self.misses
-        return self.hits / total if total else 0.0
-
 
 class LRUCache(Generic[V]):
     """Thread-safe bounded LRU map."""

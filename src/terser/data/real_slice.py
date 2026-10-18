@@ -314,7 +314,6 @@ class SliceSummary:
 
     parsed: int = 0
     duplicates: int = 0
-    pii_dropped: int = 0
     pii_scrubbed: int = 0
     untagged: int = 0
     pool_by_category: dict[str, int] = field(default_factory=dict)
@@ -338,9 +337,7 @@ def build_records(rows: Iterable[Mapping[str, Any]], summary: SliceSummary) -> l
             continue
         seen.add(key)
         result = scrub_text(rec["instruction"])
-        if result.scrubbed is None:
-            summary.pii_dropped += 1
-            continue
+        assert result.scrubbed is not None  # scrub_text redacts; it never drops a record
         if result.scrubbed != rec["instruction"]:
             summary.pii_scrubbed += 1
         category = tag_category(result.scrubbed)

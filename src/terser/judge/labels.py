@@ -16,8 +16,7 @@ Inputs:
 
 * ``task_not_worse`` - precomputed ``bool`` from :func:`terser.judge.metrics.not_worse`, or
   ``None`` when the category has no automatic task metric (``explain``, ``creative``), in which
-  case the judge alone decides. :func:`task_not_worse_from_results` wraps the metrics module
-  with a lazy import.
+  case the judge alone decides.
 * ``verdict_ab`` / ``verdict_ba`` - the judge's verdict in the ``original_first`` and
   ``rewrite_first`` orders, already translated to *sides* (``"original"``, ``"rewrite"``,
   ``"tie"``; ``None`` = unparseable) by :func:`terser.judge.pairwise.to_side`.
@@ -27,7 +26,6 @@ Labels use the positive-class convention of :mod:`terser.eval.labels` (``degrade
 
 from __future__ import annotations
 
-import importlib
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Final, Literal, TypedDict, get_args
@@ -52,7 +50,6 @@ __all__ = [
     "label_pair",
     "label_pair_from_result",
     "make_label_record",
-    "task_not_worse_from_results",
     "validate_label_record",
 ]
 
@@ -184,15 +181,6 @@ def label_pair_from_result(
         result.rewrite_first.side,
         on_missing=on_missing,
     )
-
-
-def task_not_worse_from_results(original_result: Any, rewrite_result: Any) -> bool:
-    """Compare two task-metric results with :func:`terser.judge.metrics.not_worse` (lazy import).
-
-    Kept lazy so this module does not depend on the metrics module (row 2.3.1) at import time.
-    """
-    metrics = importlib.import_module("terser.judge.metrics")
-    return bool(metrics.not_worse(original_result, rewrite_result))
 
 
 class LabelRecord(TypedDict):

@@ -179,7 +179,8 @@ def parse_oasst1(rows: Iterable[Mapping[str, Any]]) -> Iterator[NormalisedRecord
     Keeps messages with ``role == "prompter"``, no parent, ``lang == "en"``, not deleted, and not
     rejected in review (``review_result`` is not ``False``). The reference is the best-ranked
     (lowest ``rank``) assistant reply to that prompt when one exists. No category hint: oasst1 has
-    no task-type label. ``user_id`` and every other metadata field are dropped.
+    no task-type label, so :mod:`terser.data.collect` drops every oasst1 record and the source
+    contributes nothing to the dataset. ``user_id`` and every other metadata field are dropped.
     """
     prompts: dict[str, Mapping[str, Any]] = {}
     best_reply: dict[str, tuple[float, str]] = {}
