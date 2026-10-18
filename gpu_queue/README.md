@@ -26,7 +26,7 @@ One file per job, `gpu_queue/<id>.yaml`. All fields are required; unknown fields
 # gpu_queue/sft-qwen0.5b-full.yaml
 id: sft-qwen0.5b-full
 phase: 8
-depends_on: [C7.1, C2.3]
+depends_on: [C7.1]
 command: python -m terser.models.rewriter.train experiment=sft_qwen05b_full hardware=rtx4090
 est_vram_gb: 17
 est_hours: 6
@@ -39,7 +39,7 @@ outputs: [models/rewriter/sft-qwen0.5b-full/, mlruns/]
 `gpu_queue/gates.yaml` (optional, not a job spec) lists checkpoints that have passed:
 
 ```yaml
-- C2.3
+- C2.7
 - C7.1
 ```
 

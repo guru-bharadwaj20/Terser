@@ -1178,16 +1178,6 @@
           "legendFormat": "requests running",
           "refId": "B",
           "range": true
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "max(terser_gpu_utilization_ratio)",
-          "legendFormat": "GPU util (NVML)",
-          "refId": "C",
-          "range": true
         }
       ],
       "fieldConfig": {

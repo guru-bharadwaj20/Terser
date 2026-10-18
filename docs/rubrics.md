@@ -2,9 +2,9 @@
 
 Plan row: **2.3.2**. Machine-readable source: [`src/terser/judge/rubrics/<category>.yaml`](../src/terser/judge/rubrics/),
 loaded and validated by [`src/terser/judge/rubrics.py`](../src/terser/judge/rubrics.py). Category
-definitions: [categories.md](categories.md). Annotation procedure: [annotation_guideline.md](annotation_guideline.md).
+definitions: [categories.md](categories.md).
 
-This page is for annotators and reviewers. It says what "better" means for each category when you
+This page is for reviewers. It says what "better" means for each category when you
 compare two answers to the same request, and which prompt changes count as a *degradation*. The
 LLM judge (2.3.3) receives the same rubric, rendered from the YAML, inside its prompt. If this page
 and a YAML file disagree, the YAML file is authoritative and this page must be fixed in the same PR.

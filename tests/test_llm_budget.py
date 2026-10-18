@@ -231,4 +231,29 @@ def test_transport_error_records_nothing(tmp_path: Path) -> None:
     )
     with pytest.raises(RuntimeError):
         c.complete("anthropic", "priced", MSGS, max_tokens=10)
-    assert not (tmp_path / "ledger.json").exists()
+    # the reservation is released: nothing spent, nothing left pending
+    data = json.loads((tmp_path / "ledger.json").read_text(encoding="utf-8"))
+    assert data["phases"] == {} and not any(data["reserved"].values())
+
+
+def test_reservations_stop_concurrent_workers_exceeding_the_cap(tmp_path: Path) -> None:
+    """Two budgets on one ledger (two worker processes) see each other's pending calls."""
+    cfg = write_cfg(tmp_path, {"p": {"max_usd": 1, "max_tokens": 100}})
+    a, b = Budget.load(cfg, "p"), Budget.load(cfg, "p")
+    rid = a.reserve(Usage("local", "m", 40, 40))
+    with pytest.raises(BudgetExceededError):
+        b.reserve(Usage("local", "m", 20, 20))  # 80 pending + 40 > 100
+    a.record(Usage("local", "m", 10, 10), rid)  # the actual call was smaller
+    b.reserve(Usage("local", "m", 20, 20))  # 20 spent + 40 fits now
+
+
+def test_stale_reservation_of_a_crashed_worker_expires(tmp_path: Path, monkeypatch) -> None:
+    """A worker that dies mid-call never records; its reservation lapses after the TTL."""
+    cfg = write_cfg(tmp_path, {"p": {"max_usd": 1, "max_tokens": 100}})
+    a, b = Budget.load(cfg, "p"), Budget.load(cfg, "p")
+    a.reserve(Usage("local", "m", 40, 40))  # never recorded or released
+    with pytest.raises(BudgetExceededError):
+        b.reserve(Usage("local", "m", 20, 20))
+    now = budget_mod.time.time()
+    monkeypatch.setattr(budget_mod.time, "time", lambda: now + Ledger.RESERVATION_TTL_S + 1)
+    b.reserve(Usage("local", "m", 20, 20))

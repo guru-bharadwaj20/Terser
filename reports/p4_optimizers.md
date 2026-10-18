@@ -6,30 +6,27 @@ takes `budget / n` steps, mini-batch methods `budget / 64`), 5 seeds each. Gener
 `python -m terser.phase4.nn_studies optimizers --table data/processed/p4_pairs.parquet`;
 convergence curves in `reports/figures/p4_optimizers.png`, runs in `reports/p4_optimizers_runs.csv`.
 
-> **Note (post-audit):** in these runs the mini-batch configurations never reached the last
-> checkpoint (5,521 × 64 = 353,344 < 353,400), so their "final" row is the 19th checkpoint
-> (335,744 gradient evaluations, 95% of the budget) while full-batch GD is reported at 100%.
-> `optimizer_run` now places checkpoints on the budget each batch size can spend; the table is
-> unchanged until the study is re-run.
+> **Note (post-audit):** re-run on 2026-10-26 with checkpoints placed on the budget each batch
+> size can spend, so every configuration's final row is its last checkpoint.
 
 | config | final train loss | final val AUC |
 |---|---|---|
 | gd(lr=0.1) | 0.612 ± 0.011 | 0.731 ± 0.012 |
 | gd(lr=0.3) | 0.586 ± 0.006 | 0.757 ± 0.005 |
 | gd(lr=1.0) | 0.573 ± 0.010 | 0.767 ± 0.005 |
-| sgd(lr=0.01) | 0.550 ± 0.004 | 0.773 ± 0.003 |
-| sgd(lr=0.03) | 0.520 ± 0.005 | 0.768 ± 0.004 |
-| sgd(lr=0.1) | 0.485 ± 0.005 | 0.757 ± 0.003 |
-| momentum(lr=0.001, β=0.9) | 0.550 ± 0.004 | 0.773 ± 0.003 |
-| momentum(lr=0.001, β=0.99) | 0.485 ± 0.004 | 0.765 ± 0.004 |
-| momentum(lr=0.01, β=0.9) | 0.487 ± 0.008 | 0.755 ± 0.006 |
-| momentum(lr=0.01, β=0.99) | 0.477 ± 0.011 | 0.757 ± 0.006 |
-| adagrad(lr=0.01) | 0.520 ± 0.001 | 0.773 ± 0.003 |
-| adagrad(lr=0.03) | 0.483 ± 0.004 | 0.764 ± 0.006 |
-| adagrad(lr=0.1) | 0.445 ± 0.006 | 0.752 ± 0.006 |
-| adam(lr=1e-4) | 0.550 ± 0.002 | **0.774 ± 0.001** |
-| adam(lr=3e-4) | 0.518 ± 0.001 | 0.772 ± 0.004 |
-| adam(lr=1e-3) | 0.475 ± 0.003 | 0.760 ± 0.004 |
+| sgd(lr=0.01) | 0.548 ± 0.004 | 0.773 ± 0.003 |
+| sgd(lr=0.03) | 0.516 ± 0.003 | 0.768 ± 0.007 |
+| sgd(lr=0.1) | 0.481 ± 0.003 | 0.760 ± 0.009 |
+| momentum(lr=0.001, β=0.9) | 0.549 ± 0.004 | 0.773 ± 0.003 |
+| momentum(lr=0.01, β=0.9) | 0.481 ± 0.004 | 0.756 ± 0.008 |
+| momentum(lr=0.001, β=0.99) | 0.482 ± 0.005 | 0.763 ± 0.003 |
+| momentum(lr=0.01, β=0.99) | 0.482 ± 0.007 | 0.751 ± 0.005 |
+| adagrad(lr=0.01) | 0.519 ± 0.001 | 0.772 ± 0.003 |
+| adagrad(lr=0.03) | 0.480 ± 0.003 | 0.763 ± 0.007 |
+| adagrad(lr=0.1) | 0.443 ± 0.007 | 0.751 ± 0.004 |
+| adam(lr=1e-4) | 0.548 ± 0.002 | **0.774 ± 0.001** |
+| adam(lr=3e-4) | 0.516 ± 0.002 | 0.771 ± 0.004 |
+| adam(lr=1e-3) | 0.472 ± 0.002 | 0.757 ± 0.005 |
 
 ## Interpretation
 
@@ -39,7 +36,7 @@ convergence curves in `reports/figures/p4_optimizers.png`, runs in `reports/p4_o
 * **Mini-batch SGD** makes many cheap noisy steps. Raising the lr lowers train loss quickly but
   lowers val AUC: the noise floor is set by lr, and a large lr overfits the 14.7k pairs.
 * **Momentum** with β = 0.9 is equivalent to SGD at an effective lr of `lr / (1 - β)`.
-  momentum(0.001, 0.9) matches sgd(0.01) almost exactly (train 0.550, AUC 0.773). β = 0.99
+  momentum(0.001, 0.9) matches sgd(0.01) almost exactly (train 0.549 vs 0.548, AUC 0.773). β = 0.99
   (effective lr 0.1) behaves like sgd(0.1).
 * **Adagrad** divides by the accumulated squared gradient, so its effective step decays over the
   run. A moderate base lr (0.01) gives an implicit annealing schedule and ties the best AUC.
@@ -49,5 +46,5 @@ convergence curves in `reports/figures/p4_optimizers.png`, runs in `reports/p4_o
 
 Across optimizers there is a consistent **speed vs generalisation trade-off**: the
 configurations that drive train loss lowest (adagrad 0.1, adam 1e-3, momentum 0.01/0.99) lose
-0.015-0.02 val AUC. The best quality gates come from moderate effective step sizes, whichever
+0.015-0.023 val AUC. The best quality gates come from moderate effective step sizes, whichever
 update rule produces them.

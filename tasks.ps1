@@ -54,7 +54,7 @@ switch ($Task) {
             Invoke-Step "python" @("-m", "venv", ".venv")
             $Py = $VenvPython
         }
-        Invoke-Step $Py @("-m", "pip", "install", "-e", ".[dev,hpo,serve,mlops,orchestrate]")
+        Invoke-Step $Py @("-m", "pip", "install", "-e", ".[dev,hpo,serve,export,mlops,orchestrate]")
     }
     "test"      { Invoke-Step $Py @("-m", "pytest", "-m", "not gpu and not api") }
     "test-all"  { Invoke-Step $Py @("-m", "pytest") }

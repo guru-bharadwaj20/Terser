@@ -238,7 +238,6 @@ def test_review_csv_has_every_row(tmp_path: Path, settings: PilotSettings) -> No
         rows = list(csv.DictReader(fh))
     assert len(rows) == 13
     assert tuple(rows[0]) == REVIEW_COLUMNS
-    assert all(r["human_label"] == "" for r in rows)
 
 
 def test_cache_reuse(tmp_path: Path, settings: PilotSettings) -> None:

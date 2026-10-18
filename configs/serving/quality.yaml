@@ -5,7 +5,7 @@
 # TERSER_SERVING_CONFIG=configs/serving/quality.yaml uvicorn terser.serving.api:app
 # The gate and fallback are the same as the fast path: a rewrite with P(degraded) above the row
 # 3.2.3 threshold, or one that misses the latency budget, returns the fast-path result / original.
-gate_threshold: 0.264564
+gate_threshold: 0.26962
 gate_onnx: models/fast/gate.onnx
 gate_feature_target: qwen2.5
 tagger_onnx: models/fast/tagger.onnx

@@ -175,7 +175,6 @@ Job spec fields and queue rules: [hardware.md § 4](hardware.md#4-gpu-job-queue)
 | `data/raw/` | Unmodified downloads and raw LLM responses from local OpenAI-compatible servers | DVC |
 | `data/interim/` | PII-scrubbed and intermediate stage outputs; nothing enters here unscrubbed | DVC |
 | `data/processed/` | Final tables and splits (`train`, `val`, `test`); `test*` is readable only through `terser.phase12.unlock.read_locked` | DVC |
-| `data/gold/` | Human annotations, e.g. `data/gold/human_300.jsonl` | DVC |
 | `data/SOURCES.md` | Upstream source list | git |
 
 Data cards: `docs/data_cards/<dataset-name>.md`. Model cards: `docs/model_cards/<model-name>.md`.

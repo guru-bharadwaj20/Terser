@@ -31,7 +31,7 @@ help:
 install:
 	test -d .venv || $(PY) -m venv .venv
 	# The same extras as CI, so a local `make test` runs the tests CI runs.
-	$(VENV_PY) -m pip install -e ".[dev,hpo,serve,mlops,orchestrate]"
+	$(VENV_PY) -m pip install -e ".[dev,hpo,serve,export,mlops,orchestrate]"
 
 test:
 	$(VENV_PY) -m pytest -m "not gpu and not api"

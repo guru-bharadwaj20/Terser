@@ -3,9 +3,9 @@
 Every reported saving is a token count on a target's tokenizer. If a tokenizer changes (a new
 ``tiktoken`` encoding, an updated HF ``tokenizer.json``, a library upgrade that changes
 pre-tokenisation), every stored count and every model trained on token features silently goes
-stale. This job re-counts the fixed fixture set (``tests/fixtures/tokenizer_strings.jsonl``, 200
+stale. This job re-counts the fixed fixture set (``data/monitoring/tokenizer_strings.jsonl``, 200
 strings) with the tokenizers installed *now* and compares them with the pinned snapshot
-(``tests/fixtures/tokenizer_counts.json``). **Any** changed count on any target raises an alert.
+(``data/monitoring/tokenizer_counts.json``). **Any** changed count on any target raises an alert.
 
 The alert is a ``CRITICAL`` record on the ``terser.alerts`` logger (picked up by the log shipper /
 Alertmanager) and exit code 1 from the CLI, which fails the scheduled ``drift_flow``
@@ -24,6 +24,8 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from terser.config import project_root
+
 __all__ = [
     "ALERT_LOGGER",
     "DriftReport",
@@ -32,7 +34,8 @@ __all__ = [
 ]
 
 ALERT_LOGGER = "terser.alerts"
-_FIXTURES = Path(__file__).resolve().parents[3] / "tests" / "fixtures"
+# The reference set lives with the monitoring data, not in tests/ (the tests read it here too).
+_FIXTURES = project_root() / "data" / "monitoring"
 STRINGS_PATH = _FIXTURES / "tokenizer_strings.jsonl"
 SNAPSHOT_PATH = _FIXTURES / "tokenizer_counts.json"
 

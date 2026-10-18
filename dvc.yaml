@@ -53,6 +53,8 @@ stages:
     deps:
       - data/interim/clean.jsonl
       - src/terser/data/casualise.py
+      - src/terser/judge/pairwise.py
+      - src/terser/llm
       - src/terser/data/prompts/casualise_v1.txt
       - src/terser/data/prompts/casualise_check_v1.txt
     params:
@@ -67,6 +69,11 @@ stages:
           cache: false
 
   dedupe:
+    # Frozen with the test set (2026-10-18): dedupe now compares the clean instruction (5d9b754),
+    # which removes 55 records instead of 28 and would change the frozen test split
+    # (split.test_sha256). The locked outputs are kept; unfreeze both stages for a new dataset
+    # version, which needs relabelling.
+    frozen: true
     cmd: >-
       python -m terser.data.dedupe --in data/interim/casual.jsonl
       --out data/interim/casual_dedup.jsonl --report reports/p2_duplicates.md
@@ -84,6 +91,8 @@ stages:
           cache: false
 
   split:
+    # Frozen with dedupe (see the dedupe stage).
+    frozen: true
     # Also the "stratify" step of row 11.1.2; there is no separate stage. Whole source groups
     # go to train / val / test by a seeded hash, which stratifies by category and by source in
     # expectation without reshuffling existing groups when data is added (splits.py
@@ -97,6 +106,7 @@ stages:
     deps:
       - data/interim/casual_dedup.jsonl
       - src/terser/data/splits.py
+      - src/terser/data/dedupe.py
     params:
       - seed
       - split
@@ -111,6 +121,7 @@ stages:
     deps:
       - data/processed/splits
       - src/terser/data/label_subset.py
+      - src/terser/data/dedupe.py
     params:
       - seed
       - label_subset
@@ -128,6 +139,9 @@ stages:
     deps:
       - data/interim/label_prompts.jsonl
       - src/terser/data/candidates.py
+      - src/terser/data/casualise.py
+      - src/terser/llm
+      - src/terser/operators
       - src/terser/data/prompts/rewrite_v1.txt
       - configs/experiment/p2_candidates.yaml
     params:
@@ -143,6 +157,7 @@ stages:
       - data/interim/label_prompts.jsonl
       - data/interim/candidates.jsonl
       - src/terser/data/token_counts.py
+      - src/terser/llm/budget.py
       - src/terser/tokenizers/count.py
     outs:
       - data/interim/token_counts.parquet
@@ -162,6 +177,7 @@ stages:
         - data/interim/label_prompts.jsonl
         - data/interim/candidates.jsonl
         - src/terser/phase2/respond.py
+        - src/terser/llm
       params:
         - respond.max_tokens
         - respond.creative_samples
@@ -187,6 +203,7 @@ stages:
       - data/raw/humaneval
       - data/raw/mbpp
       - src/terser/phase2/label_stage.py
+      - src/terser/llm
       - src/terser/judge/protocols.py
       - src/terser/judge/pairwise.py
       - src/terser/judge/rubrics.py
@@ -214,6 +231,7 @@ stages:
       - data/processed/labels.jsonl
       - data/interim/label_prompts.jsonl
       - src/terser/phase2/oracle.py
+      - src/terser/eval/labels.py
     outs:
       - data/processed/oracle.csv
 

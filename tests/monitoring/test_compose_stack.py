@@ -146,7 +146,7 @@ def test_dashboard_panels_and_datasource() -> None:
 def _exported_names() -> set[str]:
     from terser.serving.metrics import ServiceMetrics
 
-    m = ServiceMetrics(gpu=False)
+    m = ServiceMetrics()
     for net in (1e-5, -1e-5):
         m.observe(
             path="fast",

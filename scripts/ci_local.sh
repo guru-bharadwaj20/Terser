@@ -3,7 +3,7 @@
 #
 # Use it when GitHub Actions cannot run (for example, the account's Actions minutes are blocked)
 # or before pushing. It uses the active environment (or .venv if present) and does not install
-# anything; set up with `pip install -e ".[dev,hpo,serve,mlops,orchestrate]"` first.
+# anything; set up with `pip install -e ".[dev,hpo,serve,export,mlops,orchestrate]"` first.
 #
 #   bash scripts/ci_local.sh            # every step, stop at the first failure
 #   bash scripts/ci_local.sh --keep-going

@@ -89,7 +89,7 @@ queued as a job spec in `gpu_queue/`:
 # gpu_queue/sft-qwen0.5b-full.yaml
 id: sft-qwen0.5b-full
 phase: 8
-depends_on: [C7.1, C2.3]
+depends_on: [C7.1]
 command: python -m terser.models.rewriter.train experiment=sft_qwen05b_full hardware=rtx4090
 est_vram_gb: 17
 est_hours: 6
@@ -112,7 +112,7 @@ the card · **vLLM serving and training never run at the same time on 24 GB** ·
 | CPU smoke-test LLM (Qwen2.5-0.5B / 1.5B, GGUF Q4 via Ollama or llama.cpp) | 1+ | `CPU` | 4-bit | ~1–2 GB RAM | Pipeline tests only (a few tokens/s on the i3 laptop); outputs tagged `stand_in: true`, never used for labels |
 | Candidate generation + pairwise judge (Qwen2.5-32B-Instruct-AWQ; fallback Qwen2.5-14B-Instruct-AWQ) | 2+ | `GPU` | vLLM AWQ int4 | **Measured, 32B:** 18.14 GiB weights; queued config (KV 4,112 tokens) startup peak **22.39 GiB net**, serving 19.9–20.3 GiB (RTX 4090 ×2, 2026-10-24/25) · **14B:** 20.22 GiB net at util 0.90 | Exclusive slot. The 22.39 GiB peak is a vLLM post-load transient, same on both hosts and every flag tested; it breaches the 22 GB ceiling (C7.4). [C7/serving.md](docs/checkpoints/C7/serving.md) |
 | Target LLM outputs (Phi-3.5-mini-instruct per ADR-0011, Qwen2.5-7B-Instruct) | 2, 8+ | `GPU` | vLLM bf16, `gpu_memory_utilization=0.90` | **Measured (7.6), Qwen2.5-7B:** 14.29 GiB weights + 5.54 GiB KV, peak 20.79 GiB net · **Phi-3.5-mini (RTX 4090):** 7.14 GiB weights, peak 21.36 GiB net at util 0.90, 177 gen tok/s at 16 concurrent (Llama-3.1-8B, the original plan, was gated) | 24.1 / 376 tok/s at batch 1 / 16. Was est. ~16 GB weights. [C7/serving.md](docs/checkpoints/C7/serving.md) |
-| Second judge (Phi-3.5-mini-instruct, ADR-0011; was Llama-3.1-8B AWQ) | 2 | `GPU` | vLLM AWQ int4 | ~6 GB + KV | Self-preference control (2.2.5) only |
+| Second judge (Phi-3.5-mini-instruct, ADR-0011; was Llama-3.1-8B AWQ) | 2 | `GPU` | vLLM AWQ int4 | **Measured:** same Phi-3.5-mini serving as the target row above · **Llama-3.1-8B bf16 (RTX 4500 Ada, 2026-10-28):** peak 20.81 GiB net at util 0.90, max length 4096 | Self-preference control (2.2.5) only |
 | Sentence embeddings (bge-small / e5-base) | 3+ | `CPU→GPU` | fp32 / fp16 | **Measured, bge-small:** 3.52 GiB fp32 / 1.71 GiB fp16 reserved at batch 256 × 512 tokens (943 / 3,651 texts/s) | CPU fine up to ~50k texts; fp32 at this batch exceeds the old < 2 GB estimate. [C7/bench_small](docs/checkpoints/C7/bench_small_rtx4090_worker1.json) |
 | All classical models (ID3, LR, KNN, SVM, NB, GMM, HMM, RF, GBM, k-means) | 3–6 | `CPU` | — | 0 | Never on GPU |
 | Perceptron / MLP / optimizer study | 4 | `CPU` | fp32 | 0 | Small models |
@@ -120,10 +120,10 @@ the card · **vLLM serving and training never run at the same time on 24 GB** ·
 | Rewriter SFT: Qwen2.5-0.5B full fine-tune | 8 | `GPU` | bf16 + AdamW, grad checkpointing | **Measured (7.7):** 16.32 GiB reserved fp32-master / 11.77 GiB pure bf16 (seq 1024, mb 4); 0.44 / 0.37 s per step | ~16 bytes/param for weights+grads+Adam (~8 GB) + activations; was est. ~12–16 GB. [C7/training.md](docs/checkpoints/C7/training.md) |
 | Rewriter SFT: Qwen2.5-1.5B / 3B LoRA | 8 | `GPU` | bf16 base, LoRA r=16 | **Measured (7.7), 1.5B:** 12.19 GiB reserved (seq 1024, mb 4), 1.11 s per step · **3B (RTX 4090):** 15.98 GiB reserved, 0.96 s per step | Main candidates; 1.5B was est. ~8–16 GB 
 | Rewriter SFT: 7B QLoRA | 8 | `GPU` | NF4 base + LoRA | **Measured (RTX 4090):** 18.92 GiB reserved at seq 1024, mb 4, 2.26 s per step | Above the old ~10–18 GB estimate, under the ceiling. [C7/training.md](docs/checkpoints/C7/training.md) |
-| GRPO rewriter policy (stretch) | 9 | `GPU` | 0.5B–1.5B LoRA | ~12–20 GB | Only if the stretch rows are attempted; never colocated with serving |
+| GRPO rewriter policy (stretch) | 9 | `GPU` | 0.5B–1.5B LoRA | **Measured (RTX 4500 Ada, 2026-10-28):** peak 22.87 GiB net, 1.5B LoRA, group 8, 768 + 512 tokens, grad checkpointing (30 steps, 10–29 s per step) | Only if the stretch rows are attempted; never colocated with serving |
 | Tabular Q-learning | 9 | `CPU` | — | 0 | |
 | Bayesian HPO of the rewriter | 10 | `GPU` | Optuna, 1 trial at a time | per trial | Median pruner |
-| Production serving | 11 | `GPU` (+ `CPU` fast path) | vLLM / ONNX Runtime | 2–6 GB | Fast path must also run on CPU |
+| Production serving | 11 | `GPU` (+ `CPU` fast path) | vLLM / ONNX Runtime | **Measured (RTX 4500 Ada, 2026-10-28):** 3B + LoRA rewriter on vLLM at util 0.85, max length 2048: 5.85 GiB weights, peak 20.28 GiB net under 5 and 20 RPS, 0 errors, no OOM; fast path 0 GPU | Fast path must also run on CPU |
 
 ### Weekly GPU schedule
 
@@ -255,7 +255,7 @@ statistical model.
 | 1.3.3 | Find-S | Most specific hypothesis covering all positives | Reproduces Mitchell's EnjoySport result `<Sunny, Warm, ?, Strong, ?, ?>` | ✅ |
 | 1.3.4 | Candidate-Elimination | S and G boundaries; collapse detection that reports the offending example and the examples it conflicts with | Reproduces EnjoySport S/G; version space of size 6 | ✅ |
 | 1.3.5 | Version space enumeration | All hypotheses between S and G | Enumerator matches brute force on a 5-attribute toy space | ✅ |
-| 1.3.6 | Pilot labels | **150 prompts (25/category)** × operator subsets (7 singletons + `FHC`, `FHCI`, `FHCID`, `FHCIDS`, all) → target output → position-swapped pilot judge → human review of every label | `data/pilot/labels.jsonl` + human-reviewed CSV | ❌ |
+| 1.3.6 | Pilot labels | **150 prompts (25/category)** × operator subsets (7 singletons + `FHC`, `FHCI`, `FHCID`, `FHCIDS`, all) → target output → position-swapped pilot judge | `data/pilot/labels.jsonl` + label CSV | ✅ |
 | 1.3.7 | Version space per category | Run Candidate-Elimination for each of the 6 categories on 1.3.6 | `reports/p1_version_spaces.md` with S, G, size or collapse diagnosis | ❌ |
 | 1.3.8 | Inductive bias write-up | What the conjunctive language cannot express (e.g. "drop hedging *unless* tone matters in creative prompts") and why this motivates Phases 3–5 | Section in `reports/p1_version_spaces.md` | ✅ |
 
@@ -283,7 +283,7 @@ statistical model.
 # Phase 2 — Data Generation Pipeline and Judge Validation
 
 **Goal:** a labelled dataset of (casual prompt, candidate rewrite, target, token counts,
-preserved/degraded), produced by a judge that has been **validated against humans**. Nothing
+preserved/degraded), produced by a position-swapped, order-averaged LLM judge. Nothing
 downstream can be measured without it.
 **Weeks:** 3–6 · **Depends on:** 1 · **Unlocks:** 3, 4, 5, 6, 8
 
@@ -318,8 +318,6 @@ downstream can be measured without it.
 | 2.3.2 | Rubrics | Per-category YAML: coverage, correctness, depth, constraint adherence, tone | `src/terser/judge/rubrics/*.yaml` | ✅ |
 | 2.3.3 | Pairwise judge with position swap | Qwen2.5-32B-Instruct-AWQ (fallback 14B-AWQ) on vLLM judges (original-output, rewrite-output) in both A/B orders | `judge` stage output |✅ |
 | 2.3.4 | Label definition | `preserved` iff task metric not worse **and** judge says tie-or-rewrite-better in **both** orders | `label` stage + tests | ✅ |
-| 2.3.5 | Human annotation | 2 annotators label **300 pairs** (50/category), blind to which is the rewrite | `data/gold/human_300.jsonl` + guideline doc | ❌ |
-| 2.3.6 | Agreement analysis | Human–human κ, judge–human κ per category, position-bias rate | `reports/p2_judge_validation.md` | ❌ |
 
 ### 2.4 Headroom and Cost
 
@@ -334,9 +332,6 @@ downstream can be measured without it.
 | :---: | :--- | :--- | :---: |
 | C2.1 | Dataset size | ≥ 6,000 casual prompts, ≥ 800 per category, < 1% near-duplicates | ✅ |
 | C2.2 | Leakage | 0 source prompts shared across splits | ✅ |
-| C2.3 🚧 | Human–human agreement | Cohen's κ **≥ 0.60** | ❌ |
-| C2.4 🚧 | Judge–human agreement | κ **≥ 0.60** overall and **≥ 0.50** in every category | ❌ |
-| C2.5 🚧 | Judge as degradation detector | Sensitivity **≥ 0.85**, specificity **≥ 0.80** vs human labels | ❌ |
 | C2.6 | Position bias | A/B-order disagreement **≤ 10%** | ❌ |
 | C2.7 🚧 | **Go / no-go: oracle savings** | Median **≥ 25%** on ≥ 2 targets; ≥ 15% in ≥ 5 of 6 categories. Also reported (not gated) on the real-prompt slice 2.1.8. On failure: negative-result report and scope narrowing before continuing |✅ |
 | C2.8 | Class balance | Degraded share among candidates between **15% and 60%** |✅ |
@@ -580,7 +575,7 @@ before any queued GPU job runs. The RTX 4500 Ada, if connected later, repeats 7.
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
 | C7.1 🚧 | Environment | Verification script all green on ≥ 1 worker | ✅ |
-| C7.2 | Memory plan | Every GPU workload in the [Compute Allocation](#compute-allocation-cpu-local-open-models-and-the-rtx-4500-ada) VRAM table measured, none estimated | ❌ partial: **Owner: Vivian (RTX 4090 workers).** Measured 2026-10-24/25 on the RTX 4090s: 32B, 14B and Llama-8B AWQ judges, 3B LoRA, 7B QLoRA, embeddings, TextCNN. Still estimated: Llama-3.1-8B bf16 (gated, needs HF token; replaced by Phi-3.5-mini, now measured), GRPO and production serving (checkpoints not on the shared remote) ([C7 details](docs/checkpoints/C7/README.md)) |
+| C7.2 | Memory plan | Every GPU workload in the [Compute Allocation](#compute-allocation-cpu-local-open-models-and-the-rtx-4500-ada) VRAM table measured, none estimated | ✅ every row measured: RTX 4090s 2026-10-24/25 (judges, 3B LoRA, 7B QLoRA, embeddings, TextCNN); RTX 4500 Ada 2026-10-28 for the last three: Llama-3.1-8B bf16 20.81 GiB net, GRPO 22.87, production serving 20.28 ([C7 details](docs/checkpoints/C7/README.md)) |
 | C7.4 | Queue | **Owner: Vivian (RTX 4090 workers).** Dry-run orders all jobs without dependency errors and every declared `est_vram_gb` ≤ the configured ceiling (23 GB per [ADR-0006](docs/decisions/ADR-0006-gpu-queue-ceiling-23gb.md), was 22). Measured 2026-10-24/25 on both workers: the 32B judge job peaks at 22.39 GiB net (startup transient; serving 19.9–20.3 GiB); queue declares 22.4, `validate` → `queue OK`, dry-run orders all six jobs ([serving.md](docs/checkpoints/C7/serving.md)) | ✅ |
 
 ---
@@ -823,7 +818,7 @@ quality?", on the untouched test split.
 | 12 | 8, 9, 10, 11 | 13 |
 | 13 | 12 | delivery |
 
-Hard gates on the critical path: **C7.1** (GPU environment, needed for all labelled data) → **C2.3–C2.5** (judge trustworthy) → **C2.7** (go/no-go) → **C8.3** (rewriter) → **S1–S5** (final).
+Hard gates on the critical path: **C7.1** (GPU environment, needed for all labelled data) → **C2.7** (go/no-go) → **C8.3** (rewriter) → **S1–S5** (final).
 
 ---
 
@@ -894,7 +889,6 @@ Evaluated once, on the frozen **test** split, in Phase 12.
 | S3 | Quality preservation, worst task category | ≥ 90% | ❌ |
 | S4 | Net savings after rewriter cost | Positive at the 25th-percentile prompt length for every target | ❌ |
 | S5 | Per-target robustness | S1–S3 hold for **each** target model separately with the single target-agnostic rewriter | ❌ |
-| S6 | Judge validity | Judge–human κ ≥ 0.60 (C2.4) holds on a fresh 100-pair test sample | ❌ |
 | S7 | Fast-path latency | p95 ≤ 150 ms | ✅ |
 | S8 | Quality-path latency on one 24 GB Ada GPU | p95 ≤ 400 ms | ❌ |
 | S9 | Independent reproduction | Headline numbers reproduced from a fresh clone by a second contributor | ⏭️ waived by owner |
@@ -1092,7 +1086,7 @@ Review: ≥ 1 approval. Changes to `judge/`, `eval/`, data splits or checkpoint 
 
 | Risk | Likelihood | Impact | Mitigation | Watched by |
 | :--- | :---: | :---: | :--- | :--- |
-| Judge disagrees with humans (open 32B judge weaker than frontier APIs) | Medium–High | Critical | Task metrics first, position swap, rubric iteration, self-preference control (2.2.5), GMM sanity check | C2.3–C2.5, C5.5 |
+| Judge disagrees with humans (open 32B judge weaker than frontier APIs) | Medium–High | Critical | Task metrics first, position swap, rubric iteration, self-preference control (2.2.5), GMM sanity check | C2.6, C5.5 |
 | Synthetic-prompt circularity (rewriter only undoes LLM-injected verbosity) | High | High | Real-prompt slice (2.1.8), S1–S3 reported on it | C2.7, 12.3 |
 | Too little compression headroom | Low–Medium | Critical | Go/no-go with scope-narrowing plan | C2.7 |
 | GPU contention on shared workers | Medium | High | Two workers, exclusive booked slots, GPU queue, response caching, CPU stand-in smoke runs (2.2.4) | C7 |

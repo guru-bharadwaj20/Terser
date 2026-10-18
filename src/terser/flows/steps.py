@@ -402,13 +402,13 @@ def _version_at(model_name: str, alias: str) -> str:
     setup_tracking()
     client = MlflowClient()
     if alias == "latest" or alias.startswith("experiment:"):
-        versions = client.search_model_versions(f"name = '{model_name}'")
+        versions = list(client.search_model_versions(f"name = '{model_name}'"))
         if alias != "latest":
             want = alias.split(":", 1)[1]
             versions = [
                 v
                 for v in versions
-                if client.get_run(v.run_id).data.params.get("experiment") == want
+                if v.run_id and client.get_run(v.run_id).data.params.get("experiment") == want
             ]
         if not versions:
             raise StepError(f"{model_name} has no registered version for {alias!r}")
@@ -428,6 +428,8 @@ def rung_at(model_name: str, alias: str) -> str | None:
     try:
         mv = client.get_model_version_by_alias(model_name, alias)
     except MlflowException:
+        return None
+    if not mv.run_id:
         return None
     experiment = client.get_run(mv.run_id).data.params.get("experiment")
     return next((r for r, e in RUNG_EXPERIMENTS.items() if e == experiment), None)

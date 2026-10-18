@@ -1,7 +1,7 @@
 """Supervised fine-tuning of the generative rewriter (plan rows **8.3.2**-**8.3.4**).
 
 Data: JSONL of ``{"prompt": casual, "rewrite": oracle}`` (``efficient`` is accepted as an alias
-for ``rewrite``, which is the field name in ``tests/fixtures/casual_prompts.jsonl``). Each example
+for ``rewrite``, which is the field name in ``data/samples/casual_prompts.jsonl``). Each example
 is ``<prompt> SEP <rewrite> EOS``; the loss is next-token cross-entropy on the rewrite tokens only
 (prompt positions are labelled ``-100``).
 
@@ -374,6 +374,7 @@ def run(cfg: DictConfig, on_eval: Callable[[int, float], None] | None = None) ->
     if p.model == "tiny":
         btok = ByteTokenizer()
         model: Any = build_tiny_lm(btok.vocab_size, **OmegaConf.to_container(p.tiny))  # type: ignore[arg-type]
+        sep: int | Sequence[int]
         enc, sep, eos, pad, hf = btok.encode, btok.sep_id, btok.eos_id, btok.pad_id, False
     else:  # pragma: no cover - needs the gpu extra and a GPU worker
         model, tok = _load_hf(p, device)
@@ -384,8 +385,8 @@ def run(cfg: DictConfig, on_eval: Callable[[int, float], None] | None = None) ->
         # The whole separator, as the served SFT format sends it (a single trailing token is
         # common, so the prompt/rewrite boundary would be ambiguous).
         sep = enc("\n### Rewrite:\n")
-        eos = tok.eos_token_id
-        pad = tok.pad_token_id if tok.pad_token_id is not None else eos
+        eos = int(tok.eos_token_id)
+        pad = int(tok.pad_token_id) if tok.pad_token_id is not None else eos
         hf = True
     examples = [encode_pair(enc(x.prompt), enc(x.rewrite), sep, eos, p.max_len) for x in pairs]
     val_examples: Examples | None = None

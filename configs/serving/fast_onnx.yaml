@@ -6,7 +6,7 @@
 # grouped OOF scores (sensitivity 0.950, specificity 0.380, 23.7% of rewrites passed).
 # Source: reports/p11_fast_path.md, operating_point.chosen.threshold in reports/p11_fast_path.json
 # (python -m terser.phase11.train_fast_path --operating-point-only). Rejects P(degraded) > value.
-gate_threshold: 0.264564
+gate_threshold: 0.26962
 gate_onnx: models/fast/gate.onnx
 gate_feature_target: qwen2.5   # the gate was trained on qwen2.5 token counts (row 11.3.2)
 tagger_onnx: models/fast/tagger.onnx

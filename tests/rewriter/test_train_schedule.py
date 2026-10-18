@@ -18,7 +18,7 @@ from terser.models.rewriter.train import (
     train_sft,
 )
 
-FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "casual_prompts.jsonl"
+FIXTURE = Path(__file__).resolve().parents[2] / "data" / "samples" / "casual_prompts.jsonl"
 
 
 def test_lr_factor_warmup_then_linear_decay() -> None:

@@ -24,14 +24,19 @@ from terser.serving.accounting import Pricing
 from terser.serving.service import RewriteService
 
 FIX = Path(__file__).resolve().parents[1] / "fixtures"
+SAMPLES = FIX.parent.parent / "data" / "samples"
 
 
 def _prompts(n: int = 100) -> list[str]:
-    lines = (FIX / "tokenizer_strings.jsonl").read_text(encoding="utf-8").split("\n")
+    lines = (
+        (FIX.parent.parent / "data" / "monitoring" / "tokenizer_strings.jsonl")
+        .read_text(encoding="utf-8")
+        .split("\n")
+    )
     texts = [json.loads(x)["text"] for x in lines if x]
     casual = [
         json.loads(x)["prompt"]
-        for x in (FIX / "casual_prompts.jsonl").read_text(encoding="utf-8").split("\n")
+        for x in (SAMPLES / "casual_prompts.jsonl").read_text(encoding="utf-8").split("\n")
         if x
     ]
     return (casual + texts)[:n]
