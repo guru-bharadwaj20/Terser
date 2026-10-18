@@ -28,7 +28,8 @@ KEEP: Final[Label] = "KEEP"
 DROP: Final[Label] = "DROP"
 REPLACE: Final[Label] = "REPLACE"
 
-_TOKEN_RE: Final = re.compile(r"\w+(?:['’]\w+)*|[^\w\s]")
+# Numbers first, so "2.5" and "40%" stay one token (is_number can see them).
+_TOKEN_RE: Final = re.compile(r"\d+(?:[.,]\d+)*%?(?![\w])|\w+(?:['’]\w+)*|[^\w\s]")
 TOKEN_RE: Final = _TOKEN_RE
 """The word / punctuation pattern; serving code that needs token *spans* uses it directly."""
 
