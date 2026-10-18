@@ -1,8 +1,8 @@
 # Terser: Final Report
 
 Plan row 13.6. This report describes the problem, the method, the validation-split experiments and
-every negative result of the Terser project. Test-split results and ablations come from Phase 12,
-which has not run yet; their sections are marked and left open.
+every negative result of the Terser project. Test-split results and ablations come from the Phase 12
+evaluation ([final_results.md](../reports/final_results.md)), reported in § 5.1.
 
 Every number below comes from a file in [`reports/`](../reports/), linked where it is used. The
 checkpoint ids (C*.*) and row ids refer to [CONTRIBUTING.md](../CONTRIBUTING.md); the current pass/fail
@@ -114,7 +114,7 @@ candidates → token_counts → respond (per target) → label → oracle → fe
 | Step | What happens | Numbers |
 | :--- | :--- | :--- |
 | collect | Clean instructions from Dolly, OpenAssistant, HumanEval, MBPP and GSM8K, licence-audited ([license_audit.md](../reports/license_audit.md), [SOURCES.md](../data/SOURCES.md)) | |
-| casualise | Qwen2.5-32B-Instruct-AWQ rewrites each clean instruction in one of five styles (rambling, hedging, texting, over-polite, repetitive); outputs that add or drop requirements or change numbers are rejected | 7,108 accepted, 1,292 rejected ([p2_casualise_stats.json](../reports/p2_casualise_stats.json)) |
+| casualise | Qwen2.5-32B-Instruct-AWQ rewrites each clean instruction in all five styles (rambling, hedging, texting, over-polite, repetitive); outputs that add or drop requirements or change numbers are rejected | 7,108 accepted, 1,292 rejected ([p2_casualise_stats.json](../reports/p2_casualise_stats.json)) |
 | dedupe | MinHash LSH, exact Jaccard ≥ 0.8 on word 5-grams | 7,108 → 7,080 records, 1,671 → 1,665 source groups ([p2_duplicates.md](../reports/p2_duplicates.md)) |
 | split | 70 / 15 / 15 by source prompt; the test split is frozen and hash-locked | 0 source prompts shared (C2.2) |
 | label_subset | 300 prompts per category, so judging fits the token budget | 1,800 prompts: train 1,262 / val 285 / test 253 ([p2_candidates.md](../reports/p2_candidates.md)) |
@@ -300,8 +300,8 @@ applied in the C8.3 table; § 5.4 shows what it does.
 
 ## 5. Results (validation split)
 
-All results in this section are on the **validation** split or on train-split cross-validation.
-None is a test-split result.
+All results in this section are on the **validation** split or on train-split cross-validation,
+except § 5.1, which reports the one-time test-split evaluation.
 
 ### 5.1 Test-split results
 
@@ -544,8 +544,9 @@ timeout and the gate rejected 372 rewrites. Of the 20 pairs with an edited promp
 preserved ([p11_canary.md](../reports/p11_canary.md)). The canary therefore shows that the service
 rarely harms users. It does not show that the rewriter is good.
 
-**Net savings.** No aggregate net-savings measurement exists yet (row 12.7 is open). Two
-measurements bound it. First, when the gate rejects a quality-path rewrite the original prompt is
+**Net savings.** The aggregate net-savings measurement (row 12.7) is in
+[final_results.md](../reports/final_results.md): −58.6% (Qwen2.5) and −57.5% (Phi-3.5) at the
+25th-percentile length for the full system. Two earlier measurements bound it. First, when the gate rejects a quality-path rewrite the original prompt is
 served, so the request's net savings are the rewriter cost alone, −8.5e-6 USD in the container
 check ([p11_containers_dashboard.md](../reports/p11_containers_dashboard.md)). Second, at the
 configured prices the rewriter's cost is 6% of a `gpt-4o` prompt but 75% of a prompt at the assumed
@@ -687,10 +688,10 @@ Infrastructure findings that do not map to one checkpoint:
 - **LLMLingua-2 needs the network.** Its real test downloads the model and is behind the `network`
   marker ([tests/test_data_candidates.py](../tests/test_data_candidates.py)); offline reproduction
   works only from the copied `.cache/llmlingua2` ([p11_dvc_repro.md](../reports/p11_dvc_repro.md)).
-- **CI is not green.** The workflow's median run is within the 15-minute bar, but the current
-  workflow has never passed on GitHub: `ci.yml` is pushed, but unpinned `black` disagrees with the
-  local version, and since 2026-10-17 a billing block stops every job from starting ([p11_ci.md](../reports/p11_ci.md)). Rows
-  11.4.1 (CI) and 11.4.2 (CD) are open.
+- **CI was red for most of the project.** Unpinned `black` disagreed with the local version and a
+  billing block (from 2026-10-17) stopped every job ([p11_ci.md](../reports/p11_ci.md)). Both were
+  fixed: CI run 39890354266 passed on all 4 jobs (median 8.8 min), and the v1.0.2 tag's CD run
+  published the images, closing rows 11.4.1 and 11.4.2.
 
 ### 6.9 Open because they need people
 

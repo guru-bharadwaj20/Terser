@@ -68,7 +68,7 @@ Supporting sections: [Compute Allocation](#compute-allocation-cpu-local-open-mod
 | Dev laptop (Windows 11) | Guru Bharadwaj | CPU only; all classical ML, tokenization, pipelines, CI | Available |
 | Dev workstation (Fedora 44) | Vivian Sobers | AMD Ryzen AI 7 350, 16 threads, 14 GB RAM, no NVIDIA GPU; classical ML, tokenization, pipelines, CI | Available |
 | **NVIDIA RTX 4500 Ada Generation** | Guru Bharadwaj | 24 GB GDDR6 ECC, Ada Lovelace (compute capability 8.9), bf16 supported, ~210 W. WSL2 workstation ([hardware.md § 1.2](docs/hardware.md#12-rtx-4500-ada-workstation-wsl2)) | ✅ connected 2026-10-01 |
-| **2 × NVIDIA GeForce RTX 4090** | Vivian Sobers | `worker-1` (10.10.3.83) and `worker-2` (10.10.3.50). Each 24 GB, Ada Lovelace (compute capability 8.9), bf16 supported. Ubuntu 22.04.5, i9-13900, 125 GB RAM. Shared lab machines reached over SSH | ✅ available |
+| **2 × NVIDIA GeForce RTX 4090** | Vivian Sobers | `worker-1` and `worker-2`. Each 24 GB, Ada Lovelace (compute capability 8.9), bf16 supported. Ubuntu 22.04.5, i9-13900, 125 GB RAM. Shared lab machines (access details shared out-of-band) | ✅ available |
 | Local open-model serving | both | OpenAI-compatible servers only: Ollama / llama.cpp on a dev machine for tiny models (Qwen2.5-0.5B/1.5B, smoke tests), vLLM or Ollama on an RTX 4090 (and later the RTX 4500 Ada) for all real generation and judging. **No hosted API keys are available or assumed** | CPU: available · GPU: ✅ on the 4090s |
 
 The two RTX 4090s have the same compute capability (8.9), VRAM (24 GB) and bf16 support as the
@@ -110,14 +110,14 @@ the card · **vLLM serving and training never run at the same time on 24 GB** ·
 | Claude token counts (optional) | 0+ | `CPU` | token-counting endpoint, only if an Anthropic key is ever added | 0 | Never required for any reported number |
 | CPU smoke-test LLM (Qwen2.5-0.5B / 1.5B, GGUF Q4 via Ollama or llama.cpp) | 1+ | `CPU` | 4-bit | ~1–2 GB RAM | Pipeline tests only (a few tokens/s on the i3 laptop); outputs tagged `stand_in: true`, never used for labels |
 | Candidate generation + pairwise judge (Qwen2.5-32B-Instruct-AWQ; fallback Qwen2.5-14B-Instruct-AWQ) | 2+ | `GPU` | vLLM AWQ int4 | **Measured (7.6), 32B:** 18.14 GiB weights + 1.46 GiB KV, peak 22.15 GiB net · 14B: ~9 GB (est.) | Exclusive slot. At max len 4096 the 32B fits **only** with `max_num_batched_tokens=2048` (fails at vLLM defaults); KV holds 5,968 tokens, 18.5 / 281 tok/s at batch 1 / 16. Was est. ~19 GB weights. [C7/serving.md](docs/checkpoints/C7/serving.md) |
-| Target LLM outputs (Llama-3.1-8B-Instruct, Qwen2.5-7B-Instruct) | 2, 8+ | `GPU` | vLLM bf16, `gpu_memory_utilization=0.90` | **Measured (7.6), Qwen2.5-7B:** 14.29 GiB weights + 5.54 GiB KV, peak 20.79 GiB net · Llama-3.1-8B: not measured (gated) | 24.1 / 376 tok/s at batch 1 / 16. Was est. ~16 GB weights. [C7/serving.md](docs/checkpoints/C7/serving.md) |
-| Second judge (Llama-3.1-8B-Instruct AWQ) | 2 | `GPU` | vLLM AWQ int4 | ~6 GB + KV | Self-preference control (2.2.5) only |
+| Target LLM outputs (Phi-3.5-mini-instruct per ADR-0011, Qwen2.5-7B-Instruct) | 2, 8+ | `GPU` | vLLM bf16, `gpu_memory_utilization=0.90` | **Measured (7.6), Qwen2.5-7B:** 14.29 GiB weights + 5.54 GiB KV, peak 20.79 GiB net · Phi-3.5-mini: not measured (Llama-3.1-8B, the original plan, was gated) | 24.1 / 376 tok/s at batch 1 / 16. Was est. ~16 GB weights. [C7/serving.md](docs/checkpoints/C7/serving.md) |
+| Second judge (Phi-3.5-mini-instruct, ADR-0011; was Llama-3.1-8B AWQ) | 2 | `GPU` | vLLM AWQ int4 | ~6 GB + KV | Self-preference control (2.2.5) only |
 | Sentence embeddings (bge-small / e5-base) | 3+ | `CPU→GPU` | fp32 / fp16 | < 2 GB | CPU fine up to ~50k texts |
 | All classical models (ID3, LR, KNN, SVM, NB, GMM, HMM, RF, GBM, k-means) | 3–6 | `CPU` | — | 0 | Never on GPU |
 | Perceptron / MLP / optimizer study | 4 | `CPU` | fp32 | 0 | Small models |
 | TextCNN span scorer | 8 | `CPU→GPU` | fp32 / bf16 | < 2 GB | GPU only for sweeps |
 | Rewriter SFT: Qwen2.5-0.5B full fine-tune | 8 | `GPU` | bf16 + AdamW, grad checkpointing | **Measured (7.7):** 16.32 GiB reserved fp32-master / 11.77 GiB pure bf16 (seq 1024, mb 4); 0.44 / 0.37 s per step | ~16 bytes/param for weights+grads+Adam (~8 GB) + activations; was est. ~12–16 GB. [C7/training.md](docs/checkpoints/C7/training.md) |
-| Rewriter SFT: Qwen2.5-1.5B / 3B LoRA | 8 | `GPU` | bf16 base, LoRA r=16 | **Measured (7.7), 1.5B:** 12.19 GiB reserved (seq 1024, mb 4), 1.11 s per step · 3B: ~8–16 GB (est.) | Main candidates; 1.5B was est. ~8–16 GB 
+| Rewriter SFT: Qwen2.5-1.5B / 3B LoRA | 8 | `GPU` | bf16 base, LoRA r=16 | **Measured (7.7), 1.5B:** 12.19 GiB reserved (seq 1024, mb 4), 1.11 s per step · 3B: ~8–16 GB (est.) | Main candidates; 1.5B was est. ~8–16 GB |
 | Rewriter SFT: 7B QLoRA | 8 | `GPU` | NF4 base + LoRA | ~10–18 GB at seq ≤ 1024 | Only if smaller rungs fail C8.3 |
 | GRPO rewriter policy (stretch) | 9 | `GPU` | 0.5B–1.5B LoRA | ~12–20 GB | Only if the stretch rows are attempted; never colocated with serving |
 | Tabular Q-learning | 9 | `CPU` | — | 0 | |
@@ -307,7 +307,7 @@ downstream can be measured without it.
 | 2.2.2 | Token counts | Every prompt and candidate on every target tokenizer | Counts table, 0 missing | ✅ |
 | 2.2.3 | Target outputs | Qwen2.5-7B-Instruct and Phi-3.5-mini-instruct ([ADR-0011](docs/decisions/ADR-0011-second-family-phi35.md)) on vLLM bf16, temperature 0 (creative: n = 3 samples) | `respond` stage output | ✅ |
 | 2.2.4 | Pipeline smoke run (pre-GPU) | `respond → judge → label` on 50 prompts with Qwen2.5-0.5B/1.5B via Ollama on CPU, through the same `terser.llm` client | Stages run end to end; every output tagged `stand_in: true` and excluded from labels | ✅ |
-| 2.2.5 | Judge self-preference control | Second judge Llama-3.1-8B-Instruct on 1,000 pairs; compare verdict agreement separately for Qwen-target and Llama-target outputs | Report: agreement gap between target families ≤ 5 pp, or mitigation documented |✅ |
+| 2.2.5 | Judge self-preference control | Second judge Phi-3.5-mini-instruct (ADR-0011; replaces Llama-3.1-8B) on 1,000 pairs; compare verdict agreement separately for Qwen-target and Phi-target outputs | Report: agreement gap between target families ≤ 5 pp, or mitigation documented |✅ |
 
 ### 2.3 Quality Judging
 
@@ -570,7 +570,7 @@ before any queued GPU job runs. The RTX 4500 Ada, if connected later, repeats 7.
 | 7.3 | GPU environment | Python ≥ 3.11 venv; `pip install -e ".[dev,gpu]"`; `dvc pull`; MLflow pointed at shared server | Import test for torch/vllm/peft/trl/bitsandbytes | ✅ |
 | 7.4 | Verification script | `python -m terser.hardware.verify`: device name, memory, capability (8, 9), bf16 matmul benchmark + parity with fp32 | Report in `docs/checkpoints/C7/hardware.md` | ✅ |
 | 7.5 | vLLM smoke test | Qwen2.5-0.5B-Instruct generates 32 tokens | Logged | ✅ |
-| 7.6 | Serving measurement | Llama-3.1-8B-Instruct bf16 and Qwen2.5-32B-AWQ, `gpu_memory_utilization=0.90`, max len 4096: peak VRAM, tokens/s at batch 1 and 16 | VRAM table updated | ✅ |
+| 7.6 | Serving measurement | Qwen2.5-7B-Instruct bf16 (measured in place of the gated Llama-3.1-8B-Instruct, which was **not** measured) and Qwen2.5-32B-AWQ, `gpu_memory_utilization=0.90`, max len 4096: peak VRAM, tokens/s at batch 1 and 16 | VRAM table updated | ✅ |
 | 7.7 | Training measurement | Qwen2.5-0.5B full FT and 1.5B LoRA, seq 1024, micro-batch 4, grad checkpointing: peak VRAM, step time | VRAM table updated | ✅ |
 | 7.9 | GPU test suite | All `@pytest.mark.gpu` tests | Green | ✅ |
 
@@ -579,8 +579,8 @@ before any queued GPU job runs. The RTX 4500 Ada, if connected later, repeats 7.
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
 | C7.1 🚧 | Environment | Verification script all green on ≥ 1 worker | ✅ |
-| C7.2 | Memory plan | **Owner: Vivian (RTX 4090 workers).** VRAM table in [Compute Allocation](#compute-allocation-cpu-local-open-models-and-the-rtx-4500-ada) partly measured; revised 32B queue configuration and remaining workloads still estimated ([C7 details](docs/checkpoints/C7/README.md)) | ❌ partial |
-| C7.4 | Queue | **Owner: Vivian (RTX 4090 workers).** 2026-10-03 measurement on worker-1: queued 32B config fails startup (KV 4,080 < 4,096 tokens) and peaks at 22.39 GiB net, above the 22 GiB ceiling ([serving.md](docs/checkpoints/C7/serving.md)). Local dry-run orders all three jobs without dependency errors; declared estimates pass validation against the configured 22 GB ceiling. Revised 32B estimate is UNVERIFIED pending planned RTX 4090 re-measurement ([follow-up](docs/checkpoints/C7/README.md#follow-up)); not a full pass | ❌ partial |
+| C7.2 | Memory plan | Every GPU workload in the [Compute Allocation](#compute-allocation-cpu-local-open-models-and-the-rtx-4500-ada) VRAM table measured, none estimated | ❌ partial: **Owner: Vivian (RTX 4090 workers).** Table partly measured; revised 32B queue configuration and remaining workloads still estimated ([C7 details](docs/checkpoints/C7/README.md)) |
+| C7.4 | Queue | **Owner: Vivian (RTX 4090 workers).** 2026-10-03 measurement on worker-1: queued 32B config fails startup (KV 4,080 < 4,096 tokens) and peaks at 22.39 GiB net, above the 22 GiB ceiling ([serving.md](docs/checkpoints/C7/serving.md)). Local dry-run ordered the three jobs then queued without dependency errors (the queue now holds six specs); declared estimates pass validation against the configured 22 GB ceiling. Revised 32B estimate is UNVERIFIED pending planned RTX 4090 re-measurement ([follow-up](docs/checkpoints/C7/README.md#follow-up)); not a full pass | ❌ partial |
 
 ---
 
@@ -976,7 +976,7 @@ only if they work, so each ends in a report whether or not it succeeds.
 | Contributor | Machines | Reviews |
 | :--- | :--- | :--- |
 | Guru Bharadwaj (`guru-bharadwaj20`) | Dev laptop (Windows 11, CPU only); NVIDIA RTX 4500 Ada workstation (WSL2), connected 2026-10-01 | Repository owner |
-| Vivian Sobers (`vivianedwardbangalore@gmail.com`) | Dev workstation (Fedora 44, CPU only); `worker-1` and `worker-2`, one RTX 4090 each, administered by Vivian | GPU onboarding (Phase 7), serving and queue work |
+| Vivian Sobers (`VivianSobers`) | Dev workstation (Fedora 44, CPU only); `worker-1` and `worker-2`, one RTX 4090 each, administered by Vivian | GPU onboarding (Phase 7), serving and queue work |
 
 Machine details, access and the measurements taken on them:
 [docs/hardware.md § 1.1](docs/hardware.md#11-vivians-gpu-workers). Credentials for the GPU workers
@@ -1043,7 +1043,9 @@ Create the environment with an explicit 3.11 or newer interpreter (`uv venv --py
   on some constructs, and CI runs `black --check .`.
 - From-scratch implementations (ID3, LR, KNN, perceptron, backprop, SVM dual, AdaBoost, NB, EM/GMM,
   HMM forward/Viterbi/Baum-Welch, K-means, bisecting K-means, Q-learning) live in
-  `src/terser/models/**/scratch_*.py`, each with a derivation link and a test against a library or
+  `src/terser/models/**/scratch_*.py` (ID3, KNN, penalised LR, SVM dual, NB, K-means / bisecting
+  K-means, AdaBoost, perceptron, optimisers, Q-learning) plus `classical/logistic.py` (LR),
+  `classical/gmm.py` (EM/GMM), `classical/hmm.py` (HMM) and `neural/numpy_mlp.py` (backprop), each with a derivation link and a test against a library or
   hand-computed example.
 - No hard-coded `"cuda"`: use `terser.hardware.get_device(cfg)`.
 - Hydra configs only, no magic numbers. Notebooks are exploration only, never imported, outputs stripped.

@@ -98,5 +98,8 @@ def test_build_writes_and_freezes(tmp_path: Path) -> None:
     assert all(r["use"] == "eval_only" and r["casualised"] is False for r in records)
     assert not any("jane.doe@example.org" in r["prompt"] for r in records)
     assert verify_frozen(tmp_path)["n_records"] == 20
+    frozen = (tmp_path / "test.jsonl").read_bytes()
     with pytest.raises(FrozenTestSetError):
-        build_slice(out_dir=tmp_path, size=20, rows=rows)
+        build_slice(out_dir=tmp_path, size=10, rows=rows[::-1], seed=7)  # different rows
+    assert (tmp_path / "test.jsonl").read_bytes() == frozen  # nothing was overwritten
+    assert verify_frozen(tmp_path)["n_records"] == 20

@@ -48,7 +48,7 @@ from typing import Any, Final
 from terser.data.categories import Category
 from terser.data.pii import scrub_text
 from terser.data.sources import MANIFEST_NAME, sha256_file, verify_manifest
-from terser.data.splits import freeze_test, verify_frozen
+from terser.data.splits import LOCK_NAME, FrozenTestSetError, freeze_test, verify_frozen
 
 __all__ = [
     "REPO_ID",
@@ -381,6 +381,9 @@ def build_slice(
     summary = SliceSummary()
     picked = sample_balanced(build_records(rows, summary), size, seed)
     summary.slice_by_category = dict(sorted(Counter(r["category"] for r in picked).items()))
+    # Refuse before writing: the frozen file must survive a rebuild attempt without --force.
+    if (out_dir / LOCK_NAME).exists() and not force:
+        raise FrozenTestSetError(f"{out_dir / LOCK_NAME} exists; refusing to overwrite the slice")
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / "test.jsonl"
     with out_path.open("w", encoding="utf-8", newline="\n") as fh:

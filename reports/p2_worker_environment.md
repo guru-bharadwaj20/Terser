@@ -1,6 +1,6 @@
 # Phase 2 worker environment — 2026-10-03
 
-Row 2.2.3. Worker-1 (`10.10.3.83`), environment `/home/ccbd/terser-env`, editable project `/home/ccbd/terser`.
+Row 2.2.3. Worker-1, environment `~/terser-env`, editable project `~/terser`.
 
 The system conda directory had no executable; uv created a Python 3.11 environment. All package, model, compiler and temporary caches are scoped under the project directory.
 

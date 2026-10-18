@@ -134,6 +134,8 @@ def test_check_casual_keeps_quoted_and_code_spans() -> None:
 
 def test_clean_and_parse_helpers() -> None:
     assert clean_casual('Casual message:\n"hey pls do x"') == "hey pls do x"
+    inner = '"foo" is what i mean, not "bar"'
+    assert clean_casual(inner) == inner
     assert parse_meaning_check('{"same_task": true, "added": [], "missing": []}') == (
         True,
         [],
@@ -228,6 +230,14 @@ def test_stand_in_only_writes_to_smoke(tmp_path: Path) -> None:
             client,
             model="qwen2.5:1.5b",
             out_path=tmp_path / "c.jsonl",
+            rejected_path=tmp_path / "r.jsonl",
+        )
+    with pytest.raises(ValueError):  # rejected records are stand-in output too
+        run_casualise(
+            clean_records(),
+            client,
+            model="qwen2.5:1.5b",
+            out_path=tmp_path / "smoke" / "c.jsonl",
             rejected_path=tmp_path / "r.jsonl",
         )
     stats = run_casualise(
