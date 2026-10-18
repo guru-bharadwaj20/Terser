@@ -86,14 +86,23 @@ def load_prompt_template(version: str = DEFAULT_PROMPT_VERSION) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def rubric_section(category: Category | str | None) -> str:
-    """The ``{rubric}`` block for a category: rendered rubric plus markers, or ``""`` for None."""
+def rubric_section(category: Category | str | None, mode: str = "pairwise") -> str:
+    """The ``{rubric}`` block for a category: rendered rubric plus markers, or ``""`` for None.
+
+    ``mode`` is ``"pairwise"`` (two responses, one verdict) or ``"pointwise"`` (one response,
+    1-5 scores); the instructions are worded for what the judge actually sees.
+    """
     if category is None:
         return ""
+    intro = (
+        "Apply this rubric to the response when scoring it.\n"
+        if mode == "pointwise"
+        else "Apply this rubric to both responses when deciding your verdict.\n"
+    )
     return (
         "[Rubric for this request]\n"
-        "Apply this rubric to both responses when deciding your verdict.\n"
-        f"{render_rubric(category)}\n"
+        f"{intro}"
+        f"{render_rubric(category, mode=mode)}\n"
         "[End of rubric]\n\n"
     )
 
@@ -263,12 +272,9 @@ def label_from_sides(original_first: Side | None, rewrite_first: Side | None) ->
     A single ``original`` verdict is sufficient evidence of degradation, so it wins over a
     missing verdict in the other order.
     """
-    sides = (original_first, rewrite_first)
-    if "original" in sides:
-        return "degraded"
-    if None in sides:
-        return None
-    return "preserved"
+    from terser.judge.labels import label_pair  # labels.py is the single home of the rule
+
+    return label_pair(None, original_first, rewrite_first).label
 
 
 @dataclass(frozen=True)

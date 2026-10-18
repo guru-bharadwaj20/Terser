@@ -179,7 +179,7 @@ class PointwiseJudge:
             {
                 "role": "user",
                 "content": render_pointwise_prompt(
-                    self.template, prompt, response, rubric_section(category)
+                    self.template, prompt, response, rubric_section(category, mode="pointwise")
                 ),
             }
         ]
@@ -199,7 +199,7 @@ class PointwiseJudge:
                 return PointScore(
                     scores=scores,
                     hard_fail=hard_fail,
-                    score=weighted_score(scores, weights),
+                    score=rubric.weighted_score(scores),
                     reason=reason,
                     raw=raw,
                     attempts=attempt,

@@ -18,7 +18,9 @@ Each run gets:
 
 * a **separate process** started with ``-I`` (isolated mode: ignores ``PYTHON*`` variables, user
   site-packages and the script directory) and ``-B``, using the base interpreter rather than the
-  project virtualenv, so the project's packages and ``.env`` are not importable;
+  project virtualenv, so the project's packages and ``.env`` are not importable. Isolated mode
+  also ignores ``PYTHONHASHSEED``: string hashing is randomised per run, so a test that depends
+  on set iteration order can give different results between labelling runs;
 * a fresh **temporary directory** as working directory, ``HOME`` and ``TEMP``, deleted afterwards;
 * a **scrubbed environment** (no API keys, tokens or proxies from the parent; proxies point at a
   closed port);
@@ -642,7 +644,6 @@ def _scrubbed_env(workdir: str) -> dict[str, str]:
         "TMP": workdir,
         "LANG": "C.UTF-8",
         "LC_ALL": "C.UTF-8",
-        "PYTHONHASHSEED": "0",
         "OMP_NUM_THREADS": "1",
         "HTTP_PROXY": closed_proxy,
         "HTTPS_PROXY": closed_proxy,
