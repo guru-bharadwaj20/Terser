@@ -72,8 +72,10 @@ class ServiceMetrics:
         self.requests = Counter("terser_requests", "Rewrite requests", ["path", "mode"], registry=r)
         self.latency = Histogram(
             "terser_request_latency_seconds",
+            # ``mode`` is the requested mode: a quality request that timed out and was answered
+            # by the fast path still counts against the quality SLO.
             "End-to-end request latency",
-            ["path"],
+            ["path", "mode"],
             buckets=LATENCY_BUCKETS,
             registry=r,
         )
@@ -117,7 +119,7 @@ class ServiceMetrics:
     ) -> None:
         """Record one finished request."""
         self.requests.labels(path=path, mode=mode).inc()
-        self.latency.labels(path=path).observe(latency_s)
+        self.latency.labels(path=path, mode=mode).observe(latency_s)
         if fallback_reason:
             self.fallbacks.labels(reason=fallback_reason).inc()
         if gate_rejected:

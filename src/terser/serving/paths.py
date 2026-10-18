@@ -144,10 +144,23 @@ class OpenAICompatibleRewriter:
         self.timeout_s = timeout_s
         self.max_tokens = max_tokens
         self.prompt_format = prompt_format
+        self._client: Any = None
+
+    def _post(self, url: str, body: dict[str, Any]) -> Any:
+        """POST on one pooled client, so requests reuse connections instead of opening one each."""
+        if self._client is None:
+            import httpx
+
+            self._client = httpx.Client(timeout=self.timeout_s)
+        return self._client.post(url, json=body, timeout=self.timeout_s)
+
+    def close(self) -> None:
+        """Close the pooled HTTP client."""
+        if self._client is not None:
+            self._client.close()
+            self._client = None
 
     def __call__(self, prompt: str, target: str) -> RewriteResult:
-        import httpx
-
         if self.prompt_format == "sft":
             sft: dict[str, Any] = {
                 "model": self.model,
@@ -155,7 +168,7 @@ class OpenAICompatibleRewriter:
                 "max_tokens": self.max_tokens,
                 "prompt": prompt + self.SFT_SEP,
             }
-            resp = httpx.post(f"{self.base_url}/completions", json=sft, timeout=self.timeout_s)
+            resp = self._post(f"{self.base_url}/completions", sft)
             resp.raise_for_status()
             data = resp.json()
             usage = data.get("usage") or {}
@@ -173,7 +186,7 @@ class OpenAICompatibleRewriter:
                 {"role": "user", "content": prompt},
             ],
         }
-        resp = httpx.post(f"{self.base_url}/chat/completions", json=body, timeout=self.timeout_s)
+        resp = self._post(f"{self.base_url}/chat/completions", body)
         resp.raise_for_status()
         data = resp.json()
         usage = data.get("usage") or {}

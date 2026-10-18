@@ -14,7 +14,13 @@ CONFIGS = [
     REPO_ROOT / "configs" / "serving" / "default.yaml",
     REPO_ROOT / "configs" / "serving" / "fast_onnx.yaml",
     REPO_ROOT / "docker" / "serving.compose.yaml",
+    REPO_ROOT / "configs" / "serving" / "quality.yaml",
 ]
+
+
+@pytest.mark.parametrize("path", CONFIGS[2:], ids=lambda p: p.name)
+def test_quality_rewriter_uses_the_sft_prompt_format(path: object) -> None:
+    assert load_config(str(path))["quality"]["prompt_format"] == "sft"
 
 
 @pytest.mark.parametrize("path", CONFIGS, ids=lambda p: p.name)
