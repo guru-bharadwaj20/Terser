@@ -260,7 +260,7 @@ class DecisionTree:
             u = np.unique(xs)
             thresholds: Sequence[float] = list((u[:-1] + u[1:]) / 2)
         else:
-            thresholds = candidate_thresholds(xs, ys)
+            thresholds = list(candidate_thresholds(xs, ys))
         for t in thresholds:
             i = int(np.searchsorted(xs, t, side="right"))  # examples with x <= t
             if i < self.min_samples_leaf or n - i < self.min_samples_leaf:

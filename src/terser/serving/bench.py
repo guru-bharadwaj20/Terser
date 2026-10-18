@@ -24,9 +24,9 @@ from terser.config import project_root
 from terser.serving.accounting import Pricing
 from terser.serving.service import RewriteService
 
-# Default prompt set for the load test; pass --prompts for real traffic. It is a test fixture,
-# so a deployment benchmark should always pass its own file.
-FIXTURE = project_root() / "tests" / "fixtures" / "casual_prompts.jsonl"
+# Default prompt set for the load test (20 hand-written samples, also used by the tests); pass
+# --prompts for real traffic.
+FIXTURE = project_root() / "data" / "samples" / "casual_prompts.jsonl"
 
 
 def _pct(xs: Sequence[float]) -> dict[str, float]:

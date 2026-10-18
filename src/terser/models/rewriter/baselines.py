@@ -115,13 +115,13 @@ def candidate_rewrites(
     for p in prompts:
         pid = str(p["id"])
         n0 = tokens[f"{pid}:original"]
-        c = by_pid.get(pid)
-        n1 = tokens.get(str(c["candidate_id"]), n0) if c is not None else n0
+        cand = by_pid.get(pid)
+        n1 = tokens.get(str(cand["candidate_id"]), n0) if cand is not None else n0
         fell_back = (
-            c is None
-            or bool(c.get("rejected"))
-            or bool(c.get("stand_in"))
-            or not str(c["text"]).strip()
+            cand is None
+            or bool(cand.get("rejected"))
+            or bool(cand.get("stand_in"))
+            or not str(cand["text"]).strip()
             or n1 >= n0
         )
         out.append(
@@ -132,7 +132,7 @@ def candidate_rewrites(
                 "oracle_savings": 0.0,
                 "fell_back": fell_back,
                 "latency_s": 0.0,
-                "tokens_out": n1 if c is not None else None,
+                "tokens_out": n1 if cand is not None else None,
             }
         )
     return out

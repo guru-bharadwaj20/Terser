@@ -28,7 +28,9 @@ MARKERS: dict[str, str] = {
 }
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
-_CASUAL_PROMPTS_PATH = Path(__file__).resolve().parent / "fixtures" / "casual_prompts.jsonl"
+_CASUAL_PROMPTS_PATH = (
+    Path(__file__).resolve().parents[1] / "data" / "samples" / "casual_prompts.jsonl"
+)
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
@@ -149,7 +151,7 @@ def project_root() -> Path:
 
 @pytest.fixture(scope="session")
 def casual_prompts() -> list[dict[str, Any]]:
-    """The 20 hand-written casual prompts from ``tests/fixtures/casual_prompts.jsonl``."""
+    """The 20 hand-written casual prompts from ``data/samples/casual_prompts.jsonl``."""
     with _CASUAL_PROMPTS_PATH.open(encoding="utf-8") as fh:
         return [json.loads(line) for line in fh if line.strip()]
 

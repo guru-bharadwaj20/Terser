@@ -12,7 +12,7 @@ from terser.models.rewriter.safeguards import GatedRewriter, safeguard
 from terser.operators.registry import apply_ops
 from terser.tokenizers.count import count_tokens
 
-FIXTURES = Path(__file__).parent / "fixtures" / "casual_prompts.jsonl"
+FIXTURES = Path(__file__).resolve().parents[1] / "data" / "samples" / "casual_prompts.jsonl"
 WORDS = "please could you maybe just write a python function that sorts the list fast ok".split()
 
 

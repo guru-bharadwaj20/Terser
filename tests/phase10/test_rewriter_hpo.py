@@ -32,7 +32,7 @@ from terser.phase10.rewriter_hpo import (
     write_candidates,
 )
 
-FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "casual_prompts.jsonl"
+FIXTURE = Path(__file__).resolve().parents[2] / "data" / "samples" / "casual_prompts.jsonl"
 TARGETS = ("Qwen/Qwen2.5-7B-Instruct", "microsoft/Phi-3.5-mini-instruct")
 
 

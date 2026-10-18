@@ -25,7 +25,7 @@ from terser.models.rl.verify import (
     q_change,
 )
 
-FIXTURES = Path(__file__).parent / "fixtures" / "casual_prompts.jsonl"
+FIXTURES = Path(__file__).resolve().parents[1] / "data" / "samples" / "casual_prompts.jsonl"
 QWEN, PHI = "Qwen/Qwen2.5-7B-Instruct", "microsoft/Phi-3.5-mini-instruct"
 
 

@@ -11,7 +11,7 @@ from terser.models.rl.env import ACTIONS, STEP_PENALTY, STOP, RewriteEnv, stop_r
 from terser.models.rl.scratch_qlearning import QLearner
 from terser.operators.registry import apply_ops
 
-FIXTURES = Path(__file__).parent / "fixtures" / "casual_prompts.jsonl"
+FIXTURES = Path(__file__).resolve().parents[1] / "data" / "samples" / "casual_prompts.jsonl"
 
 
 def _words(t: str) -> int:
