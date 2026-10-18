@@ -309,9 +309,16 @@ _FAMOUS_ADDRESSES = re.compile(
     re.IGNORECASE,
 )
 
+# Whole placeholder tokens only: a word must stand alone ("test-key", not "Zq8TestKx92"), a
+# template must be the entire value ("<token>", "${API_KEY}"), so a real secret that merely
+# contains "$", "test" or "myapi" is not waved through.
 _PLACEHOLDER_VALUE = re.compile(
-    r"(?:example|sample|dummy|placeholder|changeme|change_me|your[_-]?|my[_-]?(?:api|secret|token|"
-    r"key|pass)|redacted|xxxx|\*\*\*|<|>|\{|\}|\$|\.\.\.|replace|insert|todo|fake|test|demo)",
+    r"^(?:<[^>]*>|\{[^}]*\}|\$\{[^}]*\}|\$[A-Za-z_][A-Za-z0-9_]*)$"
+    r"|(?:^|[\W_])(?:example|sample|dummy|placeholder|changeme|change_me|redacted|replace|"
+    r"insert|todo|fake|test|demo)(?:$|[\W_\d])"
+    r"|^(?:your|my)[_-]?(?:api[_-]?key|secret|token|key|pass(?:word)?)(?:$|[\W_])"
+    r"|example$|^example"  # documented vendor examples, e.g. AWS's "AKIA...EXAMPLE"
+    r"|x{4,}|\*{3,}|\.\.\.",
     re.IGNORECASE,
 )
 _TRIVIAL_PASSWORDS = frozenset(
@@ -393,7 +400,12 @@ _IPV6 = re.compile(
     r"(?<![\w:.])(?:[0-9A-Fa-f]{1,4}:){1,7}(?::|(?::[0-9A-Fa-f]{1,4}){1,7}|[0-9A-Fa-f]{1,4})"
     r"(?:%\w+)?(?![\w:])"
 )
-_VERSION_CONTEXT = re.compile(r"(?:\bv|version\s*|[=~<>!]=\s*|@|\bver\.?\s*)$", re.IGNORECASE)
+_VERSION_CONTEXT = re.compile(
+    r"(?:\bv|version\s*|[=~<>!]=\s*|@|\bver\.?\s*|\b(?:python|py|node|java|gcc|clang|go|ruby|"
+    r"php|perl|rust|cuda|ubuntu|debian|macos|ios|android|windows|chrome|firefox|numpy|pandas|"
+    r"torch|pytorch|tensorflow|django|flask|react|kernel|release)\s+)$",
+    re.IGNORECASE,
+)
 _URL_USERINFO = re.compile(r"\b[a-z][a-z0-9+.-]{1,15}://([^\s/:@]+):([^\s/@]+)@", re.IGNORECASE)
 _URL_QUERY_SECRET = re.compile(
     r"[?&](?:access_token|token|api[_-]?key|apikey|key|secret|client_secret|password|passwd|pwd|"
@@ -525,6 +537,12 @@ def _detect_ibans(text: str, out: list[Detection]) -> None:
         _emit(out, m.start(), m.end(), EntityType.IBAN, 0.9, text, reason)
 
 
+def _in_subscript(text: str, start: int) -> bool:
+    """True when ``start`` opens a subscript or slice (``s[::-1]``, ``arr[100::5]``): code."""
+    before = text[max(0, start - 2) : start]
+    return before.endswith("[") and (len(before) < 2 or before[0].isalnum() or before[0] in "_)]")
+
+
 def _detect_ips(text: str, out: list[Detection]) -> None:
     for m in _IPV4.finditer(text):
         try:
@@ -540,7 +558,7 @@ def _detect_ips(text: str, out: list[Detection]) -> None:
         if candidate.count(":") < 2 or sum(ch.isdigit() for ch in candidate) == 0:
             continue
         # Short hex-ish tokens around "::" (C++ scopes such as "a1::b2") are not addresses.
-        if not re.search(r"[0-9A-Fa-f]{3,4}", candidate):
+        if not re.search(r"[0-9A-Fa-f]{3,4}", candidate) or _in_subscript(text, m.start()):
             continue
         try:
             addr6 = ipaddress.IPv6Address(candidate.split("%", 1)[0])
@@ -882,7 +900,14 @@ _NON_PII_REASONS = {
     "overlaps_regex_detection",
 }
 _STRICT_IPV6 = re.compile(r"(?<![\w:])[0-9A-Fa-f:.]*:[0-9A-Fa-f:.]+(?:%[\w]+)?(?![\w:])")
-_STRICT_STREET = re.compile(_STREET.pattern, re.IGNORECASE)
+# Lower-case addresses ("18 larkspur lane") only with an unambiguous street suffix: with
+# IGNORECASE on the full suffix list, "Way" / "Drive" / "Dr" / "St" match prose ("60 miles each
+# way", "20 minutes to drive to work", "2 Cups Dr Pepper").
+_STRICT_STREET = re.compile(
+    r"(?<![\w.])\d{1,5}[a-z]?\s+(?:[nsew]\.?\s+)?(?:[a-z]+\s+){1,3}"
+    r"(?:street|avenue|ave|road|rd|lane|ln|boulevard|blvd)\.?(?!\w)",
+    re.IGNORECASE,
+)
 _STRICT_IBAN = re.compile(_IBAN.pattern, re.IGNORECASE)
 _URL = re.compile(r"\b[a-z][a-z0-9+.-]*://[^\s<>\"']+", re.IGNORECASE)
 _URL_TOKEN = re.compile(
@@ -912,7 +937,10 @@ def detect_strict(text: str, detector: Detector = detect_regex) -> list[Detectio
             if kind is EntityType.IBAN and not iban_valid(match.group()):
                 continue
             if kind is EntityType.STREET_ADDRESS and re.search(
-                r"\b(?:across|the|over|under|along|on|from|near|of)\b", match.group(), re.IGNORECASE
+                r"\b(?:across|the|over|under|along|on|from|near|of|by|to|via|per|each|a|an|down|"
+                r"up|miles?|km|minutes?|hours?)\b",
+                match.group(),
+                re.IGNORECASE,
             ):
                 continue
             end = match.end()
@@ -939,6 +967,8 @@ def detect_strict(text: str, detector: Detector = detect_regex) -> list[Detectio
         try:
             ipaddress.IPv6Address(value.split("%", 1)[0])
         except ValueError:
+            continue
+        if _in_subscript(text, match.start()):
             continue
         # Short C++ scope-like names have no unambiguous address cue.
         unambiguous = value.startswith("::") or value.endswith("::") or value.count(":") >= 7
@@ -1034,7 +1064,6 @@ def _record_id(rec: Mapping[str, Any], index: int) -> str:
 
 
 def render_report(
-    records: Sequence[Mapping[str, Any]],
     results: Sequence[ScrubResult],
     *,
     source: str,
@@ -1250,7 +1279,6 @@ def _strict_cli(argv: Sequence[str]) -> int:
     input_hash = hashlib.sha256(args.inp.read_bytes()).hexdigest()
     sha, dirty = _git_provenance()
     report = render_report(
-        records,
         results,
         source=args.inp.as_posix(),
         field_name=args.text_field,
@@ -1372,7 +1400,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         write_sample_csv(Path(args.sample), records, results, args.sample_size, args.seed)
 
     report = render_report(
-        records,
         results,
         source=in_path.as_posix(),
         field_name=args.field,
