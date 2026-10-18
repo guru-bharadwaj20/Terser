@@ -186,6 +186,7 @@ preserves 97.3% at 0% savings.
 dvc pull models/fast models/rewriter/sft-qwen3b-lora
 
 # 2 — the stack: both paths + Prometheus, Pushgateway, Grafana
+#     (set GRAFANA_ADMIN_PASSWORD in .env first; see .env.example)
 docker compose up --build
 #     CPU-only host (no NVIDIA GPU): fast path and monitoring only
 docker compose up --build terser-cpu prometheus pushgateway grafana

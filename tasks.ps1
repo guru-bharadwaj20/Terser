@@ -20,7 +20,7 @@ if (Test-Path $VenvPython) { $Py = $VenvPython } else { $Py = "python" }
 
 $Tasks = [ordered]@{
     "help"            = "List available tasks (default)"
-    "install"         = "Create .venv if missing and pip install -e .[dev]"
+    "install"         = "Create .venv if missing and install the CI extras into it"
     "test"            = "Run CPU tests (not gpu, not api)"
     "test-all"        = "Run the full test suite"
     "lint"            = "ruff check + black --check"
@@ -54,7 +54,7 @@ switch ($Task) {
             Invoke-Step "python" @("-m", "venv", ".venv")
             $Py = $VenvPython
         }
-        Invoke-Step $Py @("-m", "pip", "install", "-e", ".[dev]")
+        Invoke-Step $Py @("-m", "pip", "install", "-e", ".[dev,hpo,serve,mlops,orchestrate]")
     }
     "test"      { Invoke-Step $Py @("-m", "pytest", "-m", "not gpu and not api") }
     "test-all"  { Invoke-Step $Py @("-m", "pytest") }
