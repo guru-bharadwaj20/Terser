@@ -107,7 +107,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         for line in args.prompts.read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
-    counts, total, n_f = count_occurrences(texts)
+    _counts, total, n_f = count_occurrences(texts)
     print(f"prompts={len(texts)} word_tokens={total} filler_tokens={n_f} P(filler)={n_f/total:.5f}")
     print(
         "| phrase | context | count(w,c) | count(w,c,F) | P(w,c given F) | P(w,c) "

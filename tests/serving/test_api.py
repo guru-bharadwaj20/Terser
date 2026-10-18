@@ -10,13 +10,13 @@ import pytest
 pytest.importorskip("fastapi")
 pytest.importorskip("prometheus_client")
 
-from fastapi.testclient import TestClient  # noqa: E402
+from fastapi.testclient import TestClient
 
-from terser.serving.accounting import Pricing  # noqa: E402
-from terser.serving.api import RewriteIn, RewriteOut, create_app, load_config  # noqa: E402
-from terser.serving.metrics import ServiceMetrics  # noqa: E402
-from terser.serving.paths import RewriteResult  # noqa: E402
-from terser.serving.service import RewriteService  # noqa: E402
+from terser.serving.accounting import Pricing
+from terser.serving.api import RewriteIn, RewriteOut, create_app, load_config
+from terser.serving.metrics import ServiceMetrics
+from terser.serving.paths import RewriteResult
+from terser.serving.service import RewriteService
 
 DOCS = Path(__file__).resolve().parents[2] / "docs" / "serving"
 

@@ -233,7 +233,7 @@ def probe(base_url: str, timeout_s: float = 1.5) -> str | None:
         resp.raise_for_status()
         data = resp.json().get("data") or []
         return str(data[0]["id"]) if data else None
-    except Exception:  # noqa: BLE001 - unreachable, refused, not OpenAI-compatible: no GPU path
+    except Exception:  # unreachable, refused, not OpenAI-compatible: no GPU path
         return None
 
 

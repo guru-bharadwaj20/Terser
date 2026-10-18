@@ -119,13 +119,13 @@ def _webhook_receiver() -> Iterator[tuple[str, list[dict[str, Any]]]]:
     received: list[dict[str, Any]] = []
 
     class Handler(http.server.BaseHTTPRequestHandler):
-        def do_POST(self) -> None:  # noqa: N802 - http.server API
+        def do_POST(self) -> None:  # http.server API
             body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
             received.append(json.loads(body))
             self.send_response(204)
             self.end_headers()
 
-        def log_message(self, format: str, *args: Any) -> None:  # noqa: A002
+        def log_message(self, format: str, *args: Any) -> None:
             del format, args
 
     server = http.server.HTTPServer(("127.0.0.1", 0), Handler)

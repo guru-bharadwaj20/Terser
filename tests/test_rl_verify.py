@@ -138,7 +138,7 @@ def _synthetic() -> tuple[list[dict], list[dict], list[dict]]:
 
 
 def test_build_candidates_format() -> None:
-    prompts, cands, _ = _synthetic()
+    _prompts, cands, _ = _synthetic()
     assert len(cands) == 8
     assert all(set(c) == {"prompt_id", "candidate_id", "method", "text"} for c in cands)
     assert {c["candidate_id"] for c in cands if c["prompt_id"] == "p1"} == {

@@ -150,7 +150,7 @@ def service_threshold(
 def _rates(y: np.ndarray, rejected: np.ndarray) -> dict[str, Any]:
     pos, passed = y == 1, ~rejected
     return {
-        "n": int(len(y)),
+        "n": len(y),
         "sensitivity": float(rejected[pos].mean()) if pos.any() else None,
         "specificity": float(passed[~pos].mean()) if (~pos).any() else None,
         "pass_rate": float(passed.mean()),

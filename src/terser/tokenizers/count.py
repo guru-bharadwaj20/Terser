@@ -75,7 +75,7 @@ def load_hf_tokenizer(repo: str) -> Any:
     if repo == LLAMA_MIRROR and token:
         try:
             return Tokenizer.from_pretrained(LLAMA_OFFICIAL, token=token)
-        except Exception as exc:  # noqa: BLE001 - gated/no access/offline: use the mirror
+        except Exception as exc:  # gated/no access/offline: use the mirror
             log.info("official Llama tokenizer unavailable (%s); using %s", exc, LLAMA_MIRROR)
     return Tokenizer.from_pretrained(repo, token=token)
 

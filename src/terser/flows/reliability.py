@@ -112,7 +112,7 @@ def _notify(record: dict[str, Any]) -> None:
         import httpx
 
         httpx.post(url, json=record, timeout=WEBHOOK_TIMEOUT_S).raise_for_status()
-    except Exception as exc:  # noqa: BLE001 - a notification failure must not mask the failure
+    except Exception as exc:  # a notification failure must not mask the failure
         _log.error("alert webhook %s failed: %s", url, exc)
 
 

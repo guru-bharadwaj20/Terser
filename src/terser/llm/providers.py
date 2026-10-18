@@ -63,8 +63,8 @@ def default_providers() -> dict[str, ProviderConfig]:
 def parse_providers(raw: Mapping[str, Any] | None) -> dict[str, ProviderConfig]:
     """Parse the ``providers:`` mapping of ``budget.yaml`` on top of the defaults."""
     providers = default_providers()
-    for name, spec in (raw or {}).items():
-        spec = spec or {}
+    for name, raw_spec in (raw or {}).items():
+        spec = raw_spec or {}
         kind = spec.get("kind", OPENAI_COMPATIBLE)
         if kind != OPENAI_COMPATIBLE:
             raise ValueError(f"provider {name!r}: unsupported kind {kind!r}")

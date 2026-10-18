@@ -69,7 +69,7 @@ def _cuda_available() -> bool:
         import torch  # lazy import keeps torch optional
 
         return bool(torch.cuda.is_available())
-    except Exception:  # noqa: BLE001 - any import/driver failure means "no CUDA"
+    except Exception:  # any import/driver failure means "no CUDA"
         return False
 
 
