@@ -9,7 +9,7 @@ import pytest
 from terser.config import load_config
 from terser.models.rewriter.train import IGNORE, ByteTokenizer, encode_pair, load_pairs, run
 
-FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "casual_prompts.jsonl"
+FIXTURE = Path(__file__).resolve().parents[2] / "data" / "samples" / "casual_prompts.jsonl"
 
 
 def test_encode_pair_masks_prompt() -> None:

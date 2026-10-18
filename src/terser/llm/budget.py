@@ -97,10 +97,13 @@ class Ledger:
     Mutations hold a cross-process lock (``<ledger>.lock``, created with ``O_EXCL``), so several
     worker processes sharing one ledger cannot lose each other's writes. In-flight calls are
     *reserved* (``reserved``) at check time and released when recorded, so concurrent workers
-    see each other's pending spend and cannot jointly exceed a cap.
+    see each other's pending spend and cannot jointly exceed a cap. A reservation older than
+    ``RESERVATION_TTL_S`` belongs to a worker that died mid-call and is dropped on the next
+    reservation, so a crash cannot hold budget forever.
     """
 
     LOCK_STALE_S = 60.0
+    RESERVATION_TTL_S = 3600.0
 
     def __init__(self, path: Path) -> None:
         self.path = Path(path)
@@ -286,12 +289,17 @@ class Budget:
         and the spend recording cannot interleave across workers.
         """
         with self.ledger.locked() as data:
+            cutoff = time.time() - self.ledger.RESERVATION_TTL_S
+            for phase_res in data.get("reserved", {}).values():
+                # Reservations written before "at" existed count as stale too.
+                for stale in [k for k, r in phase_res.items() if r.get("at", 0.0) < cutoff]:
+                    del phase_res[stale]
             self.ledger.data = data
             usd = self._check(estimate)
             rid = uuid.uuid4().hex
             tokens = estimate.input_tokens + estimate.output_tokens
             phase_res = data.setdefault("reserved", {}).setdefault(self.phase, {})
-            phase_res[rid] = {"tokens": tokens, "usd": usd}
+            phase_res[rid] = {"tokens": tokens, "usd": usd, "at": time.time()}
             self.ledger._write(data)
         return rid
 

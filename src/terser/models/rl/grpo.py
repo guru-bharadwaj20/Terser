@@ -620,6 +620,7 @@ def run(cfg: DictConfig) -> dict[str, Any]:
         for q in ref_model.parameters():
             q.requires_grad_(False)
         encode, decode = btok.encode, btok.decode
+        sep: int | Sequence[int]
         sep, eos, pad, hf, device = btok.sep_id, btok.eos_id, btok.pad_id, False, "cpu"
 
         def ref_logprobs(ids: torch.Tensor, attn: torch.Tensor, width: int) -> torch.Tensor:
@@ -649,8 +650,8 @@ def run(cfg: DictConfig) -> dict[str, Any]:
             return str(tok.decode(list(ids), skip_special_tokens=True))
 
         sep = encode("\n### Rewrite:\n")  # the full separator, as in SFT training
-        eos = tok.eos_token_id
-        pad = tok.pad_token_id if tok.pad_token_id is not None else eos
+        eos = int(tok.eos_token_id)
+        pad = int(tok.pad_token_id) if tok.pad_token_id is not None else eos
         hf = True
 
         def count(text: str) -> int:

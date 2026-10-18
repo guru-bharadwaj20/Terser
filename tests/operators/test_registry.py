@@ -21,7 +21,7 @@ def _load(name: str) -> list[dict[str, Any]]:
         return [json.loads(line) for line in fh if line.strip()]
 
 
-CASUAL = _load("casual_prompts.jsonl")
+CASUAL = _load("../../data/samples/casual_prompts.jsonl")
 EFFICIENT = _load("efficient_prompts.jsonl")
 CASUAL_IDS = [row["id"] for row in CASUAL]
 EFFICIENT_IDS = [row["id"] for row in EFFICIENT]
