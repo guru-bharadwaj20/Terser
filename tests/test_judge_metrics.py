@@ -286,3 +286,10 @@ def test_normalize_answer_keeps_sign_and_decimal_point() -> None:
     assert not fact_metric("-5", "5").passed
     assert not fact_metric("3.5", "35").passed
     assert fact_metric("The answer is -5.", "-5").passed
+
+
+def test_one_letter_units_need_to_touch_the_number() -> None:
+    from terser.judge.metrics import fact_metric
+
+    assert fact_metric("30c", "30 °C").passed
+    assert fact_metric("Answer: 3 f", "3").passed  # "f" here is not Fahrenheit
