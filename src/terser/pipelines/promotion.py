@@ -37,7 +37,8 @@ class EvalSummary:
     per_category_preservation: Mapping[str, float]
     gate_auc: float | None = None
     checkpoints_passed: Sequence[str] = ()
-    has_lineage: bool = True
+    has_lineage: bool = False
+    """Registry lineage is complete (rule 7); False unless a caller has checked it."""
 
 
 @dataclass(frozen=True)

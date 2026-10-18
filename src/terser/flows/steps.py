@@ -61,11 +61,13 @@ from terser.pipelines.promotion import EvalSummary, GuardConfig, decide
 
 __all__ = [
     "REPO_ROOT",
+    "RUNG_EXPERIMENTS",
     "StepError",
     "StepResult",
     "drift_check",
     "input_digest",
     "input_drift_check",
+    "lineage_missing",
     "llm_cache_key",
     "llm_step",
     "load_eval_summary",
@@ -76,6 +78,7 @@ __all__ = [
     "registry_has",
     "registry_promote",
     "run_command",
+    "rung_at",
     "shell_step",
     "submit_gpu_job",
 ]
@@ -320,14 +323,21 @@ def input_drift_check(name: str, current: str | None = None, dry_run: bool = Fal
     return StepResult("input_drift", "python", tuple(cmd), True, not alert, out)
 
 
-def load_eval_summary(rung: str, report: str = VAL_REPORT) -> EvalSummary:
-    """Validation summary of a rewriter rung from the row 8.3.5 val report json."""
+def load_eval_summary(
+    rung: str, report: str = VAL_REPORT, has_lineage: bool = False
+) -> EvalSummary:
+    """Validation summary of a rewriter rung from the row 8.3.5 val report json.
+
+    The report says nothing about lineage, so the caller states it (``has_lineage``); the
+    default is the safe one, a summary without lineage is refused by rule 7.
+    """
     d = json.loads((REPO_ROOT / report).read_text(encoding="utf-8"))[rung]
     return EvalSummary(
         preservation=float(d["preserved"]),
         savings=float(d["median_savings"]),
         per_category_preservation={k: float(v) for k, v in d["preserved_by_category"].items()},
         checkpoints_passed=("C8.3",) if d.get("c8_3") else (),
+        has_lineage=has_lineage,
     )
 
 
@@ -337,10 +347,16 @@ def promotion_guard(
     champion_rung: str | None = None,
     report: str = VAL_REPORT,
     required_checkpoints: Sequence[str] = ("C8.3",),
+    has_lineage: bool = True,
 ) -> StepResult:
-    """Row 11.4.4 guard on validation summaries; ``ok`` is the decision (pure, also in dry run)."""
-    candidate = load_eval_summary(rung, report)
-    champion = load_eval_summary(champion_rung, report) if champion_rung else None
+    """Row 11.4.4 guard on validation summaries; ``ok`` is the decision (pure, also in dry run).
+
+    ``has_lineage`` is the candidate's registry lineage (rule 7). It defaults to True here because
+    :func:`terser.flows.flows.promote_flow` checks the lineage of the exact version it is about
+    to move (:func:`lineage_missing`) once the metric rules have passed.
+    """
+    candidate = load_eval_summary(rung, report, has_lineage=has_lineage)
+    champion = load_eval_summary(champion_rung, report, has_lineage=True) if champion_rung else None
     decision = decide(candidate, champion, GuardConfig(required_checkpoints=required_checkpoints))
     out = "allowed" if decision.promote else "refused: " + "; ".join(decision.reasons)
     print(f"promotion guard ({rung}): {out}")
@@ -348,20 +364,71 @@ def promotion_guard(
     return StepResult("promotion_guard", "python", cmd, True, decision.promote, out)
 
 
+RUNG_EXPERIMENTS: Mapping[str, str] = {
+    "sft05": "sft_qwen05b_full",
+    "sft15": "sft_qwen15b_lora",
+    "sft3b": "sft_qwen3b_lora",
+    "sft15v2": "sft_qwen15b_lora_v2",
+    "sft3bv2": "sft_qwen3b_lora_v2",
+    "sft7bv2": "sft_qwen7b_qlora_v2",
+}
+"""Val-report rung tag -> the ``experiment`` run param its registry version was logged with."""
+
+
 def _version_at(model_name: str, alias: str) -> str:
-    """Version holding ``alias``; ``latest`` is the newest registered version (CT candidate)."""
+    """Version holding ``alias``.
+
+    ``latest`` is the newest registered version; ``experiment:<name>`` the newest version whose
+    registering run has ``experiment=<name>`` (the version a val-report rung actually measures).
+    """
     from mlflow import MlflowClient
 
     from terser.tracking import setup_tracking
 
     setup_tracking()
     client = MlflowClient()
-    if alias == "latest":
+    if alias == "latest" or alias.startswith("experiment:"):
         versions = client.search_model_versions(f"name = '{model_name}'")
+        if alias != "latest":
+            want = alias.split(":", 1)[1]
+            versions = [
+                v
+                for v in versions
+                if client.get_run(v.run_id).data.params.get("experiment") == want
+            ]
         if not versions:
-            raise StepError(f"{model_name} has no registered version")
+            raise StepError(f"{model_name} has no registered version for {alias!r}")
         return str(max(int(v.version) for v in versions))
     return str(client.get_model_version_by_alias(model_name, alias).version)
+
+
+def rung_at(model_name: str, alias: str) -> str | None:
+    """Val-report rung of the version holding ``alias`` (None if no such version or rung)."""
+    from mlflow import MlflowClient
+    from mlflow.exceptions import MlflowException
+
+    from terser.tracking import setup_tracking
+
+    setup_tracking()
+    client = MlflowClient()
+    try:
+        mv = client.get_model_version_by_alias(model_name, alias)
+    except MlflowException:
+        return None
+    experiment = client.get_run(mv.run_id).data.params.get("experiment")
+    return next((r for r, e in RUNG_EXPERIMENTS.items() if e == experiment), None)
+
+
+def lineage_missing(model_name: str, version: str) -> list[str]:
+    """Lineage tags (row 11.2.3) that ``version`` lacks; empty when the lineage is complete."""
+    from mlflow import MlflowClient
+
+    from terser.tracking import setup_tracking
+    from terser.tracking.lineage import LINEAGE_TAGS
+
+    setup_tracking()
+    tags = MlflowClient().get_model_version(model_name, version).tags
+    return [t for t in LINEAGE_TAGS if t not in tags or (not tags[t] and t != "checkpoints_passed")]
 
 
 def registry_has(model_name: str) -> bool:
@@ -391,15 +458,19 @@ def registry_has(model_name: str) -> bool:
     on_failure=[notify_failure],
 )
 def registry_promote(
-    model_name: str, stage: str, from_alias: str = "staging", dry_run: bool = False
+    model_name: str,
+    stage: str,
+    from_alias: str = "staging",
+    dry_run: bool = False,
+    version: str | None = None,
 ) -> StepResult:
-    """Move the version holding ``from_alias`` to ``stage`` (:func:`terser.tracking.promote`)."""
+    """Move ``version`` (default: the one holding ``from_alias``) to ``stage``."""
     cmd = ("terser.tracking.promote", model_name, f"@{from_alias}", stage)
     if dry_run:
         return _plan("registry_promote", "python", cmd)
     from terser.tracking import promote
 
-    version = _version_at(model_name, from_alias)
+    version = version or _version_at(model_name, from_alias)
     promote(model_name, version, stage)
     out = f"{model_name} v{version} -> {stage}"
     return StepResult("registry_promote", "python", cmd, True, True, out)
