@@ -71,6 +71,7 @@ def store(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[str]:
     mlflow.set_tracking_uri(None)
 
 
+@pytest.mark.slow  # logs, registers and promotes real MLflow models
 def test_register_promote_trace(store: str) -> None:
     from sklearn.dummy import DummyClassifier
 
@@ -94,6 +95,7 @@ def test_register_promote_trace(store: str) -> None:
         trace("terser-gate", "staging")
 
 
+@pytest.mark.slow
 def test_untraceable_version_detected(store: str) -> None:
     from mlflow import MlflowClient
     from sklearn.dummy import DummyClassifier

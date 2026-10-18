@@ -79,4 +79,7 @@ jobs:
         run: python -m terser.monitoring.tokenizer_drift
 
       - name: Tests (CPU)
-        run: pytest -m "not gpu and not api" --cov=terser --cov-report=term
+        # The CPU smoke training and feature parity tests already ran in their own steps.
+        run: >-
+          pytest -m "not gpu and not api" --cov=terser --cov-report=term
+          --ignore=tests/features --ignore=tests/rewriter/test_train_tiny.py
