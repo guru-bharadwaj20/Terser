@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from typing import Any
 
 import pytest
 
@@ -31,10 +32,9 @@ def test_fast_onnx_threshold_is_the_reported_operating_point() -> None:
     assert chosen["sensitivity"] >= 0.95
 
 
-def test_onnx_gate_requires_explicit_threshold() -> None:
+def test_onnx_gate_requires_explicit_threshold(require_dvc: Any) -> None:
     cfg = load_config(str(CONFIGS[1]))
-    if not (REPO_ROOT / cfg["gate_onnx"]).is_file():
-        pytest.skip("models/fast not pulled")
+    require_dvc(REPO_ROOT / cfg["gate_onnx"], "dvc pull models/fast")
     cfg.pop("gate_threshold")
     cfg.pop("tagger_onnx")
     with pytest.raises(KeyError, match="gate_threshold"):

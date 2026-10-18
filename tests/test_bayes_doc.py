@@ -51,3 +51,13 @@ def test_toy_corpus_and_cli(capsys: pytest.CaptureFixture[str]) -> None:
         bayes_table(["write code"])
     assert main(["--prompts", str(PROMPTS)]) == 0
     assert "P(filler)=0.01188" in capsys.readouterr().out
+
+
+def test_doc_quotes_the_computed_numbers(table: dict) -> None:
+    text = (ROOT / "docs" / "derivations" / "bayes.md").read_text(encoding="utf-8")
+    _, total, n_f = count_occurrences(_texts())
+    assert f"$N = {total:,}$".replace(",", "{,}") in text
+    assert f"$N_F = {n_f}$" in text
+    assert f"{n_f / total:.5f}" in text
+    r = table[("so", "initial")]
+    assert f"({r.n_phrase_ctx_filler}/{n_f})" in text and f"{r.n_phrase_ctx}/" in text

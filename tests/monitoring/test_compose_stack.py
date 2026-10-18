@@ -94,7 +94,7 @@ def test_cpu_image_bakes_onnx_models() -> None:
     assert "models" in ignore and "!models/fast" in ignore
 
 
-def test_gpu_default_lora_matches_adapter_base(compose: dict[str, Any]) -> None:
+def test_gpu_default_lora_matches_adapter_base(compose: dict[str, Any], require_dvc: Any) -> None:
     env = _dockerfile_env("Dockerfile.gpu")
     assert env["TERSER_LORA_PATH"].startswith("/models/rewriter/")
     gpu_env = compose["services"]["terser-gpu"]["environment"]
@@ -102,8 +102,7 @@ def test_gpu_default_lora_matches_adapter_base(compose: dict[str, Any]) -> None:
     assert env["TERSER_LORA_PATH"] in gpu_env["TERSER_LORA_PATH"]
     adapter = ROOT / "models" / env["TERSER_LORA_PATH"].removeprefix("/models/")
     cfg = adapter / "adapter_config.json"
-    if not cfg.is_file():
-        pytest.skip("rewriter checkpoint not pulled (dvc pull models/rewriter)")
+    require_dvc(cfg, "dvc pull models/rewriter")
     base = json.loads(cfg.read_text(encoding="utf-8"))["base_model_name_or_path"]
     assert base == env["TERSER_BASE_MODEL"]
 

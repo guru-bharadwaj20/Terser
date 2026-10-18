@@ -58,12 +58,13 @@ def test_bad_format_rejected() -> None:
         OpenAICompatibleRewriter("http://w/v1", "m", prompt_format="raw")
 
 
-def test_quality_config_wires_sft_rewriter(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_quality_config_wires_sft_rewriter(
+    monkeypatch: pytest.MonkeyPatch, require_dvc: Any
+) -> None:
     pytest.importorskip("onnxruntime")
     from terser.serving.api import REPO_ROOT
 
-    if not (REPO_ROOT / "models/fast/gate.onnx").is_file():
-        pytest.skip("models/fast/gate.onnx is DVC-tracked and not pulled")
+    require_dvc(REPO_ROOT / "models/fast/gate.onnx", "dvc pull models/fast")
     svc = build_service(load_config(REPO_ROOT / "configs/serving/quality.yaml"))
     assert isinstance(svc.quality, OpenAICompatibleRewriter)
     assert svc.quality.prompt_format == "sft" and svc.quality.model == "terser-rewriter"

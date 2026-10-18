@@ -93,14 +93,13 @@ def test_write_canary_manifest_and_refuses_test_split(tmp_path: Path) -> None:
         cn.write_canary(test_split, tmp_path / "c.jsonl", n=5)
 
 
-def test_committed_canary_matches_rule() -> None:
+def test_committed_canary_matches_rule(require_dvc: Any) -> None:
     manifest = json.loads((REPO / "data/canary/canary_v1.json").read_text(encoding="utf-8"))
     assert manifest["rows"] == cn.CANARY_SIZE and manifest["seed"] == cn.CANARY_SEED
     assert manifest["source"] == "data/processed/splits/val.jsonl"
     assert sum(manifest["by_category"].values()) == 200
     data = REPO / "data/canary/canary_v1.jsonl"
-    if not data.is_file():
-        pytest.skip("canary not pulled (dvc pull data/canary/canary_v1.jsonl.dvc)")
+    require_dvc(data, "dvc pull data/canary/canary_v1.jsonl.dvc")
     rows = [json.loads(x) for x in data.read_text(encoding="utf-8").splitlines()]
     assert Counter(r["category"] for r in rows) == manifest["by_category"]
     assert {r["split"] for r in rows} == {"val"}
