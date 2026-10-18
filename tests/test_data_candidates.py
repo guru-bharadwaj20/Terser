@@ -10,7 +10,6 @@ from __future__ import annotations
 import faulthandler
 import importlib.util
 import json
-import os
 import sys
 from collections.abc import Iterator
 from dataclasses import replace
@@ -421,10 +420,7 @@ def test_real_operator_stacks_keep_payload(tmp_path: Path) -> None:
 @pytest.mark.network
 @pytest.mark.slow
 @pytest.mark.skipif(importlib.util.find_spec("llmlingua") is None, reason="llmlingua not installed")
-@pytest.mark.skipif(
-    os.environ.get("TERSER_RUN_LLMLINGUA") != "1",
-    reason="loads a ~700 MB model on CPU: set TERSER_RUN_LLMLINGUA=1 to run",
-)
+@pytest.mark.llmlingua  # ~700 MB model on CPU: pytest --run-llmlingua
 def test_llmlingua2_real_model_compresses(tmp_path: Path) -> None:
     comp = LLMLingua2Compressor(cache_dir=tmp_path / "ll")
     text = PROMPTS[0]["prompt"] + " I really need this to work by tomorrow morning okay"

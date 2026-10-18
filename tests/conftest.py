@@ -23,6 +23,8 @@ MARKERS: dict[str, str] = {
     "api": "calls a paid LLM API (skipped unless --run-api and an API key is set)",
     "network": "downloads files, e.g. HF tokenizers (skipped with --no-network)",
     "slow": "slow test (deselect with -m 'not slow')",
+    "dvc": "needs DVC-tracked artifacts (skipped if not pulled; fails with --require-dvc)",
+    "llmlingua": "loads the ~700 MB LLMLingua-2 model on CPU (skipped unless --run-llmlingua)",
 }
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -38,6 +40,18 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     )
     group.addoption(
         "--no-network", action="store_true", default=False, help="skip tests marked network"
+    )
+    group.addoption(
+        "--require-dvc",
+        action="store_true",
+        default=False,
+        help="fail (instead of skip) tests whose DVC-tracked inputs are missing",
+    )
+    group.addoption(
+        "--run-llmlingua",
+        action="store_true",
+        default=False,
+        help="run tests marked llmlingua (downloads and loads the LLMLingua-2 model)",
     )
 
 
@@ -86,6 +100,10 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
         )
 
     network_skip = pytest.mark.skip(reason="network test: --no-network given")
+    run_llmlingua = bool(config.getoption("--run-llmlingua")) or (
+        os.environ.get("TERSER_RUN_LLMLINGUA") == "1"
+    )
+    llmlingua_skip = pytest.mark.skip(reason="llmlingua test: pass --run-llmlingua to run")
 
     for item in items:
         if gpu_skip is not None and item.get_closest_marker("gpu"):
@@ -94,6 +112,24 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
             item.add_marker(api_skip)
         if no_network and item.get_closest_marker("network"):
             item.add_marker(network_skip)
+        if not run_llmlingua and item.get_closest_marker("llmlingua"):
+            item.add_marker(llmlingua_skip)
+
+
+@pytest.fixture
+def require_dvc(request: pytest.FixtureRequest) -> Any:
+    """``require_dvc(path, hint)``: skip if a DVC-tracked ``path`` is missing, or fail under
+    ``--require-dvc`` so a pulled checkout (or a CI job that pulls) cannot skip silently."""
+    strict = bool(request.config.getoption("--require-dvc"))
+
+    def check(path: Path, hint: str) -> None:
+        if path.exists():
+            return
+        if strict:
+            pytest.fail(f"{path} missing under --require-dvc ({hint})")
+        pytest.skip(f"{path} not pulled ({hint})")
+
+    return check
 
 
 @pytest.fixture(autouse=True)
