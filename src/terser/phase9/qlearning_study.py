@@ -97,6 +97,10 @@ def build_gate(
         )
         f["target_phi"] = 0.0
         f.update(prompt_features(original, cost(original), bits(tuple(tokenize(original)))))
+        # Only the other target one-hots may be absent (they are 0); anything else is a bug.
+        missing = [c for c in cols if c not in f and not c.startswith("target_")]
+        if missing:
+            raise KeyError(f"gate features missing from pair_features: {missing}")
         x = np.array([[f.get(c, 0.0) for c in cols]], dtype=np.float64)
         return float(np.asarray(model.predict_proba(x))[0, 1])
 

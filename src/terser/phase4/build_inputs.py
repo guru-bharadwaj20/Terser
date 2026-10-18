@@ -24,7 +24,8 @@ from terser.features.pair_embedding import build_cache
 
 __all__ = ["main"]
 
-DROP = ("prompt_id", "savings_pct", "overhead_pct", "stand_in")
+# prompt_id is renamed to the grouping key ``group`` before this drop, so it is not listed.
+DROP = ("savings_pct", "overhead_pct", "stand_in")
 
 
 def main(argv: Sequence[str] | None = None) -> int:

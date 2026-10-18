@@ -231,11 +231,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         for r in _jsonl(args.labels)
         if r.get("split") == "train" and not r.get("stand_in") and r["prompt_id"] in cluster_of
     ]
+    # Savings are per prompt: one value per prompt (NaN when the oracle has none, which the
+    # median ignores), not one per label record, so prompts with many candidates do not dominate.
+    pids = sorted({r["prompt_id"] for r in recs})
+    savings_risk = cluster_risk(
+        [cluster_of[p] for p in pids],
+        [sav.get(p, float("nan")) for p in pids],
+        [0.0] * len(pids),
+    )
     risk = cluster_risk(
         [cluster_of[r["prompt_id"]] for r in recs],
-        [sav.get(r["prompt_id"], 0.0) for r in recs],
+        [sav.get(r["prompt_id"], float("nan")) for r in recs],
         [float(r["label"] == "degraded") for r in recs],
     )
+    risk["median_savings"] = savings_risk["median_savings"].reindex(risk.index)
     out["risk"] = risk.reset_index().to_dict(orient="records")
     out["n_label_records"] = len(recs)
     out["c6_3"] = bool(risk.high_risk.any())
