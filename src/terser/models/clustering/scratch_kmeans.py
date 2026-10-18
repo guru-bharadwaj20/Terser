@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
 
-__all__ = ["BisectingKMeans", "KMeans", "kmeans_plusplus", "size_balance", "sse"]
+__all__ = ["BisectingKMeans", "KMeans", "size_balance", "sse"]
 
 FloatArray = npt.NDArray[np.float64]
 IntArray = npt.NDArray[np.int64]

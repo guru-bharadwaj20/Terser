@@ -121,12 +121,8 @@ def _count(text: str) -> int:
 
 def default_remover(text: str) -> str:
     """Apply :data:`FILLER_OPS` with ``terser.operators.apply_ops`` (imported lazily)."""
-    try:
-        from terser.operators import apply_ops  # type: ignore[attr-defined,unused-ignore]
-    except ImportError as exc:  # operators land in rows 1.2.x
-        raise ImportError(
-            "terser.operators.apply_ops is unavailable; pass remover= to describe_prompt"
-        ) from exc
+    from terser.operators import apply_ops
+
     out: str = apply_ops(text, FILLER_OPS, LENGTH_TARGET)
     return out
 

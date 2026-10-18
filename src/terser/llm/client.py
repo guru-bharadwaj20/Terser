@@ -84,6 +84,7 @@ def anthropic_transport(
 ) -> TransportResult:
     import anthropic
 
+    del provider  # part of the Transport signature; there is only one Anthropic endpoint
     kwargs: dict[str, Any] = dict(params)
     if system is not None:
         kwargs["system"] = system
