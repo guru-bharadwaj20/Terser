@@ -118,6 +118,8 @@ RESPONSES_DIR = "data/interim/responses"
 LABELS = "data/processed/labels.jsonl"
 
 TRAIN_CLASSICAL_STEPS: Mapping[str, Sequence[str]] = {
+    # features depend on data/processed/oracle.csv (dvc.yaml), which follows the labels.
+    "oracle": ["dvc", "repro", "--single-item", "oracle"],
     "pair_features": ["python", "-m", "terser.phase3.build_features"],
     "fast_path_onnx": ["python", "-m", "terser.phase11.train_fast_path"],
 }
@@ -177,10 +179,26 @@ CT_TRIGGERS: tuple[str, ...] = ("check", "drift", "batch", "force")
 CT_EXPERIMENT = "sft_qwen3b_lora"  # the best rung so far (row 8.3.4)
 
 
+def _dvc_stage(stage: str) -> dict[str, Any]:
+    stages = yaml.safe_load((REPO_ROOT / "dvc.yaml").read_text(encoding="utf-8"))["stages"]
+    return dict(stages[stage])
+
+
 def _stage_inputs(stage: str) -> list[str]:
     """A DVC stage's deps plus ``params.yaml``: the LLM-step cache key inputs."""
-    stages = yaml.safe_load((REPO_ROOT / "dvc.yaml").read_text(encoding="utf-8"))["stages"]
-    return [*stages[stage].get("deps", []), "params.yaml"]
+    return [*_dvc_stage(stage).get("deps", []), "params.yaml"]
+
+
+def _stage_outputs(stage: str) -> list[str]:
+    """A DVC stage's outs (path strings; ``{path: options}`` entries reduced to the path)."""
+    outs = _dvc_stage(stage).get("outs", [])
+    return [o if isinstance(o, str) else next(iter(o)) for o in outs]
+
+
+def _params(section: str) -> dict[str, Any]:
+    """One section of ``params.yaml`` (the values the DVC ``respond`` / ``label`` stages use)."""
+    params = yaml.safe_load((REPO_ROOT / "params.yaml").read_text(encoding="utf-8"))
+    return dict(params.get(section) or {})
 
 
 def _run_steps(steps: Mapping[str, Sequence[str]], dry_run: bool) -> list[StepResult]:
@@ -200,7 +218,7 @@ def data_flow(
     stages: Sequence[str] = DATA_STAGES,
     label: bool = True,
     targets: Mapping[str, str] | None = None,
-    judge_model: str = JUDGE_MODEL,
+    judge_model: str | None = None,
     pairs: str | None = None,
     dry_run: bool = False,
 ) -> list[StepResult]:
@@ -208,29 +226,47 @@ def data_flow(
 
     ``label=False`` skips the ``respond`` / ``judge`` LLM steps and keeps the DVC-tracked label
     table (the CPU-only path on a machine without the LLM response cache or a vLLM server).
+    The respond / judge commands take every setting from ``params.yaml`` (the values the DVC
+    ``respond@*`` and ``label`` stages use); ``targets`` and ``judge_model`` override them.
     """
     out: list[StepResult] = []
     for stage in stages:
         cmd = ["dvc", "repro", "--single-item", stage]
         if stage in LLM_STAGES:
-            out.append(llm_step(f"dvc:{stage}", cmd, _stage_inputs(stage), dry_run))
+            inputs, outputs = _stage_inputs(stage), _stage_outputs(stage)
+            out.append(llm_step(f"dvc:{stage}", cmd, inputs, dry_run, outputs=outputs))
         else:
             out.append(shell_step(f"dvc:{stage}", cmd, dry_run))
     if label:
-        responses = []
-        for tag, model in (targets or TARGETS).items():
-            path = f"{RESPONSES_DIR}/{tag}.jsonl"
-            responses.append(path)
+        rp, lp = _params("respond"), _params("label")
+        tmap: Mapping[str, str] = targets or rp.get("targets") or TARGETS
+        responses = [f"{RESPONSES_DIR}/{tag}.jsonl" for tag in tmap]
+        # Both are DVC outs (hardlinks after `dvc checkout`): unprotect before rewriting them.
+        out += _unprotect("unprotect:responses", responses, dry_run)
+        for (tag, model), path in zip(tmap.items(), responses, strict=True):
             cmd = ["python", "-m", "terser.phase2.respond", "--prompts", PROMPTS]
             cmd += ["--candidates", CANDIDATES, "--target", model, "--out", path]
-            inputs = [PROMPTS, CANDIDATES, "src/terser/phase2/respond.py", "src/terser/llm"]
-            out.append(llm_step(f"respond:{tag}", cmd, inputs, dry_run))
+            for flag, key in (
+                ("--max-tokens", "max_tokens"),
+                ("--creative-samples", "creative_samples"),
+                ("--creative-temperature", "creative_temperature"),
+                ("--workers", "workers"),
+            ):
+                if key in rp:
+                    cmd += [flag, str(rp[key])]
+            inputs = [PROMPTS, CANDIDATES, "params.yaml", "src/terser/phase2/respond.py"]
+            inputs.append("src/terser/llm")
+            out.append(llm_step(f"respond:{tag}", cmd, inputs, dry_run, outputs=[path]))
         out += _unprotect("unprotect:labels", [LABELS], dry_run)
+        model = judge_model or lp.get("judge_model") or JUDGE_MODEL
         cmd = ["python", "-m", "terser.phase2.label_stage", "--prompts", PROMPTS]
-        cmd += ["--responses", *responses, "--judge-model", judge_model]
+        cmd += ["--responses", *responses, "--judge-model", model]
         cmd += ["--splits-dir", "data/processed/splits", "--out", LABELS]
-        inputs = [PROMPTS, *responses, "src/terser/phase2/label_stage.py", "src/terser/judge"]
-        out.append(llm_step("judge", cmd, inputs, dry_run))
+        if "workers" in lp:
+            cmd += ["--workers", str(lp["workers"])]
+        inputs = [PROMPTS, *responses, "params.yaml", "src/terser/phase2/label_stage.py"]
+        inputs.append("src/terser/judge")
+        out.append(llm_step("judge", cmd, inputs, dry_run, outputs=[LABELS]))
     if pairs:
         cmd = ["python", "-m", "terser.data.validation", pairs]
         out.append(shell_step("validate_pairs", cmd, dry_run))
