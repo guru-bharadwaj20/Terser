@@ -52,3 +52,5 @@ What the bias produced on 14,732 labelled pairs (`p3_tree_rules.md`, `p3_tree_pr
 the space, or one label is wrong, nothing is left. A *preference* bias over a complete space
 degrades gracefully: the learner always returns its best short hypothesis, and pruning sets how
 strongly shortness is preferred.
+
+![Depth-4 tree decision boundary on two features (row 3.3.5)](figures/p3_tree_boundary.png)

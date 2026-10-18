@@ -55,8 +55,6 @@ def test_root_env_override(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> N
 
 
 def test_hardware_switch_rtx4500ada() -> None:
-    if not (configs_dir() / "hardware" / "rtx4500ada.yaml").is_file():
-        pytest.skip("configs/hardware/rtx4500ada.yaml missing")
     cfg = load_config(["hardware=rtx4500ada"])
     assert cfg.hardware.device == "cuda:0"
     assert cfg.hardware.precision == "bf16"

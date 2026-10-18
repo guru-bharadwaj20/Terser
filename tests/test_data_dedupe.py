@@ -188,8 +188,6 @@ def test_cli_writes_outputs(tmp_path: Path) -> None:
 
 def test_pilot_fixture_runs() -> None:
     path = Path(__file__).resolve().parent.parent / "data" / "pilot" / "prompts.jsonl"
-    if not path.is_file():
-        pytest.skip("pilot data not present")
     result = dd.dedupe(dd.read_jsonl(path))
     assert result.report.near_duplicate_rate_after < 0.01
 

@@ -1,0 +1,20 @@
+{
+  "n_degraded": 1079,
+  "n_prompts": 739,
+  "by_category": null,
+  "by_target": null,
+  "rungs": [
+    "sft3bv2"
+  ],
+  "n": 200,
+  "seed": 0,
+  "sample_by_category": {
+    "code": 35,
+    "creative": 29,
+    "explain": 31,
+    "fact": 23,
+    "reason": 38,
+    "transform": 44
+  },
+  "note": "Reconstructed after the fact: n_degraded, n_prompts and seed are from reports/final_errors.md, the sample counts from data/annotations/p12_errors.jsonl. The population by_category / by_target were not saved and are unknown."
+}
