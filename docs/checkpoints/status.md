@@ -1,6 +1,6 @@
 # Checkpoint status
 
-Status of all 60 checkpoints as of 2026-10-25, read from the ✅ / ❌ marks in [CONTRIBUTING.md](../../CONTRIBUTING.md): **34 pass, 26 open**. Open checkpoints are either measured failures (negative results, kept as reports), blocked on human annotation, or waiting on an earlier checkpoint.
+Status of all 60 checkpoints as of 2026-10-28, read from the ✅ / ❌ marks in [CONTRIBUTING.md](../../CONTRIBUTING.md): **35 pass, 25 open**. Open checkpoints are either measured failures (negative results, kept as reports), blocked on human annotation, or waiting on an earlier checkpoint.
 
 | checkpoint | name | status | evidence |
 |---|---|---|---|
@@ -41,7 +41,7 @@ Status of all 60 checkpoints as of 2026-10-25, read from the ✅ / ❌ marks in 
 | C6.2 | K-means ⇔ EM | ✅ | see the phase checkpoint section |
 | C6.3 | Actionable finding | ❌ | riskiest cluster 1.195x the average degradation rate (≥ 1.5x) ([p6_cluster_risk.md](../../reports/p6_cluster_risk.md)) |
 | C7.1 | Environment | ✅ | see the phase checkpoint section |
-| C7.2 | Memory plan | ❌ | partial: all reachable workloads measured on the RTX 4090s (2026-10-24/25); Llama-3.1-8B bf16 (HF token), GRPO and production serving (checkpoints) remain estimates ([C7 details](C7/README.md)) |
+| C7.2 | Memory plan | ✅ | last three estimates measured on the RTX 4500 Ada 2026-10-28: Llama-3.1-8B bf16 20.81 GiB net, GRPO 22.87, production serving 20.28 ([C7 details](C7/README.md)) |
 | C7.4 | Queue | ✅ | 32B judge job measured at 22.39 GiB net on both RTX 4090s; ceiling raised to 23 GB by [ADR-0006](../decisions/ADR-0006-gpu-queue-ceiling-23gb.md); `validate` → `queue OK` ([serving.md](C7/serving.md)) |
 | C8.1 | TextCNN parameters | ✅ | see the phase checkpoint section |
 | C8.2 | TextCNN tagging | ❌ | TextCNN 0.679 vs best classical 0.658 on the binary task (+0.021, McNemar p < 1e-18; target +0.05) ([p8_textcnn.md](../../reports/p8_textcnn.md)) |

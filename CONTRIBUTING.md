@@ -112,7 +112,7 @@ the card · **vLLM serving and training never run at the same time on 24 GB** ·
 | CPU smoke-test LLM (Qwen2.5-0.5B / 1.5B, GGUF Q4 via Ollama or llama.cpp) | 1+ | `CPU` | 4-bit | ~1–2 GB RAM | Pipeline tests only (a few tokens/s on the i3 laptop); outputs tagged `stand_in: true`, never used for labels |
 | Candidate generation + pairwise judge (Qwen2.5-32B-Instruct-AWQ; fallback Qwen2.5-14B-Instruct-AWQ) | 2+ | `GPU` | vLLM AWQ int4 | **Measured, 32B:** 18.14 GiB weights; queued config (KV 4,112 tokens) startup peak **22.39 GiB net**, serving 19.9–20.3 GiB (RTX 4090 ×2, 2026-10-24/25) · **14B:** 20.22 GiB net at util 0.90 | Exclusive slot. The 22.39 GiB peak is a vLLM post-load transient, same on both hosts and every flag tested; it breaches the 22 GB ceiling (C7.4). [C7/serving.md](docs/checkpoints/C7/serving.md) |
 | Target LLM outputs (Phi-3.5-mini-instruct per ADR-0011, Qwen2.5-7B-Instruct) | 2, 8+ | `GPU` | vLLM bf16, `gpu_memory_utilization=0.90` | **Measured (7.6), Qwen2.5-7B:** 14.29 GiB weights + 5.54 GiB KV, peak 20.79 GiB net · **Phi-3.5-mini (RTX 4090):** 7.14 GiB weights, peak 21.36 GiB net at util 0.90, 177 gen tok/s at 16 concurrent (Llama-3.1-8B, the original plan, was gated) | 24.1 / 376 tok/s at batch 1 / 16. Was est. ~16 GB weights. [C7/serving.md](docs/checkpoints/C7/serving.md) |
-| Second judge (Phi-3.5-mini-instruct, ADR-0011; was Llama-3.1-8B AWQ) | 2 | `GPU` | vLLM AWQ int4 | ~6 GB + KV | Self-preference control (2.2.5) only |
+| Second judge (Phi-3.5-mini-instruct, ADR-0011; was Llama-3.1-8B AWQ) | 2 | `GPU` | vLLM AWQ int4 | **Measured:** same Phi-3.5-mini serving as the target row above · **Llama-3.1-8B bf16 (RTX 4500 Ada, 2026-10-28):** peak 20.81 GiB net at util 0.90, max length 4096 | Self-preference control (2.2.5) only |
 | Sentence embeddings (bge-small / e5-base) | 3+ | `CPU→GPU` | fp32 / fp16 | **Measured, bge-small:** 3.52 GiB fp32 / 1.71 GiB fp16 reserved at batch 256 × 512 tokens (943 / 3,651 texts/s) | CPU fine up to ~50k texts; fp32 at this batch exceeds the old < 2 GB estimate. [C7/bench_small](docs/checkpoints/C7/bench_small_rtx4090_worker1.json) |
 | All classical models (ID3, LR, KNN, SVM, NB, GMM, HMM, RF, GBM, k-means) | 3–6 | `CPU` | — | 0 | Never on GPU |
 | Perceptron / MLP / optimizer study | 4 | `CPU` | fp32 | 0 | Small models |
@@ -120,10 +120,10 @@ the card · **vLLM serving and training never run at the same time on 24 GB** ·
 | Rewriter SFT: Qwen2.5-0.5B full fine-tune | 8 | `GPU` | bf16 + AdamW, grad checkpointing | **Measured (7.7):** 16.32 GiB reserved fp32-master / 11.77 GiB pure bf16 (seq 1024, mb 4); 0.44 / 0.37 s per step | ~16 bytes/param for weights+grads+Adam (~8 GB) + activations; was est. ~12–16 GB. [C7/training.md](docs/checkpoints/C7/training.md) |
 | Rewriter SFT: Qwen2.5-1.5B / 3B LoRA | 8 | `GPU` | bf16 base, LoRA r=16 | **Measured (7.7), 1.5B:** 12.19 GiB reserved (seq 1024, mb 4), 1.11 s per step · **3B (RTX 4090):** 15.98 GiB reserved, 0.96 s per step | Main candidates; 1.5B was est. ~8–16 GB 
 | Rewriter SFT: 7B QLoRA | 8 | `GPU` | NF4 base + LoRA | **Measured (RTX 4090):** 18.92 GiB reserved at seq 1024, mb 4, 2.26 s per step | Above the old ~10–18 GB estimate, under the ceiling. [C7/training.md](docs/checkpoints/C7/training.md) |
-| GRPO rewriter policy (stretch) | 9 | `GPU` | 0.5B–1.5B LoRA | ~12–20 GB | Only if the stretch rows are attempted; never colocated with serving |
+| GRPO rewriter policy (stretch) | 9 | `GPU` | 0.5B–1.5B LoRA | **Measured (RTX 4500 Ada, 2026-10-28):** peak 22.87 GiB net, 1.5B LoRA, group 8, 768 + 512 tokens, grad checkpointing (30 steps, 10–29 s per step) | Only if the stretch rows are attempted; never colocated with serving |
 | Tabular Q-learning | 9 | `CPU` | — | 0 | |
 | Bayesian HPO of the rewriter | 10 | `GPU` | Optuna, 1 trial at a time | per trial | Median pruner |
-| Production serving | 11 | `GPU` (+ `CPU` fast path) | vLLM / ONNX Runtime | 2–6 GB | Fast path must also run on CPU |
+| Production serving | 11 | `GPU` (+ `CPU` fast path) | vLLM / ONNX Runtime | **Measured (RTX 4500 Ada, 2026-10-28):** 3B + LoRA rewriter on vLLM at util 0.85, max length 2048: 5.85 GiB weights, peak 20.28 GiB net under 5 and 20 RPS, 0 errors, no OOM; fast path 0 GPU | Fast path must also run on CPU |
 
 ### Weekly GPU schedule
 
@@ -575,7 +575,7 @@ before any queued GPU job runs. The RTX 4500 Ada, if connected later, repeats 7.
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
 | C7.1 🚧 | Environment | Verification script all green on ≥ 1 worker | ✅ |
-| C7.2 | Memory plan | Every GPU workload in the [Compute Allocation](#compute-allocation-cpu-local-open-models-and-the-rtx-4500-ada) VRAM table measured, none estimated | ❌ partial: **Owner: Vivian (RTX 4090 workers).** Measured 2026-10-24/25 on the RTX 4090s: 32B, 14B and Llama-8B AWQ judges, 3B LoRA, 7B QLoRA, embeddings, TextCNN. Still estimated: Llama-3.1-8B bf16 (gated, needs HF token; replaced by Phi-3.5-mini, now measured), GRPO and production serving (checkpoints not on the shared remote) ([C7 details](docs/checkpoints/C7/README.md)) |
+| C7.2 | Memory plan | Every GPU workload in the [Compute Allocation](#compute-allocation-cpu-local-open-models-and-the-rtx-4500-ada) VRAM table measured, none estimated | ✅ every row measured: RTX 4090s 2026-10-24/25 (judges, 3B LoRA, 7B QLoRA, embeddings, TextCNN); RTX 4500 Ada 2026-10-28 for the last three: Llama-3.1-8B bf16 20.81 GiB net, GRPO 22.87, production serving 20.28 ([C7 details](docs/checkpoints/C7/README.md)) |
 | C7.4 | Queue | **Owner: Vivian (RTX 4090 workers).** Dry-run orders all jobs without dependency errors and every declared `est_vram_gb` ≤ the configured ceiling (23 GB per [ADR-0006](docs/decisions/ADR-0006-gpu-queue-ceiling-23gb.md), was 22). Measured 2026-10-24/25 on both workers: the 32B judge job peaks at 22.39 GiB net (startup transient; serving 19.9–20.3 GiB); queue declares 22.4, `validate` → `queue OK`, dry-run orders all six jobs ([serving.md](docs/checkpoints/C7/serving.md)) | ✅ |
 
 ---
