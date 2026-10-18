@@ -44,14 +44,20 @@ _SO = re.compile(
 
 _LAUGHTER = r"(?:lol|lmao|rofl|ha(?:ha)+h?|he(?:he)+)"
 _LEADING_HESITATION = re.compile(rf"{_START}(?:{_HESITATION}|{_LAUGHTER})\b[,.!]*[ \t]*(?=\S)", _F)
-_INNER_HESITATION = re.compile(rf"(?:,[ \t]*)?\b{_HESITATION}\b(?:[ \t]*,)?", re.IGNORECASE)
+# Not after a number: "10 um wide" is a micrometre unit, not a hesitation.
+_INNER_HESITATION = re.compile(
+    rf"(?:,[ \t]*)?(?<!\d)(?<!\d )\b{_HESITATION}\b(?:[ \t]*,)?", re.IGNORECASE
+)
 _COMMA_LIKE = re.compile(r",[ \t]*like[ \t]*,", re.IGNORECASE)
 _YOU_KNOW_LEAD = re.compile(rf"{_START}(?:you know|i mean)[ \t]*,[ \t]*", _F)
 _YOU_KNOW_BRACKETED = re.compile(r",[ \t]*(?:you know|i mean)[ \t]*,", re.IGNORECASE)
 _YOU_KNOW_TRAILING = re.compile(r",[ \t]*(?:you know|i mean)[ \t]*(?=[.!?]|$)", _F)
 _INTENSIFIER = re.compile(
     r"(?<!\btranslate )(?<!\btranslated )(?<!\binterpret )(?<!\bmean )(?<!\bmeant )"
-    r"\b(?:basically|literally|honestly|totally)\b(?![-'’])[ \t]*,?[ \t]+(?=[^\W\d_])",
+    r"(?<!\bdoes )(?<!\bdo )(?<!\bword )"
+    r"\b(?:basically|literally|honestly|totally)\b(?![-'’])[ \t]*,?[ \t]+"
+    # the word itself is the topic ("what does literally mean") or part of a term
+    r"(?!(?:mean|means|meant|ordered|bounded)\b)(?=[^\W\d_])",
     re.IGNORECASE,
 )
 _REQUEST_VERBS = (

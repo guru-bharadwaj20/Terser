@@ -32,9 +32,9 @@ oracle row records whether stand-in data was involved.
 
 CLI::
 
-    python -m terser.phase2.oracle --candidates data/processed/candidates.jsonl \\
-        --token-counts data/processed/token_counts.parquet --labels data/processed/labels.jsonl \\
-        --prompts data/processed/prompts.jsonl --out data/processed/oracle.csv
+    python -m terser.phase2.oracle --candidates data/interim/candidates.jsonl \\
+        --token-counts data/interim/token_counts.parquet --labels data/processed/labels.jsonl \\
+        --prompts data/interim/label_prompts.jsonl --out data/processed/oracle.csv
 """
 
 from __future__ import annotations

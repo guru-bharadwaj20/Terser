@@ -39,7 +39,7 @@ params:
   target_model: qwen2.5:1.5b    # GPU: Qwen/Qwen2.5-7B-Instruct | meta-llama/Llama-3.1-8B-Instruct
   judge_model: qwen2.5:0.5b     # GPU: Qwen/Qwen2.5-32B-Instruct-AWQ
   stage: all                    # all | respond | judge (GPU runs use respond then judge)
-  prompts_path: ${paths.data_dir}/pilot/prompts.jsonl   # 150 prompts, 25 per category
+  prompts_path: ${paths.data_dir}/pilot/prompts.jsonl   # 500 prompts (83-84 per category); limit: 25 gives the 150-prompt pilot
   output_dir: ${paths.data_dir}/pilot                   # used only when stand_in: false
   smoke_dir: ${paths.data_dir}/pilot/smoke              # used whenever stand_in: true
   operator_subsets: [F, H, D, I, L, C, S, FHC, FHCI, FHCID, FHCIDS, FHCIDSL]
@@ -51,6 +51,7 @@ params:
   judge_retries: 2
   temperature: 0.0
   prompt_version: pairwise_v1   # src/terser/judge/prompts/<version>.txt
-  protocol: pairwise            # pairwise | pairwise_avg (ADR-0005: order-averaged logprobs)
+  protocol: pairwise_avg        # pairwise | pairwise_avg (ADR-0005: order-averaged logprobs);
+                                # pairwise would overwrite the committed pairwise_avg labels
   budget_phase: phase1          # token cap from configs/budget.yaml
   workers: 1                    # concurrent requests; GPU runs use 16-32 so vLLM can batch

@@ -19,7 +19,7 @@ rebuilds it on CPU.
 
 CLI::
 
-    python -m terser.phase2.respond --prompts data/interim/casual_dedup.jsonl \\
+    python -m terser.phase2.respond --prompts data/interim/label_prompts.jsonl \\
         --candidates data/interim/candidates.jsonl --target Qwen/Qwen2.5-7B-Instruct \\
         --out data/interim/responses/qwen2.5-7b.jsonl --workers 64
 """

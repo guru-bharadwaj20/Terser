@@ -280,3 +280,13 @@ def test_not_worse_rules() -> None:
     assert not_worse(_r(code, None, None), _r(code, 0.0, False))
     with pytest.raises(ValueError):
         not_worse(_r(code, 1.0, True), _r(fact, 1.0, True))
+
+
+def test_normalize_answer_keeps_sign_and_decimal_point() -> None:
+    from terser.judge.metrics import fact_metric
+
+    assert normalize_answer("-5") == "-5"
+    assert normalize_answer("3.5 kg.") == "3.5 kg"
+    assert not fact_metric("-5", "5").passed
+    assert not fact_metric("3.5", "35").passed
+    assert fact_metric("The answer is -5.", "-5").passed

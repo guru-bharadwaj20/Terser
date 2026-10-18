@@ -62,8 +62,14 @@ def applicability_table(
     return table
 
 
-def applicability_markdown(by_category: pd.DataFrame, by_style: pd.DataFrame) -> str:
-    """Report section for row 1.4.3 (shares rendered as percentages)."""
+def applicability_markdown(
+    by_category: pd.DataFrame, by_style: pd.DataFrame, target: str | None = None
+) -> str:
+    """Report section for row 1.4.3 (shares rendered as percentages).
+
+    ``target`` names the tokenizer target the tables were restricted to (None: any target).
+    """
+    scope = "on any target" if target is None else f"on target `{target}`"
 
     def pct(table: pd.DataFrame) -> str:
         shown = table.copy()
@@ -75,7 +81,7 @@ def applicability_markdown(by_category: pd.DataFrame, by_style: pd.DataFrame) ->
         [
             "## 1.4.3 Operator applicability",
             "",
-            "Share of prompts (%) each single operator changes (on any target), per category and "
+            f"Share of prompts (%) each single operator changes ({scope}), per category and "
             "per style; `n` is the number of prompts.",
             "",
             "### By category",
