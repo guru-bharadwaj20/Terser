@@ -8,8 +8,10 @@
   path, plus, for the quality path, the rewriter's own input and output tokens at the rewriter's
   per-token price.
 
-A fallback that returns the original prompt saves nothing but still pays for any rewriter work
-already done, so its net savings are negative. That is the honest number S4 needs.
+A fallback is charged for the path that produced its result: the fast path's per-request cost,
+and nothing for the quality call it abandoned (a timed-out or failed call reports no token usage,
+so that work is not measured). A fallback that returns the original prompt therefore saves
+nothing and costs the fast-path fee, so its net savings are at most zero.
 """
 
 from __future__ import annotations

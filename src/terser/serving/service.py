@@ -5,11 +5,15 @@ Request flow for ``rewrite(prompt, target, mode)``:
 1. **Cache** (11.3.4): LRU lookup on ``sha256(target, mode, normalised prompt)``; a hit returns the
    stored response with ``cached=True``.
 2. **Rewrite**: ``mode="fast"`` runs the CPU fast path. ``mode="quality"`` runs the quality
-   rewriter on a worker thread with a latency budget of ``quality_timeout_s``.
+   rewriter on a worker thread within a budget of ``quality_timeout_s`` measured from the start
+   of the request (cache lookup included); when every worker is busy the request falls back at
+   once instead of queueing.
 3. **Timeout fallback** (11.3.5): if the quality path is over budget, raises, or is not
    configured, the fast-path result is used and ``fallback_used=True`` with a
-   ``fallback_reason`` (``timeout`` / ``error`` / ``unavailable``). If the fast path also fails the
-   original prompt is returned, so a request never fails because a rewriter did.
+   ``fallback_reason`` (``timeout`` / ``error`` / ``unavailable``; an empty quality rewrite is an
+   ``error``). If the fast path also fails the original prompt is returned (``path="original"``;
+   the reason stays the quality path's, or ``fast_error`` when there was none), so a request
+   never fails because a rewriter did.
 4. **Gate**: features of original and rewrite come from :mod:`terser.features.shared` (the same
    code used offline, row 11.1.3); if ``P(degraded) > gate_threshold`` the original prompt is
    returned (``gate_rejected=True``).
@@ -25,6 +29,7 @@ from __future__ import annotations
 
 import concurrent.futures as cf
 import logging
+import threading
 import time
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, replace
@@ -32,7 +37,7 @@ from typing import Any
 
 from terser.features.shared import extract_features
 from terser.serving.accounting import Pricing, net_savings
-from terser.serving.cache import LRUCache, cache_key
+from terser.serving.cache import LRUCache, cache_key, normalise
 from terser.serving.paths import ConstraintGate, FastPath, Gate, Rewriter, RewriteResult
 from terser.serving.request_log import build_record, log_request, new_request_id
 
@@ -97,6 +102,9 @@ class RewriteService:
         self.metrics = metrics
         self._counter = counter
         self._pool = cf.ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="quality")
+        # One slot per worker: a request that finds every worker busy (e.g. with timed-out calls
+        # still running in the background) falls back at once instead of queueing behind them.
+        self._slots = threading.BoundedSemaphore(max_workers)
 
     def features(self, prompt: str, target: str) -> dict[str, float]:
         """Online feature path: identical code to the offline ``featurize_*`` functions."""
@@ -106,23 +114,45 @@ class RewriteService:
             counter = lambda s: fn(s, target)  # noqa: E731
         return extract_features(prompt, target, counter)
 
-    def _run_quality(self, prompt: str, target: str) -> tuple[RewriteResult | None, str | None]:
+    def _run_quality(
+        self, prompt: str, target: str, deadline: float
+    ) -> tuple[RewriteResult | None, str | None]:
+        """Quality rewrite within the request's budget (``deadline`` on ``perf_counter``)."""
         if self.quality is None:
             return None, "unavailable"
-        future = self._pool.submit(self.quality, prompt, target)
+        if not self._slots.acquire(blocking=False):
+            return None, "timeout"  # every worker is busy: the budget cannot be met
+        quality = self.quality
+
+        def call() -> RewriteResult:
+            try:
+                return quality(prompt, target)
+            finally:
+                self._slots.release()
+
         try:
-            return future.result(timeout=self.quality_timeout_s), None
+            future = self._pool.submit(call)
+        except RuntimeError:  # pool shut down
+            self._slots.release()
+            return None, "unavailable"
+        try:
+            result = future.result(timeout=max(0.0, deadline - time.perf_counter()))
         except cf.TimeoutError:
             future.cancel()
             return None, "timeout"
-        except Exception as exc:  # noqa: BLE001 - any rewriter failure falls back
+        except Exception as exc:
             log.warning("quality path failed: %s", exc)
             return None, "error"
+        if not result.text.strip():
+            # An empty rewrite would be served, cached and counted as 100% savings.
+            log.warning("quality path returned an empty rewrite")
+            return None, "error"
+        return result, None
 
     def _run_fast(self, prompt: str, target: str) -> tuple[RewriteResult, bool]:
         try:
             return self.fast(prompt, target), True
-        except Exception as exc:  # noqa: BLE001 - last resort: the original prompt
+        except Exception as exc:  # last resort: the original prompt
             log.warning("fast path failed: %s", exc)
             return RewriteResult(prompt), False
 
@@ -144,10 +174,20 @@ class RewriteService:
         key = cache_key(prompt, target, mode)
         hit = self.cache.get(key)
         if hit is not None:
+            # The key normalises whitespace and line endings, so the hit may come from a variant
+            # of this prompt: count this prompt's own tokens, and if the stored result was the
+            # unchanged prompt, return this prompt rather than the variant.
+            before = int(self.features(prompt, target)["n_tokens"])
+            unchanged = normalise(hit.rewrite) == normalise(prompt)
+            rewrite = prompt if unchanged else hit.rewrite
+            after = before if unchanged else hit.tokens_after
             # a hit costs no rewriter work, so its net savings are the gross savings
-            gross = self.pricing.target_price(target) * (hit.tokens_before - hit.tokens_after)
+            gross = self.pricing.target_price(target) * (before - after)
             resp = replace(
                 hit,
+                rewrite=rewrite,
+                tokens_before=before,
+                tokens_after=after,
                 cached=True,
                 request_id=rid,
                 net_savings_usd=gross,
@@ -160,7 +200,9 @@ class RewriteService:
         result: RewriteResult | None = None
         path = "fast"
         if mode == "quality":
-            result, fallback_reason = self._run_quality(prompt, target)
+            # The budget covers the whole request, not only the quality call.
+            deadline = t0 + self.quality_timeout_s
+            result, fallback_reason = self._run_quality(prompt, target, deadline)
             if result is not None:
                 path = "quality"
         if result is None:

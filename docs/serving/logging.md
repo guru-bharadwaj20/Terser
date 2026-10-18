@@ -26,7 +26,7 @@ retention, for example with a 30-day index lifecycle.
 | `gate_score` | float | Gate `P(degraded)` |
 | `gate_rejected` | bool | Original returned because of the gate |
 | `fallback_used` | bool | Requested path not used |
-| `fallback_reason` | string \| null | `timeout`, `error`, `unavailable`, `fast_error` |
+| `fallback_reason` | string \| null | `timeout`, `error`, `unavailable`, or `fast_error` when the fast path raised and no quality-path reason was recorded (an earlier quality reason is kept; `path` is then `original`) |
 | `cached` | bool | LRU hit |
 | `latency_ms` | float | Service time |
 | `rewriter_cost_usd` | float | Cost of producing the rewrite (0 for a cache hit) |
@@ -46,5 +46,10 @@ Example (no consent):
  "ts": 1790870480.3}
 ```
 
-Request IDs join this log with the Prometheus series (aggregates) and with the nightly canary
-(row 11.5.4) and drift jobs, which read only hashes, counts and categories from it.
+Request IDs join this log with the Prometheus series (aggregates). The input-drift job (row
+11.5.2) can read this log (`--current logs/requests.jsonl`); it uses the raw `prompt`, so only
+consented records count, and the log has no category field. The nightly canary (row 11.5.4)
+does not read the log: it runs its own fixed prompt set.
+
+**Sink.** The service attaches a handler at start-up if the logger has none: a JSON-lines file at
+`$TERSER_REQUEST_LOG` when set, else stdout.

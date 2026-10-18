@@ -199,6 +199,22 @@ validated on SFT rewrites; see [quality_gate.md §6](quality_gate.md#6-quality-g
 
 ## 7. Limitations and failure modes
 
+**Code fixes after the published runs (2026-10-18).** The SFT and GRPO numbers in this card
+predate these changes and were not regenerated (they need GPU runs):
+
+- training, `generate` and GRPO now use the whole `
+### Rewrite:
+` separator, not its last
+  token; the published checkpoints were trained with the single token, so retrain before
+  decoding them with the new code;
+- a rewrite too long for `max_len` no longer drops the prompt or ends in a mid-rewrite EOS;
+- validation decoding and GRPO sampling now pass `repetition_penalty=1.0` (the base model's
+  generation config sets 1.1, so the "greedy" decodes and GRPO samples were penalised);
+- GRPO weights micro-batches by size, and its retention proxy matches whole items ("2" no
+  longer counts as kept because "2024" is in the rewrite);
+- the val report leaves unjudged rewrites out of the preservation rate (`missing_labels`)
+  instead of counting them as degraded.
+
 | Failure mode | Share of degraded cases | Example (hashed id or link) | Mitigation in place |
 | :--- | ---: | :--- | :--- |
 | Dropped constraint | 5% | `dolly:97:hedging` (second request dropped) | 8.3.7 safeguard (length only) |

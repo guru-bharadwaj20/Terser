@@ -4,6 +4,11 @@
 CPU only. Reference window = train split (4,955 prompts). Per-run artifacts (Evidently HTML,
 Evidently JSON snapshot, summary JSON, summary markdown) are in `reports/monitoring/`.
 
+> **Note (2026-10-18).** The detector changed after these runs: PSI now uses 3-10 bins sized to
+> the smaller window, and each feature's threshold is 0.2 plus its expected PSI under no drift.
+> `mmd_samples` is now reported per side. The numbers below predate that change. Windows of 200+
+> prompts keep 10 bins, so their PSI values are unchanged; only the thresholds rise slightly.
+
 ## Method
 
 | View | Feature(s) | Statistic |

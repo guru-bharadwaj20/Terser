@@ -268,7 +268,9 @@ class LiveEndpoints:
         from terser.serving.paths import OpenAICompatibleRewriter
 
         assert self.quality_url and self.quality_model
-        rw = OpenAICompatibleRewriter(self.quality_url, self.quality_model, timeout_s=60.0)
+        rw = OpenAICompatibleRewriter(
+            self.quality_url, self.quality_model, timeout_s=60.0, prompt_format="sft"
+        )
         return rw(prompt, target).text
 
     def answer(self, target: str, prompt: str, max_tokens: int = 512) -> tuple[str, int | None]:

@@ -104,7 +104,13 @@ def candidate_rewrites(
     ``<prompt_id>:original``) to Qwen2.5 token counts. A missing, rejected, stand-in, empty or
     not strictly shorter candidate falls back to the original (savings 0).
     """
-    by_pid = {c["prompt_id"]: c for c in candidates if c["method"] == method}
+    by_pid: dict[str, Mapping[str, Any]] = {}
+    for c in candidates:
+        if c["method"] != method:
+            continue
+        if c["prompt_id"] in by_pid:
+            raise ValueError(f"duplicate {method} candidate for prompt {c['prompt_id']!r}")
+        by_pid[c["prompt_id"]] = c
     out = []
     for p in prompts:
         pid = str(p["id"])

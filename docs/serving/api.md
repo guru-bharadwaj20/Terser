@@ -43,7 +43,7 @@ named by `TERSER_SERVING_CONFIG`. The quality path is off until `quality.base_ur
 | `tokens_before`, `tokens_after` | Ground-truth token counts of `prompt` and `rewrite` on `target` |
 | `gate_score` | Gate `P(degraded)` of the candidate rewrite (0 when the candidate equals the prompt) |
 | `fallback_used` | `true` when the requested path was not the one that produced the rewrite |
-| `fallback_reason` | `timeout` (quality path over `quality_timeout_s`), `error` (quality path raised), `unavailable` (no quality path configured), `fast_error` (fast path raised too, so the original is returned), or `null` |
+| `fallback_reason` | `timeout` (quality path over `quality_timeout_s`), `error` (quality path raised), `unavailable` (no quality path configured), `fast_error` (the fast path raised and no quality-path reason was recorded; the original is returned with `path: original`; when the quality path had already failed, its reason is kept and `path` is still `original`), or `null`. An empty quality rewrite counts as `error` |
 | `path` | Path that produced the result: `fast`, `quality` or `original` |
 | `gate_rejected` | `true` when `gate_score > gate_threshold` and the original prompt was returned |
 | `cached` | `true` for an LRU hit (key: sha256 of target, mode and the normalised prompt) |
