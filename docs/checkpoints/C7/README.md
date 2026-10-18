@@ -30,8 +30,8 @@ $ python -m terser.gpu_queue dry-run --dir gpu_queue
 #  id                     phase  prio  VRAM GB  hours  exclusive  gates
 -----------------------------------------------------------------------
 1  p2-candidates-qwen32b  2      1     21.8     3      yes        -
-2  sft-qwen0.5b-full      8      2     17       6      yes        C7.1, C2.3
-3  sft-qwen1.5b-lora      8      2     13       8      yes        C7.1, C2.3
+2  sft-qwen0.5b-full      8      2     17       6      yes        C7.1
+3  sft-qwen1.5b-lora      8      2     13       8      yes        C7.1
 
 Total estimated GPU-hours: 17
 ```

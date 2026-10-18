@@ -278,7 +278,7 @@ def test_card_states_known_limitations(env: Env) -> None:
     assert card.startswith("# Data Card: `terser-bench-v1`")
     assert "Known limitations" in card
     assert "0 residual PII" in card
-    assert "rows 2.3.5, 2.3.6" in card and "judge estimates" in card
+    assert "judge estimates" in card
     assert "`deadbeef`" in card and B.REPO_URL in card
     assert "rebuild-real" in card
     for heading in ("## 1. Source", "## 6. Splits", "## 7. PII handling", "## 11. Maintenance"):

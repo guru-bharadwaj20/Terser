@@ -261,8 +261,7 @@ Worked examples:
 | "tell me about the french revolution as a bedtime story" | 3: style requirement | `creative` (`explain`) |
 | "what year did the berlin wall fall and why" | 1: "why" needs prose | `explain` (`fact`) |
 
-Disagreements between the two annotators on category (2.3.5) are resolved by discussion against
-these rules; if a rule was insufficient, update this document in the same PR.
+Disagreements on category are resolved against these rules; if a rule was insufficient, update this document in the same PR.
 
 ---
 

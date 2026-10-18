@@ -168,7 +168,7 @@ overall and per category.
 <!--
 Use the failure analysis (8.3.10, 12.8): dropped constraint, lost tone, dropped example, changed meaning,
 other, with counts. Include known weak categories, prompt-length ranges where net savings are negative,
-judge dependence (numbers are only as valid as the open-model judge, C2.4; self-preference toward the
+judge dependence (numbers are only as valid as the open-model judge, C2.6; self-preference toward the
 judge's own model family, 2.2.5), and behaviour under tokenizer drift.
 -->
 
@@ -205,7 +205,7 @@ Everything needed to trace this version back to code, data and decisions (row 11
 | Parent model (e.g. SFT for RL) | |
 | Judge model / revision used for labels | |
 | `gpu_queue` job id | |
-| Checkpoints passed | e.g. C2.3–C2.5, C7.1, C8.3 (links to `docs/checkpoints/C<N>/README.md`) |
+| Checkpoints passed | e.g. C2.7, C7.1, C8.3 (links to `docs/checkpoints/C<N>/README.md`) |
 | Related ADRs | |
 
 ## 10. Version history

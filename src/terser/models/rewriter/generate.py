@@ -97,8 +97,10 @@ def generate_rows(
                 attention_mask=mask,
                 max_new_tokens=max_new_tokens,
                 do_sample=False,
-                # True greedy decoding: the base generation_config sets repetition_penalty=1.1.
-                repetition_penalty=1.0,
+                # The base generation_config's repetition_penalty, stated explicitly. At 1.0 the
+                # SFT rungs mostly copy the prompt (3B v2, 60 val prompts: 16 fallbacks and 10.8%
+                # median savings vs 3 and 24.3% at 1.1), so every published decode uses 1.1.
+                repetition_penalty=1.1,
                 eos_token_id=tok.eos_token_id,
                 pad_token_id=pad,
             )

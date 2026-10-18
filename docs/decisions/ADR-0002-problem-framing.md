@@ -116,7 +116,7 @@ rows of one source prompt stay in the same fold. The test split is read once, in
 | :--- | :--- |
 | Input space | `(x, x', c, T)`, represented as pair features (3.1.3: token ratio on `T`, self-information removed, negations / numbers / constraint keywords removed, embedding cosine, category one-hot, target id) or the 1536-d pair embedding `[e_x, e_x', \|e_x − e_x'\|, e_x ⊙ e_x']` (4.1.2). **Target answers are not inputs**: the gate decides before `T` is called |
 | Output space | `{preserved, degraded}`, via a score `p = P(degraded \| x, x', c, T) ∈ [0, 1]` and threshold `τ` |
-| Label source | Phase 2 `label` stage (2.3.4) over candidates (2.2.1), target answers (2.2.3) and the position-swapped judge (2.3.3); validated against human labels (🚧 C2.3–C2.5) |
+| Label source | Phase 2 `label` stage (2.3.4) over candidates (2.2.1), target answers (2.2.3) and the position-swapped judge (2.3.3) |
 | Loss | Log-loss for LR, MLP and GBM; entropy / information gain for trees; hinge for SVM; exponential loss for AdaBoost |
 | Metric | ROC-AUC; **specificity at sensitivity ≥ 0.95**; PR-AP (degraded is the minority); full suite of 3.2.1 per category; all with positive class = degraded (see [Positive-class convention](#positive-class-convention-row-113)) |
 | Syllabus models | Concept learning as a symbolic precursor (1.3); ID3 / C4.5 and pruning (3.3); logistic regression (3.4); KNN classification (3.5.1); MLP (4.1.4–4.1.6) with activation and optimizer studies (4.2, 4.3); SVM linear and polynomial (4.4); AdaBoost, Random Forest, LightGBM (5.1); Bayes optimal classifier over Phase 1 hypotheses (5.2.4); grid / random / Bayesian HPO (3.6.4, 4.5, 10.2–10.4) |
@@ -260,12 +260,12 @@ are for smoke tests and are never used as labels.
     so no reported savings number can appear without its preservation number.
   - The CPU fast path (tagger + gate + predictor) can be built and served without the GPU.
   - The positive-class convention fixes the meaning of sensitivity and specificity everywhere, including
-    the judge-validity gate C2.5 and the RL gate precision C9.3.
+    the RL gate precision C9.3.
 - Negative:
   - Six components must be versioned, monitored and kept consistent (feature parity 11.1.3, registry
     11.2.2); errors compound along the fallback chain.
   - The gate inherits any judge bias, including self-preference of the Qwen judge towards Qwen outputs;
-    mitigated by 2.2.5 and 🚧 C2.3–C2.5, not eliminated.
+    mitigated by 2.2.5 and the position swap (C2.6), not eliminated.
   - Oracle-derived labels (tagger, predictor, rewriter) are bounded by the six candidates generated per
     prompt; savings beyond the best candidate cannot be learned from supervision.
   - A sensitivity ≥ 0.95 threshold will reject many safe rewrites when the gate is weak, lowering
@@ -284,8 +284,7 @@ are for smoke tests and are never used as labels.
 
 ## Positive-class convention (row 1.1.3)
 
-This section is the decision for plan row 1.1.3. It applies to the quality gate, to the judge when it is
-evaluated as a degradation detector against human labels (C2.5), and to every binary metric computed by
+This section is the decision for plan row 1.1.3. It applies to the quality gate, and to every binary metric computed by
 `terser.eval`.
 
 ### Decision
@@ -346,5 +345,5 @@ Choose `τ` to **maximise specificity subject to sensitivity ≥ 0.95**:
 
 `src/terser/eval/labels.py` (`PRESERVED`, `DEGRADED`, `POSITIVE_LABEL`, `LABEL_NAMES`, `to_binary`,
 `confusion_counts`, `sensitivity`, `specificity`) is the single source of the convention. Metrics (3.2.1),
-curves (3.2.2), threshold selection (3.2.3), judge validation (C2.5), RL gate precision (C9.3) and gate
+curves (3.2.2), threshold selection (3.2.3), RL gate precision (C9.3) and gate
 rejection monitoring (11.5.1) must use these constants rather than literal `0` / `1`.

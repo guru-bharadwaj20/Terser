@@ -74,8 +74,7 @@ labels from now on:
    presentation orders, does not prefer the original's output") is kept; only the aggregation of
    the two orders changes from "both must agree" to "their average decides".
 4. Keep both raw per-order verdicts in every record (`verdicts`), plus `aggregate`
-   (side, probabilities, margin). Flag `position_inconsistent` and `low_margin` (< 0.2) pairs for
-   human review; they are the first candidates for the 2.3.5 annotation sample.
+   (side, probabilities, margin). Flag `position_inconsistent` and `low_margin` (< 0.2) pairs.
 5. Report the raw per-order disagreement alongside every labelled dataset; it remains the
    measurement C2.6 refers to.
 
@@ -107,10 +106,8 @@ author, should decide whether the re-statement is legitimate.
   balance and the C2.7 oracle savings will be measured on a more permissive labelling than the
   plan assumed. Requires servers that return `top_logprobs` (vLLM does; verdicts recovered from a
   retry fall back to a one-hot vector).
-- Risk: if human review (2.3.5 / 2.3.6) shows the averaged verdict is wrong on the low-margin
-  pairs, the fallback is to treat `low_margin` pairs as unlabelled. This is the measurement that
-  verifies the decision: judge–human κ (C2.4) and sensitivity/specificity (C2.5) on the 300-pair
-  gold set, reported separately for low-margin pairs.
+- Risk: if the averaged verdict proves wrong on the low-margin pairs, the fallback is to treat
+  `low_margin` pairs as unlabelled.
 - Follow-up: the pilot labels were regenerated with this protocol
   (`data/pilot/labels.jsonl`; the old labels are kept as `data/pilot/labels_pairwise_v1.jsonl`);
   the Phase 2 judge stage (2.3.3) uses it; the reviewer decides the C2.6 wording.

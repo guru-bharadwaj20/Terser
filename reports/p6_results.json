@@ -495,76 +495,76 @@
     {
       "cluster": 6,
       "n": 1214,
-      "median_savings": 0.3815789473684211,
+      "median_savings": 0.375,
       "degradation_rate": 0.514827018121911,
-      "risk_ratio": 1.19496323160107,
+      "risk_ratio": 1.1948991293257167,
       "high_risk": false
     },
     {
       "cluster": 5,
-      "n": 994,
-      "median_savings": 0.3034843205574913,
-      "degradation_rate": 0.4798792756539235,
-      "risk_ratio": 1.113846146042792,
+      "n": 990,
+      "median_savings": 0.29635979810697033,
+      "degradation_rate": 0.4818181818181818,
+      "risk_ratio": 1.1182865422410948,
       "high_risk": false
     },
     {
       "cluster": 3,
-      "n": 2036,
-      "median_savings": 0.41818181818181815,
-      "degradation_rate": 0.47838899803536344,
-      "risk_ratio": 1.1103870677575192,
+      "n": 2032,
+      "median_savings": 0.4131410256410256,
+      "degradation_rate": 0.47834645669291337,
+      "risk_ratio": 1.1102287651947877,
       "high_risk": false
     },
     {
       "cluster": 8,
-      "n": 1520,
-      "median_savings": 0.39,
-      "degradation_rate": 0.46710526315789475,
-      "risk_ratio": 1.0841964293118174,
+      "n": 1518,
+      "median_savings": 0.38115373612037806,
+      "degradation_rate": 0.466403162055336,
+      "risk_ratio": 1.0825087119314947,
       "high_risk": false
     },
     {
       "cluster": 2,
       "n": 1768,
-      "median_savings": 0.31709853932076154,
-      "degradation_rate": 0.4654977375565611,
-      "risk_ratio": 1.0804652071345924,
+      "median_savings": 0.3022222222222222,
+      "degradation_rate": 0.4649321266968326,
+      "risk_ratio": 1.0790944799521878,
       "high_risk": false
     },
     {
       "cluster": 4,
-      "n": 2632,
+      "n": 2622,
       "median_savings": 0.2030456852791878,
-      "degradation_rate": 0.45706686930091184,
-      "risk_ratio": 1.0608963476510214,
+      "degradation_rate": 0.4576659038901602,
+      "risk_ratio": 1.0622297797722071,
       "high_risk": false
     },
     {
       "cluster": 0,
-      "n": 1336,
-      "median_savings": 0.3879310344827586,
-      "degradation_rate": 0.4498502994011976,
-      "risk_ratio": 1.0441459919298002,
+      "n": 1334,
+      "median_savings": 0.3771475189557538,
+      "degradation_rate": 0.4497751124437781,
+      "risk_ratio": 1.0439154732244105,
       "high_risk": false
     },
     {
       "cluster": 1,
-      "n": 736,
-      "median_savings": 0.43973214285714285,
-      "degradation_rate": 0.4483695652173913,
-      "risk_ratio": 1.040709064878306,
+      "n": 734,
+      "median_savings": 0.4351438492063492,
+      "degradation_rate": 0.4482288828337875,
+      "risk_ratio": 1.0403267174876671,
       "high_risk": false
     },
     {
       "cluster": 7,
       "n": 2496,
-      "median_savings": 0.5740327020851124,
+      "median_savings": 0.5734228473998295,
       "degradation_rate": 0.2419871794871795,
-      "risk_ratio": 0.5616756149685093,
+      "risk_ratio": 0.5616454845979858,
       "high_risk": false
     }
   ],
-  "n_label_records": 14732,
+  "n_label_records": 14708,
   "c6_3": false
 }

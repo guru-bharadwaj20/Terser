@@ -94,7 +94,7 @@ Category *hints* from the parser on the raw source (not final labels; splits pen
 
 ## 10. Intended use
 
-- Intended: Realistic user-style prompts; labelled later (rows 2.1.4, 2.3.5) to top up under-filled categories.
+- Intended: Realistic user-style prompts; labelled later (row 2.1.4) to top up under-filled categories.
 - Out of scope: Any use that keeps or tries to recover contributor identity (`user_id`).
 
 ## 11. Maintenance and version

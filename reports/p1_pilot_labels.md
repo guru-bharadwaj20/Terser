@@ -122,4 +122,4 @@ collapses in all 6 categories.
    `python -m terser.phase1.version_spaces --labels data/pilot/labels.jsonl --out reports/p1_version_spaces.md`.
 4. Then flip 1.3.6 (and 1.3.7, if the re-run stands) in CONTRIBUTING.md.
 
-The position-bias result is also direct input for Phase 2 judge validation (C2.3–C2.5).
+The position-bias result is also direct input for the Phase 2 judge protocol (C2.6).

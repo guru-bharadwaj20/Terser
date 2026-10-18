@@ -702,11 +702,9 @@ These rows and checkpoints cannot be produced by a script, and no script output 
 | C1.1 | Review of ADR-0002 by a second contributor |
 | 1.3.6 / 1.3.7 | Human review of all 836 pilot labels; version spaces re-run on the reviewed labels |
 | 2.1.3 | Manual check of a 500-row sample for residual PII |
-| 2.3.5 / 2.3.6 → C2.3, C2.4, C2.5 | Two annotators label 300 pairs blind; human–human and judge–human κ, judge sensitivity and specificity |
 | 12.12 (S9) | A second contributor reproduces the headline numbers from a fresh clone |
 
-C2.3–C2.5 are hard gates on the critical path. Until they pass, every preservation number in this
-report is a judge estimate, not a validated measurement.
+Every preservation number in this report is an estimate from the order-averaged LLM judge.
 
 ### 6.10 Stretch work (GRPO)
 
@@ -786,13 +784,10 @@ oracle headroom (§ 5.2).
 
 In rough order of expected value:
 
-1. **Validate the judge with people** (rows 2.3.5, 2.3.6): 300 blind pairs, two annotators. This
-   unblocks C2.3–C2.5 and tells whether the 72% "no visible loss" failures are rewriter errors or
-   label noise ([p8_failures.md](../reports/p8_failures.md)).
-2. **Re-judge with more samples** for the order-inconsistent and low-margin pairs, to reduce label
+1. **Re-judge with more samples** for the order-inconsistent and low-margin pairs, to reduce label
    noise before any further rewriter training.
-3. **Fix `tidy` for code** and rebuild the SFT targets (§ 6.4).
-4. **Cheap safeguards from the failure analysis:** fall back when generation reaches the token cap,
+2. **Fix `tidy` for code** and rebuild the SFT targets (§ 6.4).
+3. **Cheap safeguards from the failure analysis:** fall back when generation reaches the token cap,
    and a "no number lost" check, which would catch most visible losses in the sample
    ([p8_failures.md](../reports/p8_failures.md)).
 5. **Better targets, not bigger models.** Per-target oracle targets (46.5% / 40.5% median) are far

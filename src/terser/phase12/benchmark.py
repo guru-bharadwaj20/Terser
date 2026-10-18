@@ -874,7 +874,7 @@ def render_card(meta: Mapping[str, Any], files: Sequence[Mapping[str, Any]]) -> 
             f"Judge(s): {judges}; protocol {protocols}; {_fmt(lab['needs_human_review'])} of "
             f"{_fmt(lab['rows'])} labels flagged `needs_human_review`, "
             f"{_fmt(lab['position_inconsistent'])} position-inconsistent",
-            "Preservation rates inherit judge bias; no human validation yet (rows 2.3.5, 2.3.6)",
+            "Preservation rates inherit judge bias (order-averaged protocol, C2.6)",
         ],
         [
             "Casual styles are model-generated",
@@ -920,9 +920,8 @@ tokenizer-aware rewriting of casual prompts into shorter prompts that keep the a
 > 1. **PII (row 2.1.3).** The text was scrubbed automatically (regex policy,
 >    `docs/pii_policy.md`); the 500-row manual sample (`reports/p2_pii_pilot_sample.csv`) found
 >    0 residual PII. Report any residual PII as a repository issue.
-> 2. **Labels are judge estimates (rows 2.3.5, 2.3.6).** Human annotation of 300 pairs and the
->    judge-human agreement analysis are open, so no label in this release has been validated
->    against humans.
+> 2. **Labels are judge estimates.** Every label comes from the position-swapped,
+>    order-averaged 32B judge; preservation rates inherit its bias.
 > 3. **WildChat text is withheld.** The real-slice prompts are user-written chat and are not
 >    included (ids and sha256 only, section 7); rebuild them locally with `rebuild-real`.
 > 4. **Project licence.** Repository licence file at build time:

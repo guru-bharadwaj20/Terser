@@ -23,7 +23,7 @@ Raw tables: `p5_adaboost.csv`, `p5_rf_grid.csv`, `p5_lgbm_grid.csv`,
 `dolly:12133`, `gsm8k:train:2861`). Little information is removed (low `sum_si_removed`), so
 every stump votes "preserved" and boosting keeps raising their weight. These are degradations
 the features cannot see, e.g. a dropped politeness cue that changes the target's tone, or a
-judge-noise label. They are candidates for the row 2.3.5 human review.
+judge-noise label.
 
 ## 5.1.3 Random forest (C5.2)
 
