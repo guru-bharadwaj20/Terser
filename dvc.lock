@@ -492,8 +492,8 @@ stages:
       size: 5734
     - path: src/terser/features/span.py
       hash: md5
-      md5: b79e476f0ab962ebbd8247fcebcc9c8b
-      size: 7528
+      md5: 88694327bf176c3bc3e7286800d267db
+      size: 7988
     - path: src/terser/phase3/build_features.py
       hash: md5
       md5: bcdf78271f417a90fbe276615237497a
