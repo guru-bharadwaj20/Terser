@@ -48,4 +48,15 @@ class ResponseCache:
             return None
 
     def put(self, key: str, payload: dict[str, Any]) -> None:
-        atomic_write_json(self._path(key), payload)
+        """Store ``payload`` under ``key``.
+
+        Two threads that answer the same key race on the final rename; on Windows the loser gets
+        ``PermissionError`` (the target is open or being replaced). The entry is content-addressed,
+        so when the file already exists the other writer's copy is as good as ours.
+        """
+        path = self._path(key)
+        try:
+            atomic_write_json(path, payload)
+        except PermissionError:
+            if not path.exists():
+                raise
