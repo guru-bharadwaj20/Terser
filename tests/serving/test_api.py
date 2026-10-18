@@ -30,7 +30,7 @@ def _client(quality: object = None) -> TestClient:
         quality=crash if quality == "crash" else None,
         counter=lambda s, t: len(s.split()),
     )
-    return TestClient(create_app(svc, ServiceMetrics(gpu=False)))
+    return TestClient(create_app(svc, ServiceMetrics()))
 
 
 def test_rewrite_example_request() -> None:

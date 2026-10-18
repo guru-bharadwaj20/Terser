@@ -27,7 +27,11 @@ FIX = Path(__file__).resolve().parents[1] / "fixtures"
 
 
 def _prompts(n: int = 100) -> list[str]:
-    lines = (FIX / "tokenizer_strings.jsonl").read_text(encoding="utf-8").split("\n")
+    lines = (
+        (FIX.parent.parent / "data" / "monitoring" / "tokenizer_strings.jsonl")
+        .read_text(encoding="utf-8")
+        .split("\n")
+    )
     texts = [json.loads(x)["text"] for x in lines if x]
     casual = [
         json.loads(x)["prompt"]

@@ -14,13 +14,14 @@ from terser.tokenizers import available_targets, count_tokens
 from terser.tokenizers import count as tc
 
 FIXTURES = Path(__file__).parent / "fixtures"
+MONITORING = Path(__file__).parent.parent / "data" / "monitoring"
 STRINGS = [
     json.loads(line)["text"]
     # split on "\n" only: str.splitlines() would also break on U+2028 etc. inside strings
-    for line in (FIXTURES / "tokenizer_strings.jsonl").read_text(encoding="utf-8").split("\n")
+    for line in (MONITORING / "tokenizer_strings.jsonl").read_text(encoding="utf-8").split("\n")
     if line
 ]
-SNAPSHOT = json.loads((FIXTURES / "tokenizer_counts.json").read_text(encoding="utf-8"))
+SNAPSHOT = json.loads((MONITORING / "tokenizer_counts.json").read_text(encoding="utf-8"))
 LOCAL_TARGETS = ["gpt-4o", "qwen2.5", "llama-3.1", "phi3.5"]
 HF_REPOS = {
     "qwen2.5": "Qwen/Qwen2.5-7B-Instruct",

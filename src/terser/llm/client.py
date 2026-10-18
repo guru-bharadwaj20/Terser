@@ -211,16 +211,20 @@ class LLMClient:
         if input_tokens_estimate is None:
             prompt = json.dumps(messages, ensure_ascii=False) + (system or "")
             input_tokens_estimate = approx_tokens(prompt)
-        self.budget.check(Usage(provider, model, input_tokens_estimate, max_tokens, key))
-
-        result = self.transport(provider, model, messages, max_tokens, system, dict(params))
+        estimate = Usage(provider, model, input_tokens_estimate, max_tokens, key)
+        reservation = self.budget.reserve(estimate)
+        try:
+            result = self.transport(provider, model, messages, max_tokens, system, dict(params))
+        except BaseException:
+            self.budget.release(reservation)
+            raise
         if result.usage_reported:
             actual = Usage(provider, model, result.input_tokens, result.output_tokens, key)
         else:
             # Server omitted usage: charge approximate counts so token caps still bound compute.
             out_estimate = approx_tokens(result.text) if result.text else 0
             actual = Usage(provider, model, input_tokens_estimate, out_estimate, key, False)
-        usd = self.budget.record(actual)
+        usd = self.budget.record(actual, reservation)
         payload: dict[str, Any] = {
             "provider": provider,
             "model": model,
