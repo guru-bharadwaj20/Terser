@@ -284,6 +284,7 @@ def test_run_writes_six_candidates_with_schema(tmp_path: Path) -> None:
     assert bad["rejected"] is True and bad["rejection_reason"] == "payload_altered"
     assert summary.rejected["llm_high"] == 1
     assert summary.written["llm_low"] == 2 and len(fake.calls) == 6
+    assert summary.llm_calls == 6 and summary.cached_calls == 0
 
 
 def test_run_is_resumable_and_cached(tmp_path: Path) -> None:
@@ -440,7 +441,8 @@ def test_concurrent_workers_match_sequential_output(tmp_path: Path) -> None:
     par = make_settings(par_dir, workers=4)
     run(seq, make_client(seq_dir, FakeRewriter()))
     fake = FakeRewriter()
-    run(par, make_client(par_dir, fake))
+    summary = run(par, make_client(par_dir, fake))
     assert seq.output_path.read_text() == par.output_path.read_text()
+    assert summary.llm_calls == 6 and summary.cached_calls == 0  # counted once, while warming
     with pytest.raises(ValueError):
         make_settings(tmp_path, workers=0)
