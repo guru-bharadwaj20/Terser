@@ -43,7 +43,6 @@ NEGATIONS: Final = frozenset(
         "aren't",
         "avoid",
         "except",
-        "n't",
     }
 )
 
@@ -52,9 +51,6 @@ CONSTRAINT_WORDS: Final = frozenset(
         "must",
         "only",
         "exactly",
-        "at",
-        "least",
-        "most",
         "maximum",
         "minimum",
         "max",
@@ -183,9 +179,14 @@ _NUMBER_WORDS: Final = frozenset(
 )
 
 
+def _norm(token: str) -> str:
+    """Lower case with a curly apostrophe folded to ``'`` ("Don’t" -> "don't")."""
+    return token.lower().replace("’", "'")
+
+
 def is_negation(token: str) -> bool:
     """True for negation words."""
-    return token.lower() in NEGATIONS
+    return _norm(token) in NEGATIONS
 
 
 def is_number(token: str) -> bool:
@@ -196,14 +197,14 @@ def is_number(token: str) -> bool:
 
 def is_constraint(token: str) -> bool:
     """True for words that usually state a constraint on the answer."""
-    return token.lower() in CONSTRAINT_WORDS
+    return _norm(token) in CONSTRAINT_WORDS
 
 
 def is_filler(token: str) -> bool:
     """True for conversational filler / hedging words."""
-    return token.lower() in FILLER_WORDS
+    return _norm(token) in FILLER_WORDS
 
 
 def is_stopword(token: str) -> bool:
     """True for English function words."""
-    return token.lower() in STOPWORDS
+    return _norm(token) in STOPWORDS

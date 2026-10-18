@@ -70,8 +70,12 @@ EmbedFn = Callable[[Sequence[str]], np.ndarray]
 def add_derived_features(df: pd.DataFrame) -> pd.DataFrame:
     """Copy of ``df`` with :data:`DERIVED_FEATURES` added from its existing columns."""
     out = df.copy()
-    total = out["prompt_mean_si"] * out["prompt_words"]
-    out["si_removed_share"] = np.where(total > 0, out["sum_si_removed"] / total, 0.0)
+    total = (out["prompt_mean_si"] * out["prompt_words"]).to_numpy(dtype=np.float64)
+    removed = out["sum_si_removed"].to_numpy(dtype=np.float64)
+    # 0 for an empty prompt; a NaN input stays NaN instead of silently becoming 0.
+    share = np.divide(removed, total, out=np.zeros_like(total), where=total > 0)
+    share[np.isnan(total) | np.isnan(removed)] = np.nan
+    out["si_removed_share"] = share
     return out
 
 
