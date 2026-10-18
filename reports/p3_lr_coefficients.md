@@ -35,3 +35,5 @@ L2, C = 1, fitted on all labelled pairs; odds ratio per +1 SD.
 | prompt_constraints | -0.025 | 0.975 |
 | prompt_filler | -0.010 | 0.990 |
 | cat_fact | -0.009 | 0.991 |
+
+![LR reliability diagram](figures/p3_lr_calibration.png)

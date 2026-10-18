@@ -242,6 +242,12 @@ applied to the refit `gate.onnx`.
 
 ## 7. Limitations and failure modes
 
+**Feature fix after training (2026-10-18).** `has_code` used to count blank lines as
+indentation, so plain prose with paragraph breaks was flagged as code. It now needs four spaces
+or a tab before text. The committed gate and the numbers above predate this fix; retrain
+(`python -m terser.phase11.train_fast_path`) so that training and serving use the same
+definition.
+
 | Failure mode | Share of degraded cases | Example (hashed id or link) | Mitigation in place |
 | :--- | ---: | :--- | :--- |
 | Dropped constraint | not measured | — | Tagger never deletes negations, numbers, constraint keywords, code or quoted spans; `constraint_ratio` feature |

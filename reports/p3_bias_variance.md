@@ -43,3 +43,5 @@ bias of 0.30-0.32. KNN regression of savings shows the same floor: variance drop
 9 but bias stays near 395 (an RMSE of about 20 pp) from k = 15 on, which is why C3.5 fails.
 More capacity or tuning inside these families cannot remove this error; it needs better
 features, which is what Phases 5 and 8 test (gradient boosting 0.78 AUC, TextCNN).
+
+![bias-variance](figures/p3_bias_variance.png)

@@ -80,3 +80,8 @@ select = ["E", "F", "I", "UP", "B"]
 python_version = "3.12"
 ignore_missing_imports = true
 warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Markers are registered in tests/conftest.py (MARKERS); a typo in a mark is an error.
+addopts = "--strict-markers"

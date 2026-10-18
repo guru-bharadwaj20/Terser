@@ -64,3 +64,50 @@ def test_feature_values_and_gate_vector() -> None:
     assert [r["n_words"] for r in recs] == [2, 1]
     v = gate_vector(f, extract_features("use Python", counter=words))
     assert len(v) == len(GATE_FEATURE_NAMES) and v[-1] == 0.0
+
+
+def _words(s: str) -> int:
+    return len(s.split())
+
+
+def test_has_code_ignores_blank_lines() -> None:
+    prose = "First paragraph.\n\n\n\nSecond paragraph after blank lines."
+    assert extract_features(prose, counter=_words)["has_code"] == 0
+    assert extract_features("look:\n    x = 1", counter=_words)["has_code"] == 1
+
+
+# Golden values (word counter, no network): an independent record of the training-time feature
+# definition, so a change on either the offline or the online side shows up here.
+_GOLDEN = {
+    "um so basically can you ONLY list 3 things?": {
+        "n_words": 9.0,
+        "filler_ratio": 3 / 9,
+        "n_hedges": 1.0,
+        "n_constraints": 1.0,
+        "n_questions": 1.0,
+        "has_code": 0.0,
+    },
+    "Do not use numpy.\n\tprint(x)": {
+        "n_words": 6.0,
+        "n_constraints": 1.0,
+        "n_lines": 2.0,
+        "has_code": 1.0,
+    },
+}
+
+
+@pytest.mark.parametrize("prompt", list(_GOLDEN))
+def test_features_match_golden_values(prompt: str) -> None:
+    got = extract_features(prompt, counter=_words)
+    for name, want in _GOLDEN[prompt].items():
+        assert got[name] == pytest.approx(want), name
+
+
+def test_span_lexicons_and_tokens() -> None:
+    from terser.features.alignment import tokenize
+    from terser.features.lexicons import is_constraint, is_negation, is_number
+
+    assert tokenize("keep 2.5 kg and 40% now") == ["keep", "2.5", "kg", "and", "40%", "now"]
+    assert is_number("2.5") and is_number("40%")
+    assert is_negation("don’t") and is_negation("Can’t")
+    assert not any(map(is_constraint, ["at", "least", "most"]))

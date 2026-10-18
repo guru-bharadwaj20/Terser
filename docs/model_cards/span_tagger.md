@@ -189,6 +189,13 @@ grouped out-of-fold scores of Phase 2 candidates) and its metrics are documented
 
 ## 7. Limitations and failure modes
 
+**Feature fix after training (2026-10-18).** The token features changed after the committed
+tagger and the numbers above were produced: decimals and percentages ("2.5", "40%") are now one
+token, so `is_number` fires on them; negations with a curly apostrophe ("donâ€™t") count as
+negations; and "at", "least" and "most" are no longer constraint keywords on their own. The
+published metrics predate this fix. Retrain (`python -m terser.phase11.train_fast_path`) before
+the serving features match the training features again.
+
 | Failure mode | Share of degraded cases | Example (hashed id or link) | Mitigation in place |
 | :--- | ---: | :--- | :--- |
 | Dropped constraint | not measured | — | Hard-keep for negations, numbers and constraint keywords; gate `constraint_ratio` feature |

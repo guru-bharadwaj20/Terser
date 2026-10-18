@@ -180,8 +180,6 @@ def test_answer_accuracy(output: str, reference: str, correct: bool) -> None:
 
 
 def _pilot_reason_answers() -> list[str]:
-    if not REASON_PROMPTS.is_file():
-        return []
     with REASON_PROMPTS.open(encoding="utf-8") as fh:
         return sorted({json.loads(line)["answer"] for line in fh if line.strip()})
 
@@ -189,7 +187,6 @@ def _pilot_reason_answers() -> list[str]:
 PILOT_ANSWERS = _pilot_reason_answers()
 
 
-@pytest.mark.skipif(not PILOT_ANSWERS, reason="data/pilot/prompts/reason.jsonl not present")
 @pytest.mark.parametrize(
     "template",
     [
@@ -204,7 +201,6 @@ def test_pilot_reason_answer_formats(template: str) -> None:
     assert failures == []
 
 
-@pytest.mark.skipif(not PILOT_ANSWERS, reason="data/pilot/prompts/reason.jsonl not present")
 def test_pilot_reason_wrong_answers_fail() -> None:
     wrong = "Working: 1 + 2 = 3.\nThe answer is 987654."
     assert [a for a in PILOT_ANSWERS if reason_metric(wrong, a).passed] == []

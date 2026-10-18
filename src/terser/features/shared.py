@@ -32,6 +32,9 @@ __all__ = [
 Counter = Callable[[str], int]
 
 _WORD_RE = re.compile(r"[A-Za-z0-9']+")
+# The gate's own lexicons, deliberately separate from terser.features.lexicons (the span tagger's
+# token-level sets): they are part of the committed fast-path gate's feature definition, so they
+# change only together with a retrained gate. tests/features/test_parity.py pins them.
 _FILLER = frozenset(
     "um uh like basically actually literally just really so ok okay well kinda sorta".split()
 )
@@ -45,6 +48,9 @@ _CONSTRAINT_RE = re.compile(
     r"without|include|exclude)\b",
     re.IGNORECASE,
 )
+
+# Four spaces or a tab at the start of a line; ``\s`` would also count blank lines.
+_INDENTED = re.compile(r"^(?: {4}|\t)\S", re.M)
 
 FEATURE_NAMES: tuple[str, ...] = (
     "n_chars",
@@ -88,7 +94,7 @@ def extract_features(
         "n_hedges": float(len(_HEDGE_RE.findall(prompt))),
         "n_constraints": float(len(_CONSTRAINT_RE.findall(prompt))),
         "n_questions": float(prompt.count("?")),
-        "has_code": float("```" in prompt or bool(re.search(r"^\s{4}\S", prompt, re.M))),
+        "has_code": float("```" in prompt or bool(_INDENTED.search(prompt))),
         "digit_ratio": sum(c.isdigit() for c in prompt) / n_chars if n_chars else 0.0,
         "upper_ratio": sum(c.isupper() for c in letters) / len(letters) if letters else 0.0,
         "unique_word_ratio": len(set(words)) / n_words if n_words else 0.0,

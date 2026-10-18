@@ -64,7 +64,8 @@ def test_build_writes_files_and_merges(tmp_path: Path) -> None:
         return texts, {"generator": f"fake{kw.get('seed', '')}", "latency_mean_s": 0.001}
 
     class Res:
-        train_ids: set[str] = set()
+        def __init__(self) -> None:
+            self.train_ids: set[str] = set()
 
     out = tmp_path / "out"
     meta = C.build(
@@ -100,7 +101,8 @@ def test_leak_check(tmp_path: Path) -> None:
     write_jsonl(vp, _prompts(2))
 
     class Res:
-        train_ids = {"v1"}
+        def __init__(self) -> None:
+            self.train_ids = {"v1"}
 
     with pytest.raises(ValueError, match="train span table"):
         C.build("val", tmp_path / "o", ["hmm"], val_prompts=vp, resources=Res())  # type: ignore[arg-type]

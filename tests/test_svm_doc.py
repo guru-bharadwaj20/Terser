@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -84,3 +85,24 @@ def test_polynomial_feature_count_quoted_in_doc() -> None:
     from math import comb
 
     assert 5e8 < comb(1536 + 3, 3) < 7e8
+
+
+DOC = Path(__file__).resolve().parents[1] / "docs" / "derivations" / "svm.md"
+
+
+def test_numbers_quoted_in_doc() -> None:
+    text = DOC.read_text(encoding="utf-8")
+    assert "$w = (0.5, 0.5)$" in text
+    assert r"$2\sqrt 2 \approx 2.828427$" in text
+    assert f"{2 * math.sqrt(2):.6f}" == "2.828427"
+    assert r"$6 \times 10^8$ features" in text
+
+
+def test_project_dual_svm_reproduces_running_example() -> None:
+    from terser.models.classical.scratch_svm import DualSVM
+
+    svm = DualSVM(C=None, kernel="linear").fit(X, Y)
+    np.testing.assert_allclose(svm.coef_, [0.5, 0.5], atol=1e-5)
+    assert svm.intercept_ == pytest.approx(0.0, abs=1e-5)
+    assert svm.margin_width == pytest.approx(2 * math.sqrt(2), abs=1e-4)
+    np.testing.assert_allclose(svm.alpha_, [0.25, 0.25], atol=1e-5)
