@@ -25,9 +25,10 @@ Untuned LightGBM (lr 0.1, 31 leaves, min_child 20, 150 trees): AUC **0.7733**. B
   learning-rate axis coarsely. With three hyperparameters and a smooth response surface,
   Bayesian search has little room to beat random search.
 * **C10.2: documented plateau.** Tuning lifts the gate from 0.7733 to 0.7829 (+0.0095, about 13
-  seed-sd), just under the +0.01 bar. Every method converges to the same region (learning rate
-  about 0.02, many trees' worth of shrinkage, large `min_child_samples`), i.e. stronger
-  regularisation than the defaults, and the best-so-far curves are flat after about 20 trials.
+  seed-sd), just under the +0.01 bar. The +0.0095 is optimistic: each "best" is the maximum of 60
+  trials scored on the same OOF folds, with no held-out re-evaluation, so it carries selection
+  bias. The methods converge on a learning rate of about 0.02 (stronger shrinkage than the
+  default 0.1); `min_child_samples` does not converge (GP 197, grid 200, TPE 152, random 25), and the best-so-far curves are flat after about 20 trials.
   The remaining error is in the features (rows 3.3.7, 5.4: which spans were removed), not in the
   GBM's hyperparameters, so more search would not reach +0.01.
 * **MLP.** The tuned MLP (0.7749, TPE) stays below the tuned GBM, matching C4.4: the classical

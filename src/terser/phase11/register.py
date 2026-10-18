@@ -14,6 +14,12 @@ checkpoints passed, source run); metrics come from ``reports/p11_fast_path.json`
 ``reports/p8_rewriter_val.json``. :func:`terser.tracking.lineage.trace` is run on every
 Production / Staging alias as the check. Output: ``reports/p11_registry.md``.
 
+This rebuilds only the five components above (gate, tagger, rewriter rungs 1-3, i.e. registry
+v1-v6). Later rewriter versions (v7-v9 from row 8.3.4, v10 from row 10.7) were registered with
+``register_one`` / :mod:`terser.phase10.rewriter_hpo` and are **not** recreated here; re-register
+them with those commands after a fresh rebuild. Anything below the ``<!-- manual -->`` marker of
+an existing report is kept, so the hand-written notes on those versions survive a re-run.
+
 CLI::
 
     python -m terser.phase11.register
@@ -34,6 +40,8 @@ from terser.tracking.lineage import MODEL_NAMES, register_with_lineage, trace
 from terser.tracking.runs import promote, start_run
 
 __all__ = ["COMPONENTS", "load_metrics", "main", "register_one"]
+
+MANUAL = "<!-- manual -->"
 
 REWRITER_METRICS = {"median_savings": "median_savings", "preserved": "preserved"}
 # Each component's metrics: (json file, key or None, {logged name: field}). The files are
@@ -196,7 +204,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         ]
         lines.append("")
-    args.report.write_text("\n".join(lines), encoding="utf-8")
+    text = "\n".join(lines)
+    if args.report.is_file():
+        old = args.report.read_text(encoding="utf-8")
+        if MANUAL in old:
+            text = text.rstrip("\n") + "\n\n" + old[old.index(MANUAL) :]
+    args.report.write_text(text, encoding="utf-8", newline="\n")
     return 0
 
 
