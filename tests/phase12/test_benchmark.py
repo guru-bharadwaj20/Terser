@@ -265,18 +265,19 @@ def test_license_and_notice(env: Env) -> None:
     assert "* Qwen/Qwen2.5-32B-Instruct-AWQ\n  Licence: Apache-2.0" in notice
     assert "wrote the casual prompts" in notice and "judged target outputs" in notice
     assert (
-        "microsoft/llmlingua-2-bert-base-multilingual-cased-meetingbank\n  Licence: NOT" in notice
+        "microsoft/llmlingua-2-bert-base-multilingual-cased-meetingbank\n  Licence: Apache-2.0"
+        in notice
     )
     assert "outputs are NOT in this release" in notice
     assert "Llama 3.1 Community Licence does not apply" in notice
 
 
-def test_card_states_open_preconditions(env: Env) -> None:
+def test_card_states_known_limitations(env: Env) -> None:
     B.build(env.out, env.inputs)
     card = (env.out / "README.md").read_text(encoding="utf-8")
     assert card.startswith("# Data Card: `terser-bench-v1`")
-    assert "Not yet cleared for public release" in card
-    assert "500-row manual PII sample has not been done" in card
+    assert "Known limitations" in card
+    assert "0 residual PII" in card
     assert "rows 2.3.5, 2.3.6" in card and "judge estimates" in card
     assert "`deadbeef`" in card and B.REPO_URL in card
     assert "rebuild-real" in card

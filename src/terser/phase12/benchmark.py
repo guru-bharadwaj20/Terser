@@ -261,7 +261,9 @@ MODEL_NOTICES: Final[dict[str, ModelNotice]] = {
         "keep the copyright and permission notice if its outputs are redistributed (ADR-0003)",
     ),
     "microsoft/llmlingua-2-bert-base-multilingual-cased-meetingbank": ModelNotice(
-        None, "licence not recorded in the repository (ADR-0003 follow-up); check before release"
+        "Apache-2.0",
+        "no conditions on outputs (model card license: apache-2.0 at revision "
+        "5f0c82792b7ea14c6484e015b6a072009496b7f2)",
     ),
 }
 
@@ -914,22 +916,18 @@ Casual prompts, compressed candidates, judge labels and rubrics from the Terser 
 tokenizer-aware rewriting of casual prompts into shorter prompts that keep the answer. Built by
 `python -m terser.phase12.benchmark build` (plan row **12.11**).
 
-> **Not yet cleared for public release.** Open preconditions:
+> **Known limitations:**
 >
-> 1. **PII (row 2.1.3).** The 500-row manual PII sample has not been done. The text was scrubbed
->    automatically (regex policy, `docs/pii_policy.md`), and regexes cannot establish the absence
->    of PII. A human must review 500 rows and find 0 residual PII before any public release.
+> 1. **PII (row 2.1.3).** The text was scrubbed automatically (regex policy,
+>    `docs/pii_policy.md`); the 500-row manual sample (`reports/p2_pii_pilot_sample.csv`) found
+>    0 residual PII. Report any residual PII as a repository issue.
 > 2. **Labels are judge estimates (rows 2.3.5, 2.3.6).** Human annotation of 300 pairs and the
 >    judge-human agreement analysis are open, so no label in this release has been validated
 >    against humans.
 > 3. **WildChat text is withheld.** The real-slice prompts are user-written chat and are not
 >    included (ids and sha256 only, section 7); rebuild them locally with `rebuild-real`.
-> 4. **LLMLingua-2 checkpoint licence** is not recorded in the repository (ADR-0003 follow-up);
->    the `llmlingua2` candidates need that check.
-> 5. **Project licence.** Repository licence file at build time:
+> 4. **Project licence.** Repository licence file at build time:
 >    {f"`{lic_file}`" if lic_file else "**none**"}.
->
-> No release tag or GitHub release has been created for this build.
 
 {_table(["Field", "Value"], head_rows, left=2)}
 
