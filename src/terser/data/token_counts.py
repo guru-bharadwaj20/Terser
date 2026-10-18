@@ -60,10 +60,15 @@ class MissingTokenCountsError(RuntimeError):
 
 
 def default_targets() -> list[str]:
-    """Every target tokenizer usable here (``claude`` only with an API key)."""
+    """The local target tokenizers (no ``claude``).
+
+    ``claude`` counts need a network call and an API key, so a default that included it whenever
+    ``ANTHROPIC_API_KEY`` happened to be set made the DVC output machine-dependent. Ask for it
+    explicitly with ``--targets ... claude``.
+    """
     from terser.tokenizers import available_targets
 
-    return available_targets()
+    return [t for t in available_targets() if t != "claude"]
 
 
 def make_batch_counter(target: str) -> BatchCounter:
@@ -100,11 +105,29 @@ def _sha(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def _ref_tag(target: str) -> str:
+    """Short digest of the tokenizer behind ``target`` (the Claude model for ``claude``)."""
+    from terser.tokenizers import count as tc
+
+    spec = tc.TARGETS.get(target)
+    if spec is None:
+        ref = target
+    elif spec.kind == "anthropic":
+        ref = tc.claude_model()
+    else:
+        ref = spec.ref
+    return _sha(ref)[:10]
+
+
 class _CountCache:
-    """Per-target JSON map ``sha256(text) -> tokens``."""
+    """Per-target JSON map ``sha256(text) -> tokens``.
+
+    The file name carries the tokenizer reference (HF repo, tiktoken encoding, Claude model), so
+    changing the model behind a target name starts a new cache instead of reusing stale counts.
+    """
 
     def __init__(self, root: Path | None, target: str) -> None:
-        self.path = None if root is None else root / f"{target}.json"
+        self.path = None if root is None else root / f"{target}-{_ref_tag(target)}.json"
         self.data: dict[str, int] = {}
         if self.path is not None and self.path.is_file():
             self.data = {k: int(v) for k, v in json.loads(self.path.read_text("utf-8")).items()}

@@ -398,7 +398,9 @@ class CandidateSettings:
     prompt_version: str = "rewrite_v1"
     temperature: float = 0.0
     max_rewrite_tokens: int = 1024
-    length_targets: tuple[str, ...] = ("gpt-4o", "qwen2.5", "llama-3.1")
+    # Every respond target's tokenizer too (phi3.5 since ADR-0011): a rewrite longer on any of
+    # them is rejected.
+    length_targets: tuple[str, ...] = ("gpt-4o", "qwen2.5", "llama-3.1", "phi3.5")
     operator_target: str | None = None
     llmlingua_model: str = DEFAULT_LLMLINGUA_MODEL
     llmlingua_rate: float = 0.5
@@ -740,7 +742,12 @@ def settings_from_config(cfg: DictConfig) -> CandidateSettings:
         prompt_version=str(p.get("prompt_version", "rewrite_v1")),
         temperature=float(p.get("temperature", 0.0)),
         max_rewrite_tokens=int(p.get("max_rewrite_tokens", 1024)),
-        length_targets=tuple(str(t) for t in p.get("length_targets") or ()),
+        # An omitted key keeps the default targets; only an explicit [] disables the check.
+        length_targets=(
+            CandidateSettings.length_targets
+            if p.get("length_targets") is None
+            else tuple(str(t) for t in p["length_targets"])
+        ),
         operator_target=p.get("operator_target"),
         llmlingua_model=str(p.get("llmlingua_model", DEFAULT_LLMLINGUA_MODEL)),
         llmlingua_rate=float(p.get("llmlingua_rate", 0.5)),

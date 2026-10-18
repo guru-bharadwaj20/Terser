@@ -177,3 +177,23 @@ def test_cli_end_to_end_gpt4o(tmp_path: Path, capsys: pytest.CaptureFixture[str]
     summary = json.loads(capsys.readouterr().out)
     assert summary["missing"] == 0 and summary["rows"] == 5 and summary["unique_texts"] == 4
     assert Path(summary["output"]).is_file()
+
+
+def test_default_targets_never_include_claude(monkeypatch: pytest.MonkeyPatch) -> None:
+    from terser.data.token_counts import default_targets
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test")
+    targets = default_targets()
+    assert "claude" not in targets and "gpt-4o" in targets
+
+
+def test_count_cache_file_is_keyed_by_tokenizer(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from terser.data.token_counts import _CountCache
+
+    monkeypatch.setenv("TERSER_CLAUDE_MODEL", "claude-a")
+    a = _CountCache(tmp_path, "claude").path
+    monkeypatch.setenv("TERSER_CLAUDE_MODEL", "claude-b")
+    b = _CountCache(tmp_path, "claude").path
+    assert a != b and a is not None and a.name.startswith("claude-")

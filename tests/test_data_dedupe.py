@@ -192,3 +192,9 @@ def test_pilot_fixture_runs() -> None:
         pytest.skip("pilot data not present")
     result = dd.dedupe(dd.read_jsonl(path))
     assert result.report.near_duplicate_rate_after < 0.01
+
+
+def test_casual_records_are_compared_on_their_clean_instruction() -> None:
+    rec = {"prompt": "yo can u tell me the capital lol", "instruction": "Name the capital."}
+    assert dd.record_text(rec) == "Name the capital."
+    assert dd.record_text({"prompt": "pilot text"}) == "pilot text"
