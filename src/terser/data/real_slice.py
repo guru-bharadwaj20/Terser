@@ -20,7 +20,7 @@ Pipeline (deterministic for a fixed revision and seed):
 5. **Category-tag** with :func:`tag_category`, an ordered keyword rule set; prompts matching no
    rule are dropped. Tags are heuristic and marked ``category_source: "rules"``.
 6. **Sample** a category-balanced slice (quota per category, shortfalls redistributed) in
-   ``sha256(seed:id)`` order, write ``data/processed/real_slice/test.jsonl`` and freeze it with
+   ``sha256("terser-real-slice:<seed>:<source_id>")`` order, write ``data/processed/real_slice/test.jsonl`` and freeze it with
    :func:`terser.data.splits.freeze_test`.
 
 CLI::
@@ -287,7 +287,7 @@ def sample_balanced(
 
     Each category gets ``size // K`` slots (remainder to the first categories in
     :class:`Category` order); slots a category cannot fill go to categories with spare records.
-    Within a category, records are taken in ``sha256(seed:source_id)`` order.
+    Within a category, records are taken in ``sha256("terser-real-slice:<seed>:<source_id>")`` order.
     """
     pools: dict[str, list[Mapping[str, Any]]] = {c.value: [] for c in Category}
     for rec in records:

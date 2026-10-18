@@ -1,5 +1,5 @@
-# Row 8.3.4 (rung 2): Qwen2.5-1.5B LoRA r=16, alpha=32, bf16. Escalation (3B LoRA, 7B QLoRA)
-# only if this rung fails C8.3. Queued: gpu_queue/sft-qwen1.5b-lora.yaml.
+# Row 8.3.4, v2 data: Qwen2.5-1.5B LoRA r=16, alpha=32, bf16, retrained on the v2 SFT set
+# (rung tag sft15v2 in reports/p8_rewriter_val.md). Ran by hand on the GPU box; no queue job.
 name: sft_qwen15b_lora_v2
 phase: 8
 row: "8.3.4"

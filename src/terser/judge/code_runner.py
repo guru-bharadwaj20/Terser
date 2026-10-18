@@ -524,9 +524,10 @@ class _Capped:
     def write(self, s):
         room = self._limit - self._n
         if room > 0:
-            chunk = s[:room]
-            self._n += len(chunk)
-            self._stream.write(chunk)
+            # max_output_bytes counts UTF-8 bytes, not characters.
+            data = s.encode("utf-8", "replace")[:room]
+            self._n += len(data)
+            self._stream.write(data.decode("utf-8", "ignore"))
         return len(s)
 
     def flush(self):
