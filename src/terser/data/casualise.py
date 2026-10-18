@@ -157,7 +157,8 @@ def render_check_prompt(instruction: str, casual: str, version: str = DEFAULT_CH
 def clean_casual(text: str) -> str:
     """Strip a label line and quotes wrapping the whole message."""
     out = _LABEL_RE.sub("", text.strip()).strip()
-    if len(out) >= 2 and out[0] == out[-1] and out[0] in "\"'":
+    # Only quotes that wrap the whole message: '"foo" is what i mean, not "bar"' keeps both.
+    if len(out) >= 2 and out[0] == out[-1] and out[0] in "\"'" and out[0] not in out[1:-1]:
         out = out[1:-1].strip()
     return out
 
@@ -328,9 +329,10 @@ def run_casualise(
     temperature: float = DEFAULT_TEMPERATURE,
 ) -> CasualiseStats:
     """Casualise every (record, style); write accepted and rejected records in input order."""
-    if is_stand_in(model) and "smoke" not in out_path.parts:
+    if is_stand_in(model) and not ("smoke" in out_path.parts and "smoke" in rejected_path.parts):
         raise ValueError(
-            f"{model!r} looks like a CPU stand-in; its output may only go under a smoke/ dir"
+            f"{model!r} looks like a CPU stand-in; its accepted and rejected output may only go "
+            "under a smoke/ dir"
         )
     jobs = [(rec, style) for rec in clean_records for style in styles]
     stats = CasualiseStats()

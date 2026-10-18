@@ -47,6 +47,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from terser.llm import BudgetExceededError, LLMClient, LocalLLMUnavailableError, ResponseCache
+from terser.llm.client import LLMResponse
 
 if TYPE_CHECKING:
     from omegaconf import DictConfig
@@ -623,16 +624,21 @@ def run_candidates(
 
         path.parent.mkdir(parents=True, exist_ok=True)
         t0 = time.perf_counter()
+        warmed = False
         if kind == "llm" and settings.workers > 1:
             # Warm the response cache concurrently so vLLM can batch; the ordered loop below
-            # then reads every rewrite from the cache and writes records in prompt order.
+            # then reads every rewrite from the cache, validates it once and writes records in
+            # prompt order. Calls are counted here, where they are actually made.
             assert client is not None
 
-            def warm(row: dict[str, Any], method: str = method, llm: LLMClient = client) -> None:
-                _llm_candidate(llm, settings, str(row["id"]), method, str(row["prompt"]), count_fn)
+            def warm(row: dict[str, Any], method: str = method, llm: LLMClient = client) -> bool:
+                return _llm_response(llm, settings, method, str(row["prompt"])).cached
 
             with ThreadPoolExecutor(max_workers=settings.workers) as pool:
-                list(pool.map(warm, todo))
+                cached_flags = list(pool.map(warm, todo))
+            summary.cached_calls += sum(cached_flags)
+            summary.llm_calls += len(cached_flags) - sum(cached_flags)
+            warmed = True
         with path.open("a", encoding="utf-8", newline="\n") as fh:
             for row in todo:
                 pid, original = str(row["id"]), str(row["prompt"])
@@ -647,8 +653,10 @@ def run_candidates(
                     rec = _record(pid, method, text, str(gen), False)
                 else:
                     assert client is not None and expected_gen is not None
-                    rec = _llm_candidate(client, settings, pid, method, original, count_fn)
-                    summary.llm_calls += 1
+                    rec, cached = _llm_candidate(client, settings, pid, method, original, count_fn)
+                    if not warmed:
+                        summary.cached_calls += cached
+                        summary.llm_calls += not cached
                 if rec["rejected"]:
                     summary.rejected[method] += 1
                     summary.rejection_reasons[str(rec["rejection_reason"])] += 1
@@ -663,18 +671,13 @@ def run_candidates(
     return summary
 
 
-def _llm_candidate(
-    client: LLMClient,
-    settings: CandidateSettings,
-    prompt_id: str,
-    method: str,
-    original: str,
-    count: CountFn,
-) -> dict[str, Any]:
-    level = method[4:]
-    instruction = render_rewrite_prompt(original, level, settings.prompt_version)
+def _llm_response(
+    client: LLMClient, settings: CandidateSettings, method: str, original: str
+) -> LLMResponse:
+    """One rewrite call (served from the response cache when present)."""
+    instruction = render_rewrite_prompt(original, method[4:], settings.prompt_version)
     try:
-        resp = client.complete(
+        return client.complete(
             settings.provider,
             settings.rewrite_model,
             [{"role": "user", "content": instruction}],
@@ -686,12 +689,24 @@ def _llm_candidate(
             f"LLM rewrites need a running OpenAI-compatible server for provider "
             f"{settings.provider!r} (model {settings.rewrite_model!r}). {exc}"
         ) from exc
+
+
+def _llm_candidate(
+    client: LLMClient,
+    settings: CandidateSettings,
+    prompt_id: str,
+    method: str,
+    original: str,
+    count: CountFn,
+) -> tuple[dict[str, Any], bool]:
+    """The validated candidate record and whether its rewrite came from the cache."""
+    resp = _llm_response(client, settings, method, original)
     text, reason = validate_rewrite(
         resp.text, original, targets=settings.length_targets, count=count
     )
     gen = _generator_for(settings, method)
     assert gen is not None
-    return _record(prompt_id, method, text, gen, settings.stand_in, reason)
+    return _record(prompt_id, method, text, gen, settings.stand_in, reason), bool(resp.cached)
 
 
 # --------------------------------------------------------------------------------------------
