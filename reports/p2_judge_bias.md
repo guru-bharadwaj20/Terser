@@ -89,7 +89,7 @@ measures the judge's verdicts. Whether it should be re-stated is left to the ADR
 At full scale the 2.3.3 judge stage measured **44.0%** raw A/B disagreement (10,432 of 23,718
 parsed per-order verdict pairs, [p2_label_stats.json](p2_label_stats.json)).
 
-## Pilot relabel (row 1.3.6, still awaiting human review)
+## Pilot relabel (row 1.3.6)
 
 The pilot was relabelled with `pairwise_avg` (all 1,672 judge requests served from the cache, 0
 new tokens; MLflow `508e0d17bce8`). The cached verdicts are those of the `pairwise_32b` re-run

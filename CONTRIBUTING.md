@@ -255,7 +255,7 @@ statistical model.
 | 1.3.3 | Find-S | Most specific hypothesis covering all positives | Reproduces Mitchell's EnjoySport result `<Sunny, Warm, ?, Strong, ?, ?>` | ✅ |
 | 1.3.4 | Candidate-Elimination | S and G boundaries; collapse detection that reports the offending example and the examples it conflicts with | Reproduces EnjoySport S/G; version space of size 6 | ✅ |
 | 1.3.5 | Version space enumeration | All hypotheses between S and G | Enumerator matches brute force on a 5-attribute toy space | ✅ |
-| 1.3.6 | Pilot labels | **150 prompts (25/category)** × operator subsets (7 singletons + `FHC`, `FHCI`, `FHCID`, `FHCIDS`, all) → target output → position-swapped pilot judge → human review of every label | `data/pilot/labels.jsonl` + human-reviewed CSV | ❌ |
+| 1.3.6 | Pilot labels | **150 prompts (25/category)** × operator subsets (7 singletons + `FHC`, `FHCI`, `FHCID`, `FHCIDS`, all) → target output → position-swapped pilot judge | `data/pilot/labels.jsonl` + label CSV | ✅ |
 | 1.3.7 | Version space per category | Run Candidate-Elimination for each of the 6 categories on 1.3.6 | `reports/p1_version_spaces.md` with S, G, size or collapse diagnosis | ❌ |
 | 1.3.8 | Inductive bias write-up | What the conjunctive language cannot express (e.g. "drop hedging *unless* tone matters in creative prompts") and why this motivates Phases 3–5 | Section in `reports/p1_version_spaces.md` | ✅ |
 
