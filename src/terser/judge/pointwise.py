@@ -19,6 +19,7 @@ a retry after an unparseable reply appends a corrective turn, as in the pairwise
 from __future__ import annotations
 
 import json
+import math
 import re
 from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING, Any
@@ -85,6 +86,8 @@ def parse_scores(text: str, dimensions: tuple[str, ...]) -> tuple[dict[str, int]
         for key, name in wanted.items():
             value = raw.get(key)
             if isinstance(value, bool) or not isinstance(value, int | float):
+                break
+            if not math.isfinite(value):  # json.loads accepts NaN / Infinity
                 break
             if value != int(value) or not _MIN_SCORE <= value <= _MAX_SCORE:
                 break

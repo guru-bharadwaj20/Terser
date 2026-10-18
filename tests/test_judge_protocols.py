@@ -261,3 +261,9 @@ def test_judge_pair_averaged(tmp_path: Path) -> None:
     plain = PairwiseJudge(client, provider="local", model="m")
     with pytest.raises(ValueError):
         judge_pair_averaged(plain, "p", "a", "b")
+
+
+def test_parse_scores_rejects_non_finite_values() -> None:
+    for bad in ("NaN", "Infinity", "-Infinity"):
+        reply = '{"scores": {"correctness": ' + bad + '}, "hard_fail": false}'
+        assert parse_scores(reply, ("correctness",)) is None

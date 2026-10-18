@@ -49,3 +49,19 @@ def test_filler_keeps_intensifier_as_topic() -> None:
 def test_hedging_keeps_please_as_verb() -> None:
     assert "please my boss" in hedging("How do I please my boss?")
     assert "please" not in hedging("Please sort this list.").lower()
+
+
+def test_tidy_keeps_leading_punctuation_tokens() -> None:
+    from terser.operators.base import tidy
+
+    assert tidy("Write it in .NET please") == "Write it in .NET please"
+    assert tidy("what does the ! operator do") == "What does the ! operator do"
+    assert tidy("Drop this , and that .") == "Drop this, and that."
+
+
+def test_tidy_does_not_force_capitals() -> None:
+    from terser.operators.base import tidy
+
+    assert tidy("iPhone apps crash") == "iPhone apps crash"
+    assert tidy("Use a list, e.g. the builtin one.") == "Use a list, e.g. the builtin one."
+    assert tidy("Done. next step.") == "Done. Next step."
