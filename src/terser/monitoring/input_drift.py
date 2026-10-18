@@ -262,7 +262,8 @@ class DriftResult:
             ),
             f"- PCA: {self.n_components} components fitted on the reference, "
             f"{self.explained_variance:.1%} of embedding variance",
-            f"- MMD² (RBF, σ = {self.mmd_sigma:.3f}, {self.mmd_samples['reference']} reference / {self.mmd_samples['current']} current rows): "
+            f"- MMD² (RBF, σ = {self.mmd_sigma:.3f}, {self.mmd_samples['reference']} reference / "
+            f"{self.mmd_samples['current']} current rows): "
             f"{self.mmd2:.5f}, permutation p = {self.mmd_p:.4f}",
         ]
         if self.evidently:
