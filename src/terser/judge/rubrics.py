@@ -308,25 +308,42 @@ def load_rubrics(directory: Path | None = None) -> dict[Category, Rubric]:
     return {cat: load_rubric(cat, directory) for cat in Category}
 
 
-def render_rubric(category: Category | str, directory: Path | None = None) -> str:
-    """Render a rubric as the plain-text block used in the pairwise judge prompt.
+def render_rubric(
+    category: Category | str, directory: Path | None = None, mode: str = "pairwise"
+) -> str:
+    """Render a rubric as the plain-text block used in the judge prompt.
+
+    ``mode="pointwise"`` words the role and hard-fail lines for a single scored response.
 
     The block lists the dimensions with their 1-5 anchors and weights, what does and does not
     count as a degradation, and the hard-fail conditions. It contains no ``{prompt}``-style
     placeholders, so it is safe to insert into a judge template.
     """
     rubric = load_rubric(category, directory)
-    role = (
-        "Use this rubric to break ties; the task's automatic metric is checked separately."
-        if rubric.role == "tie_break"
-        else "This rubric is the main basis for your verdict."
-    )
+    pointwise = mode == "pointwise"
+    if pointwise:
+        role = (
+            "Score the response with this rubric; the task's automatic metric is checked "
+            "separately."
+            if rubric.role == "tie_break"
+            else "This rubric is the main basis for your scores."
+        )
+    else:
+        role = (
+            "Use this rubric to break ties; the task's automatic metric is checked separately."
+            if rubric.role == "tie_break"
+            else "This rubric is the main basis for your verdict."
+        )
     lines = [
         f"Category: {rubric.category.value} (rubric v{rubric.version})",
         rubric.summary,
         role,
         "",
-        "Dimensions (score each response 1-5; weight in brackets):",
+        (
+            "Dimensions (score the response 1-5; weight in brackets):"
+            if pointwise
+            else "Dimensions (score each response 1-5; weight in brackets):"
+        ),
     ]
     for dim in rubric.dimensions:
         lines.append(f"- {dim.name} [{dim.weight:g}]: {dim.description}")
@@ -335,6 +352,13 @@ def render_rubric(category: Category | str, directory: Path | None = None) -> st
     lines += [f"- {r.description}" for r in rubric.degradation_rules if r.degradation]
     lines += ["", "Does NOT count as a degradation in this category:"]
     lines += [f"- {r.description}" for r in rubric.degradation_rules if not r.degradation]
-    lines += ["", "Hard fails (a response with a hard fail loses unless both have one):"]
+    lines += [
+        "",
+        (
+            "Hard fails (set hard_fail to true if the response has any of these):"
+            if pointwise
+            else "Hard fails (a response with a hard fail loses unless both have one):"
+        ),
+    ]
     lines += [f"- {f.description}" for f in rubric.hard_fails]
     return "\n".join(lines)
