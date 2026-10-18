@@ -23,7 +23,8 @@ Entry points::
         --labels data/interim/rewrites/val_labels_all_v2.jsonl \
         --prompts data/interim/rewrites/val_prompts.jsonl --n 100 --seed 0 --out sample.jsonl
     python -m terser.models.rewriter.failures report \
-        --annotations data/annotations/p8_failures.jsonl --out reports/p8_failures.md
+        --annotations data/annotations/p8_failures.jsonl --pool reports/p8_failures.pool.json \
+        --out reports/p8_failures.md
 """
 
 from __future__ import annotations
@@ -222,6 +223,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     s.add_argument("--n", type=int, default=100)
     s.add_argument("--seed", type=int, default=0)
     s.add_argument("--out", type=Path, required=True)
+    s.add_argument(
+        "--pool-out", type=Path, default=None, help="default reports/<out stem>.pool.json"
+    )
     r = sub.add_parser("report", help="render the annotation file as markdown")
     r.add_argument("--annotations", type=Path, required=True)
     r.add_argument("--pool", type=Path, help="JSON written by sample (population stats)")
@@ -254,12 +258,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             "seed": args.seed,
             "sample_by_category": dict(sorted(Counter(c["category"] for c in picked).items())),
         }
-        args.out.with_suffix(".pool.json").write_text(json.dumps(pool, indent=2) + "\n")
+        # Population stats are a report artifact, not an annotation: they go under reports/.
+        pool_out = args.pool_out or Path("reports") / f"{args.out.stem}.pool.json"
+        pool_out.parent.mkdir(parents=True, exist_ok=True)
+        pool_out.write_text(json.dumps(pool, indent=2) + "\n", encoding="utf-8")
         print(json.dumps(pool))
         return 0
 
     records = _jsonl(args.annotations)
-    stats = json.loads(args.pool.read_text()) if args.pool else None
+    stats = json.loads(args.pool.read_text(encoding="utf-8")) if args.pool else None
     md = render(records, stats, args.title, args.split, args.annotations.as_posix())
     if args.out.exists() and MANUAL in (old := args.out.read_text(encoding="utf-8")):
         md += "\n" + MANUAL + old.split(MANUAL, 1)[1]

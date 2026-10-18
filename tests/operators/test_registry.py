@@ -83,7 +83,6 @@ def test_full_stack_idempotent(row: dict[str, Any]) -> None:
     assert apply_ops(once, CANONICAL_ORDER) == once
 
 
-@pytest.mark.skipif(not PILOT_PATH.exists(), reason="pilot prompts not present")
 def test_full_stack_idempotent_on_pilot_prompts() -> None:
     with open(PILOT_PATH, encoding="utf-8") as fh:
         rows = [json.loads(line) for line in fh if line.strip()]

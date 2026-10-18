@@ -147,10 +147,6 @@ def test_instance_rejects_bad_input() -> None:
 
 
 def test_default_remover_integration() -> None:
-    try:
-        from terser.operators import apply_ops  # noqa: F401
-    except ImportError:
-        pytest.skip("terser.operators.apply_ops not available yet")
     casual = "hey so um, basically could you maybe please explain recursion? thanks in advance"
     attrs = at.describe_prompt(casual)
     assert attrs["filler_density"] == "high"

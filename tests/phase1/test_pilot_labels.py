@@ -351,9 +351,6 @@ def test_config_gpu_variant_overrides() -> None:
 
 
 def test_with_real_operators_if_available(tmp_path: Path, settings: PilotSettings) -> None:
-    operators = pytest.importorskip("terser.operators")
-    if not hasattr(operators, "apply_ops"):
-        pytest.skip("terser.operators.apply_ops not implemented yet")
     summary = run_pilot(
         replace(settings, operator_subsets=("F", "H", "FHCIDSL")), make_client(tmp_path, FakeLLM())
     )
