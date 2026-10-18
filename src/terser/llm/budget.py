@@ -67,10 +67,6 @@ class Price:
     input_per_mtok: float | None
     output_per_mtok: float | None
 
-    @property
-    def known(self) -> bool:
-        return self.input_per_mtok is not None and self.output_per_mtok is not None
-
     def cost(self, input_tokens: int, output_tokens: int) -> float | None:
         if self.input_per_mtok is None or self.output_per_mtok is None:
             return None

@@ -53,7 +53,6 @@ LOG_FIELDS: tuple[str, ...] = (
     "net_savings_usd",
     "consent_raw_text",
 )
-RAW_FIELDS: tuple[str, ...] = ("prompt", "rewrite")
 
 
 def new_request_id() -> str:

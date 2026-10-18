@@ -24,6 +24,9 @@ stages:
       - src/terser/data/sources.py
       - src/terser/data/pii.py
       - data/raw/dolly
+      # oasst1 has no task-type label, so collect drops every oasst1 record (0 in clean.jsonl).
+      # Removing the dep changes the stage hash and needs a `dvc repro collect`; until then it
+      # stays listed.
       - data/raw/oasst1
       - data/raw/humaneval
       - data/raw/mbpp

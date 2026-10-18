@@ -130,7 +130,6 @@ HISTORY_PATH = Path("logs/canary_history.jsonl")
 RUNS_DIR = Path("logs/canary")
 REPORT_PATH = Path("reports/p11_canary.md")
 DEFAULT_SERVICE_URL = "http://localhost:8080"
-DEFAULT_LLM_URL = "http://localhost:8000/v1"
 DEFAULT_PROMETHEUS = "http://localhost:9090"
 DEFAULT_GRAFANA = "http://localhost:3000"
 DASHBOARD_UID = "terser-serving"
