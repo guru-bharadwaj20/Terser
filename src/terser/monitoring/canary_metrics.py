@@ -7,13 +7,16 @@ dashboard (``docker/monitoring/grafana/dashboards/terser-serving.json``) and the
 (``docker/monitoring/grafana/provisioning/alerting/terser-alerts.yaml``) read these gauges:
 
 =============================================  ===============================================
-:data:`PRESERVATION`                           preserved / judged pairs in this run
+:data:`PRESERVATION`                           preserved / scored pairs in this run
 :data:`ROLLING_PRESERVATION`                   pooled over the last :data:`ROLLING_WINDOW` runs;
                                                **alert when < 0.92** (:data:`ALERT_THRESHOLD`)
-:data:`PROMPTS`                                judged (prompt, target) pairs in this run
+:data:`PROMPTS`                                scored (prompt, target) pairs in this run
 :data:`ROLLING_RUNS`                           runs inside the rolling window (<= 7)
 :data:`LAST_RUN`                               Unix time of the push (staleness panel)
 =============================================  ===============================================
+
+"Scored" pairs are the judged pairs plus the pairs whose rewrite equals the prompt, which are
+never sent to the judge and count as preserved.
 
 "Rolling" pools counts rather than averaging ratios, so a short run cannot outweigh a full one.
 
@@ -96,6 +99,8 @@ def canary_registry(
     """
     from prometheus_client import CollectorRegistry, Gauge
 
+    if total <= 0:
+        raise ValueError("a canary run with no scored pairs has no preservation to push")
     runs = [*history, (preserved, total)]
     rolling, used = rolling_preservation(runs, window)
     reg = CollectorRegistry()
@@ -105,7 +110,7 @@ def canary_registry(
         f"Canary preservation pooled over the last {window} runs",
         registry=reg,
     ).set(rolling)
-    Gauge(PROMPTS, "Judged canary (prompt, target) pairs, this run", registry=reg).set(total)
+    Gauge(PROMPTS, "Scored canary (prompt, target) pairs, this run", registry=reg).set(total)
     Gauge(ROLLING_RUNS, "Canary runs in the rolling window", registry=reg).set(used)
     Gauge(LAST_RUN, "Unix time of the canary push", registry=reg).set(
         time.time() if timestamp is None else timestamp
