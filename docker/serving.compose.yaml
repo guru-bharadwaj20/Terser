@@ -14,6 +14,7 @@ cache_size: 10000
 quality:
   base_url: http://terser-gpu:8000/v1
   model: terser-rewriter     # = TERSER_SERVED_NAME in docker/Dockerfile.gpu
+  prompt_format: sft         # the SFT rewriter's training format (as in configs/serving/quality.yaml)
   http_timeout_s: 2.0
 
 pricing:

@@ -27,6 +27,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from terser.serving.accounting import Pricing
 from terser.serving.metrics import ServiceMetrics
 from terser.serving.paths import Gate, OnnxGate, OpenAICompatibleRewriter
+from terser.serving.request_log import configure_request_log
 from terser.serving.service import RewriteService
 
 __all__ = ["RewriteIn", "RewriteOut", "app", "build_service", "create_app", "load_config"]
@@ -154,10 +155,13 @@ def build_service(cfg: dict[str, Any], metrics: ServiceMetrics | None = None) ->
 
 def create_app(service: RewriteService | None = None, metrics: ServiceMetrics | None = None) -> Any:
     """Build the FastAPI app around ``service`` (default: from the config file)."""
-    metrics = metrics if metrics is not None else ServiceMetrics()
+    if metrics is None:
+        # /metrics must show the registry the service updates, not a fresh empty one.
+        metrics = service.metrics if service is not None and service.metrics else ServiceMetrics()
     svc = service if service is not None else build_service(load_config(), metrics)
     if svc.metrics is None:
         svc.metrics = metrics
+    configure_request_log()
     api = FastAPI(
         title="Terser",
         version="0.1.0",

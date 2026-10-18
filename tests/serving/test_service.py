@@ -113,7 +113,36 @@ def test_both_paths_fail_returns_original() -> None:
     s = RewriteService(pricing=PRICING, fast=broken, quality=Quality("crash"), counter=words)
     r = s.rewrite(PROMPT, "t", "quality")
     assert r.rewrite == PROMPT and r.path == "original" and r.fallback_used
+    assert r.fallback_reason == "error"  # the quality path's reason is kept
     assert r.tokens_after == r.tokens_before
+    fast_only = RewriteService(pricing=PRICING, fast=broken, counter=words).rewrite(PROMPT, "t")
+    assert fast_only.fallback_reason == "fast_error" and fast_only.path == "original"
+
+
+def test_empty_quality_rewrite_falls_back() -> None:
+    def empty(prompt: str, target: str) -> RewriteResult:
+        return RewriteResult("   ", tokens_in=5, tokens_out=0)
+
+    r = svc(quality=empty, quality_timeout_s=1.0).rewrite(PROMPT, "t", "quality")
+    assert r.fallback_reason == "error" and r.path == "fast" and r.rewrite.strip()
+
+
+def test_busy_pool_falls_back_without_waiting() -> None:
+    q = Quality("hang")
+    s = svc(quality=q, quality_timeout_s=0.05, max_workers=1)
+    s.rewrite(PROMPT, "t", "quality")  # times out; its worker is still busy
+    t0 = time.perf_counter()
+    r = s.rewrite(PROMPT + " again", "t", "quality")
+    q.release.set()
+    assert r.fallback_reason == "timeout" and time.perf_counter() - t0 < 0.05
+
+
+def test_cache_hit_counts_this_prompts_tokens() -> None:
+    s = svc(gate_threshold=-1.0)  # every rewrite rejected: the response is the prompt itself
+    s.rewrite(PROMPT, "t")
+    variant = PROMPT + "   \n"
+    r = s.rewrite(variant, "t")
+    assert r.cached and r.rewrite == variant and r.tokens_before == r.tokens_after
 
 
 def test_repeated_faults_always_fall_back() -> None:

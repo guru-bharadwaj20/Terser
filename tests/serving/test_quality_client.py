@@ -30,7 +30,9 @@ def test_sft_format_posts_raw_completion(monkeypatch: pytest.MonkeyPatch) -> Non
         usage = {"prompt_tokens": 9, "completion_tokens": 3}
         return _Resp({"choices": [{"text": " Sort the list. "}], "usage": usage})
 
-    monkeypatch.setattr(httpx, "post", post)
+    monkeypatch.setattr(
+        httpx.Client, "post", lambda self, url, json, timeout: post(url, json, timeout)
+    )
     rw = OpenAICompatibleRewriter("http://w:8001/v1/", "terser-rewriter", prompt_format="sft")
     out = rw("hey could you sort this list pls", "qwen2.5")
     assert sent["url"] == "http://w:8001/v1/completions"
@@ -46,7 +48,9 @@ def test_chat_format_is_default(monkeypatch: pytest.MonkeyPatch) -> None:
         sent.update(url=url, body=json)
         return _Resp({"choices": [{"message": {"content": "x"}}]})
 
-    monkeypatch.setattr(httpx, "post", post)
+    monkeypatch.setattr(
+        httpx.Client, "post", lambda self, url, json, timeout: post(url, json, timeout)
+    )
     OpenAICompatibleRewriter("http://w/v1", "m")("p", "gpt-4o")
     assert (
         sent["url"].endswith("/chat/completions") and sent["body"]["messages"][1]["content"] == "p"
