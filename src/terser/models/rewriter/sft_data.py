@@ -43,7 +43,8 @@ def build_sft_rows(
     ``tokens`` maps a candidate id to its token count on the reference tokenizer; the original
     prompt's count is keyed ``<prompt_id>:original``.
     """
-    targets = {r["target"] for r in labels}
+    # Targets from real labels only: a stand-in row's target would be required but never met.
+    targets = {r["target"] for r in labels if not r.get("stand_in", False)}
     preserved: dict[str, set[str]] = defaultdict(set)
     for r in labels:
         if r["label"] == "preserved" and not r.get("stand_in", False):

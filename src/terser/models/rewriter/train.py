@@ -100,17 +100,32 @@ class ByteTokenizer:
 
 
 def encode_pair(
-    prompt_ids: Sequence[int], rewrite_ids: Sequence[int], sep: int, eos: int, max_len: int
+    prompt_ids: Sequence[int],
+    rewrite_ids: Sequence[int],
+    sep: int | Sequence[int],
+    eos: int,
+    max_len: int,
 ) -> tuple[list[int], list[int]]:
     """``(input_ids, labels)``; labels are ``-100`` on the prompt and separator.
 
-    The prompt is truncated from the left so the full rewrite always fits when possible.
+    ``sep`` is the separator's token ids (an int for a one-token separator). The prompt is
+    truncated from the left so the full rewrite fits when possible, but keeps at least half of
+    ``max_len`` (or all of itself if shorter): a rewrite that cannot fit beside it is truncated
+    *without* EOS, so the model never learns to stop in the middle of a rewrite.
     """
-    target = list(rewrite_ids)[: max_len - 2] + [eos]
-    room = max_len - len(target) - 1
-    prompt = list(prompt_ids)[-room:] if room > 0 else []
-    ids = prompt + [sep] + target
-    labels = [IGNORE] * (len(prompt) + 1) + target
+    sep_ids = [sep] if isinstance(sep, int) else list(sep)
+    prompt_all = list(prompt_ids)
+    budget = max_len - len(sep_ids)
+    keep_prompt = min(len(prompt_all), budget // 2)
+    rewrite = list(rewrite_ids)
+    if len(rewrite) + 1 <= budget - keep_prompt:
+        target = rewrite + [eos]
+    else:
+        target = rewrite[: budget - keep_prompt]
+    room = budget - len(target)
+    prompt = prompt_all[-room:] if room > 0 else []
+    ids = prompt + sep_ids + target
+    labels = [IGNORE] * (len(prompt) + len(sep_ids)) + target
     return ids, labels
 
 
@@ -366,7 +381,9 @@ def run(cfg: DictConfig, on_eval: Callable[[int, float], None] | None = None) ->
         def enc(text: str) -> list[int]:
             return list(tok(text, add_special_tokens=False)["input_ids"])
 
-        sep = enc("\n### Rewrite:\n")[-1]
+        # The whole separator, as the served SFT format sends it (a single trailing token is
+        # common, so the prompt/rewrite boundary would be ambiguous).
+        sep = enc("\n### Rewrite:\n")
         eos = tok.eos_token_id
         pad = tok.pad_token_id if tok.pad_token_id is not None else eos
         hf = True

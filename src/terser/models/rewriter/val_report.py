@@ -45,9 +45,15 @@ def rung_metrics(
             ok[(pid, r["target"])] = r["label"] == "preserved"
     targets = sorted({t for _, t in ok})
     by_cat: dict[str, list[bool]] = defaultdict(list)
+    missing = 0
     for w in rewrites:
         for t in targets:
-            by_cat[w["category"]].append(w["fell_back"] or ok.get((w["id"], t), False))
+            if w["fell_back"]:
+                by_cat[w["category"]].append(True)
+            elif (w["id"], t) in ok:
+                by_cat[w["category"]].append(ok[(w["id"], t)])
+            else:
+                missing += 1  # not judged: left out of the rate, and reported
     flat = [x for xs in by_cat.values() for x in xs]
     per_cat = {c: sum(xs) / len(xs) for c, xs in sorted(by_cat.items())}
     m = {
@@ -59,6 +65,7 @@ def rung_metrics(
         "latency_s": statistics.mean(w["latency_s"] for w in rewrites),
         "preserved": sum(flat) / len(flat) if flat else 0.0,
         "preserved_by_category": per_cat,
+        "missing_labels": missing,
     }
     m["c8_3"] = (
         m["median_savings"] >= MIN_SAVINGS

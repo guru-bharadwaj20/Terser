@@ -37,7 +37,8 @@ non-negative, unbiased estimator of KL(policy || reference).
   training by :mod:`terser.models.rl.audit`, with the 32B judge served on its own (never
   colocated with training).
 * **Degenerate-output monitor (9.3.4).** Each rewrite is classified as ``empty`` (no
-  non-space text), ``truncated`` (no EOS within ``max_new_tokens``) or ``non_nl`` (not natural
+  non-space text), ``truncated`` (no EOS within the step's cap, ``min(max_new_tokens, longest
+  prompt + 8)`` tokens) or ``non_nl`` (not natural
   language, :func:`is_natural_language`); the rates are logged every step.
 
 Metrics go to ``<output_dir>/metrics.jsonl`` and, with ``mlflow: true``, to MLflow
@@ -206,7 +207,16 @@ def retention(original: str, rewrite: str) -> float:
         return 1.0
     low = rewrite.lower()
     words = set(re.findall(r"[a-z]+", low))
-    hit = sum((i in words) if i.isalpha() and i in CONSTRAINT_WORDS else (i in low) for i in need)
+
+    def kept(item: str) -> bool:
+        if item.isalpha() and item in CONSTRAINT_WORDS:
+            return item in words
+        # Whole-item match: "2" must not count as kept because "2024" is in the rewrite.
+        pat = (r"(?<![\w.])" if item[:1].isalnum() else "") + re.escape(item)
+        pat += r"(?![\w])" if item[-1:].isalnum() else ""
+        return re.search(pat, low) is not None
+
+    hit = sum(map(kept, need))
     return hit / len(need)
 
 
@@ -286,7 +296,7 @@ def sample_groups(
     *,
     group_size: int,
     max_new_tokens: int,
-    sep: int,
+    sep: int | Sequence[int],
     eos: int,
     pad: int,
     temperature: float,
@@ -300,7 +310,8 @@ def sample_groups(
     """
     import torch
 
-    seqs = [list(p) + [sep] for p in prompt_ids]
+    sep_ids = [sep] if isinstance(sep, int) else list(sep)
+    seqs = [list(p) + sep_ids for p in prompt_ids]
     width = max(map(len, seqs))
     ids = torch.tensor([[pad] * (width - len(s)) + s for s in seqs], device=device)
     attn = torch.tensor([[0] * (width - len(s)) + [1] * len(s) for s in seqs], device=device)
@@ -318,6 +329,9 @@ def sample_groups(
                 max_new_tokens=max_new_tokens,
                 eos_token_id=eos,
                 pad_token_id=pad,
+                # Sample from the policy itself: the base model's generation_config sets
+                # repetition_penalty=1.1, which would make the samples off-policy.
+                repetition_penalty=1.0,
             )
         else:
             gen = ids
@@ -355,7 +369,7 @@ def train_grpo(
     *,
     encode: Callable[[str], list[int]],
     decode: Callable[[Sequence[int]], str],
-    sep: int,
+    sep: int | Sequence[int],
     eos: int,
     pad: int,
     reward_fn: RewardFn,
@@ -429,7 +443,7 @@ def train_grpo(
             )
         policy.train()
         opt.zero_grad(set_to_none=True)
-        n_mb = (len(ids) + micro_batch - 1) // micro_batch
+        n = len(ids)
         loss_sum = kl_sum = 0.0
         for i in range(0, len(ids), micro_batch):
             sl = slice(i, i + micro_batch)
@@ -438,10 +452,11 @@ def train_grpo(
             kl = kl_k3(logp, ref[sl])
             pg = -torch.exp(logp - logp.detach()) * adv[sl, None]
             per = ((pg + beta * kl) * m).sum(1) / m.sum(1).clamp(min=1)
-            loss = per.mean() / n_mb
+            # Weight each micro-batch by its size, so a short last one is not over-weighted.
+            loss = per.sum() / n
             loss.backward()
             loss_sum += float(loss.detach())
-            kl_sum += float(((kl * m).sum(1) / m.sum(1).clamp(min=1)).mean()) / n_mb
+            kl_sum += float(((kl * m).sum(1) / m.sum(1).clamp(min=1)).sum()) / n
         grad_norm = float(torch.nn.utils.clip_grad_norm_(params, 1.0))
         opt.step()
         kinds = [degenerate_kind(r, t) for r, t in zip(raws, trunc, strict=True)]
@@ -633,7 +648,7 @@ def run(cfg: DictConfig) -> dict[str, Any]:
         def decode(ids: Sequence[int]) -> str:
             return str(tok.decode(list(ids), skip_special_tokens=True))
 
-        sep = encode("\n### Rewrite:\n")[-1]
+        sep = encode("\n### Rewrite:\n")  # the full separator, as in SFT training
         eos = tok.eos_token_id
         pad = tok.pad_token_id if tok.pad_token_id is not None else eos
         hf = True
@@ -647,10 +662,14 @@ def run(cfg: DictConfig) -> dict[str, Any]:
             return scorer(rows)
 
         threshold = gate_threshold(Path(p.serving_config))
-        cpu_similarity = _cpu_similarity(str(p.get("reward_v2", {}).get("encoder", _ENCODER)))
+        encoder = str(p.get("reward_v2", {}).get("encoder", _ENCODER))
+        loaded: list[Callable[[list[Row]], list[float]]] = []
 
         def similarity(rows: list[Row]) -> list[float]:
-            return cpu_similarity(rows)
+            # Loaded on first use: the v1 reward never calls it.
+            if not loaded:
+                loaded.append(_cpu_similarity(encoder))
+            return loaded[0](rows)
 
         def ref_logprobs(ids: torch.Tensor, attn: torch.Tensor, width: int) -> torch.Tensor:
             with policy.disable_adapter():
