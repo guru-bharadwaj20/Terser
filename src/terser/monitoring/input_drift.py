@@ -44,6 +44,7 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 
+from terser.config import project_root
 from terser.features.embeddings import EmbeddingCache, Encoder
 
 __all__ = [
@@ -63,7 +64,7 @@ __all__ = [
 ]
 
 ALERT_LOGGER = "terser.alerts"
-_ROOT = Path(__file__).resolve().parents[3]
+_ROOT = project_root()
 REFERENCE_PATH = _ROOT / "data" / "processed" / "splits" / "train.jsonl"
 CURRENT_PATH = _ROOT / "data" / "processed" / "splits" / "val.jsonl"
 EMBEDDINGS_DIR = _ROOT / "data" / "processed" / "embeddings"
@@ -480,8 +481,8 @@ def load_prompts(path: Path, category: str | None = None) -> tuple[list[PromptRe
 
     records: list[PromptRecord] = []
     skipped = 0
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
         if not line.startswith("{"):
             continue
         row = json.loads(line)

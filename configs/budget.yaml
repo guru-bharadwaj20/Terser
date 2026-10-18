@@ -1,5 +1,5 @@
 # Per-phase API spend caps, enforced by terser.llm.LLMClient BEFORE every call.
-# A cap of 0 means "no API calls allowed in this phase".
+# max_usd: 0 refuses every priced (paid API) call in the phase; max_tokens: 0 refuses every call.
 # Relative paths resolve against the project root (env TERSER_ROOT, else the repo root).
 ledger_path: .cache/llm_ledger.json
 cache_dir: .cache/llm_responses/
@@ -10,8 +10,8 @@ cache_dir: .cache/llm_responses/
 # Local / self-hosted providers (priced: false, see `providers:` below) cost $0 by definition:
 # max_usd and allow_unpriced do NOT apply to them, but max_tokens DOES -- for local models the
 # token cap bounds compute time, not money. A phase with max_tokens: 0 refuses every call.
-# Phases expected to use local open models: phase1, phase2, phase5, phase8, phase9, phase11,
-# phase12 (their max_tokens caps are sized for GPU batch inference with vLLM; a CPU smoke test
+# Phases expected to use local open models: phase1, phase2, phase5, phase8, phase9, phase9_3,
+# phase9_3_v2, phase11, phase12 (their max_tokens caps are sized for GPU batch inference with vLLM; a CPU smoke test
 # at ~10-50 tok/s will never get near them).
 phases:
   phase0: {max_usd: 1, max_tokens: 200000, allow_unpriced: false}

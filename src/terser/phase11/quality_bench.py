@@ -96,7 +96,7 @@ async def _load(url: str, prompts: list[str], rps: float, seconds: float) -> dic
                         "gate_rejected": bool(d["gate_rejected"]),
                     }
                 )
-            except Exception:  # noqa: BLE001
+            except Exception:
                 errors += 1
 
         start = time.perf_counter()
@@ -118,7 +118,7 @@ def _vllm_alive(vllm: str) -> bool:
 
     try:
         return httpx.get(f"{vllm.rstrip('/')}/models", timeout=5.0).status_code == 200
-    except Exception:  # noqa: BLE001
+    except Exception:
         return False
 
 
@@ -146,7 +146,7 @@ def run(
                     "quality_path"
                 ]:
                     break
-            except Exception:  # noqa: BLE001
+            except Exception:
                 pass
             time.sleep(0.5)
         for p in prompts[:20]:  # warm-up: tokenizers, ONNX sessions, vLLM graphs

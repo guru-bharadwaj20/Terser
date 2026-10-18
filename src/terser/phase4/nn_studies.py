@@ -107,8 +107,8 @@ def activation_run(
             gws, gbs = m.backward(X[b], y[b])
             for k, (w, bias, gw, gb) in enumerate(zip(m.weights, m.biases, gws, gbs, strict=True)):
                 grad_norm_sum[k] += float(np.sqrt((gw**2).sum() + (gb**2).sum()))
-                w -= lr * gw
-                bias -= lr * gb
+                np.subtract(w, lr * gw, out=w)  # in place on the model's arrays
+                np.subtract(bias, lr * gb, out=bias)
             steps += 1
         aucs.append(_safe_auc(yv, m.predict_proba(Xv)))
     best = float(np.nanmax(aucs)) if not np.all(np.isnan(aucs)) else float("nan")

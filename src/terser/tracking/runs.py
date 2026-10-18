@@ -29,7 +29,9 @@ from mlflow.entities import Run
 from mlflow.entities.model_registry import ModelVersion
 from mlflow.exceptions import MlflowException
 
-REPO_ROOT: Path = Path(__file__).resolve().parents[3]
+from terser.config import project_root
+
+REPO_ROOT: Path = project_root()
 REQUIRED_TAGS: tuple[str, ...] = ("phase", "row", "task", "hardware", "data_hash", "git_sha")
 STAGES: tuple[str, ...] = ("None", "Staging", "Production", "Archived")
 RUN_NAME_RE = re.compile(r"^\d+-[A-Za-z0-9_.]+-[A-Za-z0-9_.]+-[A-Za-z0-9_.]+-\d+$")

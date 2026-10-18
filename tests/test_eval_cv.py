@@ -26,7 +26,7 @@ def _data(seed: int = 0) -> tuple[np.ndarray, np.ndarray, list[str], list[str]]:
 
 
 def test_groups_never_straddle_and_every_example_validated_once() -> None:
-    X, y, cats, groups = _data()
+    _X, y, cats, groups = _data()
     seen = np.zeros(len(y), dtype=int)
     g = np.array(groups)
     for tr, va in grouped_folds(y, cats, groups):
@@ -36,7 +36,7 @@ def test_groups_never_straddle_and_every_example_validated_once() -> None:
 
 
 def test_stratification_keeps_degraded_share() -> None:
-    X, y, cats, groups = _data(1)
+    _X, y, cats, groups = _data(1)
     shares = [y[va].mean() for _, va in grouped_folds(y, cats, groups)]
     assert max(shares) - min(shares) < 0.1
     assert len(np.unique(strata(y, cats))) == 6

@@ -42,7 +42,7 @@ class Optimizer:
             self._state = [{} for _ in params]
         self.t += 1
         for p, g, s in zip(params, grads, self._state, strict=True):
-            p -= self.lr * self._direction(g, s)
+            np.subtract(p, self.lr * self._direction(g, s), out=p)  # in-place update
 
     def _direction(self, g: FloatArray, s: dict[str, FloatArray]) -> FloatArray:
         return g

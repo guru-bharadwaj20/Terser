@@ -34,8 +34,8 @@ class Operator:
 def tidy(text: str) -> str:
     """Repair spacing and punctuation left behind by deletions, without changing words."""
     lines = []
-    for line in text.split("\n"):
-        line = re.sub(r"[ \t]+", " ", line)
+    for raw in text.split("\n"):
+        line = re.sub(r"[ \t]+", " ", raw)
         # Only a space before *trailing* punctuation: "in .NET" and "the ! operator" keep theirs.
         line = re.sub(r"\s+([,.;:])(?=\s|$)", r"\1", line)
         line = re.sub(r"\s+([!?])(?=$|\s+[A-Z])", r"\1", line)

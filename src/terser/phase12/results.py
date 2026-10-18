@@ -1353,9 +1353,9 @@ def run(
     out: dict[str, Any] = {
         "split": split,
         "targets": targets,
-        "n_prompts": int(len(main_idx)),
+        "n_prompts": len(main_idx),
         "n_groups": len(set(ctx["groups"])),
-        "n_real": int(len(real_idx)),
+        "n_real": len(real_idx),
         "bootstrap": {"n_resamples": n_resamples, "seed": seed, "unit": "source group"},
         "gates": dict(gates.header) if gates is not None else {},
         "label_index": {

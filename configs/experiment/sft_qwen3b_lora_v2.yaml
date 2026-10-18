@@ -1,5 +1,5 @@
-# Row 8.3.4 escalation (rung 3): Qwen2.5-3B LoRA r=16, alpha=32, bf16; rung 2 failed C8.3
-# (reports/p8_rewriter_val.md). 1000 steps (~3 epochs): 3000 steps drove rung 1/2 loss to ~0.
+# Row 8.3.4, v2 data: Qwen2.5-3B LoRA r=16, alpha=32, bf16, retrained on the v2 SFT set (rung
+# tag sft3bv2 in reports/p8_rewriter_val.md). Ran by hand on the GPU box; no queue job.
 name: sft_qwen3b_lora_v2
 phase: 8
 row: "8.3.4"

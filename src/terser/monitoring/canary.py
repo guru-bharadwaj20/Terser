@@ -130,7 +130,6 @@ HISTORY_PATH = Path("logs/canary_history.jsonl")
 RUNS_DIR = Path("logs/canary")
 REPORT_PATH = Path("reports/p11_canary.md")
 DEFAULT_SERVICE_URL = "http://localhost:8080"
-DEFAULT_LLM_URL = "http://localhost:8000/v1"
 DEFAULT_PROMETHEUS = "http://localhost:9090"
 DEFAULT_GRAFANA = "http://localhost:3000"
 DASHBOARD_UID = "terser-serving"
@@ -359,7 +358,7 @@ def _post_rewrite(
             if resp.status_code == 200:
                 return dict(resp.json()), None
             error = f"HTTP {resp.status_code}: {resp.text[:200]}"
-        except Exception as exc:  # noqa: BLE001 - any transport failure is retried
+        except Exception as exc:  # any transport failure is retried
             error = f"{type(exc).__name__}: {exc}"
         if attempt < retries:
             sleep(2.0**attempt)
@@ -391,7 +390,7 @@ def rewrite_stage(
     try:
         h = http.get(base_url.rstrip("/") + "/healthz")
         health = dict(h.json()) if h.status_code == 200 else f"HTTP {h.status_code}"
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         health = f"{type(exc).__name__}: {exc}"
     for t in targets[:1]:
         for _ in range(warmup):

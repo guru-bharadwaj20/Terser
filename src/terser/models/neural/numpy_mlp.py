@@ -159,8 +159,8 @@ class NumpyMLP:
         """One gradient-descent update; returns the loss before the update."""
         loss, gws, gbs = self._loss_and_grads(X, y)
         for w, b, gw, gb in zip(self.weights, self.biases, gws, gbs, strict=True):
-            w -= lr * gw
-            b -= lr * gb
+            np.subtract(w, lr * gw, out=w)  # in place: w is the model's own array
+            np.subtract(b, lr * gb, out=b)
         return loss
 
     def fit(

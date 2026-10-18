@@ -10,13 +10,13 @@ import pytest
 pytest.importorskip("onnxruntime")
 pytest.importorskip("skl2onnx")
 
-from sklearn.linear_model import LogisticRegression  # noqa: E402
-from sklearn.pipeline import make_pipeline  # noqa: E402
-from sklearn.preprocessing import StandardScaler  # noqa: E402
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 
-from terser.features.shared import GATE_FEATURE_NAMES, extract_features  # noqa: E402
-from terser.serving.onnx_export import check_parity, export_sklearn  # noqa: E402
-from terser.serving.paths import OnnxGate  # noqa: E402
+from terser.features.shared import GATE_FEATURE_NAMES, extract_features
+from terser.serving.onnx_export import check_parity, export_sklearn
+from terser.serving.paths import OnnxGate
 
 
 def test_export_and_serve_gate(tmp_path: Path) -> None:

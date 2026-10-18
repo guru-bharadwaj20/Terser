@@ -64,7 +64,7 @@ async def _load(url: str, prompts: list[str], rps: float, seconds: float) -> dic
                 r = await client.post(url, json={"prompt": p, "target": "gpt-4o", "mode": "fast"})
                 r.raise_for_status()
                 lat.append((time.perf_counter() - t0) * 1000)
-            except Exception:  # noqa: BLE001
+            except Exception:
                 errors += 1
 
         start = time.perf_counter()
@@ -109,7 +109,7 @@ def check_latency(prompts: list[str], rps: float, seconds: float, port: int) -> 
             try:
                 httpx.get(f"http://127.0.0.1:{port}/healthz", timeout=1.0)
                 break
-            except Exception:  # noqa: BLE001
+            except Exception:
                 time.sleep(0.5)
         # warm-up: load tokenizers and ONNX sessions before timing
         for p in prompts[:20]:

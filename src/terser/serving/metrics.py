@@ -49,7 +49,7 @@ class _GpuCollector:
             import pynvml
 
             pynvml.nvmlInit()
-        except Exception:  # noqa: BLE001 - no NVML / no driver: CPU host
+        except Exception:  # no NVML / no driver: CPU host
             return
         util = GaugeMetricFamily("terser_gpu_utilization_ratio", "GPU utilisation", labels=["gpu"])
         mem = GaugeMetricFamily("terser_gpu_memory_used_bytes", "GPU memory used", labels=["gpu"])

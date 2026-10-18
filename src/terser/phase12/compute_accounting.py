@@ -66,6 +66,8 @@ from typing import Any
 
 import yaml
 
+from terser.config import project_root
+
 __all__ = [
     "BOARD_POWER_W",
     "LEDGER_CUTOFF",
@@ -82,7 +84,7 @@ __all__ = [
     "vllm_span",
 ]
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = project_root()
 # Board power limits used for the energy ESTIMATE. RTX 4500 Ada: 210 W (CONTRIBUTING hardware
 # table; nvidia-smi power.limit in reports/compute_power_sample.csv). RTX 4090: 450 W (NVIDIA
 # reference board power; the worker's limit was not recorded).
@@ -1217,7 +1219,7 @@ def _f(x: float | None, nd: int = 2) -> str:
 
 
 def _i(x: int | float | None) -> str:
-    return "n/a" if x is None else f"{int(round(x)):,}"
+    return "n/a" if x is None else f"{round(x):,}"
 
 
 def render_markdown(r: dict[str, Any]) -> str:
