@@ -728,7 +728,7 @@ quality monitoring.
 
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| 11.4.1 | CI | Every PR: lint, types, unit tests, CPU smoke training, `dvc repro --dry`, feature parity | Median ≤ 15 min | ❌ |
+| 11.4.1 | CI | Every PR: lint, types, unit tests, CPU smoke training, `dvc repro --dry`, feature parity | Median ≤ 15 min | ✅ run 39890354266 green on 4 jobs, median 8.8 min |
 | 11.4.2 | CD | Tag `v*`: build + scan images → push to GHCR → start the container in CI → smoke + latency tests | Release images published by the workflow | ❌ |
 | 11.4.3 | CT | On drift alert or a new data batch: judge labels → retrain gate/tagger (CPU) → queue rewriter retrain (GPU) → evaluate → register as Staging if checkpoints pass | One full cycle completed | ✅ |
 | 11.4.4 | Promotion guard | CT refuses promotion when a synthetic regression is injected | Test green | ✅ |

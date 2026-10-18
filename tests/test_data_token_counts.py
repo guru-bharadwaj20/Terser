@@ -137,6 +137,7 @@ def test_write_table_parquet_or_csv(tmp_path: Path, monkeypatch: pytest.MonkeyPa
 
     monkeypatch.setattr(builtins, "__import__", no_pyarrow)
     csv_path = write_table(table, tmp_path / "out" / "counts.parquet")
+    monkeypatch.undo()
     assert csv_path.suffix == ".csv"
     assert pd.read_csv(csv_path).shape == table.shape
 
