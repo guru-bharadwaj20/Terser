@@ -18,6 +18,19 @@ def test_encode_pair_masks_prompt() -> None:
     assert labels == [IGNORE] * 4 + [7, 8, 10]
     ids, labels = encode_pair(list(range(20)), [7, 8], sep=99, eos=98, max_len=8)
     assert len(ids) == 8 and ids[-3:] == [7, 8, 98] and ids[:4] == [16, 17, 18, 19]
+    # A rewrite too long to fit keeps half the prompt and gets no EOS mid-rewrite.
+    ids, labels = encode_pair(list(range(20)), list(range(50, 70)), sep=99, eos=98, max_len=8)
+    assert len(ids) == 8 and 98 not in ids and ids[:3] == [17, 18, 19] and ids[3] == 99
+    # A multi-token separator is masked as a whole.
+    ids, labels = encode_pair([1, 2], [7], sep=[90, 91], eos=98, max_len=16)
+    assert ids == [1, 2, 90, 91, 7, 98] and labels == [IGNORE] * 4 + [7, 98]
+
+
+def test_retention_needs_whole_items() -> None:
+    from terser.models.rl.grpo import retention
+
+    assert retention("list 2 primes", "list primes from 2024") == 0.5  # "list" kept, "2" not
+    assert retention("list 2 primes", "list 2 primes") == 1.0
 
 
 def test_load_pairs_and_byte_tokenizer(tmp_path: Path) -> None:

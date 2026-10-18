@@ -64,8 +64,9 @@ class GatedRewriter:
         rewriters: Ladder ordered from most to least aggressive.
         gate: ``(original, rewrite) -> P(degraded)``.
         count: Token counter for the target ``T``.
-        threshold: Reject when ``P(degraded) >= threshold`` (set on validation for
-            sensitivity 0.95, row 3.2.6).
+        threshold: Reject when ``P(degraded) > threshold``, the same rule as serving
+            (``gate_score > gate_threshold``) and GRPO (pass iff ``<=``); set on validation for
+            sensitivity 0.95, row 3.2.6.
     """
 
     rewriters: Sequence[Rewriter]
@@ -82,7 +83,7 @@ class GatedRewriter:
                 trace.append((i, "not_shorter", None))
                 continue
             p = float(self.gate(original, text))
-            if p >= self.threshold:
+            if p > self.threshold:
                 trace.append((i, "gate_rejected", p))
                 continue
             trace.append((i, "accepted", p))

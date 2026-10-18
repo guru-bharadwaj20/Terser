@@ -64,9 +64,6 @@ def load_model(
     return model.to("cuda").eval(), tok
 
 
-_load = load_model  # backwards-compatible private name
-
-
 def generate_rows(
     model: Any,
     tok: Any,
@@ -80,7 +77,7 @@ def generate_rows(
     """Greedy, safeguarded rewrites of ``rows`` (``id``, ``category``, ``prompt``, ``savings``)."""
     import torch
 
-    sep = tok(SEP_TEXT, add_special_tokens=False)["input_ids"][-1]
+    sep = list(tok(SEP_TEXT, add_special_tokens=False)["input_ids"])
     pad = tok.pad_token_id if tok.pad_token_id is not None else tok.eos_token_id
 
     def count(text: str) -> int:
@@ -89,7 +86,7 @@ def generate_rows(
     out: list[dict[str, Any]] = []
     for i in range(0, len(rows), batch_size):
         chunk = rows[i : i + batch_size]
-        seqs = [tok(r["prompt"], add_special_tokens=False)["input_ids"] + [sep] for r in chunk]
+        seqs = [tok(r["prompt"], add_special_tokens=False)["input_ids"] + sep for r in chunk]
         width = max(map(len, seqs))
         ids = torch.tensor([[pad] * (width - len(s)) + s for s in seqs], device=device)
         mask = torch.tensor([[0] * (width - len(s)) + [1] * len(s) for s in seqs], device=device)
@@ -100,6 +97,8 @@ def generate_rows(
                 attention_mask=mask,
                 max_new_tokens=max_new_tokens,
                 do_sample=False,
+                # True greedy decoding: the base generation_config sets repetition_penalty=1.1.
+                repetition_penalty=1.0,
                 eos_token_id=tok.eos_token_id,
                 pad_token_id=pad,
             )
