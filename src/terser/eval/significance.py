@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Hashable, Sequence
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -48,10 +49,11 @@ def mcnemar(y_true: ArrayLike, pred_a: ArrayLike, pred_b: ArrayLike) -> McNemarR
     With no discordant pairs the models are indistinguishable: statistic 0, p-value 1.
     """
     y = _as_binary_array(y_true)
-    a = _as_binary_array(pred_a) == y
-    bb = _as_binary_array(pred_b) == y
-    if not (len(y) == len(a) == len(bb)):
+    pa, pb = _as_binary_array(pred_a), _as_binary_array(pred_b)
+    # Check before comparing: ``==`` would broadcast a length-1 prediction over every example.
+    if not (len(y) == len(pa) == len(pb)):
         raise ValueError("y_true, pred_a and pred_b must have equal length")
+    a, bb = pa == y, pb == y
     b = int(np.sum(a & ~bb))
     c = int(np.sum(~a & bb))
     if b + c == 0:
@@ -69,6 +71,7 @@ class BootstrapCI:
     low: float
     high: float
     n_resamples: int
+    """Resamples on which the metric was defined (the ones the interval is built from)."""
 
 
 def _resample_indices(
@@ -91,8 +94,22 @@ def _resample_indices(
 def _interval(values: list[float], alpha: float) -> tuple[float, float]:
     arr = np.asarray(values, dtype=np.float64)
     arr = arr[np.isfinite(arr)]
+    if arr.size == 0:  # the metric was undefined on every resample
+        return float("nan"), float("nan")
     lo, hi = np.quantile(arr, [alpha / 2, 1 - alpha / 2])
     return float(lo), float(hi)
+
+
+def _as_values(values: npt.ArrayLike) -> npt.NDArray[Any]:
+    """Predictions or scores as an array, keeping their dtype (labels stay labels, ints stay ints).
+
+    Casting to float would make metrics over labels (``accuracy`` and friends) raise.
+    """
+    return np.asarray(values)
+
+
+def _finite_count(values: list[float]) -> int:
+    return int(np.isfinite(np.asarray(values, dtype=np.float64)).sum())
 
 
 def bootstrap_ci(
@@ -117,7 +134,7 @@ def bootstrap_ci(
         seed: RNG seed.
     """
     y = _as_binary_array(y_true)
-    v = np.asarray(values, dtype=np.float64)
+    v = _as_values(values)
     reps: list[float] = []
     for idx in _resample_indices(len(y), groups, n_resamples, seed):
         try:
@@ -125,7 +142,7 @@ def bootstrap_ci(
         except ValueError:
             continue
     lo, hi = _interval(reps, alpha)
-    return BootstrapCI(estimate=metric(y, v), low=lo, high=hi, n_resamples=n_resamples)
+    return BootstrapCI(estimate=metric(y, v), low=lo, high=hi, n_resamples=_finite_count(reps))
 
 
 def paired_bootstrap_diff(
@@ -140,8 +157,8 @@ def paired_bootstrap_diff(
 ) -> BootstrapCI:
     """CI of ``metric(A) - metric(B)`` with both models evaluated on the same resamples."""
     y = _as_binary_array(y_true)
-    a = np.asarray(values_a, dtype=np.float64)
-    b = np.asarray(values_b, dtype=np.float64)
+    a = _as_values(values_a)
+    b = _as_values(values_b)
     reps: list[float] = []
     for idx in _resample_indices(len(y), groups, n_resamples, seed):
         try:
@@ -150,5 +167,5 @@ def paired_bootstrap_diff(
             continue
     lo, hi = _interval(reps, alpha)
     return BootstrapCI(
-        estimate=metric(y, a) - metric(y, b), low=lo, high=hi, n_resamples=n_resamples
+        estimate=metric(y, a) - metric(y, b), low=lo, high=hi, n_resamples=_finite_count(reps)
     )

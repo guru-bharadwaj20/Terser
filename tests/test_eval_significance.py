@@ -58,3 +58,21 @@ def test_paired_diff_detects_better_model() -> None:
     assert d.low > 0
     same = paired_bootstrap_diff(_acc, y, good, good, n_resamples=50)
     assert same.low == same.high == same.estimate == 0.0
+
+
+def test_bootstrap_accepts_label_metrics() -> None:
+    from terser.eval.metrics import classification_metrics
+
+    y = ["preserved", "degraded"] * 20
+    ci = bootstrap_ci(lambda t, p: classification_metrics(t, p).accuracy, y, y, n_resamples=20)
+    assert ci.estimate == 1.0 and ci.n_resamples == 20
+
+
+def test_bootstrap_with_no_valid_resample_is_nan() -> None:
+    ci = bootstrap_ci(lambda t, p: float("nan"), [0, 1], [0, 1], n_resamples=10)
+    assert np.isnan(ci.low) and np.isnan(ci.high) and ci.n_resamples == 0
+
+
+def test_mcnemar_rejects_a_length_one_prediction() -> None:
+    with pytest.raises(ValueError):
+        mcnemar([0, 1, 1], [1], [0, 1, 1])
