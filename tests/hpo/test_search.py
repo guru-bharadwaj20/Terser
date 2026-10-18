@@ -26,6 +26,20 @@ def test_grid_discretisation() -> None:
     assert SPACE.grid_size(4) == 32
     log = SearchSpace({"lr": Float(1e-4, 1e-1, log=True)}).grid(4)["lr"]
     assert log == pytest.approx([1e-4, 1e-3, 1e-2, 1e-1])
+    assert 1e-4 <= min(log) and max(log) <= 1e-1  # endpoints never step outside the bounds
+
+
+def test_gp_survives_failed_startup_trials() -> None:
+    calls = {"n": 0}
+
+    def flaky(p: dict[str, object]) -> float:
+        calls["n"] += 1
+        if calls["n"] <= 2:
+            raise ValueError("startup trial failed")
+        return quad(p)
+
+    res = run_search(flaky, SPACE, method="gp", n_trials=4, n_startup=2, catch=(ValueError,))
+    assert len(res.values) == 2
 
 
 def test_invalid_space() -> None:
