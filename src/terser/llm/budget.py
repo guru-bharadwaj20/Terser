@@ -13,6 +13,8 @@ from typing import Any
 
 import yaml
 
+from terser.config import ROOT_ENV_VAR
+from terser.config import project_root as config_project_root
 from terser.llm.providers import ProviderConfig, default_providers, parse_providers
 
 DEFAULT_LEDGER = ".cache/llm_ledger.json"
@@ -49,10 +51,10 @@ def atomic_write_json(path: Path, data: Any, compact: bool = False) -> None:
 
 
 def project_root(config_path: Path) -> Path:
-    """Project root: env ``TERSER_ROOT``, else the parent of the ``configs/`` dir."""
-    env = os.environ.get("TERSER_ROOT")
-    if env:
-        return Path(env)
+    """Project root: env ``TERSER_ROOT`` (as :func:`terser.config.project_root`), else the parent
+    of the ``configs/`` dir that holds ``config_path``."""
+    if os.environ.get(ROOT_ENV_VAR):
+        return config_project_root()
     parent = config_path.resolve().parent
     return parent.parent if parent.name == "configs" else parent
 

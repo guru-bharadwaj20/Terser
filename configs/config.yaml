@@ -12,6 +12,8 @@ paths:
   data_dir: ${paths.root}/data
   reports_dir: ${paths.root}/reports
   cache_dir: ${paths.root}/.cache
+  # Informational: terser.tracking derives the store from terser.config.project_root() (same
+  # path); MLFLOW_TRACKING_URI overrides it.
   mlruns_dir: ${paths.root}/mlruns
 
 hydra:

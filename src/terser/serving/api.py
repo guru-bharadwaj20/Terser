@@ -24,6 +24,7 @@ import yaml
 from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel, ConfigDict, Field
 
+from terser.config import project_root
 from terser.serving.accounting import Pricing
 from terser.serving.metrics import ServiceMetrics
 from terser.serving.paths import Gate, OnnxGate, OpenAICompatibleRewriter
@@ -32,7 +33,7 @@ from terser.serving.service import RewriteService
 
 __all__ = ["RewriteIn", "RewriteOut", "app", "build_service", "create_app", "load_config"]
 
-DEFAULT_CONFIG = Path(__file__).resolve().parents[3] / "configs" / "serving" / "default.yaml"
+DEFAULT_CONFIG = project_root() / "configs" / "serving" / "default.yaml"
 
 EXAMPLE_PROMPT = (
     "hey so um, could you maybe write a Python function that checks if a string is a "

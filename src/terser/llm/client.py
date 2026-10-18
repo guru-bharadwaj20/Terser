@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
+from terser.config import project_root
 from terser.llm.budget import Budget, Usage, approx_tokens
 from terser.llm.cache import ResponseCache, cache_key
 from terser.llm.providers import (
@@ -25,7 +26,7 @@ from terser.llm.providers import (
 if TYPE_CHECKING:
     import httpx
 
-DEFAULT_BUDGET_PATH = Path(__file__).resolve().parents[3] / "configs" / "budget.yaml"
+DEFAULT_BUDGET_PATH = project_root() / "configs" / "budget.yaml"
 CACHE_ONLY_ENV = "TERSER_LLM_CACHE_ONLY"
 
 
