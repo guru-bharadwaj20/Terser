@@ -7,6 +7,7 @@ few and small.
 from __future__ import annotations
 
 import os
+import sys
 
 import pytest
 
@@ -176,8 +177,13 @@ def test_environment_is_scrubbed(monkeypatch: pytest.MonkeyPatch) -> None:
             "assert 'ANTHROPIC_API_KEY' not in env()",
             "assert not any('do-not-leak' in v for v in env().values())",
             "assert 'terser-sandbox-' in cwd(), cwd()",
-            "import importlib.util\nassert importlib.util.find_spec('terser') is None",
         ]
+        # Without a virtualenv (as in CI) the base interpreter has the project installed.
+        + (
+            ["import importlib.util\nassert importlib.util.find_spec('terser') is None"]
+            if sys.prefix != sys.base_prefix
+            else []
+        )
     )
     result = run_code_tests(code, tests, FAST)
     assert result.passed, result.stderr_tail
