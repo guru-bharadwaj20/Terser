@@ -152,6 +152,11 @@ def nested_cv_scores(
     labels = _as_binary_array(y)
     cats = list(categories)
     grps = list(groups)
+    if not (len(Xa) == len(labels) == len(cats) == len(grps)):
+        raise ValueError(
+            f"lengths differ: X {len(Xa)}, y {len(labels)}, categories {len(cats)}, "
+            f"groups {len(grps)}"
+        )
     scores = np.full(len(labels), np.nan)
     fold = np.full(len(labels), -1, dtype=np.int64)
     chosen: list[dict[str, object]] = []
@@ -164,6 +169,8 @@ def nested_cv_scores(
                 make_fit_predict(params), Xa[tr], labels[tr], sub_c, sub_g, inner_splits, seed
             )
             val = inner_score(labels[tr], inner.scores)
+            if not np.isfinite(val):
+                raise ValueError(f"inner score is {val} for params {params}")
             if val > best_val:
                 best, best_val = params, val
         scores[va] = make_fit_predict(best)(Xa[tr], labels[tr], Xa[va])

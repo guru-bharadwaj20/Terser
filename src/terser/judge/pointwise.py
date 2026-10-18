@@ -24,7 +24,7 @@ import re
 from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING, Any
 
-from terser.judge.pairwise import _json_candidates, load_prompt_template, rubric_section
+from terser.judge.pairwise import json_candidates, load_prompt_template, rubric_section
 from terser.judge.rubrics import ANCHOR_SCORES, load_rubric
 
 if TYPE_CHECKING:
@@ -74,7 +74,7 @@ def parse_scores(text: str, dimensions: tuple[str, ...]) -> tuple[dict[str, int]
     if not isinstance(text, str) or not text.strip():
         return None
     wanted = {_norm_name(d): d for d in dimensions}
-    for candidate in _json_candidates(text):
+    for candidate in json_candidates(text):
         try:
             obj = json.loads(candidate)
         except json.JSONDecodeError:

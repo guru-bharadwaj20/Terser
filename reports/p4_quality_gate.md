@@ -20,8 +20,11 @@ transform 0.761.
 
 ## Reading
 
-The embedding-only MLP scores **below** the 27 hand-built pair features: grouped LR reaches 0.748,
-and the NumPy MLP on those features 0.774. The pair embedding describes *what the texts mean*, but
+The embedding-only MLP scores **below** the 27 hand-built pair features under the same grouped
+5-fold OOF protocol: LR reaches 0.748 ([p3_gate_checkpoint.md](p3_gate_checkpoint.md)) and the tuned
+MLP on those features 0.775 ([p10_hpo.md](p10_hpo.md)). (An earlier version cited 0.774 for the
+NumPy MLP, which is a single train/val split from [p4_activations.md](p4_activations.md), not
+comparable with OOF scores.) The pair embedding describes *what the texts mean*, but
 the judge's degraded label depends on *which* tokens were removed: high-information spans,
 numbers and constraints (`max_si_removed`, `sum_si_removed`, `drop_ratio`; rows 3.3.7, 3.4.5).
 Mean-pooled sentence embeddings blur exactly those details, so even 410k parameters cannot

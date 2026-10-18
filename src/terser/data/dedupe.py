@@ -40,7 +40,7 @@ Record fields are read leniently so both the pilot schema (``id``, ``prompt``, `
 CLI::
 
     python -m terser.data.dedupe --in data.jsonl --out kept.jsonl --report report.md \
-        [--threshold 0.8] [--source-priority dolly,oasst] [--seed 0]
+        [--threshold 0.8] [--source-priority dolly,oasst1] [--seed 0]
 
 ``--report`` is written as Markdown when the path ends in ``.md``, otherwise as JSON.
 """

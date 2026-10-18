@@ -53,12 +53,17 @@ def _jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def build_gate(
-    table: Path, target: str
+    table: Path, target: str, exclude_groups: frozenset[str] = frozenset()
 ) -> tuple[Callable[[str, str], float], Callable[[str], int], dict[str, str]]:
-    """LightGBM gate on the pair table and a cached ``gate(original, draft) -> P(degraded)``."""
+    """LightGBM gate on the pair table and a cached ``gate(original, draft) -> P(degraded)``.
+
+    Pairs whose ``group`` (source prompt) is in ``exclude_groups`` are left out of the gate's
+    training data, so the gate scores the study's prompts out of sample.
+    """
     import lightgbm as lgb
 
     df = pd.read_parquet(table)
+    df = df[~df["group"].astype(str).isin(exclude_groups)]
     cols = [c for c in df.columns if c not in ("id", "group", "category", "label")]
     model = lgb.LGBMClassifier(
         learning_rate=0.1, n_estimators=70, max_depth=3, random_state=0, verbose=-1
@@ -92,6 +97,10 @@ def build_gate(
         )
         f["target_phi"] = 0.0
         f.update(prompt_features(original, cost(original), bits(tuple(tokenize(original)))))
+        # Only the other target one-hots may be absent (they are 0); anything else is a bug.
+        missing = [c for c in cols if c not in f and not c.startswith("target_")]
+        if missing:
+            raise KeyError(f"gate features missing from pair_features: {missing}")
         x = np.array([[f.get(c, 0.0) for c in cols]], dtype=np.float64)
         return float(np.asarray(model.predict_proba(x))[0, 1])
 
@@ -113,7 +122,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     rows = _jsonl(args.split)
     pick = rng.choice(len(rows), min(args.prompts, len(rows)), replace=False)
     prompts = [rows[i] for i in pick]
-    gate, cost, category_of = build_gate(args.table, args.target)
+    groups = frozenset(str(p.get("source_id", p["id"])) for p in prompts)
+    gate, cost, category_of = build_gate(args.table, args.target, groups)
     episodes = []
     for p in prompts:
         category_of[p["prompt"]] = p["category"]

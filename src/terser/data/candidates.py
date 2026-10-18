@@ -46,6 +46,7 @@ from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from terser.data.casualise import is_stand_in
 from terser.llm import BudgetExceededError, LLMClient, LocalLLMUnavailableError, ResponseCache
 from terser.llm.client import LLMResponse
 
@@ -111,9 +112,6 @@ DEFAULT_LLMLINGUA_MODEL = "microsoft/llmlingua-2-bert-base-multilingual-cased-me
 CountFn = Callable[[str, str], int]
 ApplyOps = Callable[[str, str, str | None], str]
 Compressor = Callable[[str], str]
-
-# An Ollama tag such as ``qwen2.5:1.5b`` (name:tag, no org/ prefix). vLLM serves HF ids instead.
-_OLLAMA_TAG_RE = re.compile(r"^[A-Za-z0-9._-]+:[A-Za-z0-9._-]+$")
 
 
 class CandidateServerUnavailableError(RuntimeError):
@@ -418,7 +416,7 @@ class CandidateSettings:
             method_kind(method)
         if len(set(self.methods)) != len(self.methods):
             raise ValueError(f"duplicate methods in {self.methods}")
-        if not self.stand_in and _OLLAMA_TAG_RE.match(self.rewrite_model):
+        if not self.stand_in and is_stand_in(self.rewrite_model):
             raise ValueError(
                 f"stand_in=false but rewrite_model {self.rewrite_model!r} looks like an Ollama "
                 "stand-in tag; real candidates come from Qwen/Qwen2.5-32B-Instruct-AWQ on vLLM. "

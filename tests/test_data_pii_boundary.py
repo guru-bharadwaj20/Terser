@@ -342,3 +342,9 @@ def test_real_looking_secrets_are_not_placeholders(value: str) -> None:
 @pytest.mark.parametrize("value", ["<token>", "${API_KEY}", "your_api_key", "test-key", "xxxxxxxx"])
 def test_placeholders_are_recognised(value: str) -> None:
     assert pii._looks_placeholder(value)
+
+
+def test_scrub_record_keeps_skipped_fields() -> None:
+    rec = {"id": "src:192.168.1.9", "prompt": "host 192.168.1.9"}
+    row, _ = pii.scrub_record(rec, skip=("id",))
+    assert row == {"id": "src:192.168.1.9", "prompt": "host <IP_ADDRESS>"}

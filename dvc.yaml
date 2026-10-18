@@ -236,8 +236,9 @@ stages:
       - data/processed/span_features.parquet
 
   register:
-    # Rebuilds the MLflow model registry (rows 11.2.2, 11.2.3). mlruns/ is local and gitignored,
-    # so a fresh clone runs `dvc pull && dvc repro register` to get the same registry back.
+    # Rebuilds part of the MLflow model registry (rows 11.2.2, 11.2.3): gate, tagger and rewriter
+    # rungs 1-3 (v1-v6) only. v7-v10 were registered by register_one / phase10.rewriter_hpo and
+    # must be re-registered by hand after `dvc pull && dvc repro register` on a fresh clone.
     cmd: python -m terser.phase11.register
     deps:
       - src/terser/phase11/register.py

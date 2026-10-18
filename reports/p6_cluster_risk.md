@@ -2,6 +2,8 @@
 
 K-means k = 9 on 4,955 train prompts (bge-small). Degradation rate over 14,732 train label records (both targets); savings = mean oracle savings over targets. High risk = degradation rate >= 1.5x overall; high-risk clusters become eval slices in row 12.3.
 
+> **Note (post-audit):** `median_savings` below was taken over label records, with prompts lacking an oracle row counted as 0 savings. `phase6.studies` now takes it per prompt and leaves missing savings out; the table is unchanged until the study is re-run (the degradation rates and C6.3 are unaffected).
+
 | cluster | n | median_savings | degradation_rate | risk_ratio | high_risk | top_category |
 |---|---|---|---|---|---|---|
 | 6 | 1214 | 0.382 | 0.515 | 1.195 | False | explain |

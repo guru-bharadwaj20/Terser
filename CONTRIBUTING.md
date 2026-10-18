@@ -702,7 +702,7 @@ quality monitoring.
 | # | Task | Detail | Definition of Done | Status |
 | :---: | :--- | :--- | :--- | :---: |
 | 11.1.1 | MLOps overview ADR | Lifecycle diagram + Terser-specific production challenges: judge cost, tokenizer drift, silent over-compression, latency budget, training/serving skew | `docs/decisions/ADR-0010-mlops.md` | ✅ |
-| 11.1.2 | Full DVC pipeline | `collect → casualise → candidates → respond → judge → label → features → split → stratify` | `dvc repro` end to end | ✅ |
+| 11.1.2 | Full DVC pipeline | `collect → casualise → dedupe → split → label_subset → candidates → token_counts → respond → label (judge + label) → oracle`, plus `features` (from `split`) and `register` (as in `dvc.yaml`) | `dvc repro` end to end | ✅ |
 | 11.1.3 | Shared feature code | One `terser.features` used offline and online | Parity test: 100/100 prompts identical | ✅ |
 | 11.1.4 | Data validation | pandera schemas: nulls, token-ratio ranges, category balance | Fails on a corrupted fixture | ✅ |
 
