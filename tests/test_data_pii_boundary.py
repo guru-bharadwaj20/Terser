@@ -147,7 +147,6 @@ def test_report_never_leaks_adjacent_entities() -> None:
     records = [{"id": "private.person@example.com", "prompt": "a.b@gmail.com c.d@gmail.com"}]
     results = pii.scan_records(records, "prompt", pii.detect_regex, "regex")
     md = pii.render_report(
-        records,
         results,
         source="input.jsonl",
         field_name="prompt",
@@ -244,7 +243,6 @@ def test_street_prepositions_are_not_addresses() -> None:
 
 def test_report_lists_zero_counts() -> None:
     md = pii.render_report(
-        [{"prompt": "clean"}],
         [pii.scrub_text("clean")],
         source="input",
         field_name="prompt",
@@ -319,3 +317,28 @@ def test_hex_literal_with_prefix_is_not_a_generic_secret() -> None:
 def test_explicit_secret_assignment_redacts_hex() -> None:
     text = 'api_key = "' + "0123456789abcdef" * 4 + '"'
     assert pii.scrub_text(text).scrubbed == 'api_key = "<SECRET>"'
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "print(s[::-1])",
+        "every other item: a[::2]",
+        "arr[100::5] picks a stride",
+        "He travels 60 miles each way to work.",
+        "It takes 20 minutes to drive to work.",
+        "Install python 3.10.4.1 first.",
+    ],
+)
+def test_code_and_prose_are_not_redacted(text: str) -> None:
+    assert pii.scrub_text(text).scrubbed == text
+
+
+@pytest.mark.parametrize("value", ["S3cure$Pass99", "Zq8TestKx92Lmn4Vb", "myapiXq77Lpw"])
+def test_real_looking_secrets_are_not_placeholders(value: str) -> None:
+    assert not pii._looks_placeholder(value)
+
+
+@pytest.mark.parametrize("value", ["<token>", "${API_KEY}", "your_api_key", "test-key", "xxxxxxxx"])
+def test_placeholders_are_recognised(value: str) -> None:
+    assert pii._looks_placeholder(value)
