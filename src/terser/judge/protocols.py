@@ -12,8 +12,9 @@ rewrite output) pair to sides in the ``original_first`` and ``rewrite_first`` or
     The same two pairwise calls with ``top_logprobs``; the A/B/tie probabilities of each order
     are mapped to sides and **averaged over the two orders** (:func:`order_averaged_side`). The
     argmax side is used for both orders, so the label cannot depend on presentation order. A
-    call without probabilities (e.g. the verdict came from a retry) contributes a one-hot vector
-    of its parsed side.
+    call without probabilities (e.g. the provider returned no ``top_logprobs``, or the verdict
+    token was not in the top list) contributes a one-hot vector of its parsed side. Retries
+    request logprobs too.
 ``pointwise``
     Each output scored alone against the category rubric
     (:class:`terser.judge.pointwise.PointwiseJudge`); the side comes from comparing the scores

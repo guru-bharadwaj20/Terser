@@ -219,9 +219,11 @@ def _token_verdict(token: str) -> Verdict | None:
 def verdict_probs(text: str, logprobs: TokenLogprobs | None) -> dict[str, float] | None:
     """Probability of each verdict (``A``, ``B``, ``tie``) at the reply's verdict token.
 
-    Finds the first token at or after the end of ``"verdict": "`` in the generated text and
-    renormalises the ``top_logprobs`` mass of the candidates that spell a verdict. Returns None
-    when there are no logprobs, no verdict key, or no verdict candidate in the top list.
+    Joins the generated tokens of ``logprobs``, finds the first token at or after the end of
+    ``"verdict": "`` and renormalises the ``top_logprobs`` mass of the candidates that spell a
+    verdict. Returns None when there are no logprobs, no verdict key, or no verdict candidate in
+    the top list. ``text`` (the reply) is not read: the token stream is the source of truth for
+    positions, and the parameter stays only for call-site compatibility.
     """
     if not logprobs:
         return None
