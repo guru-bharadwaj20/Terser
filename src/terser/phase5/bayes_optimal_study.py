@@ -29,8 +29,8 @@ import numpy.typing as npt
 import pandas as pd
 
 from terser.concept.attributes import DOMAINS, instance
-from terser.models.classical.bayes_optimal import BayesOptimalClassifier
 from terser.phase1.version_spaces import POSITIVE_LABEL, AttributeCache, load_labels
+from terser.phase5.bayes_studies import bayes_optimal_vs_map
 
 __all__ = ["coverage_matrix", "hypothesis_codes", "main"]
 
@@ -90,17 +90,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             tr = ~va
             maj = int(yc[tr].mean() >= 0.5)
             for noise in args.noise:
-                bo = BayesOptimalClassifier(noise=noise).fit(P[:, tr], yc[tr])
+                res = bayes_optimal_vs_map(P[:, tr], yc[tr], P[:, va], yc[va], noise=noise)
                 rows.append(
                     {
                         "category": cat,
                         "seed": seed,
                         "noise": noise,
                         "n_val": int(va.sum()),
-                        "map": float(np.mean(bo.predict_map(P[:, va]) == yc[va])),
-                        "bayes_optimal": float(np.mean(bo.predict(P[:, va]) == yc[va])),
+                        "map": res["acc_map"],
+                        "bayes_optimal": res["acc_bayes_optimal"],
                         "majority": float(np.mean(yc[va] == maj)),
-                        "map_posterior": float(bo.posterior_[bo.map_index_]),
+                        "map_posterior": res["map_posterior"],
                     }
                 )
         print(json.dumps({"category": cat, "n": int(m.sum())}), flush=True)

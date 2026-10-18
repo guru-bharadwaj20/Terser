@@ -3,9 +3,10 @@
 * :func:`baum_welch_f1` (5.3.5): supervised MLE on labelled sequences (row 5.3.2), then
   Baum-Welch on unlabelled casual prompts from that initialisation; token macro-F1 of Viterbi tags
   on a labelled validation set before vs after.
-* :func:`compress` (5.3.6): Viterbi tags -> rewritten prompt for each input. The end-to-end row
-  then judges these rewrites with the Phase 2 judge on 500 validation prompts (GPU-served model),
-  which needs the Phase 2 dataset and is not run here.
+* :func:`compress` (5.3.6): a minimal whitespace-token version of Viterbi tags -> rewritten
+  prompt, kept as the tested reference. The end-to-end row 5.3.6 uses
+  :func:`terser.phase5.hmm_compressor.hmm_rewrite` instead (protected spans, punctuation repair)
+  and has been run and judged (C5.6, ``reports/p5_hmm_compressor.md``).
 
 Labelled sequences come from row 3.1.1 alignment labels (KEEP / DROP / REPLACE per word).
 """
