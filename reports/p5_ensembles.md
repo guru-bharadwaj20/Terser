@@ -83,7 +83,8 @@ Permutation importance (AUC drop on held-out data), top 10:
 
 Mean |SHAP| by category (`p5_shap_by_category.csv`):
 
-* **Total information removed** (`sum_si_removed`) dominates in every category (0.39-0.60).
+* **Total information removed** (`sum_si_removed`) dominates in every category except `reason`,
+  where `cat_reason` is larger (0.39-0.60 elsewhere).
   How *much surprising content* is cut matters more than how many tokens are cut.
 * **reason** prompts are special: `cat_reason` carries 0.76 there (vs ~0.15 elsewhere), and
   `target_phi` matters 5x more (0.079). Maths and logic prompts are *protected* (LR odds ratio
