@@ -49,6 +49,7 @@ from typing import Any
 import yaml
 from prefect import flow
 
+from terser.flows import steps
 from terser.flows.reliability import notify_flow_failure
 from terser.flows.steps import (
     REPO_ROOT,
@@ -110,7 +111,8 @@ TARGETS: Mapping[str, str] = {
     "phi3.5-mini": "microsoft/Phi-3.5-mini-instruct",
 }
 JUDGE_MODEL = "Qwen/Qwen2.5-32B-Instruct-AWQ"
-PROMPTS = "data/interim/casual_dedup.jsonl"
+# The labelled subset (dvc.yaml respond@* / label), not the whole deduplicated pool.
+PROMPTS = "data/interim/label_prompts.jsonl"
 CANDIDATES = "data/interim/candidates.jsonl"
 RESPONSES_DIR = "data/interim/responses"
 LABELS = "data/processed/labels.jsonl"
@@ -138,8 +140,15 @@ EVALUATE_STEPS: Mapping[str, Sequence[str]] = {
         f"sft15={_REWRITES}/sft-qwen1.5b-lora.val.jsonl",
         "--rung",
         f"sft3b={_REWRITES}/sft-qwen3b-lora.val.jsonl",
+        "--rung",
+        f"sft15v2={_REWRITES}/sft15v2.val.jsonl",
+        "--rung",
+        f"sft3bv2={_REWRITES}/sft3bv2.val.jsonl",
+        "--rung",
+        f"sft7bv2={_REWRITES}/sft7bv2.val.jsonl",
+        # v1 and v2 labels; the v1-only file would drop the v2 rungs from the committed report.
         "--labels",
-        f"{_REWRITES}/val_labels_all.jsonl",
+        f"{_REWRITES}/val_labels_all_v2.jsonl",
         "--out",
         "reports/p8_rewriter_val.md",
     ],
@@ -312,7 +321,9 @@ def promote_flow(
 
     ``mlruns/`` is gitignored, so on a fresh clone ``dvc.lock`` calls the ``register`` stage up
     to date while the registry is empty; the sync then runs it with ``--force``.
-    ``from_alias="latest"`` promotes the newest registered version (the CT candidate).
+    ``from_alias="latest"`` promotes the newest registered version, ``experiment:<name>`` the
+    newest version of one experiment. The version is resolved once, its lineage checked
+    (rule 7), and that same version is promoted.
     """
     out: list[StepResult] = []
     if sync_registry:
@@ -321,9 +332,19 @@ def promote_flow(
             cmd.insert(3, "--force")
         out.append(shell_step("register", cmd, dry_run))
     guard = promotion_guard(rung, champion_rung, report)
+    name = MODEL_NAMES[component]
+    version: str | None = None
+    if guard.ok and not dry_run:
+        # Rule 7 on the exact version that would move, not on the report row.
+        version = steps._version_at(name, from_alias)
+        missing = steps.lineage_missing(name, version)
+        if missing:
+            msg = f"refused: {name} v{version} lineage incomplete (missing {missing})"
+            print(f"promotion guard ({rung}): {msg}")
+            guard = replace(guard, ok=False, output=msg)
     out.append(guard)
     if guard.ok:
-        out.append(registry_promote(MODEL_NAMES[component], stage, from_alias, dry_run))
+        out.append(registry_promote(name, stage, from_alias, dry_run, version=version))
     return out
 
 
@@ -375,6 +396,7 @@ def ct_flow(
     queue_dir: str = "gpu_queue",
     rung: str = "sft3b",
     champion_rung: str | None = None,
+    candidate_alias: str | None = None,
     sync_registry: bool = True,
     report: str = VAL_REPORT,
     state_path: str = CT_STATE,
@@ -395,9 +417,11 @@ def ct_flow(
     The cycle: ``data_flow`` (stages, then the judge labels unless ``label=False``),
     ``train_classical_flow`` (gate and tagger, CPU), ``train_rewriter_flow`` (CPU smoke test, then
     the job is *queued* in ``queue_dir`` for the GPU worker; nothing trains here),
-    ``evaluate_flow``, then ``promote_flow(stage="Staging", from_alias="latest")``: the newest
-    registered rewriter version moves to Staging only if the row 11.4.4 guard passes on the
-    validation report (C8.3 required). The rewriter queued in this cycle is evaluated by the next
+    ``evaluate_flow``, then ``promote_flow(stage="Staging")``: the registry version that the
+    ``rung`` row of the validation report measures (``candidate_alias``, default
+    ``experiment:<rung's experiment>``) moves to Staging only if the row 11.4.4 guard passes
+    (C8.3 required; rules 3-5 against ``champion_rung``, default the rung now holding Staging;
+    rule 7 on that version's lineage). The rewriter queued in this cycle is evaluated by the next
     cycle, once the GPU worker has trained it. A completed cycle is recorded in ``state_path`` so
     an unchanged ``batch`` does not trigger again. In a dry run the detectors only plan and the
     cycle is planned as if triggered.
@@ -446,12 +470,21 @@ def ct_flow(
     )
     out += _prefixed("train_rewriter_flow", queued)
     out += _prefixed("evaluate_flow", evaluate_flow(dry_run=dry_run))
+    # The guard reads ``rung``'s row of the val report, so promote the registry version that
+    # row measures (its experiment), not whatever was registered last.
+    if candidate_alias is None:
+        exp = steps.RUNG_EXPERIMENTS.get(rung)
+        candidate_alias = f"experiment:{exp}" if exp else "latest"
+    # Rules 3-5 compare with the current champion: the rung holding Staging, when known.
+    if champion_rung is None and not dry_run:
+        held = steps.rung_at(MODEL_NAMES["rewriter"], "staging")
+        champion_rung = held if held != rung else None
     staged = promote_flow(
         rung=rung,
         champion_rung=champion_rung,
         component="rewriter",
         stage="Staging",
-        from_alias="latest",
+        from_alias=candidate_alias,
         sync_registry=sync_registry,
         report=report,
         dry_run=dry_run,

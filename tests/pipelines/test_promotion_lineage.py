@@ -15,7 +15,9 @@ from terser.tracking import promote, start_run
 from terser.tracking.lineage import LineageError, register_with_lineage, trace
 
 CATS = {"code": 0.96, "fact": 0.97, "reason": 0.95, "explain": 0.97, "creative": 0.93}
-CHAMP = EvalSummary(0.955, 0.31, CATS, gate_auc=0.86, checkpoints_passed=("C8.3",))
+CHAMP = EvalSummary(
+    0.955, 0.31, CATS, gate_auc=0.86, checkpoints_passed=("C8.3",), has_lineage=True
+)
 
 
 # ---- promotion guard ---------------------------------------------------------------------------
