@@ -1,0 +1,66 @@
+name: CD
+
+# Row 11.4.2: on a `v*` tag, build the terser-cpu image, scan it, start it, run smoke and
+# fast-path latency tests against the running container, then publish it to GHCR.
+# The fast-path ONNX models are DVC outputs (local remote), so the release for the tag carries
+# them as `models-fast.tar.gz`. The GPU image needs a GPU to test and is built locally (row 7).
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/terser-cpu
+
+jobs:
+  cpu-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch fast-path models from the tag's release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 30); do
+            gh release download "$GITHUB_REF_NAME" -p models-fast.tar.gz && break
+            sleep 20
+          done
+          tar -xzf models-fast.tar.gz
+          ls -l models/fast
+
+      - name: Build image
+        run: docker build -f docker/Dockerfile.cpu -t terser-cpu:ci .
+
+      - name: Scan image (critical, fixable)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: terser-cpu:ci
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Start container
+        run: |
+          docker run -d --name terser -p 8080:8080 terser-cpu:ci
+          for i in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:8080/healthz && exit 0
+            sleep 2
+          done
+          docker logs terser
+          exit 1
+
+      - name: Smoke and latency tests
+        run: python3 scripts/cd_smoke.py --url http://127.0.0.1:8080 --requests 200 --p95-ms 150
+
+      - name: Push to GHCR
+        run: |
+          echo "${{ github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          for t in "$GITHUB_REF_NAME" latest; do
+            docker tag terser-cpu:ci "$IMAGE:$t"
+            docker push "$IMAGE:$t"
+          done
