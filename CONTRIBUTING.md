@@ -579,8 +579,8 @@ before any queued GPU job runs. The RTX 4500 Ada, if connected later, repeats 7.
 | # | Check | Target | Status |
 | :---: | :--- | :--- | :---: |
 | C7.1 🚧 | Environment | Verification script all green on ≥ 1 worker | ✅ |
-| C7.2 | Memory plan | VRAM table in [Compute Allocation](#compute-allocation-cpu-local-open-models-and-the-rtx-4500-ada) partly measured; revised 32B queue configuration and remaining workloads still estimated ([C7 details](docs/checkpoints/C7/README.md)) | ❌ partial |
-| C7.4 | Queue | Local dry-run orders all three jobs without dependency errors; declared estimates pass validation against the configured 22 GB ceiling. Revised 32B estimate is UNVERIFIED pending planned RTX 4090 re-measurement ([follow-up](docs/checkpoints/C7/README.md#follow-up)); not a full pass | ❌ partial |
+| C7.2 | Memory plan | **Owner: Vivian (RTX 4090 workers).** VRAM table in [Compute Allocation](#compute-allocation-cpu-local-open-models-and-the-rtx-4500-ada) partly measured; revised 32B queue configuration and remaining workloads still estimated ([C7 details](docs/checkpoints/C7/README.md)) | ❌ partial |
+| C7.4 | Queue | **Owner: Vivian (RTX 4090 workers).** 2026-10-03 measurement on worker-1: queued 32B config fails startup (KV 4,080 < 4,096 tokens) and peaks at 22.39 GiB net, above the 22 GiB ceiling ([serving.md](docs/checkpoints/C7/serving.md)). Local dry-run orders all three jobs without dependency errors; declared estimates pass validation against the configured 22 GB ceiling. Revised 32B estimate is UNVERIFIED pending planned RTX 4090 re-measurement ([follow-up](docs/checkpoints/C7/README.md#follow-up)); not a full pass | ❌ partial |
 
 ---
 
