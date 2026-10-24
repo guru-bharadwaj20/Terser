@@ -5,6 +5,8 @@ optimizer steps on random token ids (sequence length 1024, micro-batch 4, gradie
 and reports peak VRAM and mean step time. ``--mode lora`` trains LoRA adapters (r=16 on every
 linear projection) over a frozen bf16 base. Full fine-tuning keeps fp32 master weights under bf16
 autocast by default; ``--weights-dtype bf16`` measures pure-bf16 weights and AdamW state instead.
+``--mode qlora`` trains the same adapters over a 4-bit NF4 base with double quantization and
+bf16 compute (row 8.3.4).
 """
 
 from __future__ import annotations
@@ -36,6 +38,7 @@ class TrainResult:
     peak_allocated_gib: float
     peak_reserved_gib: float
     step_seconds: list[float] = field(default_factory=list)
+    quantization: dict[str, Any] | None = None
 
     @property
     def mean_step_seconds(self) -> float:
@@ -48,6 +51,8 @@ class TrainResult:
 
     def to_dict(self) -> dict[str, Any]:
         out = asdict(self)
+        if self.quantization is None:
+            out.pop("quantization")
         out["mean_step_seconds"] = round(self.mean_step_seconds, 4)
         out["tokens_per_s"] = round(self.tokens_per_s, 1)
         return out
@@ -62,26 +67,67 @@ def run_name(model: str, mode: str, weights_dtype: str) -> str:
     """``7-trainbench-<model>-<variant>-0`` following the repo's run-name pattern."""
     short = model.split("/")[-1].lower().replace("-instruct", "").replace("-", "")
     variant = "lora_r16" if mode == "lora" else f"full_{weights_dtype}"
+    if mode == "qlora":
+        variant = "qlora_nf4"
     return f"7-trainbench-{short}-{variant}-0"
 
 
 def run(args: argparse.Namespace) -> TrainResult:
+    if args.mode == "qlora":
+        try:
+            import bitsandbytes  # noqa: F401 - check the optional dependency before loading
+        except ImportError as exc:
+            raise ImportError(
+                "QLoRA requires bitsandbytes; install it with pip install 'terser[gpu]'."
+            ) from exc
+
     import torch
     from transformers import AutoModelForCausalLM
 
     torch.manual_seed(0)
     device = torch.device("cuda")
     weights_dtype = torch.float32 if args.weights_dtype == "fp32" else torch.bfloat16
-    if args.mode == "lora":
+    if args.mode in ("lora", "qlora"):
         weights_dtype = torch.bfloat16
-    model: Any = AutoModelForCausalLM.from_pretrained(args.model, dtype=weights_dtype)
-    model = model.to(device)
+    quantization = None
+    model: Any
+    if args.mode == "qlora":
+        from transformers import BitsAndBytesConfig
+
+        quantization = {
+            "load_in_4bit": True,
+            "bnb_4bit_quant_type": "nf4",
+            "bnb_4bit_use_double_quant": True,
+            "bnb_4bit_compute_dtype": "bf16",
+        }
+        quantization_config = BitsAndBytesConfig(
+            **{**quantization, "bnb_4bit_compute_dtype": torch.bfloat16}
+        )
+        model = AutoModelForCausalLM.from_pretrained(
+            args.model,
+            dtype=weights_dtype,
+            quantization_config=quantization_config,
+            device_map={"": device},
+        )
+    else:
+        model = AutoModelForCausalLM.from_pretrained(args.model, dtype=weights_dtype)
+        model = model.to(device)
     model.config.use_cache = False
-    model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
-    if args.mode == "lora":
+    if args.mode == "qlora":
+        from peft import prepare_model_for_kbit_training
+
+        model = prepare_model_for_kbit_training(
+            model,
+            use_gradient_checkpointing=True,
+            gradient_checkpointing_kwargs={"use_reentrant": False},
+        )
+    else:
+        model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+    if args.mode in ("lora", "qlora"):
         from peft import LoraConfig, get_peft_model
 
-        model.enable_input_require_grads()
+        if args.mode == "lora":
+            model.enable_input_require_grads()
         config = LoraConfig(
             r=args.lora_r,
             lora_alpha=2 * args.lora_r,
@@ -121,6 +167,7 @@ def run(args: argparse.Namespace) -> TrainResult:
         peak_allocated_gib=round(torch.cuda.max_memory_allocated() / 2**30, 2),
         peak_reserved_gib=round(torch.cuda.max_memory_reserved() / 2**30, 2),
         step_seconds=[round(t, 4) for t in times],
+        quantization=quantization,
     )
 
 
@@ -142,6 +189,7 @@ def _log_mlflow(result: TrainResult) -> None:
             "seq_len": result.seq_len,
             "micro_batch": result.micro_batch,
             "gradient_checkpointing": True,
+            **(result.quantization or {}),
         },
     ):
         mlflow.log_metric("peak_allocated_gib", result.peak_allocated_gib)
@@ -154,7 +202,7 @@ def _log_mlflow(result: TrainResult) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--model", required=True)
-    parser.add_argument("--mode", choices=("full", "lora"), required=True)
+    parser.add_argument("--mode", choices=("full", "lora", "qlora"), required=True)
     parser.add_argument("--weights-dtype", choices=("fp32", "bf16"), default="fp32")
     parser.add_argument("--seq-len", type=int, default=1024)
     parser.add_argument("--micro-batch", type=int, default=4)
