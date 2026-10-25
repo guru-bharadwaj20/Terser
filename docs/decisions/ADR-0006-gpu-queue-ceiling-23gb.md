@@ -2,11 +2,15 @@
 
 | Field | Value |
 | :--- | :--- |
-| Status | Proposed (decided by the Phase 7 owner on 2026-10-25; becomes Accepted after review by ≥ 1 other contributor) |
+| Status | Accepted (2026-10-25, by the Phase 7 owner without a second contributor's review; see the note below) |
 | Date | 2026-10-25 |
 | Plan row(s) | C7.4, 7.6, 7.8; risk R04 |
 | Deciders | Vivian Sobers |
-| Reviewers | Guru Bharadwaj (pending) |
+| Reviewers | None. A second-contributor review was not done before acceptance |
+
+> Acceptance note: the conventions ask for review by at least one other contributor before an ADR is
+> Accepted. The phase owner accepted this one directly on 2026-10-25. A later review that disagrees
+> should supersede it with a new ADR.
 
 ## Context
 
