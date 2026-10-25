@@ -7,29 +7,18 @@ depends_on: []
 command: >-
   bash -c 'vllm serve Qwen/Qwen2.5-32B-Instruct-AWQ --quantization awq_marlin --max-model-len 4096
   --gpu-memory-utilization 0.90 --max-num-batched-tokens 1024 --max-num-seqs 64
-  --kv-cache-memory-bytes 1073741824 & SRV=$!;
+  --kv-cache-memory-bytes 1077936128 & SRV=$!;
   until curl -sf http://localhost:8000/v1/models >/dev/null; do sleep 10; done;
   TERSER_LOCAL_LLM_URL=http://localhost:8000/v1 python -m terser.data.candidates
   experiment=p2_candidates hardware=rtx4500ada experiment.params.stand_in=false
   experiment.params.rewrite_model=Qwen/Qwen2.5-32B-Instruct-AWQ; RC=$?; kill $SRV; exit $RC'
-# Recorded baseline: 22.15 GiB net peak, not 21 (docs/checkpoints/C7/serving.md).
-# Baseline: utilization 0.90, batched tokens 2048, max sequences 64, max len 4096.
-# Revised ESTIMATE, UNVERIFIED: this configuration has NOT been run on hardware.
-# Queue uses a numeric GB ceiling of 22; estimates follow the existing GiB convention
-# in C7/serving.md, not a conversion to decimal GB. Hardware must verify this budget.
-# Derived residual (contexts/activations/etc.): 22.15 - 18.14 - 1.46 = 2.55 GiB.
-# Derived space after fixed weights: 22 - 18.14 = 3.86 GiB (not all available to KV).
-# Derived KV budget retaining residual: 22 - 18.14 - 2.55 = 1.31 GiB.
-# Choose 1.00 GiB KV = 1 * 2^30 = 1073741824 bytes; serving.md reports
-# 1.0 GiB needed for a 4096-token sequence. Exact block capacity/startup unverified.
-# Explicit KV cap overrides utilization-based KV allocation; 0.90 is not a peak cap.
-# Revised batched-token limit 1024 = 2048 / 2; intended to reduce activation pressure.
-# Do NOT assume tokens linearly scale KV or credit any activation saving here.
-# Derived peak: 18.14 + 1.00 + 2.55 = 21.69 GiB; round UP to 21.8 (+0.11).
-# Derived margin: 22 - 21.8 = 0.2 GiB; residual stability/real peak are unverified.
-# Needs re-measurement on worker-1 or worker-2 BEFORE this job is trusted.
-# Tracked follow-up: docs/checkpoints/C7/README.md#follow-up (RTX 4090 verification).
-est_vram_gb: 21.8
+# MEASURED on both RTX 4090 workers, 2026-10-24/25 (docs/checkpoints/C7/serving.md,
+# "RTX 4090 re-measurement"): KV 1077936128 bytes = 4,112 tokens (1073741824 = 4,080 tokens
+# fails startup at max-model-len 4096). Peak 22.39 GiB net, an ~8 s transient during vLLM's
+# post-load weight processing; identical across hosts, kernels, eager/graphs, batch limits and
+# utilisation. Serving under load: 19.9-20.3 GiB net. This exceeds the 22 GB ceiling, so
+# `validate` rejects this job until the ceiling or the judge changes (C7.4 open).
+est_vram_gb: 22.4
 est_hours: 3
 exclusive: true
 priority: 1
