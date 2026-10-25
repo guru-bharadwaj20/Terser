@@ -1,0 +1,28 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 2 files:   0%|          | 0/2 [00:00<?, ?it/s]Fetching 2 files:  50%|█████     | 1/2 [05:52<05:52, 352.19s/it]Fetching 2 files: 100%|██████████| 2/2 [08:10<00:00, 226.55s/it]Fetching 2 files: 100%|██████████| 2/2 [08:10<00:00, 245.39s/it]
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights:  76%|███████▌  | 328/434 [00:00<00:00, 3264.75it/s]Loading weights: 100%|██████████| 434/434 [00:00<00:00, 3159.85it/s]
+{
+  "model": "Qwen/Qwen2.5-3B-Instruct",
+  "mode": "lora",
+  "weights_dtype": "bf16",
+  "seq_len": 1024,
+  "micro_batch": 4,
+  "trainable_params": 29933568,
+  "total_params": 3115872256,
+  "peak_allocated_gib": 13.75,
+  "peak_reserved_gib": 15.98,
+  "step_seconds": [
+    0.9276,
+    0.927,
+    0.9269,
+    0.9273,
+    0.9278,
+    0.9278,
+    0.928,
+    0.9286,
+    0.928,
+    1.2817
+  ],
+  "mean_step_seconds": 0.9631,
+  "tokens_per_s": 4253.1
+}
