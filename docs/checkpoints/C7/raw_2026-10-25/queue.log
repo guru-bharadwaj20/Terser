@@ -1,0 +1,4 @@
+judge8b_llama_awq CLEAN startup_s 191 ready 1 load requests 48 ok 48 fail 0 mean_prompt_tokens 2217 completion_tokens 1860 seconds 13.1 gen_tok_s 141.62 peak_device_mib 21283 baseline_mib 95 peak_net_gib 20.691406 samples 828 
+lora3b rc=0 CLEAN peak_alloc 13.75 peak_reserved 15.98 tok_s 4253.1
+qlora7b rc=0 CLEAN peak_alloc 17.25 peak_reserved 18.92 tok_s 1812.7
+QUEUE_DONE

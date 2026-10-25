@@ -1,0 +1,8 @@
+startup_s 110 ready 1
+load requests 48 ok 48 fail 0 mean_prompt_tokens 2211 completion_tokens 1427 seconds 75.3 gen_tok_s 18.96
+peak_device_mib 23024 baseline_mib 97 peak_net_gib 22.389648 samples 862
+(APIServer pid=578867) INFO 10-25 06:46:49 [loggers.py:315] Engine 000: Avg prompt throughput: 1541.0 tokens/s, Avg generation throughput: 18.6 tokens/s, Running: 1 reqs, Waiting: 15 reqs, GPU KV cache usage: 54.7%, Prefix cache hit rate: 0.7%
+(APIServer pid=578867) INFO 10-25 06:46:59 [loggers.py:315] Engine 000: Avg prompt throughput: 1317.3 tokens/s, Avg generation throughput: 20.7 tokens/s, Running: 1 reqs, Waiting: 15 reqs, GPU KV cache usage: 54.3%, Prefix cache hit rate: 0.7%
+(APIServer pid=578867) INFO 10-25 06:47:09 [loggers.py:315] Engine 000: Avg prompt throughput: 1323.2 tokens/s, Avg generation throughput: 16.3 tokens/s, Running: 1 reqs, Waiting: 15 reqs, GPU KV cache usage: 53.9%, Prefix cache hit rate: 0.7%
+(APIServer pid=578867) INFO 10-25 06:47:19 [loggers.py:315] Engine 000: Avg prompt throughput: 1533.8 tokens/s, Avg generation throughput: 20.5 tokens/s, Running: 1 reqs, Waiting: 10 reqs, GPU KV cache usage: 54.3%, Prefix cache hit rate: 0.7%
+(APIServer pid=578867) INFO 10-25 06:47:29 [loggers.py:315] Engine 000: Avg prompt throughput: 1313.3 tokens/s, Avg generation throughput: 16.8 tokens/s, Running: 1 reqs, Waiting: 3 reqs, GPU KV cache usage: 50.4%, Prefix cache hit rate: 0.7%
