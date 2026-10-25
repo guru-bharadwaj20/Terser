@@ -1,0 +1,6 @@
+python 3.11.15
+vllm 0.30.0
+torch 2.13.0+cu130 cuda 13.0
+transformers 5.20.2
+device NVIDIA GeForce RTX 4090
+driver 580.178.04
