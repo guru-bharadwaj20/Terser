@@ -14,8 +14,8 @@
 | # | Check | Target | Measured | Result |
 | :---: | :--- | :--- | :--- | :---: |
 | C7.1 🚧 | Environment | Verification script all green on ≥ 1 worker | `python -m terser.hardware.verify`: capability 8.9, 23.99 GiB, bf16 114.9 TFLOP/s, bf16-vs-fp32 max relative error 4.83e-3. **All green** ([hardware.md](hardware.md)). Measured on the RTX 4500 Ada, a 24 GB Ada-class card like the RTX 4090 workers (ADR-0004 evidence 3 notes they share compute capability 8.9; it does not itself rule on C7.1) | ✅ |
-| C7.2 | Memory plan | VRAM table replaced with measured values | The rows the plan asks Phase 7 to measure (7.6, 7.7) are replaced: the 32B AWQ judge, the Qwen2.5-7B target, 0.5B full FT and 1.5B LoRA. **Still estimates:** the revised 32B queue configuration (21.8, UNVERIFIED; the measured 22.15 GiB peak applies only to the original configuration), Llama-3.1-8B bf16 target (gated, no HF token), Llama-3.1-8B AWQ small judge, Qwen2.5-14B-AWQ fallback judge, 3B LoRA, 7B QLoRA, GRPO, embeddings, TextCNN, production serving | ❌ partial |
-| C7.4 | Queue | Dry-run orders all jobs without dependency errors; every declared `est_vram_gb` ≤ the configured 22 GB ceiling, with hardware evidence before a full pass | Local CPU-only validation on 2026-10-03: `validate --dir gpu_queue` → `queue OK`; `dry-run --dir gpu_queue` orders all three jobs without dependency errors. Declared estimates 21.8, 17 and 13 all pass `validate()` against 22. **The revised 32B configuration is an UNVERIFIED estimate pending RTX 4090 hardware re-measurement; C7.4 is not a full, confident pass** | ❌ partial |
+| C7.2 | Memory plan | VRAM table replaced with measured values | Measured on the RTX 4500 Ada (2026-10-01): 32B judge (original config), Qwen2.5-7B target, 0.5B full FT, 1.5B LoRA. Measured on the RTX 4090 workers (2026-10-24/25, [serving.md](serving.md#rtx-4090-re-measurement-2026-10-2425-rows-76-c72-c74), [training.md](training.md)): 32B judge queued config (startup peak 22.39 GiB net, serving 19.9–20.3), Qwen2.5-14B-AWQ fallback judge (20.22, util 0.90), Llama-3.1-8B AWQ judge (20.69, util 0.90), 3B LoRA (15.98 reserved), 7B QLoRA (18.92 reserved), bge-small (3.52 fp32 / 1.71 fp16 reserved, batch 256×512), TextCNN (0.35 reserved). **Still estimates:** Llama-3.1-8B bf16 target (gated, needs an HF token), GRPO and production serving (their checkpoints are not on the shared DVC remote) | ❌ partial |
+| C7.4 | Queue | Dry-run orders all jobs without dependency errors; every declared `est_vram_gb` ≤ the configured 22 GB ceiling, with hardware evidence before a full pass | Measured on both RTX 4090 workers 2026-10-24/25: the 32B judge job peaks at **22.39 GiB net** during vLLM's post-load weight processing, unchanged by every serving flag tested (kernel, eager vs graphs, batch limits, utilisation). `gpu_queue/p2-candidates-qwen32b.yaml` now declares the measured 22.4 and `validate --dir gpu_queue` rejects it (`22.4 GB exceeds max_vram_gb 22 GB`). Passing needs an ADR: raise the ceiling (the card has ≈1.6 GiB headroom at that peak) or move the job to the 14B fallback judge | ❌ fail |
 
 ## Queue verification (2026-10-03, CPU only)
 
@@ -75,6 +75,15 @@ for max length 4096, and completes representative serving/candidate-generation l
 baseline, device-wide and net peak VRAM in `docs/checkpoints/C7/`, verify the 22 ceiling and real
 margin, then replace the estimate with the observed result and reassess C7.4. If startup fails
 or the peak breaches the ceiling, revise and re-measure; do not mark C7.4 passed on these CPU checks.
+
+**Done 2026-10-24/25.** The verification ran on both workers. The revised flags start once KV is
+1,077,936,128 bytes (4,112 tokens); representative judge load completes (48/48 requests on each
+host). The peak breaches the ceiling: 22.39 GiB net, a startup transient that no serving flag
+tested moves ([serving.md](serving.md#rtx-4090-re-measurement-2026-10-2425-rows-76-c72-c74)). The
+queue file now carries the measured 22.4 and fails `validate`. Remaining decision (owner: Vivian):
+an ADR either raising the single-job ceiling for this job or moving it to the 14B fallback judge
+(measured 20.22 GiB at utilisation 0.90). C7.2's last three estimates need an HF token (Llama-3.1-8B
+bf16) or the GRPO / production-serving checkpoints on the shared remote.
 
 ## Findings
 
