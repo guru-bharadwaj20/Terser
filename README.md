@@ -1,14 +1,38 @@
+<div align="center">
+
 # Terser
 
-**Rewriting casual prompts into token-efficient prompts that get the same output quality.**
+<p>
+Rewrites casual prompts into <strong>token-efficient prompts</strong> that get the same output quality, scored by a position-swapped <strong>Qwen2.5-32B</strong> pairwise judge on two target model families.
+</p>
 
-[![CI](https://img.shields.io/badge/CI-4_jobs-2ea44f?logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
-[![CD](https://img.shields.io/badge/CD-GHCR_image-2ea44f?logo=docker&logoColor=white)](.github/workflows/cd.yml)
-[![Python](https://img.shields.io/badge/Python-3.11_|_3.13-3776AB?logo=python&logoColor=white)](pyproject.toml)
-[![DVC](https://img.shields.io/badge/data-DVC-945DD6?logo=dvc&logoColor=white)](dvc.yaml)
-[![MLflow](https://img.shields.io/badge/tracking-MLflow-0194E2?logo=mlflow&logoColor=white)](src/terser/tracking)
-[![Release](https://img.shields.io/badge/release-v1.0.2-blue)](docs/serving/api.md)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+![Task](https://img.shields.io/badge/Task-Prompt%20Compression%20%C2%B7%20Quality%20Preserved-1565C0?style=for-the-badge&labelColor=42A5F5)
+![Targets](https://img.shields.io/badge/Targets-Qwen2.5--7B%20%C2%B7%20Phi--3.5--mini-6A1B9A?style=for-the-badge&labelColor=AB47BC)
+![Judge](https://img.shields.io/badge/Judge-Qwen2.5--32B%20AWQ%20Pairwise-E65100?style=for-the-badge&labelColor=FF9800)
+![Serving](https://img.shields.io/badge/Serving-vLLM%200.30%20%C2%B7%20FastAPI%20%C2%B7%20ONNX-00897B?style=for-the-badge&labelColor=26A69A)
+![MLOps](https://img.shields.io/badge/MLOps-DVC%20%C2%B7%20MLflow%20%C2%B7%20Prefect-B8860B?style=for-the-badge&labelColor=FFD54F)
+![Hardware](https://img.shields.io/badge/Hardware-2%C3%97%20RTX%204090%20%C2%B7%20RTX%204500%20Ada-2E7D32?style=for-the-badge&labelColor=66BB6A)
+![Checkpoints](https://img.shields.io/badge/Checkpoints-34%20%2F%2063%20Pass-B71C1C?style=for-the-badge&labelColor=EF5350)
+![Release](https://img.shields.io/badge/Release-v1.0.2%20%C2%B7%20GHCR-512DA8?style=for-the-badge&labelColor=9575CD)
+![Language](https://img.shields.io/badge/Language-Python%203.11%20%7C%203.13-1C1C1C?style=for-the-badge&labelColor=424242&logo=python&logoColor=FFD700)
+![License](https://img.shields.io/badge/License-MIT-455A64?style=for-the-badge&labelColor=78909C)
+
+<p>
+  <a href="#what-it-does">Features</a> &bull;
+  <a href="#architecture">Architecture</a> &bull;
+  <a href="#how-a-prompt-travels">Request Flow</a> &bull;
+  <a href="#headline-results">Results</a> &bull;
+  <a href="#quick-start">Quick Start</a> &bull;
+  <a href="#project-status">Status</a> &bull;
+  <a href="#design-decisions">Decisions</a> &bull;
+  <a href="#repository-layout">Repository</a> &bull;
+  <a href="#documentation">Docs</a> &bull;
+  <a href="#team">Team</a>
+</p>
+
+</div>
+
+---
 
 Terser sits between a user and an LLM. It takes a prompt written the way people
 talk (filler, hedging, restated requirements) and rewrites it for a specific
