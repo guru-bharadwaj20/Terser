@@ -1,0 +1,8 @@
+startup_s 166 ready 1
+load requests 48 ok 48 fail 0 mean_prompt_tokens 2472 completion_tokens 1630 seconds 9.2 gen_tok_s 177.09
+peak_device_mib 21963 baseline_mib 95 peak_net_gib 21.355469 samples 712
+(EngineCore pid=2035254) INFO 10-25 07:41:04 [utils.py:320] Using LBNHC KV cache layout.
+(EngineCore pid=2035254) INFO 10-25 07:41:57 [gpu_worker.py:640] Available KV cache memory: 13.0 GiB
+(EngineCore pid=2035254) INFO 10-25 07:41:57 [gpu_worker.py:655] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9000 is equivalent to --gpu-memory-utilization=0.8790 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.9210. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(EngineCore pid=2035254) INFO 10-25 07:41:57 [kv_cache_utils.py:2395] GPU KV cache size: 35,365 tokens, Maximum concurrency for 4,096 tokens per request: 8.63x
+(APIServer pid=2032950) INFO 10-25 07:42:31 [loggers.py:315] Engine 000: Avg prompt throughput: 8624.4 tokens/s, Avg generation throughput: 99.9 tokens/s, Running: 14 reqs, Waiting: 0 reqs, GPU KV cache usage: 95.9%, Prefix cache hit rate: 0.0%
