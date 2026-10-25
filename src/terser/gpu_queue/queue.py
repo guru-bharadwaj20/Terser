@@ -17,7 +17,7 @@ import yaml
 
 from terser.gpu_queue.schema import JobSpec, parse_spec
 
-DEFAULT_MAX_VRAM_GB = 22.0
+DEFAULT_MAX_VRAM_GB = 23.0  # ADR-0006
 HARDWARE_YAML = Path("configs/hardware/rtx4500ada.yaml")
 GATES_FILE = "gates.yaml"
 STATE_FILE = Path(".cache/gpu_queue_state.json")
@@ -37,7 +37,7 @@ def spec_files(queue_dir: Path) -> list[Path]:
 
 
 def max_vram_gb(root: Path) -> float:
-    """``max_vram_gb`` from the RTX 4500 Ada hardware config if present, else 22."""
+    """``max_vram_gb`` from the RTX 4500 Ada hardware config if present, else 23 (ADR-0006)."""
     path = root / HARDWARE_YAML
     try:
         data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}

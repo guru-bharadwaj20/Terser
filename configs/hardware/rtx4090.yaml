@@ -4,5 +4,5 @@ name: "NVIDIA GeForce RTX 4090"
 device: "cuda:0"
 precision: bf16
 total_vram_gb: 24
-max_vram_gb: 22
+max_vram_gb: 23   # ADR-0006
 compute_capability: "8.9"
