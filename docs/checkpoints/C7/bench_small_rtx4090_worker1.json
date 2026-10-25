@@ -1,0 +1,31 @@
+{
+ "device": "NVIDIA GeForce RTX 4090",
+ "torch": "2.13.0+cu130",
+ "seed": 0,
+ "runs": [
+  {
+   "workload": "bge-small encode float32",
+   "batch": 256,
+   "seq_len": 512,
+   "peak_allocated_gib": 2.198,
+   "peak_reserved_gib": 3.516,
+   "texts_per_s": 942.6
+  },
+  {
+   "workload": "bge-small encode float16",
+   "batch": 256,
+   "seq_len": 512,
+   "peak_allocated_gib": 1.104,
+   "peak_reserved_gib": 1.707,
+   "texts_per_s": 3651.1
+  },
+  {
+   "workload": "TextCNN train step fp32 (concat pooling)",
+   "batch": 64,
+   "seq_len": 512,
+   "peak_allocated_gib": 0.263,
+   "peak_reserved_gib": 0.354,
+   "mean_step_seconds": 0.0034
+  }
+ ]
+}
