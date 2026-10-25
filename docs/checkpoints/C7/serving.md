@@ -75,3 +75,43 @@ archive SHA256 `9fbe0e454cf6394a5933fda0215c6b09c9596e6ba500545e384de6c1f11e1476
 Input/data DVC hashes are recorded in the smoke report. Worker-2 serving remains
 unmeasured. Resolve the memory cap and judge position inconsistency before a full run.
 All started servers were shut down; no full-scale run began.
+
+## RTX 4090 re-measurement, 2026-10-24/25 (rows 7.6, C7.2, C7.4)
+
+Both workers, vLLM 0.30.0, torch 2.13.0+cu130, transformers 5.20.2, Python 3.11; worker-1 driver
+595.84, worker-2 driver 580.178.04 ([versions](raw_2026-10-25/)). Every run: `--max-model-len 4096`,
+`--max-logprobs 20`, seed 42, then a judge-shaped load of `3 × concurrency` requests (mean 2,211
+prompt tokens, `max_tokens` 256, greedy, top-20 logprobs). Device memory sampled every 200 ms from
+before server start to after shutdown; net = peak minus the pre-start baseline. A sidecar logged
+every GPU process during the run; runs where another user's process appeared were discarded
+(one 7B QLoRA attempt). Scripts: [setup.sh](raw_2026-10-25/setup.sh),
+[measure.sh](raw_2026-10-25/measure.sh), [queue.sh](raw_2026-10-25/queue.sh).
+
+KV cache is pinned at 1,077,936,128 bytes (4,112 tokens). The queued 1,073,741,824 bytes give
+4,080 tokens and fail startup at length 4,096 (2026-10-03 above).
+
+| Run | Host | Model, flags | Startup peak, net GiB | Serving peak, net GiB | Load result |
+| :--- | :--- | :--- | ---: | ---: | :--- |
+| `graphs_s16` | worker-2 | 32B AWQ, `awq_marlin`, CUDA graphs, seqs 16, batched 1024 | **22.389** | 20.271 | 48/48, 18.5 gen tok/s |
+| `graphs_s16_w1` | worker-1 | same | **22.390** | 20.259 | 48/48, 19.0 gen tok/s |
+| `eager_s16_w2` | worker-2 | 32B, `awq_marlin`, `--enforce-eager` | **22.389** | 19.904 | 48/48, 8.0 gen tok/s |
+| `awq_plain_s16` | worker-2 | 32B, `awq` kernel (no Marlin repack) | **22.389** | — | 48/48, 18.7 gen tok/s |
+| `marlin_b512_s8` | worker-2 | 32B, seqs 8, batched 512 | **22.384** | — | 24/24, 18.7 gen tok/s |
+| `marlin_u085` | worker-2 | 32B, `--gpu-memory-utilization 0.85` | **22.389** | — | 48/48, 18.7 gen tok/s |
+| `judge14b_awq` | worker-2 | Qwen2.5-14B-Instruct-AWQ, `awq_marlin`, util 0.90 | 20.219 (whole run) | — | 48/48, 61.3 gen tok/s |
+| `judge8b_llama_awq` | worker-2 | Llama-3.1-8B-Instruct AWQ-INT4 (hugging-quants), util 0.90 | 20.691 (whole run) | — | 48/48, 141.6 gen tok/s |
+
+"Serving peak" is the maximum after the model finished loading (from 130 s, or after readiness).
+
+**Finding.** The 32B judge's peak is an ~8 s transient between vLLM's "Loading weights took" and
+"Model loading took 18.14 GiB" log lines (post-load weight processing). It is the same to within
+5 MiB across both hosts and drivers, both kernels, eager vs CUDA graphs, halved batch limits and
+lower memory utilisation, so no serving flag tested removes it. Steady serving under load stays at
+19.9–20.3 GiB net. On vLLM 0.30.0 the 32B judge therefore **cannot be queued under the 22 GB
+ceiling as configured**: its true job peak is 22.39 GiB. It runs on a 24 GB card (≈1.6 GiB
+headroom) but breaches the project ceiling for the duration of startup.
+
+The 14B and 8B rows are whole-run peaks at `--gpu-memory-utilization 0.90`, where vLLM sizes the
+KV cache to fill the budget; they show what the server takes, not a minimum requirement.
+
+Raw per-run files (result, flags, baseline, 200 ms VRAM trace): [raw_2026-10-25/](raw_2026-10-25/).
