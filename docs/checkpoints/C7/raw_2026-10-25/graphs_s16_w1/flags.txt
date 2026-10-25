@@ -1,0 +1,1 @@
+--quantization awq_marlin --max-num-seqs 16 --max-num-batched-tokens 1024 --kv-cache-memory-bytes 1077936128

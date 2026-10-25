@@ -1,0 +1,1 @@
+--quantization awq_marlin --max-num-seqs 16 --max-num-batched-tokens 1024 --gpu-memory-utilization 0.90
