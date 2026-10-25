@@ -53,7 +53,7 @@ def fake_torch(monkeypatch: pytest.MonkeyPatch) -> Any:
 def test_yaml_files_load() -> None:
     assert load("cpu").precision == "fp32" and load("cpu").max_vram_gb == 0
     gpu = load("rtx4500ada")
-    assert gpu.device == "cuda:0" and gpu.precision == "bf16" and gpu.max_vram_gb == 22
+    assert gpu.device == "cuda:0" and gpu.precision == "bf16" and gpu.max_vram_gb == 23
     assert gpu.total_vram_gb == 24 and gpu.compute_capability == "8.9"
     assert load("auto").device == "auto" and load("auto").precision == "auto"
 
