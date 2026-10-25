@@ -108,8 +108,8 @@ KV cache is pinned at 1,077,936,128 bytes (4,112 tokens). The queued 1,073,741,8
 "Model loading took 18.14 GiB" log lines (post-load weight processing). It is the same to within
 5 MiB across both hosts and drivers, both kernels, eager vs CUDA graphs, halved batch limits and
 lower memory utilisation, so no serving flag tested removes it. Steady serving under load stays at
-19.9–20.3 GiB net. On vLLM 0.30.0 the 32B judge therefore **cannot be queued under the 22 GB
-ceiling as configured**: its true job peak is 22.39 GiB. It runs on a 24 GB card (≈1.6 GiB
+19.9–20.3 GiB net. On vLLM 0.30.0 the 32B judge therefore **could not be queued under the 22 GB
+ceiling as configured** (resolved by [ADR-0006](../../decisions/ADR-0006-gpu-queue-ceiling-23gb.md), which raises the ceiling to 23 GB): its true job peak is 22.39 GiB. It runs on a 24 GB card (≈1.6 GiB
 headroom) but breaches the project ceiling for the duration of startup.
 
 The 14B, 8B and Phi-3.5 rows are whole-run peaks at `--gpu-memory-utilization 0.90`, where vLLM sizes the
