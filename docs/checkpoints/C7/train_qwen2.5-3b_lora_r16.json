@@ -1,0 +1,25 @@
+{
+  "model": "Qwen/Qwen2.5-3B-Instruct",
+  "mode": "lora",
+  "weights_dtype": "bf16",
+  "seq_len": 1024,
+  "micro_batch": 4,
+  "trainable_params": 29933568,
+  "total_params": 3115872256,
+  "peak_allocated_gib": 13.75,
+  "peak_reserved_gib": 15.98,
+  "step_seconds": [
+    0.9276,
+    0.927,
+    0.9269,
+    0.9273,
+    0.9278,
+    0.9278,
+    0.928,
+    0.9286,
+    0.928,
+    1.2817
+  ],
+  "mean_step_seconds": 0.9631,
+  "tokens_per_s": 4253.1
+}
