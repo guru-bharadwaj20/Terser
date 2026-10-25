@@ -176,8 +176,8 @@ def test_cycle_detection(root: Path) -> None:
 
 
 def test_vram_over_default_budget(root: Path) -> None:
-    write(root, spec("big", est_vram_gb=23))
-    write(root, spec("ok", est_vram_gb=22))
+    write(root, spec("big", est_vram_gb=23.5))
+    write(root, spec("ok", est_vram_gb=23))
     errors = validate(root / "gpu_queue", root)
     assert len(errors) == 1 and "big.yaml" in errors[0] and "'est_vram_gb'" in errors[0]
 
