@@ -581,7 +581,7 @@ before any queued GPU job runs. The RTX 4500 Ada, if connected later, repeats 7.
 | :---: | :--- | :--- | :---: |
 | C7.1 🚧 | Environment | Verification script all green on ≥ 1 worker | ✅ |
 | C7.2 | Memory plan | Every GPU workload in the [Compute Allocation](#compute-allocation-cpu-local-open-models-and-the-rtx-4500-ada) VRAM table measured, none estimated | ❌ partial: **Owner: Vivian (RTX 4090 workers).** Measured 2026-10-24/25 on the RTX 4090s: 32B, 14B and Llama-8B AWQ judges, 3B LoRA, 7B QLoRA, embeddings, TextCNN. Still estimated: Llama-3.1-8B bf16 (gated, needs HF token; replaced by Phi-3.5-mini, now measured), GRPO and production serving (checkpoints not on the shared remote) ([C7 details](docs/checkpoints/C7/README.md)) |
-| C7.4 | Queue | **Owner: Vivian (RTX 4090 workers).** Measured on both workers 2026-10-24/25: the 32B judge job peaks at 22.39 GiB net (startup weight processing, unchanged by any serving flag tested), above the 22 GB ceiling; the queue file declares 22.4 and `validate` rejects it. Needs an ADR: raise the ceiling or use the 14B fallback judge ([serving.md](docs/checkpoints/C7/serving.md)) | ❌ fail |
+| C7.4 | Queue | **Owner: Vivian (RTX 4090 workers).** Dry-run orders all jobs without dependency errors and every declared `est_vram_gb` ≤ the configured ceiling (23 GB per [ADR-0006](docs/decisions/ADR-0006-gpu-queue-ceiling-23gb.md), was 22). Measured 2026-10-24/25 on both workers: the 32B judge job peaks at 22.39 GiB net (startup transient; serving 19.9–20.3 GiB); queue declares 22.4, `validate` → `queue OK`, dry-run orders all six jobs ([serving.md](docs/checkpoints/C7/serving.md)) | ✅ |
 
 ---
 
@@ -919,14 +919,14 @@ which were not, and why.
 | 4 — ANN and SVM | Vivian | 16 | 5 | 20 | ❌ |
 | 5 — Boosting, Bayes, GMM, HMM | Vivian | 16 | 6 | 17 | ❌ |
 | 6 — Clustering | Vivian | 9 | 3 | 10 | ❌ |
-| 7 — GPU Onboarding | Vivian | 8 | 3 | 9 | ❌ |
+| 7 — GPU Onboarding | Vivian | 8 | 3 | 10 | ❌ |
 | 8 — CNN and Rewriter | Vivian | 14 | 5 | 15 | ❌ |
 | 9 — Reinforcement Learning | Vivian | 7 | 2 | 7 | ❌ |
 | 10 — HPO | Vivian | 5 | 4 | 9 | ❌ |
 | 11 — MLOps | Vivian | 25 | 7 | 30 | ❌ |
 | 12 — Final Evaluation | Vivian | 11 | — | 10 | ❌ |
 | 13 — Documentation | Guru | 6 | — | 6 | ✅ |
-| **Total** | | **214** | **60** | **242** | ❌ |
+| **Total** | | **214** | **60** | **243** | ❌ |
 
 Stretch rows are not counted.
 
@@ -934,7 +934,7 @@ Stretch rows are not counted.
 
 | Owner | Hardware | Phases | Rows | Done | Remaining |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 187 | 27 |
+| Vivian | 2 × RTX 4090 (24 GB each) | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 214 | 188 | 26 |
 | Guru | 1 × RTX 4500 Ada (24 GB) | 0, 1, 13 | 60 | 55 | 5 |
 
 Each phase has one owner, who runs it end to end, including its checkpoint.
