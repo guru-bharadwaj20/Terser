@@ -100,6 +100,7 @@ KV cache is pinned at 1,077,936,128 bytes (4,112 tokens). The queued 1,073,741,8
 | `marlin_u085` | worker-2 | 32B, `--gpu-memory-utilization 0.85` | **22.389** | — | 48/48, 18.7 gen tok/s |
 | `judge14b_awq` | worker-2 | Qwen2.5-14B-Instruct-AWQ, `awq_marlin`, util 0.90 | 20.219 (whole run) | — | 48/48, 61.3 gen tok/s |
 | `judge8b_llama_awq` | worker-2 | Llama-3.1-8B-Instruct AWQ-INT4 (hugging-quants), util 0.90 | 20.691 (whole run) | — | 48/48, 141.6 gen tok/s |
+| `target_phi35_bf16` | worker-2 | Phi-3.5-mini-instruct bf16 (ADR-0011 target), util 0.90; 7.14 GiB weights, KV 35,365 tokens | 21.355 (whole run) | — | 48/48, 177.1 gen tok/s |
 
 "Serving peak" is the maximum after the model finished loading (from 130 s, or after readiness).
 
@@ -111,7 +112,10 @@ lower memory utilisation, so no serving flag tested removes it. Steady serving u
 ceiling as configured**: its true job peak is 22.39 GiB. It runs on a 24 GB card (≈1.6 GiB
 headroom) but breaches the project ceiling for the duration of startup.
 
-The 14B and 8B rows are whole-run peaks at `--gpu-memory-utilization 0.90`, where vLLM sizes the
+The 14B, 8B and Phi-3.5 rows are whole-run peaks at `--gpu-memory-utilization 0.90`, where vLLM sizes the
 KV cache to fill the budget; they show what the server takes, not a minimum requirement.
 
 Raw per-run files (result, flags, baseline, 200 ms VRAM trace): [raw_2026-10-25/](raw_2026-10-25/).
+
+The Phi-3.5 run was taken without the foreign-process sidecar (direct invocation); the GPU had no
+other process before or after it and the trace shows no foreign step.
