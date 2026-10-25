@@ -103,8 +103,8 @@ Measurements from rows 7.4–7.7 are in [checkpoints/C7/](checkpoints/C7/README.
 Consequences of the profile:
 
 - bf16 is the default mixed-precision dtype on the GPU. fp16 loss scaling is not needed.
-- ECC memory means VRAM available to CUDA is slightly below 24 GB. The queue (C7.4, `max_vram_gb` in `configs/hardware/rtx4500ada.yaml`) uses **22 GB** as the
-  usable ceiling for any single job.
+- ECC memory means VRAM available to CUDA is slightly below 24 GB. The queue (C7.4, `max_vram_gb` in `configs/hardware/rtx4500ada.yaml`) uses **23 GB** as the
+  usable ceiling for any single job ([ADR-0006](decisions/ADR-0006-gpu-queue-ceiling-23gb.md); 22 GB until 2026-10-25).
 - Until Phase 7 is ✅, nothing in the repository may *require* a GPU to pass CI.
 - **The GPU is on the critical path.** With no hosted APIs, every labelled example (target outputs,
   candidates, judge verdicts) is produced on the RTX 4500 Ada, so Phase 2 cannot finish before Phase 7.
@@ -122,7 +122,7 @@ resolved by `terser.hardware.get_device(cfg)` (row 0.1.5).
 | :--- | :--- | :--- |
 | `configs/hardware/cpu.yaml` | Dev laptop or workstation, CI | Forces CPU, fp32 |
 | `configs/hardware/rtx4500ada.yaml` | RTX 4500 Ada machine | Requires a CUDA device; bf16 enabled. On a machine without CUDA, `get_device` raises with a clear message instead of silently falling back |
-| `configs/hardware/rtx4090.yaml` | `worker-1` / `worker-2` | Same contract as the RTX 4500 Ada profile: requires CUDA, bf16, 22 GB usable ceiling |
+| `configs/hardware/rtx4090.yaml` | `worker-1` / `worker-2` | Same contract as the RTX 4500 Ada profile: requires CUDA, bf16, 23 GB usable ceiling (ADR-0006) |
 | `configs/hardware/auto.yaml` | Any | Uses CUDA if available, otherwise CPU |
 
 ```powershell
@@ -203,7 +203,7 @@ outputs: [models/rewriter/sft-qwen0.5b-full/, mlruns/]
    on) and record the host in the run's `host` tag. Giving the spec a real `host` field, so both
    cards drain from one queue, is open design work rather than something the current code supports.
 8. The validator's VRAM ceiling is read from `configs/hardware/rtx4500ada.yaml` only, which is
-   hardcoded in `terser.gpu_queue.queue`. Both profiles set `max_vram_gb: 22`, so jobs aimed at a
+   hardcoded in `terser.gpu_queue.queue`. Both profiles set `max_vram_gb: 23` (ADR-0006), so jobs aimed at a
    4090 are still checked against the right number today. If the two ever diverge, that path has to
    become config-driven.
 

@@ -1,7 +1,7 @@
 # GPU job queue
 
 GPU work is never a blocker. Every GPU job is written, CPU-smoke-tested with a tiny config, and
-queued here as one YAML spec per job, then run on a 24 GB card (22 GB usable budget): an RTX 4090
+queued here as one YAML spec per job, then run on a 24 GB card (23 GB usable budget, [ADR-0006](../docs/decisions/ADR-0006-gpu-queue-ceiling-23gb.md)): an RTX 4090
 worker or the RTX 4500 Ada.
 See CONTRIBUTING.md, "Compute Allocation".
 
@@ -15,7 +15,7 @@ One file per job, `gpu_queue/<id>.yaml`. All fields are required; unknown fields
 | `phase` | int | Roadmap phase |
 | `depends_on` | list[str] | Other job ids, or checkpoint gates matching `^C\d+(\.\d+)?$` (e.g. `C7.1`) |
 | `command` | str | Shell command, run from the repo root |
-| `est_vram_gb` | number > 0 | Must be ≤ `max_vram_gb` in `configs/hardware/rtx4500ada.yaml` (default 22) |
+| `est_vram_gb` | number > 0 | Must be ≤ `max_vram_gb` in `configs/hardware/rtx4500ada.yaml` (default 23, ADR-0006) |
 | `est_hours` | number > 0 | Planning estimate |
 | `exclusive` | bool | Nothing else on the GPU while it runs |
 | `priority` | int ≥ 1 | 1 = highest |
