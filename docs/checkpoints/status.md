@@ -44,8 +44,8 @@ Status of all 63 checkpoints as of 2026-10-25, read from the ✅ / ❌ marks in 
 | C6.2 | K-means ⇔ EM | ✅ | see the phase checkpoint section |
 | C6.3 | Actionable finding | ❌ | riskiest cluster 1.195x the average degradation rate (≥ 1.5x) ([p6_cluster_risk.md](../../reports/p6_cluster_risk.md)) |
 | C7.1 | Environment | ✅ | see the phase checkpoint section |
-| C7.2 | Memory plan | ❌ | partial: several VRAM rows still estimates; needs RTX 4090 worker measurements ([C7 details](C7/README.md)) |
-| C7.4 | Queue | ❌ | partial: queue validates and dry-runs; revised 32B estimate unverified on the RTX 4090 workers ([follow-up](C7/README.md#follow-up)) |
+| C7.2 | Memory plan | ❌ | partial: all reachable workloads measured on the RTX 4090s (2026-10-24/25); Llama-3.1-8B bf16 (HF token), GRPO and production serving (checkpoints) remain estimates ([C7 details](C7/README.md)) |
+| C7.4 | Queue | ❌ | fail: 32B judge job peaks at 22.39 GiB net on both RTX 4090s (startup transient), above the 22 GB ceiling; needs an ADR ([serving.md](C7/serving.md)) |
 | C8.1 | TextCNN parameters | ✅ | see the phase checkpoint section |
 | C8.2 | TextCNN tagging | ❌ | TextCNN 0.679 vs best classical 0.658 on the binary task (+0.021, McNemar p < 1e-18; target +0.05) ([p8_textcnn.md](../../reports/p8_textcnn.md)) |
 | C8.3 | **Rewriter main gate (val split)** | ❌ | SFT rungs at 7.6% (0.5B, 1.5B) and 2.1% (3B) median savings, targets capped near 10%; on `sft_v2` targets 1.5B LoRA saves 35.0% at 57.0% preserved, 3B LoRA 12.5% at 71.4% and 7B QLoRA 2.0% at 75.3% (bar 25% / 92%); escalation ladder exhausted ([p8_rewriter_val.md](../../reports/p8_rewriter_val.md)) |
