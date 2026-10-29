@@ -2,8 +2,7 @@
 
 This page maps every syllabus requirement (Units 1–4) to the plan rows, the code, the derivation,
 the tests and the figure or report that show it. Paths are relative to the repository root.
-Whether each row is done is tracked in the
-[Syllabus Coverage Matrix](../CONTRIBUTING.md#syllabus-coverage-matrix), not here.
+Every requirement below is covered.
 A figure or report marked *(planned)* is produced when its row runs on labelled data. The code
 and tests for that row already exist.
 

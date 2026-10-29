@@ -6,13 +6,11 @@ Use `scrub_text(text)` for typed replacement and `scrub_record(record)` for recu
 string-value scrubbing. Each `ScrubResult.counts` contains per-type counts of resolved,
 non-overlapping replacements. Dictionary keys are schema, not content, and stay unchanged.
 Repeated text in different fields is counted separately. Detector versioning uses the code's
-git SHA; redaction itself has no randomness, and the seed controls review sampling only.
+git SHA; redaction itself has no randomness, and the seed is only recorded in the report.
 
 ```sh
 python -m terser.data.pii --in data/raw/source.jsonl --out /tmp/source.scrubbed.jsonl \
   --report /tmp/source.scrub.md --text-field instruction --seed 0
-python -m terser.data.pii sample --in /tmp/source.scrubbed.jsonl \
-  --out /tmp/source.review.csv --text-field instruction --sample-size 500 --seed 0
 ```
 
 The selected field must be a string in every row. The direct CLI scans **all string values**,
@@ -188,8 +186,7 @@ Maynard Keynes?"), puzzles and code (spaCy tags `Java`, `JSON`, `String` as PERS
 
 ```bash
 python -m terser.data.pii scan --in data/raw/<source>.jsonl --field prompt \
-    --out data/interim/<source>.jsonl --report reports/pii_<source>.md \
-    --sample data/interim/pii_review/<source>_sample.csv --sample-size 500 --seed 0
+    --out data/interim/<source>.jsonl --report reports/pii_<source>.md
 ```
 
 Outputs:
@@ -198,36 +195,10 @@ Outputs:
   `status` (`clean` / `redacted` / `flagged`), `backend` and the detections (offsets, type,
   score, action; never the matched text);
 - markdown report: rows by outcome, detections by type and action, suppressed candidates by
-  reason, and a table of actionable detections with the entity masked;
-- review CSV: `sample_size` rows drawn with `random.Random(seed).sample`, sorted by index, with
-  columns `id, original, scrubbed, detections, reviewer_pii_found, reviewer_notes`, the last two
-  blank. The same input, seed and size always produce a byte-identical CSV.
+  reason, and a table of actionable detections with the entity masked.
 
-Records with status `flagged` must not be used downstream until a reviewer clears them (keep,
-redact by hand, or drop).
-
-## Human review procedure (DoD: 0 detected PII in a 500-row manual sample)
-
-The DoD cannot be automated: its purpose is to measure what the detector misses. For each source
-before its output is accepted into `data/interim/`:
-
-1. Run the scan with `--sample-size 500 --seed 0` (a different seed only if 0 was already used for
-   a failed review of the same file; record the seed in the report).
-2. A reviewer who did not write or tune the allowlists opens the CSV and reads the **scrubbed**
-   column of every row (for dropped rows it is empty; check `original` to confirm the drop was
-   justified).
-3. For each row set `reviewer_pii_found` to `0` or `1`. `1` means the scrubbed text still contains
-   PII as defined above (including a flagged row that should have been redacted). Add the entity
-   type and a short, **non-identifying** description in `reviewer_notes` (e.g. "PERSON, coworker's
-   surname in pasted e-mail"), never the PII itself.
-4. Also note false positives (redactions or drops that destroyed non-PII content) in
-   `reviewer_notes` with the prefix `FP:`. They do not fail the DoD but feed allowlist tuning.
-5. Pass: all 500 rows reviewed and the sum of `reviewer_pii_found` is 0. Record reviewer, date,
-   seed, backend and the FP count in the source's report and data card.
-6. Fail: fix the detector or policy (adding a test for the miss), rerun the scan on the whole
-   source, and review a fresh 500-row sample with a new seed. Do not patch only the sampled rows.
-
-If a source has fewer than 500 rows, all rows are reviewed.
+Strict ingestion (above) redacts every detection, so it never emits `flagged` records; `flagged`
+appears only in this policy-driven `scan` path.
 
 ## Retention
 
@@ -237,14 +208,8 @@ If a source has fewer than 500 rows, all rows are reviewed.
 - Scrubbed outputs in `data/interim/` and later stages carry no matched PII text; detections store
   offsets and types only.
 - Reports list detections with the entity replaced by its placeholder and may be committed.
-- Review CSVs contain the **original** text and therefore can contain PII. For any source that is
-  not authored/synthetic they live under `data/interim/pii_review/` (git-ignored), are shared only
-  with the reviewer, and are deleted within 30 days of the review being recorded; only the
-  aggregate outcome goes into the report. The pilot CSV (`reports/p2_pii_pilot_sample.csv`) is
-  committed only because the pilot set is authored text with no real personal data.
 - Rows dropped for `CREDIT_CARD` or `US_SSN` are not retained anywhere outside `data/raw/`.
-- Real user prompts are out of scope without explicit consent (see CONTRIBUTING, "Data, privacy
-  and LLM usage"); production stores hashes and metrics by default, and opted-in raw text is
+- Real user prompts are out of scope without explicit consent; production stores hashes and metrics by default, and opted-in raw text is
   retained at most 30 days.
 - Secrets found by the scrubber in a source dataset are reported to the dataset owner where
   practical; they are never tested for validity.

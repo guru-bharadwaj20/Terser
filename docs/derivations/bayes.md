@@ -1,6 +1,6 @@
 # Bayesian learning: Bayes' theorem, naive Bayes, MAP and the Bayes optimal classifier
 
-Row **5.2.1** of `CONTRIBUTING.md`, with the theory used by rows 5.2.3 (naive Bayes filler
+Plan row **5.2.1**, with the theory used by rows 5.2.3 (naive Bayes filler
 detector) and 5.2.4 (Bayes optimal classifier). The worked numbers in §2 are recomputed from the
 committed pilot corpus by `tests/test_bayes_doc.py`.
 

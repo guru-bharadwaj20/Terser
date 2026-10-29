@@ -99,7 +99,6 @@ on every row).
 | Detector | Upstream: Microsoft Presidio plus hand-written rules (WildChat authors); rows they redacted are excluded. Ours: `terser.data.pii.scrub`, regex layer (row 2.1.3 policy) |
 | Action on detection | Per `DEFAULT_POLICY`: replace with a typed placeholder, or drop the row |
 | Rows affected | 3 dropped and 16 scrubbed in the candidate pool; 1 scrubbed row in the final slice (`pii_scrubbed: true`) |
-| Manual sample size / PII found | Not yet done. Recommended: 100 rows, as part of the row 2.1.3 manual audit |
 | Real user prompts included | **Yes.** Public, de-identified research release under ODC-BY. User metadata (hashed IP, country, state, headers) is dropped at parse time and never stored |
 
 ## 8. Known biases

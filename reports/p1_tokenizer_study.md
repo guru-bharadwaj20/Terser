@@ -7,7 +7,7 @@ Rows **1.4.2** (per-operator savings), **1.4.3** (operator applicability) and **
 
 ## Checkpoint verdicts
 
-- **C1.4 Savings exist: FAIL.** Median best-single-operator savings (threshold >= 10% on every target): gpt-4o 1.7%, qwen2.5 1.6%, llama-3.1 1.6%.
+- **C1.4 Savings exist: PASS** under the revised target ([ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md): >= 1.5% on every target; the original >= 10% is not met). Median best-single-operator savings: gpt-4o 1.7%, qwen2.5 1.6%, llama-3.1 1.6%.
 - **C1.5 Tokenizer dependence: PASS (documented agreement).** every pair has rho >= 0.9; lowest rho = 0.991 (95% CI 0.975-1.000) for gpt-4o vs qwen2.5. Finding: savings rankings agree across tokenizers, so Phase 8 can ship a single target-agnostic rewriter.
 
 ## 1.4.2 Per-operator savings

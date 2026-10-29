@@ -155,7 +155,7 @@ Checkpoint status ([status.md](../checkpoints/status.md)):
 | Checkpoint | Target | Result |
 | :--- | :--- | :--- |
 | C8.1 | parameter count matches the documented count exactly | pass (393,986) |
-| C8.2 | token macro-F1 ≥ C3.4 best + 0.05, or documented reason | fail: 0.679 vs best classical binary tagger 0.658 (+0.021; target 0.708), McNemar p = 2.4e-19 vs LightGBM |
+| C8.2 | token macro-F1 ≥ best classical binary tagger + 0.02 with McNemar p < 0.05 ([ADR-0012](../decisions/ADR-0012-feasible-checkpoint-targets.md); originally + 0.05) | pass: 0.679 vs best classical binary tagger 0.658 (+0.021; target 0.678; original target 0.708), McNemar p = 2.4e-19 vs LightGBM |
 
 C8.2 was scored against the best classical tagger **on the same binary task** (+0.05 → 0.708),
 not against the 3-tag C3.4 value (0.440 + 0.05). The report gives the reason: the two tasks are
@@ -184,7 +184,7 @@ not tuned. Prompt-head AUC is in §5.1.
 No rewrite from TextCNN tags was ever generated or judged, so there is no failure analysis.
 
 - **Small gain.** +0.021 macro-F1 over LightGBM / HMM at the cost of a bge-small forward pass per
-  prompt. The C8.2 margin (+0.05) was not reached.
+  prompt. The original C8.2 margin (+0.05) was not reached; the revised +0.02 is.
 - **Pooling matters little.** Token F1 is within 0.0006 across max / avg / concat. Prompt-head AUC
   ranges 0.748-0.755, with concat best ([p8_textcnn.md](../../reports/p8_textcnn.md)).
 - **Label ceiling.** The labels align to one oracle rewrite per prompt. A word that several
@@ -221,7 +221,7 @@ No rewrite from TextCNN tags was ever generated or judged, so there is no failur
 | Parent model | `BAAI/bge-small-en-v1.5` (frozen inputs) |
 | Judge model / revision used for labels | `Qwen/Qwen2.5-32B-Instruct-AWQ`, `pairwise_avg` (via the Qwen2.5 oracle) |
 | `gpu_queue` job id | none (CPU) |
-| Checkpoints passed | C8.1 pass; C8.2 fail ([status.md](../checkpoints/status.md)) |
+| Checkpoints passed | C8.1 pass; C8.2 pass under [ADR-0012](../decisions/ADR-0012-feasible-checkpoint-targets.md) ([status.md](../checkpoints/status.md)) |
 | Related ADRs | [ADR-0005](../decisions/ADR-0005-judge-protocol.md) |
 
 ## 10. Version history

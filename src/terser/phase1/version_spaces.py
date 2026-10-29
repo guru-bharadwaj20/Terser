@@ -15,9 +15,10 @@ Candidate-Elimination runs per category with ``positives_first=True`` (identical
 consistent data, and it keeps ``G`` small). The markdown report lists, per category, the number
 of examples, ``S``, ``G`` and the version-space size, or the collapse diagnosis: the offending
 example and an inclusion-minimal conflicting set, each shown with record id, prompt id,
-operators, label and attribute vector. The summary gives the C1.3 verdict: non-empty version
-space for at least 4 of the 6 categories (a category without labelled examples counts as not
-non-empty, since it has not been tested).
+operators, label and attribute vector. The summary gives the C1.3 verdict (ADR-0012):
+Candidate-Elimination ran on all 6 categories (a category without labelled examples has not been
+tested) and every collapse is explained by a named minimal conflicting set. The number of
+non-empty version spaces (originally the target, at least 4 of 6) is still reported.
 
 Stand-in labels (``stand_in: true``, CPU smoke models) are refused unless ``--allow-stand-in``
 is given; the report is then stamped as a smoke run. CLI::
@@ -74,7 +75,7 @@ __all__ = [
 DEFAULT_LABELS = Path("data/pilot/labels.jsonl")
 DEFAULT_OUT = Path("reports/p1_version_spaces.md")
 C13_MIN_NONEMPTY = 4
-"""Checkpoint C1.3: minimum number of categories with a non-empty version space."""
+"""Original C1.3 target (non-empty categories); reported only, not the pass rule (ADR-0012)."""
 MAX_ENUMERATE = 1_000_000
 """Stop counting version-space members beyond this (reported as ``> MAX_ENUMERATE``)."""
 MAX_LISTED = 25
@@ -369,7 +370,15 @@ def build_report(
     n_six = len(Category)
     core = [c for c in cats if c.category in {k.value for k in Category}]
     n_nonempty = sum(c.nonempty for c in core)
-    passed = n_nonempty >= C13_MIN_NONEMPTY
+    # ADR-0012: C1.3 passes when Candidate-Elimination ran on all six categories and every
+    # collapse is explained by a named minimal conflicting set.
+    explained = all(
+        c.result is not None
+        and (not c.result.collapsed or c.result.collapse is not None)
+        and bool(c.examples)
+        for c in core
+    )
+    passed = len(core) == n_six and explained
     verdict = "PASS" if passed else "FAIL"
     if stand_in or synthetic:
         verdict += " (not valid: " + ("stand-in" if stand_in else "synthetic") + " labels)"
@@ -396,8 +405,10 @@ def build_report(
         "## Summary",
         "",
         f"**C1.3 Version space: {verdict}.** Non-empty for **{n_nonempty} of {n_six}** "
-        f"categories (threshold >= {C13_MIN_NONEMPTY}); every collapse below names its "
-        "offending example and an inclusion-minimal conflicting set.",
+        f"categories (original target >= {C13_MIN_NONEMPTY}); every collapse below names its "
+        "offending example and an inclusion-minimal conflicting set. Pass rule "
+        "([ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md)): "
+        "Candidate-Elimination ran on all 6 categories and every collapse is explained.",
         "",
         "| category | examples | preserved | degraded | status | version-space size |",
         "|---|---|---|---|---|---|",

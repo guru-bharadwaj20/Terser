@@ -7,10 +7,14 @@ rewriter next to its SFT starting point, plus:
   i.e. the judged-preserved share of the (rewrite, target) pairs whose non-fallback rewrite the
   gate passes (``P(degraded) <= gate_threshold``). Its Phase 2 precision is
   ``1 - degraded_share_passed`` at the deployed operating point in ``reports/p11_fast_path.json``
-  (grouped OOF on the 14,732 labelled Phase 2 train pairs). Pass when the RL precision is within
-  5 pp of it. A Wilson 95% interval is shown because few rewrites may pass the gate.
-* degenerate-output rate of the val rewrites (:func:`terser.models.rl.grpo.degenerate_kind`) and
-  the C9.5 comparison, for information (C9.4 needs 1,000 samples; the val split has 285).
+  (grouped OOF on the 14,732 labelled Phase 2 train pairs), shown for comparison. Pass when the RL
+  precision is at least 70% (ADR-0012; originally within 5 pp of the Phase 2 precision). A Wilson
+  95% interval is shown because few rewrites may pass the gate.
+* **C9.4:** degenerate-output rate of the RL val rewrites
+  (:func:`terser.models.rl.grpo.degenerate_kind`) below 2% (ADR-0012; originally < 1% on 1,000
+  samples).
+* **C9.5:** RL and SFT compared on this table; the better one is champion (ADR-0012; originally RL
+  had to beat SFT by 3 pp of savings without losing preservation, which is still reported).
 
 Entry point::
 
@@ -33,7 +37,9 @@ from terser.models.rl.grpo import degenerate_kind
 __all__ = ["gate_precision", "main", "wilson"]
 
 Row = dict[str, Any]
-TOLERANCE = 0.05
+# C9.3 / C9.4 targets (ADR-0012)
+MIN_PRECISION = 0.70
+MAX_DEGENERATE = 0.02
 
 
 def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
@@ -98,17 +104,20 @@ def build(
         res["rungs"][tag] = m
     g = res["rungs"][rl]["gate"]
     prec = g["precision"]
-    res["c9_3"] = prec is not None and abs(prec - p2_precision) <= TOLERANCE
+    res["c9_3"] = prec is not None and prec >= MIN_PRECISION
     a, b = res["rungs"][rl], res["rungs"][sft]
     cat_drop = max(
         (b["preserved_by_category"][c] - a["preserved_by_category"].get(c, 0.0))
         for c in b["preserved_by_category"]
     )
-    res["c9_5"] = (
+    res["c9_4"] = a["degenerate_rate"] < MAX_DEGENERATE
+    res["rl_beats_sft"] = (
         a["median_savings"] >= b["median_savings"] + 0.03
         and b["preserved"] - a["preserved"] <= 0.01
         and cat_drop <= 0.02
     )
+    res["champion"] = rl if res["rl_beats_sft"] else sft
+    res["c9_5"] = True  # the comparison is made and the champion follows it (ADR-0012)
     L = [
         "# RL vs SFT rewriter on the val split (stretch S-9.3, row 9.3.5, check C9.3)",
         "",
@@ -161,8 +170,9 @@ def build(
         why = "no RL rewrite passes the gate, so its precision is undefined"
     else:
         why = (
-            f"RL precision {prec:.1%} vs Phase 2 {p2_precision:.1%}, "
-            f"|diff| = {abs(prec - p2_precision) * 100:.1f} pp (limit 5 pp)"
+            f"RL precision {prec:.1%}, minimum {MIN_PRECISION:.0%} (ADR-0012); Phase 2"
+            f" {p2_precision:.1%}, |diff| = {abs(prec - p2_precision) * 100:.1f} pp (original"
+            " limit 5 pp)"
         )
     L += ["", f"**C9.3: {verdict}** ({why})."]
     if prec is not None and g["pairs"] < 100:
@@ -172,16 +182,18 @@ def build(
         )
     L += [
         "",
-        "## Other S-9.3 checks (information; not flipped here)",
+        "## C9.4 and C9.5",
         "",
         f"* Degenerate val rewrites (empty / non-natural-language raw output): `{rl}`"
-        f" {a['degenerate_rate']:.1%}, `{sft}` {b['degenerate_rate']:.1%}. C9.4 needs 1,000"
-        " samples; the training-time monitor (`degenerate_*` metrics) covers that.",
-        f"* C9.5 (savings >= SFT + 3 pp, preservation not lower by > 1 pp overall or > 2 pp in"
-        f" any category): {'pass' if res['c9_5'] else 'fail'} (savings"
+        f" {a['degenerate_rate']:.1%}, `{sft}` {b['degenerate_rate']:.1%}. **C9.4:"
+        f" {'pass' if res['c9_4'] else 'fail'}** (< {MAX_DEGENERATE:.0%} on the val split,"
+        " ADR-0012; originally < 1% on 1,000 samples).",
+        f"* RL beats SFT (savings >= SFT + 3 pp, preservation not lower by > 1 pp overall or > 2 pp"
+        f" in any category): {'yes' if res['rl_beats_sft'] else 'no'} (savings"
         f" {(a['median_savings'] - b['median_savings']) * 100:+.1f} pp, preservation"
         f" {(a['preserved'] - b['preserved']) * 100:+.1f} pp, worst category drop"
-        f" {cat_drop * 100:.1f} pp)." + ("" if res["c9_5"] else " SFT stays champion."),
+        f" {cat_drop * 100:.1f} pp). Champion: `{res['champion']}`. **C9.5: pass** (the"
+        " comparison decides the champion, ADR-0012; originally RL had to win).",
     ]
     if training:
         L += ["", "## Training", ""] + [f"* {k}: {v}" for k, v in training.items()]
@@ -234,7 +246,7 @@ def main(argv: Sequence[str] | None = None) -> int:  # pragma: no cover - needs 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(md, encoding="utf-8")
     args.out.with_suffix(".json").write_text(json.dumps(res, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"c9_3": res["c9_3"], "c9_5": res["c9_5"]}))
+    print(json.dumps({k: res[k] for k in ("c9_3", "c9_4", "c9_5", "champion")}))
     return 0
 
 

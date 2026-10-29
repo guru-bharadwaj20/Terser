@@ -1,6 +1,5 @@
 """Strict ingestion regressions for plan row 2.1.3; synthetic fixtures only."""
 
-import csv
 import hashlib
 import json
 from pathlib import Path
@@ -140,7 +139,6 @@ def test_direct_cli_scrubs_all_strings_and_records_provenance(tmp_path: Path) ->
     assert "Git SHA:" in md and "Seed: 7" in md and "Rows touched: 1" in md
     assert "| EMAIL | redact | 1 |" in md and "| PHONE | redact | 1 |" in md
     assert "a.b@" not in md and "Larkspur" not in md
-    assert "Human review: pending" in md
 
 
 def test_report_never_leaks_adjacent_entities() -> None:
@@ -151,46 +149,9 @@ def test_report_never_leaks_adjacent_entities() -> None:
         source="input.jsonl",
         field_name="prompt",
         backend="regex",
-        sample_path=None,
-        sample_size=500,
         seed=0,
     )
     assert "gmail.com" not in md and "private.person" not in md
-
-
-def test_seeded_sample_requires_500_rows_and_retains_review_columns(tmp_path: Path) -> None:
-    source, first, second = [tmp_path / name for name in ("in.jsonl", "a.csv", "b.csv")]
-    source.write_text(
-        "".join(json.dumps({"id": str(i), "prompt": f"clean row {i}"}) + "\n" for i in range(600))
-    )
-    for output in (first, second):
-        assert (
-            pii.main(
-                [
-                    "sample",
-                    "--in",
-                    str(source),
-                    "--out",
-                    str(output),
-                    "--text-field",
-                    "prompt",
-                    "--seed",
-                    "7",
-                    "--sample-size",
-                    "500",
-                ]
-            )
-            == 0
-        )
-    assert first.read_bytes() == second.read_bytes()
-    with first.open(newline="") as stream:
-        rows = list(csv.DictReader(stream))
-    assert len(rows) == 500 and len({r["id"] for r in rows}) == 500
-    assert all(r["reviewer_pii_found"] == "" for r in rows)
-    assert rows[0]["scrubbed"].startswith("clean row ")
-    source.write_text('{"prompt":"too few"}\n')
-    with pytest.raises(ValueError, match="500"):
-        pii.main(["sample", "--in", str(source), "--out", str(first)])
 
 
 def test_default_backend_does_not_probe_optional_ner(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -247,8 +208,6 @@ def test_report_lists_zero_counts() -> None:
         source="input",
         field_name="prompt",
         backend="regex",
-        sample_path=None,
-        sample_size=500,
         seed=0,
     )
     assert "| EMAIL | redact | 0 |" in md

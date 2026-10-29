@@ -1,7 +1,6 @@
 # Hardware Profile and Compute Allocation
 
-Plan row: **0.1.6**. Source of truth: [CONTRIBUTING.md § Compute Allocation](../CONTRIBUTING.md#compute-allocation-cpu-local-open-models-and-the-rtx-4500-ada).
-If this document and CONTRIBUTING.md disagree, CONTRIBUTING.md wins and this file is corrected.
+Plan row: **0.1.6**. This document is the source of truth for hardware and compute allocation.
 
 ---
 
@@ -140,7 +139,7 @@ different driver and torch versions.
 
 ## 3. Compute tags
 
-Every task row in CONTRIBUTING.md carries one or more tags.
+Every task row carries one or more tags.
 
 | Tag | Meaning | What a contributor does now |
 | :--- | :--- | :--- |
@@ -196,7 +195,7 @@ outputs: [models/rewriter/sft-qwen0.5b-full/, mlruns/]
 4. The queue drains by `priority` first, then by `depends_on` order. A job whose dependencies are not
    complete is skipped, not failed.
 5. After Phase 7, every job must satisfy `est_vram_gb ≤ 22` using measured values (C7.2 / C7.4).
-6. Each job logs GPU-hours to MLflow (see Experiment standards in CONTRIBUTING.md).
+6. Each job logs GPU-hours to MLflow.
 7. **The runner is single-host.** `terser.gpu_queue` validates and drains one queue on the machine it
    runs on, and the job spec has no host field, so a job cannot be addressed to `worker-1` or
    `worker-2`. With two cards available, run one queue per host (`--dir gpu_queue/worker-1`, and so
@@ -261,7 +260,7 @@ the judge's context length has to be pinned.
 | 7.8 | 30-minute sustained training step | Throughput drop (target < 5%) |
 
 When measurements land, replace the "Est. VRAM" column with measured values, keep the estimate in a
-note for comparison, and update the same table in CONTRIBUTING.md in the same commit.
+note for comparison.
 
 ---
 
@@ -288,7 +287,7 @@ disk (`worker-1`, 235 GB) for anything that writes checkpoints.
 > **Largely superseded.** This section was written when the RTX 4500 Ada was the only GPU. Two
 > RTX 4090s ([§ 1.1](#11-vivians-gpu-workers)) have been available since 2026-09-10, so the trigger
 > for this fallback is unlikely to fire. It is kept verbatim because retiring it changes risk **R03**
-> and the Phase 7 schedule, which needs an ADR (Gate rule in CONTRIBUTING.md). Read it as the plan
+> and the Phase 7 schedule, which needs an ADR. Read it as the plan
 > for losing access to the workers, not as the current state.
 
 The target for Phase 7 is week 13 at the latest, but all labelled data waits for the GPU, so the
@@ -300,10 +299,8 @@ the smoke-test data. If the card is still not connected by week 6:
    - Phase 9: tabular Q-learning (9.1, 9.2).
    - Phase 10: classical HPO studies (10.1–10.5, 10.8).
    - Phase 11: fast-path serving, CI/CD, monitoring, orchestration (11.1, 11.2, 11.3.1–11.3.2, 11.3.4–11.3.6, 11.4, 11.5, 11.6).
-2. Phase 2 labelling and everything that depends on its labels (see the dependency map in
-   CONTRIBUTING.md), including the neural parts of Phases 8 and 9, shift right by the length of the delay.
+2. Phase 2 labelling and everything that depends on its labels, including the neural parts of Phases 8 and 9, shift right by the length of the delay.
 3. Continue writing GPU code with CPU smoke tests and queued jobs, so the queue is ready to drain on day one.
-4. **The schedule slips. Checkpoint targets are not lowered.** Changing a target requires an ADR
-   (see Gate rule in CONTRIBUTING.md).
+4. **The schedule slips. Checkpoint targets are not lowered.** Changing a target requires an ADR.
 
 This risk is tracked as a register entry in [risks.md](risks.md).

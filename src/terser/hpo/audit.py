@@ -9,8 +9,8 @@ Two automated checks, both run in CI:
    is not ``train``/``val``.
 2. **Static check.** :func:`scan_sources` greps ``src/terser`` for literal references to
    ``data/processed/test*`` (or a ``test.jsonl`` split file) outside
-   :mod:`terser.phase12.unlock`, the only sanctioned reader of the test split (CONTRIBUTING
-   "Never tune on test"; ADR-0001 calls it ``terser.eval.final``). It only sees literal paths:
+   :mod:`terser.phase12.unlock`, the only sanctioned reader of the test split (rule
+   "never tune on test"; ADR-0001 calls it ``terser.eval.final``). It only sees literal paths:
    code that builds a path from parts (e.g. ``phase12.benchmark`` / ``phase12.candidates``, which
    read the split through ``read_locked``) is not caught, so the runtime log check and
    :func:`terser.data.splits.assert_no_test_access` remain the real guard.

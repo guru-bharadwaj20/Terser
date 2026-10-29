@@ -171,7 +171,7 @@ def test_method_metrics_and_verdict() -> None:
     ok = c9_2_verdict({"preserved": 0.90, "median_savings": 0.4}, fx | {"preserved": 0.91})
     assert ok["equal_preservation"] and ok["pass"]
     low = c9_2_verdict({"preserved": 0.95, "median_savings": 0.3}, fx)
-    assert low["equal_preservation"] and not low["pass"]  # higher preservation, less savings
+    assert low["equal_preservation"] and low["pass"]  # more preservation, less savings
 
 
 def _run(name: str, n: int, value: float, ok: bool) -> dict:

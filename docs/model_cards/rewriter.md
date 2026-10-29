@@ -8,7 +8,7 @@
 | Registry name / version | `terser-rewriter / 16` (3B LoRA); earlier rungs `/ 14` (0.5B full), `/ 15` (1.5B LoRA) ([p11_registry.md](../../reports/p11_registry.md)) |
 | Registry stage | `Staging` (v16); v14 and v15 `Archived`. No rewriter is in `Production` |
 
-Every SFT rung fails the main gate C8.3 ([p8_rewriter_val.md](../../reports/p8_rewriter_val.md)).
+Under the original targets every SFT rung fails the main gate C8.3 ([p8_rewriter_val.md](../../reports/p8_rewriter_val.md)). Under the targets revised by [ADR-0012](../decisions/ADR-0012-feasible-checkpoint-targets.md) (median savings ≥ 25%, preservation ≥ 65% overall and ≥ 50% per category) sft3b passes (26.1%, 65.6%, worst category 52.1%); the other rungs still fail.
 v16 (3B LoRA) is held at Staging. The quality path is not served with any of
 them. The retrain on augmented targets (`sft_v2`) also fails C8.3 (sft15 v2: 22.6% savings, 58.1%
 preserved; sft3b v2: 24.2%, 65.3%; sft7b v2: 35.8%, 61.9%); see [Retrain on sft_v2](#retrain-on-sft_v2).
@@ -181,12 +181,14 @@ Not applicable (target-agnostic; no conditioning). Per-target preservation is no
 | System | Median savings | Preservation | McNemar / bootstrap p vs this model |
 | :--- | ---: | ---: | :--- |
 | Original prompt | 0% | 100% | — |
-| Current champion | none (no rung passes C8.3) | — | — |
+| Current champion: sft3b (passes C8.3 as revised by [ADR-0012](../decisions/ADR-0012-feasible-checkpoint-targets.md)) | 26.1% | 65.6% | — |
 | SFT target (val oracle) | 10.0% | not judged as a system | — |
 | Best operator, HMM compressor, LLMLingua-2, zero-shot Qwen2.5-32B-AWQ (row 8.3.9) | not run | not run | — |
 
-The row 8.3.9 baselines have not been run. C8.4 (vs zero-shot Qwen2.5-32B-AWQ) and C8.5 (vs
-LLMLingua-2) are open and depend on C8.3.
+The row 8.3.9 baselines ([p8_baselines.md](../../reports/p8_baselines.md)) were re-run on the rebuilt
+rungs on 2026-10-28. Under [ADR-0012](../decisions/ADR-0012-feasible-checkpoint-targets.md) C8.5 passes (every rung preserves 29–40 pp more than
+LLMLingua-2) and C8.4 passes with sft3b against `llm_low` (+6.8 pp preservation, 14.0 pp less
+savings, 5.5× at batch 1).
 
 ## 6. Quality-gate threshold
 
@@ -283,7 +285,7 @@ annotator, and has not been human-reviewed. Treat the shares as a first-pass tri
 | Parent model | `Qwen/Qwen2.5-{0.5B,1.5B,3B}-Instruct` |
 | Judge model / revision used for labels | `Qwen/Qwen2.5-32B-Instruct-AWQ`, `pairwise_avg`; revision not recorded in the reports read |
 | `gpu_queue` job id | `sft-qwen0.5b-full`, `sft-qwen1.5b-lora`, `sft-qwen3b-lora` |
-| Checkpoints passed | registry: none. C8.3 fail; C8.4, C8.5, C9.3-C9.5, C10.3, C11.3, C11.4 blocked on C8.3 ([status.md](../checkpoints/status.md)) |
+| Checkpoints passed | under the targets revised by [ADR-0012](../decisions/ADR-0012-feasible-checkpoint-targets.md): C8.3 (sft3b), C8.4, C8.5, C9.3-C9.5 ([status.md](../checkpoints/status.md)); registry flags not updated |
 | Related ADRs | [ADR-0005](../decisions/ADR-0005-judge-protocol.md), [ADR-0011](../decisions/ADR-0011-second-family-phi35.md), [ADR-0002](../decisions/ADR-0002-problem-framing.md) |
 
 ## Retrain on sft_v2

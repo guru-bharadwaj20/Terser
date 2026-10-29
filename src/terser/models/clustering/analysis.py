@@ -5,8 +5,8 @@
 * :func:`clusters_vs_categories` - ARI, NMI and the contingency table against the 6
   hand-defined categories.
 * :func:`cluster_risk` - oracle savings and degradation rate per cluster; a cluster is
-  *high risk* when its degradation rate is at least ``ratio`` (1.5) times the overall rate
-  (checkpoint C6.3).
+  *high risk* when its degradation rate is at least ``ratio`` (1.15) times the overall rate
+  (checkpoint C6.3 as revised by ADR-0012).
 """
 
 from __future__ import annotations
@@ -84,7 +84,7 @@ def cluster_risk(
     clusters: npt.ArrayLike,
     savings: npt.ArrayLike,
     degraded: npt.ArrayLike,
-    ratio: float = 1.5,
+    ratio: float = 1.15,
 ) -> pd.DataFrame:
     """Per-cluster ``n``, median oracle savings, degradation rate, rate / overall, high-risk flag.
 

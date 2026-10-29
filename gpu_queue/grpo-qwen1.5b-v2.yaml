@@ -1,4 +1,4 @@
-# GRPO v2 ablation (not a CONTRIBUTING row): preservation-aware reward (soft gate x CPU bge-small
+# GRPO v2 ablation (not a plan row): preservation-aware reward (soft gate x CPU bge-small
 # cosine ramp x protected-item retention x capped savings). Same start / KL ref as grpo-qwen1.5b.
 # Stops at TERSER_GRPO_DEADLINE; the 32B audit judge runs only after it exits.
 id: grpo-qwen1.5b-v2

@@ -2,11 +2,10 @@
 
 | Field | Value |
 | :--- | :--- |
-| Status | Proposed (becomes Accepted after review by ≥ 1 other contributor) |
+| Status | Accepted (2026-10-28, by the owner; ADRs no longer wait for a second contributor's review) |
 | Date | 2026-10-01 |
 | Plan row(s) | 2.3.3, 2.3.4 (label rule unchanged), 1.3.6 (pilot relabel); checkpoint C2.6 |
 | Deciders | guru-bharadwaj20 |
-| Reviewers | pending |
 | Related | [reports/p2_judge_bias.md](../../reports/p2_judge_bias.md), [reports/p1_pilot_labels.md](../../reports/p1_pilot_labels.md), ADR-0002 (problem framing) |
 
 ## Context
@@ -55,7 +54,7 @@ Findings:
   keeps every reference label** (32B: 100%, κ = 1.000). The 342 position-inconsistent pairs
   are resolved by the averaged probabilities: 191 → `preserved`, 151 → `degraded` (under the
   both-orders rule 315 of them were `degraded` in the pilot run). On 209 of them the averaged margin between the top two sides is < 0.2, so these are
-  close calls and are flagged `low_margin` for human review.
+  close calls and are flagged `low_margin`.
 
 ## Decision
 
@@ -80,11 +79,11 @@ labels from now on:
 
 **C2.6 is not changed by this ADR and stays ❌.** The raw A/B disagreement of the chosen judge on
 the pilot is 40.9% (target ≤ 10%). The labels no longer depend on it, but a checkpoint target may
-only be changed by an accepted ADR that shows it was wrong. This ADR proposes, for the reviewer
-to accept or reject, that C2.6 be re-stated as "the **label** does not depend on presentation
+only be changed by an accepted ADR that shows it was wrong. This ADR proposes, for the owner
+to accept or reject separately, that C2.6 be re-stated as "the **label** does not depend on presentation
 order (A/B swap changes ≤ 10% of labels), with the raw per-order disagreement reported". Under
-that wording `pairwise_avg` passes by construction, which is exactly why the reviewer, not the
-author, should decide whether the re-statement is legitimate.
+that wording `pairwise_avg` passes by construction, which is why the re-statement is a separate
+decision from this ADR.
 
 ## Alternatives considered
 
@@ -100,7 +99,7 @@ author, should decide whether the re-statement is legitimate.
 
 - Positive: labels are invariant to A/B order by construction; the 32B judge's consistent
   verdicts are kept exactly; no extra GPU cost over the planned pairwise judge (same two calls,
-  one more response field); the averaged margin gives a confidence score for review sampling.
+  one more response field); the averaged margin gives a confidence score per label.
 - Negative: on order-inconsistent pairs the label rests on small probability differences
   (median margin 0.13); `degraded` labels drop from 51% to 32% on the pilot, so the C2.8 class
   balance and the C2.7 oracle savings will be measured on a more permissive labelling than the
@@ -110,4 +109,4 @@ author, should decide whether the re-statement is legitimate.
   `low_margin` pairs as unlabelled.
 - Follow-up: the pilot labels were regenerated with this protocol
   (`data/pilot/labels.jsonl`; the old labels are kept as `data/pilot/labels_pairwise_v1.jsonl`);
-  the Phase 2 judge stage (2.3.3) uses it; the reviewer decides the C2.6 wording.
+  the Phase 2 judge stage (2.3.3) uses it; the C2.6 wording is a separate owner decision.
