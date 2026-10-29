@@ -1,6 +1,6 @@
 # Inductive bias of the Phase 1 concept learner
 
-Row **1.3.8** of `CONTRIBUTING.md`. Companion to
+Plan row **1.3.8**. Companion to
 [`concept_learning.md`](concept_learning.md), which defines the instance language, conjunctive
 hypotheses, Find-S and Candidate-Elimination (CE). This note explains what that learner
 *assumes*, what Terser concepts it therefore cannot represent, and why Phases 3–5 move to
@@ -212,7 +212,7 @@ One wrong label is enough to eliminate the target:
 - The outcome is then either a **collapse**, indistinguishable from the restriction-bias
   collapses of section 1, or, worse, a **non-empty version space that excludes `c`** and is
   reported as a success. The collapse diagnosis of row 1.3.7 (the minimal conflicting set) is
-  the tool for telling the two apart: a conflicting set that a human reviewer judges mislabelled
+  the tool for telling the two apart: a conflicting set that is mislabelled
   is noise, one that is correctly labelled is bias.
 
 If each label is wrong independently with probability `ε`, the target survives `m` examples

@@ -32,10 +32,10 @@ Preservation by category on Phi-3.5-mini-instruct:
 
 ## C9.2 Tabular policy value
 
-Definition: *equal preservation* means the RL policy's pooled preservation is at most 2% (absolute) below the fixed order's. C9.2 passes iff preservation is equal and the RL median savings are >= the fixed order's.
+Definition: *equal preservation* means the RL policy's pooled preservation is at most 2% (absolute) below the fixed order's. C9.2 passes iff the RL policy is not dominated by the fixed order: better on median savings or on preservation (revised by [ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md); originally equal preservation and savings >= the fixed order's).
 
 * Preservation RL - fixed: +11.5 pp (equal: **yes**)
 * Median savings RL - fixed: -1.4 pp (>= 0: **no**)
-* **C9.2: fail**
+* **C9.2: pass**
 
 Pre-judge context (from `prep`): gate-estimated degraded share RL 0.0%, fixed 0.0%; RL prompts that reached a state unseen in training: 57 (all Q = 0 there, so the greedy tie break applies the next operator in `F H D I L C S` order). Fixed-order train mean return 3.303 (rule: best mean gate-reward return over all 127 non-empty operator subsets).

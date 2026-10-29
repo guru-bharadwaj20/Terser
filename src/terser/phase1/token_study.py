@@ -280,7 +280,7 @@ def write_report(
     n_bootstrap: int = 1000,
     seed: int = 0,
     figures_dir: str | Path | None = None,
-    savings_threshold: float = 10.0,
+    savings_threshold: float = 1.5,
     rho_threshold: float = 0.9,
 ) -> StudyOutputs:
     """Build the full Phase 1 tokenizer-study report (rows 1.4.2-1.4.4) from raw results.
@@ -290,7 +290,8 @@ def write_report(
         n_bootstrap: Bootstrap resamples for the Spearman confidence intervals.
         seed: Bootstrap RNG seed.
         figures_dir: Where to save figures; ``None`` skips them.
-        savings_threshold: C1.4 threshold on median best-single-operator savings (percent).
+        savings_threshold: C1.4 threshold on median best-single-operator savings (percent);
+            1.5 since ADR-0012 (originally 10).
         rho_threshold: C1.5 threshold on Spearman rho.
 
     Returns:

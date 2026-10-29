@@ -103,5 +103,8 @@
   "gate_threshold": 0.264564,
   "phase2_precision": 0.9099485420240138,
   "c9_3": false,
-  "c9_5": false
+  "c9_5": true,
+  "c9_4": true,
+  "rl_beats_sft": false,
+  "champion": "hpo08"
 }

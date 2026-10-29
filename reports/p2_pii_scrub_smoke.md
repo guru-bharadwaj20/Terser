@@ -94,7 +94,7 @@ sample_rows=500 population=500 seed=0 human_review=pending
 - Rows manually read: pending (required: 500)
 - Residual PII count: pending (required: 0)
 - False positives: pending
-- Decision: pending; CONTRIBUTING.md row 2.1.3 remains incomplete
+- Decision: pending; row 2.1.3 remains incomplete
 
 The report is an aggregate CPU validation artifact; no tracking service was used. The git SHA
 above identifies the base revision and `git_dirty=true` explicitly records uncommitted code.
@@ -184,7 +184,7 @@ git log -1 --oneline
 ```
 
 The requested small local commits require write access to the repository metadata.
-No SSH connection or accelerator workload was run. CONTRIBUTING.md was not edited.
+No SSH connection or accelerator workload was run.
 
 ## Final verification
 
@@ -230,7 +230,6 @@ is qualified by the temporary dependency help-rendering adjustment, not a reposi
 ```sh
 ruff check src/terser/data/pii.py src/terser/data/collect.py src/terser/data/real_slice.py tests/test_data_pii.py tests/test_data_pii_boundary.py
 git diff --check
-git diff --quiet -- CONTRIBUTING.md
 ```
 
 ```text

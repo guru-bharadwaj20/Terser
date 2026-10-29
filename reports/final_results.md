@@ -77,7 +77,7 @@ Cells: preserved / median savings.
 
 ## 12.3 Stratified: target x Phase 6 cluster
 
-K-means k = 9 refit on the train embeddings (Phase 6 recipe; agreement with the stored Phase 6 cluster x category table 100.0%); each prompt goes to its nearest centroid (bge-small). No cluster met the C6.3 high-risk bar (>= 1.5x), so the slice is the highest-risk cluster(s) by train risk ratio: 6.
+K-means k = 9 refit on the train embeddings (Phase 6 recipe; agreement with the stored Phase 6 cluster x category table 100.0%); each prompt goes to its nearest centroid (bge-small). High-risk clusters (C6.3: degradation >= 1.15x overall, ADR-0012): 6.
 
 | System | Target | c0 (risk 1.04) | c1 (risk 1.04) | c2 (risk 1.08) | c3 (risk 1.11) | c4 (risk 1.06) | c5 (risk 1.12) | c6 (risk 1.19, HR) | c7 (risk 0.56) | c8 (risk 1.08) |
 |---|---|---|---|---|---|---|---|---|---|---|

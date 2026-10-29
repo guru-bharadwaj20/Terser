@@ -4,7 +4,7 @@ Rows 2.2.1–2.2.3 and 2.3.3; C7.4 hardware follow-up. The smoke completed on wo
 
 ## Reproducibility and scope
 
-Selection and serving seed: 42. Creative common-random-number seeds: 1000, 1001, 1002. The selected pilot contains 20 prompts: code/creative four each; explain/fact/reason/transform three each. Selected IDs and the clean PII scan are in [prepare_stats.json](../data/raw/p2_smoke_20261003/prepare_stats.json). No stand-ins were used. Raw outputs/caches remain in `data/raw/`; intermediate files were scanned before entering `data/interim/` and carry `smoke_only=true`. The regex scan found all records clean; that does not replace production human review.
+Selection and serving seed: 42. Creative common-random-number seeds: 1000, 1001, 1002. The selected pilot contains 20 prompts: code/creative four each; explain/fact/reason/transform three each. Selected IDs and the clean PII scan are in [prepare_stats.json](../data/raw/p2_smoke_20261003/prepare_stats.json). No stand-ins were used. Raw outputs/caches remain in `data/raw/`; intermediate files were scanned before entering `data/interim/` and carry `smoke_only=true`. The regex scan found all records clean.
 
 Worker code was captured before concurrent local edits: base SHA `7bfce9f364d02ac0ff52eebf3e507b6fdfa5812d`, `git_dirty=true`. The [source archive](../data/raw/p2_smoke_20261003/code_snapshot.tar.gz) SHA256 is `9fbe0e454cf6394a5933fda0215c6b09c9596e6ba500545e384de6c1f11e1476`. The archive and recorded wrapper hashes establish the executed code; the pre-provider-fix wrapper was reconstructed from the one-line change and verified against its recorded SHA256, and both versions are retained; the current local checkout has subsequent independent commits. Prompt SHA256 is `620bae63a58ba7f0a5364316ef79c93ea8fac57e02c27be2d593d7de8571bac0`. Input MD5/DVC leaf hash is `867d12bea7893564ea5821759ff67c19`.
 
@@ -44,7 +44,7 @@ Observed coverage:
 - 280 token-count cells: 140 original/candidate texts × two actual target tokenizers; no missing values. The default tokenizer registry lacks Phi, so the smoke explicitly used its real tokenizer.
 - 192 logical response records per target, each from 157 unique uncached requests. Creative originals and rewrites have three samples. Completion caps were reached by six Qwen responses and ten Phi responses.
 - 232 labels, one for every accepted candidate and target. The judge used position-swapped `pairwise_avg`, greedy decoding, 20 top log-probabilities, two retries, and 256-token completion cap. It made 494 uncached requests and generated 22,698 tokens. There were 182 judged pairs and 50 identical pairs.
-- Label values: 147 preserved, 85 degraded; 95 records flagged for human review. Raw position disagreement occurred in 147 of 274 parsed comparisons; 57 low-margin comparisons were recorded. These diagnostics require rubric/position-consistency review before production. The pilot has no reference answers/tests for reference-based code, fact or reasoning metrics, so this smoke cannot validate those metrics or label quality.
+- Label values: 147 preserved, 85 degraded; 95 records flagged for human review. Raw position disagreement occurred in 147 of 274 parsed comparisons; 57 low-margin comparisons were recorded. The pilot has no reference answers/tests for reference-based code, fact or reasoning metrics, so this smoke cannot validate those metrics or label quality.
 
 Coverage, schema, unique keys, seeds, model snapshot bytes, tracking tags, statuses and memory samples were checked by [verification](../data/raw/p2_smoke_20261003/commands/51_verify.log). No production tables or frozen test data were changed.
 
@@ -71,7 +71,7 @@ Startup recovery was scoped to project processes and paths: missing conda execut
 
 [Command ledger](p2_smoke_commands.md) provides exact remote scripts, exit codes and trimmed real output. Download weights and the environment remain under the authorized project paths on worker-1; only smoke outputs, source archive, logs and tracking artifacts were copied locally.
 
-The local `.git` directory is mounted read-only. `git add reports/p2_worker_environment.md` failed with `Unable to create .../.git/index.lock: Read-only file system`; therefore no task commit could be created and nothing was pushed. The prepared changes were committed later from the main checkout; the handoff note that listed them was not kept. CONTRIBUTING statuses remain unchanged.
+The local `.git` directory is mounted read-only. `git add reports/p2_worker_environment.md` failed with `Unable to create .../.git/index.lock: Read-only file system`; therefore no task commit could be created and nothing was pushed. The prepared changes were committed later from the main checkout; the handoff note that listed them was not kept.
 
 ## Local DVC retention
 

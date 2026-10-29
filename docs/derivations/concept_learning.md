@@ -1,6 +1,6 @@
 # Concept learning for Terser: hypotheses, Find-S, Candidate-Elimination
 
-Row **1.3.2** of `CONTRIBUTING.md`. This note derives the concept-learning machinery used in
+Plan row **1.3.2**. This note derives the concept-learning machinery used in
 Phase 1 and ties each result to the code in `src/terser/concept/`:
 
 | Module | Contents |

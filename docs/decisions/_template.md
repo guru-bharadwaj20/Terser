@@ -11,7 +11,6 @@ Keep it short: an ADR records one decision. Do not edit an Accepted ADR's decisi
 | Date | `YYYY-MM-DD` |
 | Plan row(s) | `<e.g. 1.1.1>` |
 | Deciders | `<names>` |
-| Reviewers | `<names>` |
 
 ## Context
 

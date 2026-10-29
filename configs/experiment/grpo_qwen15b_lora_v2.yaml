@@ -1,11 +1,11 @@
-# GRPO v2 (follow-up negative-result ablation of S-9.3; not a CONTRIBUTING row). v1's reward
+# GRPO v2 (follow-up negative-result ablation of S-9.3; not a plan row). v1's reward
 # (savings x gate_pass) was hacked (C9.3 fail: 42.4% judged-preserved among gate-passed val
 # rewrites vs 91.0%). v2 keeps everything else of grpo_qwen15b_lora (start hpo08, KL ref, group 8)
 # and swaps in the preservation-aware reward of terser.models.rl.grpo.make_reward_v2.
 # Queued: gpu_queue/grpo-qwen1.5b-v2.yaml (driver /home/temp/p9v2_grpo.sh; deadline via env).
 name: grpo_qwen15b_lora_v2
 phase: 9
-row: null   # follow-up ablation, not a CONTRIBUTING row
+row: null   # follow-up ablation, not a plan row
 task: rewriter_grpo
 params:
   model: Qwen/Qwen2.5-1.5B-Instruct

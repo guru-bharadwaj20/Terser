@@ -3,7 +3,7 @@
 GPU work is never a blocker. Every GPU job is written, CPU-smoke-tested with a tiny config, and
 queued here as one YAML spec per job, then run on a 24 GB card (23 GB usable budget, [ADR-0006](../docs/decisions/ADR-0006-gpu-queue-ceiling-23gb.md)): an RTX 4090
 worker or the RTX 4500 Ada.
-See CONTRIBUTING.md, "Compute Allocation".
+See [docs/hardware.md](../docs/hardware.md) for compute allocation.
 
 ## Spec format
 

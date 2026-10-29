@@ -12,7 +12,8 @@ truncated to 256 words.
 * 8.2.3 - prompt-head pooling max / avg / concat, 3 seeds each: prompt-head AUC and token F1.
 * 8.2.4 - TextCNN (concat) vs supervised HMM (Viterbi, KEEP vs not) vs LightGBM on the row 3.1.2
   span features, identical grouped 5-fold split by prompt: token macro-F1 and McNemar.
-* C8.2 - TextCNN macro-F1 vs the best classical tagger on the same binary task (+0.05).
+* C8.2 - TextCNN macro-F1 vs the best classical tagger on the same binary task (+0.02 and
+  McNemar p < 0.05, revised by ADR-0012; originally +0.05).
 
 CLI::
 
@@ -39,6 +40,8 @@ from terser.models.neural.textcnn import TextCNNConfig, build_textcnn
 __all__ = ["main"]
 
 MAX_WORDS = 256
+# C8.2 margin over the best classical tagger (ADR-0012; originally 0.05)
+C82_MARGIN = 0.02
 
 
 def word_states(
@@ -261,6 +264,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     mcd = pd.DataFrame(mc)
     cnn_f1 = float(comp.token_macro_f1.iloc[0])
     best_cls = float(comp.token_macro_f1.iloc[1:].max())
+    best_name = str(comp.tagger.loc[comp.token_macro_f1.iloc[1:].idxmax()])
+    best_p = float(mcd[(mcd.A == names[0]) & (mcd.B == best_name)].p.iloc[0])
+    c82 = cnn_f1 >= best_cls + C82_MARGIN and best_p < 0.05
 
     def md(df: pd.DataFrame) -> str:
         cols = list(df.columns)
@@ -289,9 +295,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "## 8.2.4 TextCNN vs HMM vs GBM taggers\n\n" + md(comp) + "\n\nMcNemar (exact binomial on "
         "discordant tokens):\n\n" + md(mcd) + "\n\n"
         f"## C8.2\n\nTextCNN token macro-F1 **{cnn_f1:.3f}** vs best classical tagger on the same "
-        f"binary task **{best_cls:.3f}** (target: +0.05 → {best_cls + 0.05:.3f}). The C3.4 number "
+        f"binary task **{best_cls:.3f}** ({best_name}, McNemar p = {best_p:.2g}; target: "
+        f"+{C82_MARGIN} → {best_cls + C82_MARGIN:.3f} with p < 0.05, revised by ADR-0012; "
+        f"originally +0.05 → {best_cls + 0.05:.3f}). The C3.4 number "
         f"({args.c34:.3f}) is 3-tag macro-F1, so the comparison here uses the binary task both "
-        f"can be scored on. C8.2: **{'pass' if cnn_f1 >= best_cls + 0.05 else 'fail'}**.\n"
+        f"can be scored on. C8.2: **{'pass' if c82 else 'fail'}**.\n"
     )
     (args.out / "p8_textcnn.md").write_text(text, encoding="utf-8")
     print(json.dumps({"cnn_f1": cnn_f1, "best_classical": best_cls}))

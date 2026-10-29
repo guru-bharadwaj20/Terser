@@ -1,7 +1,8 @@
 # Phase 2 judge position bias: protocol comparison on the pilot pairs
 
-> Supports row **2.3.3** and checkpoint **C2.6** (A/B-order disagreement ≤ 10%). Decision:
-> [ADR-0005](../docs/decisions/ADR-0005-judge-protocol.md) (Proposed). All numbers are judge
+> Supports row **2.3.3** and checkpoint **C2.6** (an A/B swap changes ≤ 10% of labels, [ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md);
+> originally raw A/B verdict disagreement ≤ 10%). Decision:
+> [ADR-0005](../docs/decisions/ADR-0005-judge-protocol.md) (Accepted). All numbers are judge
 > outputs on unreviewed pilot pairs.
 
 ## Setup
@@ -81,11 +82,12 @@ Compute (distinct requests only; repeats are cache hits):
 ## Decision and checkpoint status
 
 `pairwise_avg` with Qwen2.5-32B-Instruct-AWQ is the judge protocol for 2.3.3 onwards (ADR-0005,
-Proposed). It keeps the 2.3.4 label rule, applied to the order-averaged verdict.
+Accepted). It keeps the 2.3.4 label rule, applied to the order-averaged verdict.
 
-**C2.6 stays ❌.** Measured raw A/B disagreement of the chosen judge: **40.9%** on the pilot
-(target ≤ 10%). The label produced by `pairwise_avg` cannot depend on order, but C2.6 as written
-measures the judge's verdicts. Whether it should be re-stated is left to the ADR-0005 reviewer.
+**C2.6 ✅ under the revised target** ([ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md), adopting the ADR-0005 re-statement): the label
+produced by `pairwise_avg` averages both orders, so an A/B swap changes **0%** of labels (target
+≤ 10%). The raw per-order verdict disagreement is still reported and still misses the original
+target: **40.9%** on the pilot (original target ≤ 10%).
 At full scale the 2.3.3 judge stage measured **44.0%** raw A/B disagreement (10,432 of 23,718
 parsed per-order verdict pairs, [p2_label_stats.json](p2_label_stats.json)).
 

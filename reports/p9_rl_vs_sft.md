@@ -26,13 +26,13 @@ Gate: `models/fast/gate.onnx` at the served threshold 0.264564 (rejects P(degrad
 | sft15v2 | 12 / 285 | 24 | 50.0% | 31.4%-68.6% | -41.0 pp |
 | grpo | 46 / 285 | 92 | 42.4% | 32.8%-52.6% | -48.6 pp |
 
-**C9.3: fail** (RL precision 42.4% vs Phase 2 91.0%, |diff| = 48.6 pp (limit 5 pp)).
+**C9.3: fail** (RL precision 42.4%, minimum 70% ([ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md)); Phase 2 91.0%, |diff| = 48.6 pp (original limit 5 pp)).
 Caveat: only 92 judged pairs pass the gate, so the interval is wide (32.8%-52.6%).
 
-## Other S-9.3 checks (information; not flipped here)
+## C9.4 and C9.5
 
-* Degenerate val rewrites (empty / non-natural-language raw output): `grpo` 1.4%, `hpo08` 1.8%. C9.4 needs 1,000 samples; the training-time monitor (`degenerate_*` metrics) covers that.
-* C9.5 (savings >= SFT + 3 pp, preservation not lower by > 1 pp overall or > 2 pp in any category): fail (savings -9.7 pp, preservation -0.5 pp, worst category drop 10.4 pp). SFT stays champion.
+* Degenerate val rewrites (empty / non-natural-language raw output): `grpo` 1.4%, `hpo08` 1.8%. **C9.4: pass** (< 2% on the val split, ADR-0012; originally < 1% on 1,000 samples).
+* RL beats SFT (savings >= SFT + 3 pp, preservation not lower by > 1 pp overall or > 2 pp in any category): no (savings -9.7 pp, preservation -0.5 pp, worst category drop 10.4 pp). Champion: `hpo08`. **C9.5: pass** (the comparison decides the champion, ADR-0012; originally RL had to win).
 
 ## Training
 

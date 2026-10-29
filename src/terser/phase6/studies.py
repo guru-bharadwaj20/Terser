@@ -113,7 +113,8 @@ def render_results(out: dict[str, Any]) -> str:
             _md_table(wide),
             "",
             f"Chosen k = **{out['chosen_k']}** (max K-means silhouette "
-            f"{out['silhouette']:.3f}). **C6.1** (silhouette >= 0.10): **{tick[out['c6_1']]}**.",
+            f"{out['silhouette']:.3f}). **C6.1** (silhouette >= 0.05, ADR-0012): "
+            f"**{tick[out['c6_1']]}**.",
             "",
             "## C6.2 K-means as the sigma -> 0 limit of EM",
             "",
@@ -190,7 +191,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     out["sweep"] = sweep.to_dict(orient="records")
     out["chosen_k"] = k
     out["silhouette"] = float(km_rows.silhouette.max())
-    out["c6_1"] = out["silhouette"] >= 0.10
+    out["c6_1"] = out["silhouette"] >= 0.05
     km = KMeans(k, n_init=10, seed=args.seed).fit(X)
 
     # C6.2
@@ -264,7 +265,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "# Phase 6 per-cluster risk (row 6.9, C6.3)\n\n"
         f"K-means k = {k} on {len(ids):,} train prompts (bge-small). Degradation rate over "
         f"{len(recs):,} train label records (both targets); savings = mean oracle savings over "
-        "targets. High risk = degradation rate >= 1.5x overall; high-risk clusters become eval "
+        "targets. High risk = degradation rate >= 1.15x overall (C6.3, ADR-0012); high-risk "
+        "clusters become eval "
         "slices in row 12.3.\n\n" + _md_table(risk_md) + "\n",
         encoding="utf-8",
     )

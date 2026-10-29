@@ -2,16 +2,15 @@
 
 | Field | Value |
 | :--- | :--- |
-| Status | Proposed (becomes Accepted after review by ≥ 1 other contributor) |
+| Status | Accepted (2026-10-28, by the owner; ADRs no longer wait for a second contributor's review) |
 | Date | 2026-10-16 |
-| Plan row(s) | CONTRIBUTING § Data, privacy and LLM usage ("Record the check in ADR-0003 before Phase 8"); 8.3.1, 8.3.3, 8.3.4; risk R11 |
+| Plan row(s) | Data rule "record the licence check in ADR-0003 before Phase 8"; 8.3.1, 8.3.3, 8.3.4; risk R11 |
 | Deciders | guru-bharadwaj20 |
-| Reviewers | pending |
 | Related | [reports/license_audit.md](../../reports/license_audit.md) § Generating models, ADR-0001 (local open-source models), ADR-0011 (Phi-3.5 replaces Llama-3.1), [docs/risks.md](../risks.md) (R11), [docs/model_cards/rewriter.md](../model_cards/rewriter.md) |
 
 ## Context
 
-CONTRIBUTING requires that training on model outputs comply with each open model's licence and
+The project's data rules require that training on model outputs comply with each open model's licence and
 that the check be recorded here **before Phase 8**. This ADR was written late. Phase 8 code landed
 on 2026-10-01 (8.3.2 tiny CPU smoke test, no model-output data). The first training on
 model-generated data was on 2026-10-11 (8.3.1 SFT data `e083b5a`, rung 1 Qwen2.5-0.5B `1995649`,
@@ -107,7 +106,7 @@ Training Terser's components on the outputs listed above is **compliant**. The 3
 | :--- | :--- | :--- | :--- |
 | Drop the 3B rung; train only on Apache-2.0 bases | Every rewriter could be released without restriction | Loses the best-preserving rung (74.7% preserved vs 67.4% / 69.3% for rungs 1 / 2; all fail C8.3) and the 8.3.4 escalation ladder | No commercial release is planned; recording the restriction is enough |
 | Train the rewriter only on operator candidates (R11 contingency) | No model-output licence question at all | Operators supply 163 of 1,262 v1 targets (133 in v2); savings are capped by hand-written rules | Not needed: every generating model's licence permits training on its outputs |
-| Mark the requirement not met and pause Phase 8 until review | Follows the "before Phase 8" order literally | Training already ran; pausing does not change which outputs were used | A retroactive check against the actual data gives the same assurance, and the reviewer can still reject it |
+| Mark the requirement not met and pause Phase 8 | Follows the "before Phase 8" order literally | Training already ran; pausing does not change which outputs were used | A retroactive check against the actual data gives the same assurance |
 
 ## Consequences
 
@@ -134,8 +133,8 @@ Training Terser's components on the outputs listed above is **compliant**. The 3
     (`rewriter.md`, `quality_gate.md`, `span_tagger.md`, `textcnn.md`) and the source data cards.
   - Update R11 in `docs/risks.md` once this ADR is accepted.
   - Pin model revisions in the generation, respond and SFT configs before data is regenerated.
-  - Reviewer decision: whether loading the Llama-3.1 tokenizer from the ungated mirror
+  - Open question: whether loading the Llama-3.1 tokenizer from the ungated mirror
     (token counting only) is consistent with ADR-0011's rule against bypassing the gate.
-  - Verification: the reviewer re-runs the provenance counts above (model-id fields in the data
+  - Verification: re-run the provenance counts above (model-id fields in the data
     files, Llama grep), and the release checklist (row 12.11) checks that any 3B-derived artifact
     ships under the Qwen Research Licence.

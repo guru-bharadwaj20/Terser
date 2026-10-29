@@ -1,6 +1,6 @@
 # Support vector machines: margin, primal, dual, kernels
 
-Rows **4.4.1–4.4.3** of `CONTRIBUTING.md`. It derives the objects that the from-scratch dual solver
+Plan rows **4.4.1–4.4.3**. It derives the objects that the from-scratch dual solver
 (row 4.4.4) optimises. The running example is recomputed by `tests/test_svm_doc.py`.
 
 Notation: training pairs $(x_i, y_i)$, $i = 1..n$, with $x_i \in \mathbb{R}^d$ and

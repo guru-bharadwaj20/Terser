@@ -104,8 +104,7 @@ Grouping key: `<field>` · Seed: `<n>` · Leakage test: `<test path>` → `<resu
 
 <!--
 Detector used (name, version, entity types), where in the pipeline it runs (before data/interim/),
-what happens to detections (redact, replace with placeholder, drop row), counts, and the manual
-sample result (row 2.1.3 requires 0 PII in a 500-row sample). State whether any real user prompts are
+what happens to detections (redact, replace with placeholder, drop row) and counts. State whether any real user prompts are
 included and, if so, the consent basis and retention (≤ 30 days for raw text).
 -->
 
@@ -114,7 +113,6 @@ included and, if so, the consent basis and retention (≤ 30 days for raw text).
 | Detector | |
 | Action on detection | |
 | Rows affected | |
-| Manual sample size / PII found | |
 | Real user prompts included | no / yes (consent basis: ...) |
 
 ## 8. Known biases

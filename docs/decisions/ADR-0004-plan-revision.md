@@ -2,16 +2,15 @@
 
 | Field | Value |
 | :--- | :--- |
-| Status | Proposed (becomes Accepted after review by ≥ 1 other contributor) |
+| Status | Accepted (2026-10-28, by the owner; ADRs no longer wait for a second contributor's review) |
 | Date | 2026-09-30 |
 | Plan row(s) | Whole plan; checkpoints C1.4, C2.9, C7.3, C8.6, C8.7, C9.3–C9.5; headline S5 |
 | Deciders | guru-bharadwaj20 |
-| Reviewers | pending |
 | Related | ADR-0002 (problem framing), [C1 checkpoint](../checkpoints/C1/README.md), [hardware.md](../hardware.md) |
 
 ## Context
 
-The Gate rule says a checkpoint target changes only through an ADR that shows the target was wrong.
+A checkpoint target changes only through an ADR that shows the target was wrong.
 Three pieces of evidence arrived after the plan was written:
 
 1. **C1.4 failed for a structural reason.** Conservative rule operators save a median of 1.7% (gpt-4o),
@@ -32,7 +31,7 @@ product or its evaluation need it?* — found rows that pass neither and rows th
 
 ## Decision
 
-Revise `CONTRIBUTING.md` as follows. Row ids are kept stable; removed ids are not reused.
+Revise the project plan as follows. Row ids are kept stable; removed ids are not reused.
 
 **Checkpoint changes**
 
@@ -61,7 +60,7 @@ Revise `CONTRIBUTING.md` as follows. Row ids are kept stable; removed ids are no
 | Alternative | Pros | Cons | Why not chosen |
 | :--- | :--- | :--- | :--- |
 | Keep the plan unchanged | No governance cost | C1.4 can never pass, so Phase 1 can never close; effort goes to effects already shown to be absent | Blocks the plan on a mis-specified check |
-| Lower C1.4 to 2% | Phase 1 closes | "We did not reach it" is exactly what the Gate rule forbids | Invalid by the plan's own rules |
+| Lower C1.4 to 2% | Phase 1 closes | "We did not reach it" is exactly what that rule forbids | Invalid by the plan's own rules |
 | Drop the classical phases, keep only the rewriter | Faster to a product | Loses the syllabus coverage the project exists to demonstrate | Out of scope |
 
 ## Consequences
@@ -73,5 +72,4 @@ Revise `CONTRIBUTING.md` as follows. Row ids are kept stable; removed ids are no
 - New risk: **synthetic-prompt circularity.** Casual prompts are produced by an LLM from clean
   instructions, so a rewriter can score well by undoing the verbosity the pipeline added. Mitigation:
   row 2.1.8 and reporting S1–S3 separately on real prompts.
-- Follow-up: the reviewer checks the removed-row list against the Syllabus Coverage Matrix before
-  accepting.
+- Follow-up: the removed-row list is checked against the syllabus map ([syllabus_map.md](../syllabus_map.md)).

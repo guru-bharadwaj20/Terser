@@ -1,7 +1,6 @@
 # Conventions
 
-Plan row: **0.3.3**. These conventions apply to every contributor and every phase. Where a rule is
-also stated in [CONTRIBUTING.md](../CONTRIBUTING.md), CONTRIBUTING.md is authoritative.
+Plan row: **0.3.3**. These conventions apply to every contributor and every phase.
 
 General rules for identifiers: lowercase, ASCII, `-` as the word separator inside a field, no spaces.
 Model sizes keep their decimal point (`qwen0.5b`), except in Hydra config names, which use `_` and no dots
@@ -51,7 +50,7 @@ Every run sets all of these tags. A run missing any of them fails the tracking a
 | `data_hash` | DVC hash of the input dataset version | `3f2a9c…` |
 | `git_sha` | Full commit SHA of the code; runs from a dirty tree also set `git_dirty=true` | `40c00d9…` |
 
-Also log generated tokens and GPU-hours per run (Experiment standards in CONTRIBUTING.md). All LLM calls
+Also log generated tokens and GPU-hours per run. All LLM calls
 go to local open-source models, so there is no $ cost to log.
 
 ## 3. Branches
@@ -100,8 +99,8 @@ docs(conventions): 0.3.3 naming and tracking conventions
 
 A row changes from ❌ to ✅ **only** when its Definition of Done is met and the artifact exists in the
 repository (code + test + logged experiment or report). The flip happens **in the same commit** that
-satisfies the Definition of Done, together with the Overall Progress table and, if applicable, the
-Syllabus Coverage Matrix. `GPU` rows stay ❌ until their `gpu_queue` job has run on the RTX 4500 Ada.
+satisfies the Definition of Done, together with [checkpoints/status.md](checkpoints/status.md) for a
+checkpoint. `GPU` rows stay ❌ until their `gpu_queue` job has run on the RTX 4500 Ada.
 
 ## 6. Reports and figures
 
@@ -118,9 +117,8 @@ Syllabus Coverage Matrix. `GPU` rows stay ❌ until their `gpu_queue` job has ru
 ## 7. Checkpoint reports
 
 Location: `docs/checkpoints/C<N>/README.md` (e.g. `docs/checkpoints/C2/README.md`). Supporting files sit
-beside it (e.g. `docs/checkpoints/C7/hardware.md`). Content follows the checkpoint protocol in
-CONTRIBUTING.md: measured value per check, pass/fail, MLflow links, DVC hash, git SHA, seeds, figures,
-deviations, reviewer, decision (`PASS`, `PASS WITH CONDITIONS`, `FAIL`).
+beside it (e.g. `docs/checkpoints/C7/hardware.md`). Content: measured value per check, pass/fail, MLflow links, DVC hash, git SHA, seeds, figures,
+deviations, decision (`PASS`, `PASS WITH CONDITIONS`, `FAIL`).
 
 ## 8. Architecture Decision Records
 
@@ -194,6 +192,6 @@ Default local and CI command:
 pytest -m "not gpu and not api and not network and not slow"
 ```
 
-CONTRIBUTING.md's minimum `pytest -m "not gpu and not api"` must also stay green. Tests of `terser.llm`
+The minimum `pytest -m "not gpu and not api"` run must also stay green. Tests of `terser.llm`
 against the `local` provider use a fake in-process OpenAI-compatible server, so the default run needs no
 Ollama, llama.cpp or vLLM process.

@@ -2,11 +2,10 @@
 
 | Field | Value |
 | :--- | :--- |
-| Status | Proposed (becomes Accepted after review at checkpoint C1.1) |
+| Status | Accepted (2026-10-28, by the owner; ADRs no longer wait for a second contributor's review) |
 | Date | 2026-09-10 |
 | Plan row(s) | 1.1.1 (sub-problem taxonomy), 1.1.3 (positive-class convention) |
 | Deciders | guru-bharadwaj20 |
-| Reviewers | ≥ 1 other contributor (C1.1), pending |
 | Related | ADR-0001 (ML lifecycle, local open-source models), [categories.md](../categories.md) (row 1.1.2), ADR-0003 (training on model outputs) |
 
 ## Context
@@ -253,7 +252,7 @@ are for smoke tests and are never used as labels.
 
 - Positive:
   - Every phase has a fixed input, output, label source, metric and baseline, so results are comparable
-    across models and phases and map directly to the Syllabus Coverage Matrix.
+    across models and phases and map directly to the syllabus units ([syllabus_map.md](../syllabus_map.md)).
   - One Phase 2 dataset (candidates, target answers, judge labels, oracle table) feeds all supervised
     sub-problems; the gate then replaces the judge as a cheap reward model and serving-time check.
   - Savings, preservation and net savings are defined once, on `T`'s tokenizer and in measured compute,
@@ -277,7 +276,7 @@ are for smoke tests and are never used as labels.
   - `k_T`, `k_R` and `k_G` are measured in 7.6 and 11.3 and recorded in the VRAM table and model cards.
   - The lighter-rewrite operator set in the inference diagram is confirmed or amended after 1.3.7 and
     1.4.3.
-  - Verification: C1.1 review of this ADR; unit tests in `tests/test_eval_labels.py`; checkpoints C3.3,
+  - Verification: unit tests in `tests/test_eval_labels.py`; checkpoints C3.3,
     C3.4, C3.5, C6.3, 🚧 C8.3 and C9.3 exercise each sub-problem's definition.
 
 ---

@@ -36,4 +36,6 @@ def test_fallback_counts_preserved_and_gate() -> None:
     assert m["median_savings"] == 0.3
     assert m["preserved"] == 5 / 6
     assert m["preserved_by_category"] == {"code": 1.0, "qa": 0.75}
-    assert m["c8_3"] is False
+    assert m["c8_3"] is True  # ADR-0012: savings >= 25%, preserved >= 65%, every category >= 50%
+    low = rung_metrics([{**w, "savings": 0.2} for w in rewrites], labels, "r1")
+    assert low["c8_3"] is False

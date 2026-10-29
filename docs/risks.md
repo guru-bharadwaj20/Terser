@@ -1,8 +1,7 @@
 # Risk Register
 
-Plan row: **0.3.5**. Expands the [Risk Register in CONTRIBUTING.md](../CONTRIBUTING.md#risk-register)
-with measurable early-warning triggers, contingencies and owners. Rows R01–R10 correspond to the
-CONTRIBUTING.md register; R11–R17 are additional risks.
+Plan row: **0.3.5**. The project's risk register (R01–R17), with measurable early-warning triggers,
+contingencies and owners.
 
 ## Scales
 

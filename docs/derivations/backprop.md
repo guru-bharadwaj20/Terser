@@ -1,6 +1,6 @@
 # Backpropagation for the quality-gate MLP
 
-Row **4.1.7** of `CONTRIBUTING.md`. It derives the gradients that `terser.models.neural.numpy_mlp`
+Plan row **4.1.7**. It derives the gradients that `terser.models.neural.numpy_mlp`
 (row 4.1.3) implements without autograd. The worked example in section 4 is recomputed by
 `tests/test_backprop_doc.py`, so this document and the code cannot drift apart.
 

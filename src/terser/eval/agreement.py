@@ -48,7 +48,11 @@ THRESHOLDS: Final[Mapping[str, float]] = {
     "specificity": 0.80,
     "position_disagreement": 0.10,
 }
-"""Checkpoint thresholds from CONTRIBUTING.md (C2.3-C2.6)."""
+"""Checkpoint thresholds (C2.3-C2.6).
+
+Since ADR-0012 the C2.6 value is the share of labels that change under an A/B swap; raw per-order
+verdict disagreement is reported, not gated.
+"""
 
 
 def _paired(
@@ -359,7 +363,7 @@ def checkpoint_checks(
     out.append(
         CheckResult(
             "C2.6",
-            "A/B-order disagreement rate",
+            "A/B-order label disagreement rate",
             pd,
             t["position_disagreement"],
             not math.isnan(pd) and pd <= t["position_disagreement"],

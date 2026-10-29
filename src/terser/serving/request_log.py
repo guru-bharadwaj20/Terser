@@ -2,7 +2,7 @@
 
 One JSON object per request on the ``terser.requests`` logger. Prompts and rewrites are logged as
 sha256 hashes by default; raw text appears only when the caller set ``consent_raw_text`` (the
-CONTRIBUTING privacy rule: hashes and metrics by default, raw text only when opted in).
+project privacy rule: hashes and metrics by default, raw text only when opted in).
 """
 
 from __future__ import annotations

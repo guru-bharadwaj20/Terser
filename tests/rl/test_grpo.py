@@ -161,7 +161,12 @@ def test_gate_precision_and_report() -> None:
         {"sft": sft_rows, "rl": rows}, labels + sft_labels, "rl", "sft",
         lambda rs: [0.1] * len(rs), 0.5, p2_precision=0.62,
     )  # fmt: skip
-    assert res["c9_3"] and "C9.3: pass" in md and "| rl | 6 |" in md
-    _, res2 = build({"sft": sft_rows, "rl": rows}, labels + sft_labels, "rl", "sft",
-                    lambda rs: [0.1] * len(rs), 0.5, p2_precision=0.91)  # fmt: skip
-    assert not res2["c9_3"]
+    # every rewrite passes the gate: precision 4/6 < 70%
+    assert not res["c9_3"] and "C9.3: fail" in md and "| rl | 6 |" in md
+    assert res["c9_5"] and res["champion"] in ("rl", "sft") and "C9.4:" in md
+    md2, res2 = build(
+        {"sft": sft_rows, "rl": rows}, labels + sft_labels, "rl", "sft",
+        lambda rs: [0.9 if int(r["id"][1:]) % 3 == 0 else 0.1 for r in rs], 0.5,
+        p2_precision=0.91,
+    )  # fmt: skip
+    assert res2["c9_3"] and "C9.3: pass" in md2  # only preserved rewrites pass: precision 100%

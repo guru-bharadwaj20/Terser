@@ -7,7 +7,6 @@
 | Plan row(s) | 11.1.1 (also frames 11.1–11.6) |
 | Related | ADR-0001 (ML lifecycle, row 0.3.4), ADR-0004 (plan revision), ADR-0005 (judge protocol) |
 | Deciders | Project owner |
-| Reviewers | — |
 
 ## Context
 

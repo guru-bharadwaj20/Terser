@@ -65,7 +65,6 @@ Not applicable yet. Upstream splits are ignored; Terser's source-grouped 70/15/1
 | Detector | Pending row 2.1.3 (runs before `data/interim/`) |
 | Action on detection | Pending row 2.1.3 |
 | Rows affected | Pending |
-| Manual sample size / PII found | Pending (500-row sample across all sources) |
 | Real user prompts included | no (employee-written instructions, not end-user traffic) |
 
 Upstream card: "To our knowledge, there are no private person's personal identifiers or sensitive information." Text was written by Databricks employees; some `context` passages are copied from Wikipedia and name public figures.

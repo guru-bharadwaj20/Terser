@@ -40,7 +40,7 @@ k = 1 has less variance than k = 3-5, likely because many pairs share their feat
 with pairs of the same prompt, so 1-NN copies the same label in most bootstraps. At both
 minima the net variance (unbiased minus biased) is small (tree 0.002, KNN 0.006) next to a
 bias of 0.30-0.32. KNN regression of savings shows the same floor: variance drops from 212 to
-9 but bias stays near 395 (an RMSE of about 20 pp) from k = 15 on, which is why C3.5 fails.
+9 but bias stays near 395 (an RMSE of about 20 pp) from k = 15 on, which is why C3.5 misses its original target (MAE ≤ 10 pp); it passes the revised target ([ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md): MAE ≤ 17 pp, R² ≥ 0.25).
 More capacity or tuning inside these families cannot remove this error; it needs better
 features, which is what Phases 5 and 8 test (gradient boosting 0.78 AUC, TextCNN).
 

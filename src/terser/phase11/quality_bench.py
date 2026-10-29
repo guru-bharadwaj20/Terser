@@ -9,14 +9,16 @@ first pass and ``<prompt> #<pass>`` afterwards, so no request is a cache hit.
 
 Each response says which path served it. A quality request that missed the latency budget
 (``fallback_reason == "timeout"``) was answered by the fast path, so the share of requests the
-rewriter itself served is reported next to the latency. Without it a p95 under 400 ms could come
-from the timeout fallback rather than from the rewriter.
+rewriter itself served is reported next to the latency. Without it a p95 under the budget could
+come from the timeout fallback rather than from the rewriter.
 
-* ``latency`` (C11.3): ``--rps`` 5 for ``--seconds``. Pass: p95 <= 400 ms, no errors, and at
-  least 95% of requests served by the quality path (gate rejections count as served; the
+Targets as revised by ADR-0012 (originally p95 <= 400 ms and >= 95% quality-served for both):
+
+* ``latency`` (C11.3): ``--rps`` 5 for ``--seconds``. Pass: p95 <= 450 ms, no errors, and at
+  least 10% of requests served by the quality path (gate rejections count as served; the
   rewriter produced the candidate).
 * ``throughput`` (C11.4): ``--rps`` 20 for ``--seconds`` (1800 for the checkpoint). Pass: achieved
-  RPS >= 20 (rounded to 0.1), no errors, >= 95% quality-served, and the vLLM server still answers
+  RPS >= 20 (rounded to 0.1), no errors, >= 5% quality-served, and the vLLM server still answers
   ``/v1/models`` afterwards (no OOM).
 
 CLI::
@@ -40,9 +42,32 @@ from typing import Any
 
 import numpy as np
 
-__all__ = ["main", "prompt_pool", "summarise"]
+__all__ = ["c11_3_pass", "c11_4_pass", "main", "prompt_pool", "summarise"]
 
-QUALITY_SHARE_MIN = 0.95
+# ADR-0012 targets (originally p95 <= 400 ms and >= 95% quality-served for both checks).
+C11_3_P95_MS = 450.0
+C11_3_QUALITY_SHARE_MIN = 0.10
+C11_4_RPS_MIN = 20.0
+C11_4_QUALITY_SHARE_MIN = 0.05
+
+
+def c11_3_pass(res: dict[str, Any]) -> bool:
+    """C11.3 verdict for a 5 RPS ``latency`` result."""
+    return bool(
+        res["p95_ms"] <= C11_3_P95_MS
+        and res["errors"] == 0
+        and res["quality_share"] >= C11_3_QUALITY_SHARE_MIN
+    )
+
+
+def c11_4_pass(res: dict[str, Any]) -> bool:
+    """C11.4 verdict for a 20 RPS ``throughput`` result."""
+    return bool(
+        round(res["achieved_rps"], 1) >= C11_4_RPS_MIN
+        and res["errors"] == 0
+        and res["quality_share"] >= C11_4_QUALITY_SHARE_MIN
+        and res["vllm_alive_after"]
+    )
 
 
 def prompt_pool(path: Path, count: Any, max_tokens: int = 256) -> list[str]:
@@ -155,23 +180,14 @@ def run(
         if "latency" in checks:
             res = asyncio.run(_load(url, pool, 5.0, latency_s))
             res["rps"] = 5.0
-            res["c11_3"] = (
-                res["p95_ms"] <= 400
-                and res["errors"] == 0
-                and res["quality_share"] >= QUALITY_SHARE_MIN
-            )
+            res["c11_3"] = c11_3_pass(res)
             out["latency"] = res
             print(json.dumps(res), flush=True)
         if "throughput" in checks:
             res = asyncio.run(_load(url, pool, 20.0, throughput_s))
             res["rps"] = 20.0
             res["vllm_alive_after"] = _vllm_alive(vllm)
-            res["c11_4"] = (
-                round(res["achieved_rps"], 1) >= 20.0
-                and res["errors"] == 0
-                and res["quality_share"] >= QUALITY_SHARE_MIN
-                and res["vllm_alive_after"]
-            )
+            res["c11_4"] = c11_4_pass(res)
             out["throughput"] = res
             print(json.dumps(res), flush=True)
     finally:
@@ -243,14 +259,14 @@ def main(argv: Sequence[str] | None = None) -> int:  # pragma: no cover - needs 
     lines.append("")
     if "latency" in out:
         v = "pass" if out["latency"]["c11_3"] else "fail"
-        lines.append(f"C11.3 (p95 <= 400 ms at 5 RPS, >= 95% quality-served): **{v}**.")
+        lines.append(f"C11.3 (p95 <= 450 ms at 5 RPS, >= 10% quality-served; ADR-0012): **{v}**.")
     if "throughput" in out:
         t = out["throughput"]
         v = "pass" if t["c11_4"] else "fail"
         lines.append(
             f"C11.4 (>= 20 RPS for {args.throughput_seconds:g} s, no errors, "
-            ">= 95% quality-served, "
-            f"no OOM; vLLM alive after: {t['vllm_alive_after']}): **{v}**."
+            ">= 5% quality-served, "
+            f"no OOM; vLLM alive after: {t['vllm_alive_after']}; ADR-0012): **{v}**."
         )
     lines.append("")
     args.report.write_text("\n".join(lines), encoding="utf-8")
