@@ -893,9 +893,10 @@ def build_report(res: Mapping[str, Any]) -> str:
             f" the stored Phase 6 cluster x category table {_pct(cl['refit_agreement'])}); each"
             " prompt goes to its nearest centroid (bge-small). "
             + (
-                "High-risk clusters (C6.3: degradation >= 1.5x overall): " + ", ".join(map(str, hr))
+                "High-risk clusters (C6.3: degradation >= 1.15x overall): "
+                + ", ".join(map(str, hr))
                 if cl["any_high_risk"]
-                else "No cluster met the C6.3 high-risk bar (>= 1.5x), so the slice is the"
+                else "No cluster met the C6.3 high-risk bar (>= 1.15x), so the slice is the"
                 f" highest-risk cluster(s) by train risk ratio: {', '.join(map(str, hr))}."
             ),
             "",

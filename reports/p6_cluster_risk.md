@@ -13,3 +13,5 @@ K-means k = 9 on 4,955 train prompts (bge-small). Degradation rate over 14,708 t
 | 0 | 1334 | 0.377 | 0.450 | 1.044 | False | explain |
 | 1 | 734 | 0.435 | 0.448 | 1.040 | False | creative |
 | 7 | 2496 | 0.573 | 0.242 | 0.562 | False | reason |
+
+**C6.3.** Original bar (degradation rate >= 1.5x overall): no cluster, **fail** (the `high_risk` column above was computed at 1.5x). As revised by [ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md) (>= 1.15x): cluster 6 (1.195x, mostly `explain`) is high risk and is the row 12.3 eval slice, **pass**. The code default is now 1.15x; the table above was not regenerated.

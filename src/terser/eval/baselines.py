@@ -6,8 +6,8 @@ protocol as the real models:
 
 * ``majority``: constant score equal to the training majority class (0 or 1);
 * ``stratified``: random 0/1 draws with the training positive rate (seeded);
-* ``always_preserved``: constant 0 (never flag ``degraded``), the "original prompt" baseline of
-  the experiment standards: 0% savings, 100% preservation.
+* ``always_preserved``: constant 0 (never flag ``degraded``), the "original prompt" baseline
+  every model is compared with: 0% savings, 100% preservation.
 """
 
 from __future__ import annotations

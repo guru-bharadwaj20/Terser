@@ -108,22 +108,31 @@ def test_c8_4_matching_and_latency() -> None:
     }
     c = c8_4(rung, llm)
     lv = {r["level"]: r for r in c["levels"]}
-    assert c["matched"] == ["lo"] and c["closest"] == "lo"
+    assert c["matched"] == ["lo", "hi"] and c["closest"] == "lo"
     assert lv["lo"]["speedup"] == pytest.approx(20.0) and lv["lo"]["pass"]
-    assert not lv["hi"]["matched"] and not lv["hi"]["latency_ok"]
+    assert lv["hi"]["matched"] and not lv["hi"]["pass"]  # preserves more but saves 30 pp less
+    assert lv["lo"]["speedup_b1_est"] == pytest.approx(50.0)
     assert c["pass"]
     # interpolation between (0.50, 0.60) and (0.705, 0.34) at 0.60
     mid = c8_4({**rung, "preserved": 0.60}, llm)
     assert mid["interpolated_llm_savings"] == pytest.approx(0.60 - 0.26 * 0.1 / 0.205)
     assert not mid["pass"]
-    slow = c8_4({**rung, "latency_s": 1.0}, llm)
-    assert not slow["pass"]  # matched and close on savings, but only 2x faster
+    slow = c8_4({**rung, "latency_s": 2.0}, llm)
+    assert not slow["pass"]  # matched and close on savings, but batch-1 ratio only 2.5x
+    # preserves 6.8 pp more than the level, saves 14 pp less, 5.5x faster at batch 1: pass
+    low = {
+        "low": {"preserved": 0.588, "median_savings": 0.401, "latency_s": 0.25, "b1_est_s": 3.85}
+    }
+    ahead = c8_4({"preserved": 0.656, "median_savings": 0.261, "latency_s": 0.70}, low)
+    assert ahead["pass"]
+    assert not c8_4({"preserved": 0.656, "median_savings": 0.241, "latency_s": 0.70}, low)["pass"]
+    assert not c8_4({"preserved": 0.560, "median_savings": 0.400, "latency_s": 0.70}, low)["pass"]
 
 
 def test_c8_5() -> None:
     lingua = {"preserved": 0.3, "median_savings": 0.5}
     assert c8_5({"preserved": 0.7, "median_savings": 0.5}, lingua)["pass"]
-    assert not c8_5({"preserved": 0.7, "median_savings": 0.1}, lingua)["pass"]
+    assert c8_5({"preserved": 0.7, "median_savings": 0.1}, lingua)["pass"]  # not dominated
     assert not c8_5({"preserved": 0.3, "median_savings": 0.9}, lingua)["pass"]
 
 
@@ -194,7 +203,8 @@ def test_build_end_to_end_and_pending_rung() -> None:
     assert res["llm_latency"]["llm_medium"]["latency_s"] == 0.5
     assert res["llm_latency"]["llm_low"]["latency_source"] == "b16_est"
     assert res["llm_latency"]["llm_low"]["latency_s"] == pytest.approx(0.05)
-    # r1 preserves more than every level: no match, C8.4 fails; C8.5 savings equal, pres higher
-    assert res["c8_4_verdict"] == "fail" and res["c8_5_verdict"] == "pass"
+    # r1 preserves 50 pp more than every level at equal savings and is 50x faster: C8.4 passes
+    # (ADR-0012); C8.5 savings equal, preservation higher
+    assert res["c8_4_verdict"] == "pass" and res["c8_5_verdict"] == "pass"
     md = _markdown(res)
     assert "HMM compressor" in md and "pending" in md and "`r2`" in md

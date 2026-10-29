@@ -58,4 +58,4 @@ branch: main
 staged files: none
 git diff --check: no output, exit 0
 tracked modification: docs/checkpoints/C7/serving.md
-No CONTRIBUTING or queue configuration diff.
+No queue configuration diff.

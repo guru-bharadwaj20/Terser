@@ -85,7 +85,7 @@ __all__ = [
 ]
 
 ROOT = project_root()
-# Board power limits used for the energy ESTIMATE. RTX 4500 Ada: 210 W (CONTRIBUTING hardware
+# Board power limits used for the energy ESTIMATE. RTX 4500 Ada: 210 W (docs/hardware.md
 # table; nvidia-smi power.limit in reports/compute_power_sample.csv). RTX 4090: 450 W (NVIDIA
 # reference board power; the worker's limit was not recorded).
 BOARD_POWER_W: dict[str, float] = {"rtx4500ada": 210.0, "rtx4090": 450.0}

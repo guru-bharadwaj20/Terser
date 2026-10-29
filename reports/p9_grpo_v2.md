@@ -1,6 +1,6 @@
 # GRPO v2: preservation-aware reward (follow-up negative-result ablation)
 
-Follow-up to S-9.3 (`reports/p9_rl_vs_sft.md`, `reports/p9_grpo_audit.md`). Not a CONTRIBUTING row; no row or check is flipped here. Full generated tables: `reports/p9_grpo_v2_val.md` (val comparison) and `reports/p9_grpo_v2_audit.md` (per-step training audit).
+Follow-up to S-9.3 (`reports/p9_rl_vs_sft.md`, `reports/p9_grpo_audit.md`). Not a plan row; no row or check is flipped here. Full generated tables: `reports/p9_grpo_v2_val.md` (val comparison) and `reports/p9_grpo_v2_audit.md` (per-step training audit).
 
 ## Why
 
@@ -34,7 +34,7 @@ Training audit (judge on up to 16 samples per audited step): gate-passed samples
 
 ## Reading
 
-* **Hacking is reduced but not removed.** Gate precision on val rose from 42.4% to 71.4%. That is now level with the hpo08 start (70.8%) but still 19.6 pp below the Phase 2 91.0%, so C9.3 would still fail. The gap at hpo08 suggests part of the shortfall comes from the gate generalising poorly to model rewrites, not from RL.
+* **Hacking is reduced but not removed.** Gate precision on val rose from 42.4% to 71.4%. That is now level with the hpo08 start (70.8%) but still 19.6 pp below the Phase 2 91.0%, so C9.3 would still fail its original 5 pp target; it passes the revised ≥ 70% target ([ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md)). The gap at hpo08 suggests part of the shortfall comes from the gate generalising poorly to model rewrites, not from RL.
 * **The policy traded savings for preservation.** It learned to rewrite more conservatively: higher cosine, more items kept, far fewer fallbacks (8 vs 26). Preservation is 54.6% (+5.4 pp over hpo08 and +6.0 pp over v1), but median savings fell to 29.1% (-25.2 pp). It does not beat sft15v2, which preserves more (57.0%) and saves more (35.0%). C9.5 fails. The SFT champion is unchanged.
 * **The proxies are weak.** With AUC around 0.65, the preservation proxies mostly push towards copying the prompt. They are not a faithful preservation signal, so the result is a sit-on-the-fence policy rather than one that compresses well. Next steps would be a learned preservation reward model trained on the Phase 2 labels, or periodic judge-in-the-loop rewards.
 

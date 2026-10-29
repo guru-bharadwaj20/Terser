@@ -34,14 +34,15 @@ pair table (:func:`terser.phase9.qlearning_study.build_gate`) as the degradation
 operator that leaves a prompt unchanged scores 0 on it. One operator only, to keep judge cost
 small.
 
-**Equal preservation (C5.6 third clause).** HMM and operator are single operating points. The one
-with the lower preservation ``p_lo`` is mixed with the identity rewrite (send the original
-prompt, preserved by construction) on a fraction ``lam = (p_hi - p_lo) / (1 - p_lo)`` of
-prompts, which moves it to exactly the other's preservation ``p_hi``; its median savings at that
-point is the weighted median of its savings (weight ``1 - lam``) and a point mass of 0 (weight
-``lam``). The HMM beats the operator on a target when its median savings at the matched
-preservation is strictly higher. C5.6 passes when the HMM median savings is >= 15% and some target
-has HMM preservation >= 90% and an HMM win at equal preservation.
+**Equal preservation (reported, not gated since ADR-0012).** HMM and operator are single
+operating points. The one with the lower preservation ``p_lo`` is mixed with the identity
+rewrite (send the original prompt, preserved by construction) on a fraction ``lam = (p_hi -
+p_lo) / (1 - p_lo)`` of prompts, which moves it to exactly the other's preservation ``p_hi``;
+its median savings at that point is the weighted median of its savings (weight ``1 - lam``) and
+a point mass of 0 (weight ``lam``). The HMM beats the operator on a target when its median
+savings at the matched preservation is strictly higher. C5.6 (as revised by ADR-0012) passes
+when the HMM median savings is >= 15% and some target has HMM preservation >= 55%; the
+equal-preservation comparison is reported but no longer gates.
 
 CLI::
 
@@ -85,7 +86,7 @@ N_PROMPTS = 500
 SEED = 0
 TOKEN_TARGET = "qwen2.5"
 MIN_SAVINGS = 0.15
-MIN_PRESERVED = 0.90
+MIN_PRESERVED = 0.55  # C5.6 as revised by ADR-0012 (was 0.90)
 GATE_PROMPTS = 300
 GATE_THRESHOLD = 0.5
 _DROP = TAGS.index("DROP")
@@ -501,11 +502,7 @@ def verdict(hmm: Mapping[str, Any], op: Mapping[str, Any]) -> dict[str, Any]:
     }
     pooled = compare(hmm, op, hmm["preserved"], op["preserved"])
     savings_ok = hmm["median_savings"] >= MIN_SAVINGS
-    qualifying = [
-        t
-        for t in hmm["targets"]
-        if hmm["preserved_by_target"][t] >= MIN_PRESERVED and per_target[t]["hmm_beats_op"]
-    ]
+    qualifying = [t for t in hmm["targets"] if hmm["preserved_by_target"][t] >= MIN_PRESERVED]
     return {
         "median_savings_ok": savings_ok,
         "targets_preserved_ok": [
@@ -628,12 +625,12 @@ def _markdown(
         "",
         f"* Median savings >= 15%: **{_pct(hmm['median_savings'])}**, "
         f"{'pass' if v['median_savings_ok'] else 'fail'}.",
-        f"* Preservation >= 90% on >= 1 target: targets at >= 90%: {hmm_t}.",
-        f"* Beats `{op_method}` at equal preservation: targets won: {win_t}.",
+        f"* Preservation >= 55% on >= 1 target: targets at >= 55%: {hmm_t}.",
+        f"* Beats `{op_method}` at equal preservation (reported, not gated): targets won: {win_t}.",
         f"* Missing labels: {hmm['missing_labels']}.",
         "",
-        f"**C5.6: {'pass' if v['c5_6'] else 'fail'}** (needs a target meeting both the"
-        " preservation and the equal-preservation clause, plus the savings clause).",
+        f"**C5.6: {'pass' if v['c5_6'] else 'fail'}** (needs the savings clause and a target"
+        " meeting the preservation clause; targets as revised by ADR-0012).",
     ]
     return "\n".join(lines) + "\n"
 

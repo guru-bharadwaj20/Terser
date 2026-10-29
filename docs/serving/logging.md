@@ -7,7 +7,7 @@ not in this schema, so personal data cannot be added to the log by accident.
 
 **Privacy default.** The prompt and the rewrite are logged only as SHA-256 hashes. The raw text
 fields `prompt` and `rewrite` appear only when the request set `consent_raw_text: true`. This
-follows CONTRIBUTING, *Data, privacy and LLM usage*: hashes and metrics by default, raw text only
+follows the project's privacy rule: hashes and metrics by default, raw text only
 when the user opted in, and retained for no more than 30 days. The log sink must enforce that
 retention, for example with a 30-day index lifecycle.
 

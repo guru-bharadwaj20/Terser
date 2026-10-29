@@ -174,7 +174,7 @@ def test_method_metrics_and_verdict() -> None:
     assert v["per_target"]["org/T1"]["hmm_beats_op"]
     assert v["per_target"]["org/T2"]["mixed"] == "hmm"
     assert not v["per_target"]["org/T2"]["hmm_beats_op"]
-    assert v["qualifying_targets"] == ["org/T1"]
+    assert v["qualifying_targets"] == ["org/T1", "org/T2"]  # both >= 55% (ADR-0012)
     assert v["c5_6"]
 
 

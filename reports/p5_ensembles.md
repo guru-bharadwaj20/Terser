@@ -45,6 +45,8 @@ rewrite judged on the other target. OOB is therefore a near-naive estimate. Grou
 honest number, and C5.2 would only pass with a group-bootstrap forest (sampling source prompts).
 That is recorded as a follow-up, not hidden.
 
+**C5.2 as revised by [ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md)** (OOB within 0.10 of grouped CV, gap explained): +0.08 to +0.082, explained above, **pass**.
+
 ## 5.1.5 Gradient boosting (LightGBM)
 
 Early stopping on a grouped validation fold carved from each training fold.
@@ -61,6 +63,8 @@ Early stopping on a grouped validation fold carved from each training fold.
 The n_estimators cap does not matter: early stopping halts well before 200 trees in every
 configuration. Best: lr 0.1, depth 3, AUC **0.778**, the strongest single quality gate so far
 (LR 0.748, RF 0.774).
+
+**C5.1.** Original target ROC-AUC >= 0.85 and specificity >= 0.60 at sensitivity 0.95: **fail** (0.778 here; 0.783 after tuning, [p10_hpo.md](p10_hpo.md)). As revised by [ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md) (grouped ROC-AUC >= 0.78, specificity clause dropped): the tuned LightGBM (0.783) **passes**; the untuned 0.778 above does not. The tuned gate's specificity at sensitivity 0.95 was not recorded.
 
 ## 5.1.6 Feature importance: what makes a rewrite unsafe
 

@@ -82,7 +82,7 @@ C27_MIN_CATEGORIES: int = 5
 C28_RANGE: tuple[float, float] = (0.15, 0.60)
 
 C27_FAILURE_INSTRUCTION: str = (
-    "C2.7 failed (go / no-go). Per CONTRIBUTING.md: write a negative-result report and narrow the "
+    "C2.7 failed (go / no-go). Write a negative-result report and narrow the "
     "scope (e.g. to the targets and categories that clear the bar) before continuing past Phase 2."
 )
 

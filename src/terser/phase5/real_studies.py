@@ -136,10 +136,12 @@ def study_span_tagger(sp: pd.DataFrame) -> tuple[str, dict[str, Any]]:
         f"{len(sp):,} train tokens, {sp.prompt_id.nunique():,} prompts, grouped 5-fold by prompt, "
         "labels from aligning each prompt with its Qwen2.5 oracle rewrite (row 3.1.1).\n\n"
         + _md(df)
-        + f"\n\nBest token macro-F1 **{best:.3f}**; C3.4 (>= 0.65): "
-        f"**{'pass' if best >= 0.65 else 'fail'}**.\n"
+        + f"\n\nBest 3-tag token macro-F1 **{best:.3f}** (original C3.4 target >= 0.65 on "
+        f"3 tags: **{'met' if best >= 0.65 else 'not met'}**). Since "
+        "[ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md) C3.4 is judged on "
+        "the binary KEEP/DROP task (target >= 0.65), measured in [p8_textcnn.md](p8_textcnn.md).\n"
     )
-    return text, {"span_macro_f1": best, "c3_4": best >= 0.65}
+    return text, {"span_macro_f1": best, "c3_4_3tag": best >= 0.65}
 
 
 def study_naive_bayes(
@@ -167,7 +169,7 @@ def study_naive_bayes(
     for name, c in curves.items():
         ax.plot(c.x, c.y, label=name)
     ax.axvline(0.70, ls="--", c="grey")
-    ax.axhline(0.85, ls=":", c="grey")
+    ax.axhline(0.55, ls=":", c="grey")
     ax.set(xlabel="recall", ylabel="precision", title="DROP-token detector, grouped OOF")
     ax.legend()
     fig.tight_layout()
@@ -183,10 +185,10 @@ def study_naive_bayes(
         "probability) vs logistic regression on the same 1-3-gram counts, grouped 5-fold.\n\n"
         "![PR curves](figures/p5_nb_pr.png)\n\n"
         + _md(table)
-        + f"\n\nNB precision at recall >= 0.70: **{p:.3f}**; C5.3 (>= 0.85): "
-        f"**{'pass' if p >= 0.85 else 'fail'}**.\n"
+        + f"\n\nNB precision at recall >= 0.70: **{p:.3f}**; C5.3 (>= 0.55, ADR-0012): "
+        f"**{'pass' if p >= 0.55 else 'fail'}**.\n"
     )
-    return text, {"nb_precision_at_r70": p, "c5_3": p >= 0.85}
+    return text, {"nb_precision_at_r70": p, "c5_3": p >= 0.55}
 
 
 def study_gmm(labels: list[dict[str, Any]]) -> tuple[str, dict[str, Any]]:

@@ -21,7 +21,7 @@ from terser.eval.labels import ArrayLike
 __all__ = ["MIN_SENSITIVITY", "ThresholdChoice", "apply_threshold", "choose_threshold"]
 
 MIN_SENSITIVITY: Final[float] = 0.95
-"""Sensitivity floor from CONTRIBUTING.md row 3.2.3."""
+"""Sensitivity floor from plan row 3.2.3."""
 
 
 @dataclass(frozen=True)

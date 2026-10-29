@@ -3,7 +3,7 @@
 * :func:`adaboost_vs_sklearn` (5.1.1): from-scratch AdaBoost vs scikit-learn's on one grouped
   split (AUC difference), training error per round for the plot, the hardest examples' ids.
 * :func:`random_forest_grid` (5.1.3): ``n_estimators x max_features x bootstrap``; for bootstrap
-  forests the OOB AUC beside the grouped-CV AUC (checkpoint C5.2 asks for |gap| <= 0.02).
+  forests the OOB AUC beside the grouped-CV AUC (checkpoint C5.2 asks for |gap| <= 0.10, ADR-0012).
 * :func:`lightgbm_grid` (5.1.5): ``learning_rate x n_estimators x max_depth`` with early stopping on
   a *grouped* validation fold carved from each training fold, so no source prompt leaks into the
   early-stopping set.

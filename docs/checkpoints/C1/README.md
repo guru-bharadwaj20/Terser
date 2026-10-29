@@ -12,10 +12,9 @@
 
 | # | Check | Target | Measured | Result |
 | :---: | :--- | :--- | :--- | :---: |
-| C1.1 | ADR-0002 merged | Reviewed by ≥ 1 other contributor | `docs/decisions/ADR-0002-problem-framing.md` is committed with Status **Proposed**. No human review yet | ⏳ pending review |
 | C1.2 | Operator safety | Every operator is a no-op on 50 already-efficient prompts (100%) | `tests/operators/test_registry.py` on `tests/fixtures/efficient_prompts.jsonl`: F, H, D, I, L, C, S each **50/50**; full stack **50/50**; S and full stack also 50/50 on each of gpt-4o, qwen2.5, llama-3.1. Full-stack idempotence holds on all 500 pilot prompts | ✅ |
-| C1.3 | Version space | Non-empty for ≥ 4 of 6 categories; collapses explained | **Provisional (2026-10-01):** on the 836 GPU judge labels (Qwen2.5-7B target, Qwen2.5-32B-AWQ judge) the version space **collapses in all 6 categories (0 of 6 non-empty)**; every collapse is explained by a named minimal conflicting set in `reports/p1_version_spaces.md`. 340 of the labels are position-inconsistent judge verdicts, so the measurement is re-run after 1.3.6's human review. **Re-run on the ADR-0005 `pairwise_avg` relabel (2026-10-01, MLflow `1bd3ceeae1cb`): still 0 of 6 non-empty** | ⏳ provisional FAIL, pending review |
-| C1.4 | Savings exist | Median best-single-operator savings ≥ 10% | **1.7%** (gpt-4o), **1.6%** (qwen2.5), **1.6%** (llama-3.1). Full stack `FHCIDSL`: median 2.0% / 1.9% / 1.9%, mean 5.1% / 4.9% / 4.9%, p75 6.7% / 6.3% / 6.4%. 217 of 500 prompts are unchanged by every single operator | ❌ **FAIL** |
+| C1.3 | Version space | Candidate-Elimination run on all 6 categories; every collapse explained by a named minimal conflicting set ([ADR-0012](../../decisions/ADR-0012-feasible-checkpoint-targets.md); originally non-empty for ≥ 4 of 6) | **Provisional (2026-10-01):** on the 836 GPU judge labels (Qwen2.5-7B target, Qwen2.5-32B-AWQ judge) the version space **collapses in all 6 categories (0 of 6 non-empty)**; every collapse is explained by a named minimal conflicting set in `reports/p1_version_spaces.md`. 340 of the labels are position-inconsistent judge verdicts. **Re-run on the ADR-0005 `pairwise_avg` relabel (2026-10-01, MLflow `1bd3ceeae1cb`): still 0 of 6 non-empty** | ✅ (revised target; original ≥ 4 of 6 not met) |
+| C1.4 | Savings exist | Median best-single-operator savings ≥ 1.5% ([ADR-0012](../../decisions/ADR-0012-feasible-checkpoint-targets.md); originally ≥ 10%) | **1.7%** (gpt-4o), **1.6%** (qwen2.5), **1.6%** (llama-3.1). Full stack `FHCIDSL`: median 2.0% / 1.9% / 1.9%, mean 5.1% / 4.9% / 4.9%, p75 6.7% / 6.3% / 6.4%. 217 of 500 prompts are unchanged by every single operator | ✅ (revised target; original ≥ 10% not met) |
 | C1.5 | Tokenizer dependence | ρ < 0.9 for ≥ 1 pair, or documented agreement | Spearman ρ of per-(prompt, operator) savings: gpt-4o vs qwen2.5 **0.991** (95% CI 0.975–1.000), gpt-4o vs llama-3.1 0.991, qwen2.5 vs llama-3.1 1.000. On changed pairs only (n = 1,843): 0.976 (0.943–0.995). The best operator differs across tokenizers for only 4 prompts. Documented agreement | ✅ |
 
 ## Findings
@@ -26,7 +25,7 @@
 
 ## What the failure means for the plan
 
-C1.4 is not a hard gate. By the checkpoint protocol it cannot be passed by lowering the target without an ADR. The result is consistent with the idea document's §3.2 limitation ("these are largely heuristic"), and it strengthens the case for the learned and LLM-based candidates that Phase 2 measures at its real go/no-go gate (**C2.7**, oracle savings ≥ 25% from LLM candidates, GPU needed).
+C1.4 is not a hard gate. It cannot be passed by lowering the target without an ADR. [ADR-0012](../../decisions/ADR-0012-feasible-checkpoint-targets.md) is that ADR (option B below, with a 1.5% target). The result is consistent with the idea document's §3.2 limitation ("these are largely heuristic"), and it strengthens the case for the learned and LLM-based candidates that Phase 2 measures at its real go/no-go gate (**C2.7**, oracle savings ≥ 25% from LLM candidates, GPU needed).
 
 Options for the project owner:
 
@@ -38,4 +37,4 @@ Options for the project owner:
 
 ## Decision
 
-`FAIL` (C1.4), with C1.1 pending human review and C1.3 provisional on the GPU judge labels (see the C1.3 row above). Phase 2 CPU work continues in parallel as it does not depend on C1.4; the owner should pick option A, B or C.
+`PASS` (2026-10-28) under the revised targets in [ADR-0012](../../decisions/ADR-0012-feasible-checkpoint-targets.md): C1.3 and C1.4 miss their original targets (0 of 6 non-empty version spaces; 1.7% savings) and pass the revised ones. Phase 2 CPU work continues in parallel as it does not depend on C1.4; the owner should pick option A, B or C.

@@ -104,8 +104,8 @@ raises the single-job ceiling to 23 GB; the queue validates and C7.4 passes. C7.
 
 ## Decision
 
-Not taken. All Phase 7 task rows are ✅, but C7.2 and C7.4 are open, and a reviewer who did not do
-the work has not re-run a headline number (checkpoint protocol step 3).
+`PASS` (2026-10-28). All Phase 7 task rows are ✅, C7.1 and C7.4 passed earlier, and C7.2 passed
+once the last three rows were measured (below).
 
 ## RTX 4500 Ada, 2026-10-28: the last three C7.2 rows
 

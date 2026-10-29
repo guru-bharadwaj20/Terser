@@ -7,7 +7,7 @@
 # reports/p11_fast_path.json (operating_point.chosen.threshold), as configs/serving/fast_onnx.yaml.
 gate_threshold: 0.5
 gate_onnx: null              # path to the exported trained gate; null = rule-based ConstraintGate
-quality_timeout_s: 0.4       # quality-path latency budget (C11.3 targets p95 <= 400 ms)
+quality_timeout_s: 0.4       # quality-path latency budget (C11.3: p95 <= 450 ms, ADR-0012)
 cache_size: 10000            # LRU entries (row 11.3.4)
 
 quality:

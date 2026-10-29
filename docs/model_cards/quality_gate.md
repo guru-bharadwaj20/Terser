@@ -158,7 +158,7 @@ deployed gate is at or above 0.70 in every category (lowest: `creative`, 0.705).
 
 Sources: [p11_fast_path.md](../../reports/p11_fast_path.md),
 [p11_serving_checks.md](../../reports/p11_serving_checks.md). C11.2 (p95 ≤ 150 ms at 20 RPS): pass.
-The quality path has no rewriter that passes C8.3, so it is not measured.
+No rewriter passed the original C8.3 when this card was written, so the quality path is not measured here; sft3b passes the C8.3 targets revised by [ADR-0012](../decisions/ADR-0012-feasible-checkpoint-targets.md).
 
 ### 5.4 Cross-model generalisation
 
@@ -286,8 +286,7 @@ AdaBoost highest-weight pairs from [p5_ensembles.md](../../reports/p5_ensembles.
   ([docs/serving/api.md](../serving/api.md)) when the requested path did not produce the rewrite.
   A gate rejection returns the original prompt. A gate miss is not flagged to the user.
 - **Privacy.** Training text was scrubbed before it entered `data/interim/`
-  ([pii_policy.md](../pii_policy.md)). The regex backend does not detect personal names, and the
-  500-row manual review required by row 2.1.3 is a human step. At serving time prompts and
+  ([pii_policy.md](../pii_policy.md)). The regex backend does not detect personal names. At serving time prompts and
   rewrites are logged as SHA-256 hashes; raw text only with `consent_raw_text: true`, retained at
   most 30 days ([docs/serving/logging.md](../serving/logging.md)).
 - **Licences.** Labels come from Qwen2.5-32B-Instruct-AWQ (Apache-2.0) judging Qwen2.5-7B-Instruct

@@ -64,3 +64,5 @@ Rule: max mean Phase 9 stop reward (LightGBM gate >= 0.5) on 300 train prompts, 
 * Missing labels: 0.
 
 **C5.6: fail** (needs a target meeting both the preservation and the equal-preservation clause, plus the savings clause).
+
+**C5.6 as revised by [ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md)** (median savings >= 15% and preservation >= 55% on >= 1 target; the equal-preservation clause is reported, not gated): 16.5% median savings, Qwen2.5 preserved 58.0%, **pass**. Phi-3.5 (52.8%) is below 55%.

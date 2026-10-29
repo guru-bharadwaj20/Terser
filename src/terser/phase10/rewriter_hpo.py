@@ -133,7 +133,7 @@ import numpy as np
 
 from terser.hpo.audit import DataAccessLog, audit_access_log
 from terser.hpo.search import Categorical, Float, SearchSpace, run_search
-from terser.models.rewriter.val_report import MIN_PRESERVED, MIN_SAVINGS, rung_metrics
+from terser.models.rewriter.val_report import MIN_SAVINGS, rung_metrics
 
 __all__ = [
     "DEFAULT_PARAMS",
@@ -155,6 +155,10 @@ __all__ = [
     "trial_settings",
     "trial_tag",
 ]
+
+# The C8.3 preservation target when this study ran. ADR-0012 later lowered C8.3 to 0.65; the
+# completed study keeps the objective it was run with.
+HPO_TAU = 0.92
 
 DEFAULT_BASE = "Qwen/Qwen2.5-1.5B-Instruct"
 BASE_EXPERIMENTS: Mapping[str, str] = {
@@ -247,7 +251,7 @@ def trial_settings(params: Mapping[str, Any], n_train: int, batch_size: int) -> 
 def objective_value(
     savings: float,
     preserved: float,
-    tau: float = MIN_PRESERVED,
+    tau: float = HPO_TAU,
     min_savings: float = MIN_SAVINGS,
 ) -> float:
     """``savings`` if inside the C8.3 box, else ``-1 -`` (distance to the box); see module doc."""
@@ -712,7 +716,7 @@ def candidate_records(rewrites: Rows, tag: str) -> Rows:
 
 
 def choose_trial(
-    results: Mapping[str, Mapping[str, Any]], tau: float = MIN_PRESERVED
+    results: Mapping[str, Mapping[str, Any]], tau: float = HPO_TAU
 ) -> tuple[str, bool]:
     """``(tag, qualifies)``: most savings with preserved >= ``tau``, else best-preserving."""
     if not results:

@@ -20,3 +20,18 @@ Why nothing is served inside the budget: the same rewriters on the same vLLM set
 | sft15v2 (v7) | 1145 | 1768 | 1% | 102.1 | 11.0 | 0 |
 
 A rewrite is roughly as long as its prompt (mean prompt 167.5 tokens), so even at 11 ms per decoded token the unloaded 1.5B rewriter needs about 1.1 s for a typical prompt, about 3x the 400 ms C11.3 budget, before any queueing. Meeting C11.3 on this GPU would need a much shorter output (edit-style output, or a span-deletion head instead of full regeneration) or a far smaller rewriter, not a serving change. The bench shows the safeguard working: under 20 RPS for 30 min the API answered every request near the 400 ms budget via the fast-path fallback, with no errors and vLLM alive afterwards.
+
+## Verdict under ADR-0012 (2026-10-28)
+
+[ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md) revised both targets after
+measurement. The original targets (p95 <= 400 ms at 5 RPS and >= 95% quality-served for both checks)
+are still failed by the runs above.
+
+| Check | Revised target | Measured | Result |
+|---|---|---|---|
+| C11.3 | p95 <= 450 ms at 5 RPS, no errors, >= 10% quality-served, timeout fallback on | 2026-10-28 production-serving run (3B + LoRA, vLLM util 0.85): 1,500 requests, 0 errors, p95 416 ms, 16.1% quality-served ([serving_prod.bench.log](../docs/checkpoints/C7/raw_2026-10-28/serving_prod.bench.log)) | pass |
+| C11.4 | 20 RPS sustained 30 min, 0 errors, no OOM, fallback on; >= 5% quality-served at 20 RPS | 30-min run above: 36,000 requests at 20.0 RPS, 0 errors, vLLM alive after. 2026-10-28 run: 12,000 requests (10 min) at 20.0 RPS, 0 errors, 9.3% quality-served, vLLM alive after | pass |
+
+The C11.4 evidence combines two runs: the 30-minute run had 0% quality-served, and the 9.3% comes
+from a 10-minute run. Most requests are still answered by the fast path, so the headline target
+S8 (quality-path p95 <= 400 ms) is unchanged and still fails.

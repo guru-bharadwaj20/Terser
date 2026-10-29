@@ -4,7 +4,7 @@ The ``1536 -> 256 -> 64 -> 1`` network of :func:`~terser.models.neural.mlp.build
 is trained with Adam on ``BCEWithLogitsLoss`` inside every fold of
 :func:`~terser.eval.cv.out_of_fold_scores` (row 3.2.4), with standardisation fitted on the fold's
 training part only. The out-of-fold scores give ROC-AUC, specificity at sensitivity 0.95
-(row 3.2.3) and the per-category table the experiment standards require.
+(row 3.2.3) and the per-category table every performance report carries.
 
 ``python -m terser.phase4.quality_gate --table <meta> --features data/features/pair_emb.npy``.
 ``torch`` is imported lazily (CPU is enough for 410k parameters).

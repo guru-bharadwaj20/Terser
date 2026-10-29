@@ -6,7 +6,6 @@ scanners on the repository do not mistake the test file for a leak.
 
 from __future__ import annotations
 
-import csv
 import json
 from pathlib import Path
 
@@ -22,7 +21,6 @@ from terser.data.pii import (
     iban_valid,
     luhn_valid,
     private_person_context,
-    sample_indices,
     scrub,
 )
 
@@ -408,16 +406,8 @@ def test_presidio_backend_falls_back_when_missing(monkeypatch: pytest.MonkeyPatc
 
 
 # --------------------------------------------------------------------------------------------
-# Sampling and CLI
+# CLI
 # --------------------------------------------------------------------------------------------
-
-
-def test_sample_indices_deterministic() -> None:
-    a = sample_indices(2000, 500, seed=0)
-    assert a == sample_indices(2000, 500, seed=0)
-    assert a != sample_indices(2000, 500, seed=1)
-    assert len(a) == 500 == len(set(a)) and a == sorted(a)
-    assert sample_indices(30, 500, seed=0) == list(range(30))
 
 
 RECORDS = [
@@ -429,27 +419,22 @@ RECORDS = [
 ]
 
 
-def _run_cli(tmp_path: Path, name: str, sample_size: int = 3) -> tuple[Path, Path, Path]:
+def _run_cli(tmp_path: Path, name: str) -> tuple[Path, Path]:
     src = tmp_path / "in.jsonl"
     src.write_text("\n".join(json.dumps(r) for r in RECORDS) + "\n", encoding="utf-8")
-    out, report, sample = (
-        tmp_path / f"{name}.jsonl",
-        tmp_path / f"{name}.md",
-        tmp_path / f"{name}.csv",
-    )
+    out, report = tmp_path / f"{name}.jsonl", tmp_path / f"{name}.md"
     code = pii.main(
         [
             "scan", "--in", str(src), "--field", "prompt", "--out", str(out),
-            "--report", str(report), "--sample", str(sample),
-            "--sample-size", str(sample_size), "--seed", "0", "--backend", "regex",
+            "--report", str(report), "--seed", "0", "--backend", "regex",
         ]
     )  # fmt: skip
     assert code == 0
-    return out, report, sample
+    return out, report
 
 
 def test_cli_scan(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    out, report, sample = _run_cli(tmp_path, "a")
+    out, report = _run_cli(tmp_path, "a")
     assert "backend=regex records=5" in capsys.readouterr().out
 
     rows = [json.loads(line) for line in out.read_text(encoding="utf-8").splitlines()]
@@ -468,21 +453,11 @@ def test_cli_scan(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     assert "reserved_example_domain" in md
     assert "dana.reyes" not in md and "4539" not in md  # no raw PII in the report
 
-    with sample.open(encoding="utf-8", newline="") as fh:
-        table = list(csv.DictReader(fh))
-    assert list(table[0]) == list(pii.SAMPLE_COLUMNS)
-    assert len(table) == 3
-    assert all(r["reviewer_pii_found"] == "" and r["reviewer_notes"] == "" for r in table)
-    dropped = [r for r in table if r["id"] == "r3"]
-    assert all(r["scrubbed"] == "" for r in dropped)
 
-
-def test_cli_sample_is_deterministic(tmp_path: Path) -> None:
-    _, _, first = _run_cli(tmp_path, "a")
-    _, _, second = _run_cli(tmp_path, "b")
+def test_cli_scan_is_deterministic(tmp_path: Path) -> None:
+    first, _ = _run_cli(tmp_path, "a")
+    second, _ = _run_cli(tmp_path, "b")
     assert first.read_bytes() == second.read_bytes()
-    _, _, full = _run_cli(tmp_path, "c", sample_size=500)
-    assert len(full.read_text(encoding="utf-8").splitlines()) == 1 + len(RECORDS)
 
 
 def test_cli_policy_file_and_missing_field(tmp_path: Path) -> None:

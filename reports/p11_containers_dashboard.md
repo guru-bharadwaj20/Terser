@@ -239,7 +239,9 @@ the GPU.
 serves from `terser-cpu`. The quality path runs end to end on the GPU: API, then vLLM on
 `terser-gpu` with the Staging LoRA, then the gate, then the response. Prometheus scrapes both.
 
-**C11.3: still a fail, now confirmed in the container.** At the deployed 0.4 s budget every
+**C11.3: a fail against the original target, now confirmed in the container** (it passes the
+revised target of [ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md); see
+[p11_quality_path.md](p11_quality_path.md#verdict-under-adr-0012-2026-10-28)). At the deployed 0.4 s budget every
 quality request times out and is answered by the fast path, as in
 [p11_quality_path.md](p11_quality_path.md). An unloaded quality request takes 0.95 to 1.3 s
 end to end. The committed `docker/serving.compose.yaml` keeps `quality_timeout_s: 0.4`; the

@@ -14,7 +14,7 @@ Terser is several learned components (quality gate, span tagger, TextCNN span sc
 rewriter, RL policy) that depend on one labelled dataset produced by an LLM judge. Its headline claim,
 "fewer tokens at the same quality", is only credible if every model can be traced to the data, code,
 config and checkpoint results that produced it, and if no model reaches users without passing the
-quality checks defined in CONTRIBUTING.md.
+quality checks defined by the phase checkpoints.
 
 Constraints that shape the lifecycle:
 
@@ -38,8 +38,8 @@ Terser adopts an eight-stage lifecycle with an explicit gate between stages:
 
 **data → label → train → evaluate → register → deploy → monitor → retrain**, with retrain feeding back into data.
 
-A model or dataset moves to the next stage only when that stage's gate passes. Gates are the checkpoints
-in CONTRIBUTING.md; 🚧 gates allow no conditional pass. The tools per stage are fixed below; replacing a
+A model or dataset moves to the next stage only when that stage's gate passes. Gates are the phase checkpoints
+([status.md](../checkpoints/status.md)); 🚧 gates allow no conditional pass. The tools per stage are fixed below; replacing a
 tool requires a new ADR.
 
 ```mermaid
@@ -71,7 +71,7 @@ flowchart LR
 | 1 | **Data** | Collect permissively licensed instruction sets; licence audit; PII scrub before `data/interim/`; casualise in 5 styles; MinHash dedupe; source-grouped 70/15/15 splits; test split frozen and hash-locked; later cluster stratification; schema validation | 1.4.1, 2.1.1–2.1.7, 6.9, 11.1.2, 11.1.4 | DVC, pandera, Hydra, `terser.llm` provider `local` (casualisation on vLLM) | C2.1 (≥ 6,000 prompts, ≥ 800 per category, < 1% near-duplicates), C2.2 (0 shared source prompts), data card complete |
 | 2 | **Label** | Generate 6 candidates per prompt; token counts on every target tokenizer; target outputs (Phi-3.5-mini-instruct per ADR-0011, Qwen2.5-7B-Instruct on vLLM); task metrics + position-swapped pairwise judge (Qwen2.5-32B-Instruct-AWQ on vLLM); judge self-preference control with a second Llama-3.1-8B judge; `preserved`/`degraded` label; oracle rewrite and headroom | 1.3.6, 2.2.1–2.2.5, 2.3.1–2.3.4, 2.4.1–2.4.3; needs 🚧 C7.1 | `terser.llm` provider `local` against vLLM with token-cap budget guard and disk cache (0.3.6); CPU stand-in via Ollama / llama.cpp for the pre-GPU smoke run only (2.2.4); DVC, tiktoken / HF tokenizers (Anthropic token counting optional, never required) | 🚧 C2.7 (oracle savings go/no-go), C2.6, C2.8, C2.9 |
 | 3 | **Train** | Classical and small neural models on CPU (Phases 3–6); TextCNN, SFT rewriter ladder, GRPO and neural HPO as `gpu_queue/` jobs after a CPU smoke test | 3.3–3.6, 4.1–4.4, 5.1–5.3, 6.1–6.9, 8.2, 8.3, 9.2, 9.3, 10.1–10.7 | Hydra (`experiment=… hardware=…`), MLflow tracking, `terser.hardware.get_device`, `terser.gpu_queue`, PyTorch / PEFT / TRL, Optuna | Run logged with tags `phase`, `row`, `task`, `hardware`, `data_hash`, `git_sha`; CPU smoke test green; for GPU jobs 🚧 C7.1 passed and `est_vram_gb` ≤ 22 GB measured |
-| 4 | **Evaluate** | `StratifiedGroupKFold` grouped by source prompt; per-category metrics; sensitivity-constrained threshold; McNemar / bootstrap vs champion and the original-prompt baseline; savings, preservation, net savings, latency; test split touched once in Phase 12 | 3.2.1–3.2.8, phase checkpoints C3–C10, 10.8, 12.1–12.12 | `terser.eval`, MLflow, `terser.eval.final` (only reader of test; implemented as `terser.phase12.unlock`) | The phase checkpoint (e.g. C5.1, 🚧 C8.3, C9.5, C10.3); per-category rows present; no test access (10.8); report in `reports/` with MLflow links |
+| 4 | **Evaluate** | `StratifiedGroupKFold` grouped by source prompt; per-category metrics; sensitivity-constrained threshold; McNemar / bootstrap vs champion and the original-prompt baseline; savings, preservation, net savings, latency; test split touched once in Phase 12 | 3.2.1–3.2.8, phase checkpoints C3–C10, 10.8, 12.1–12.11 | `terser.eval`, MLflow, `terser.eval.final` (only reader of test; implemented as `terser.phase12.unlock`) | The phase checkpoint (e.g. C5.1, 🚧 C8.3, C9.5, C10.3); per-category rows present; no test access (10.8); report in `reports/` with MLflow links |
 | 5 | **Register** | Register gate, tagger and rewriter versions with lineage (git SHA, DVC hash, resolved config, checkpoints passed); model card written | 0.2.4, 11.2.1–11.2.3, 13.4 | MLflow Model Registry (`None → Staging → Production → Archived`) | Tracking audit finds 0 unlinked numbers (11.2.1); lineage complete (11.2.3); model card complete. Promotion to Staging only via the CT flow or a checkpoint PASS |
 | 6 | **Deploy** | FastAPI `POST /rewrite`; fast path (span tagger + gate on ONNX Runtime, CPU); quality path (rewriter on vLLM + gate + fallback, GPU); cache; timeout fallback; per-request net-savings accounting; `terser-cpu` / `terser-gpu` containers; CD from tag `v*` through staging with manual approval | 11.3.1–11.3.7, 11.4.1, 11.4.2 | FastAPI, ONNX Runtime, vLLM, Docker / docker-compose, GitHub Actions | C11.2 (fast p95 ≤ 150 ms at 20 RPS), C11.3 (quality p95 ≤ 400 ms at 5 RPS), C11.4 (≥ 20 RPS for 30 min, no OOM), C11.5 (fallback returns original 100%), manual approval |
 | 7 | **Monitor** | RPS, latency per path, fallback rate, gate rejections, tokens saved, net savings, GPU util/VRAM; daily input drift; tokenizer fixture re-count; 1% shadow judging of consented rewrites; structured logs with hashes by default | 11.5.1–11.5.6 | Prometheus, Grafana, Evidently, local judge on vLLM | Alerts wired and tested: C11.6 (synthetic shift or tokenizer swap alerts within one cycle); rolling preservation alert at < 92% |
@@ -92,7 +92,7 @@ flowchart LR
 
 | Alternative | Pros | Cons | Why not chosen |
 | :--- | :--- | :--- | :--- |
-| Notebook-driven workflow, results copied into reports | Fast to start | No lineage, not reproducible, violates "every number links to an MLflow run" | Fails C0.3, C2.9, 11.2.1, S9 |
+| Notebook-driven workflow, results copied into reports | Fast to start | No lineage, not reproducible, violates "every number links to an MLflow run" | Fails C0.3, C2.9, 11.2.1 |
 | Train directly on judge labels without human validation | Saves weeks 5–6 and annotation effort | All downstream numbers inherit an unmeasured judge error | Judge validity is the critical-path assumption |
 | Continuous deployment with automatic promotion to Production | Less manual work | A regression in one category could reach users; silent over-compression is not caught by aggregate metrics | Manual approval plus promotion guard (11.4.2, 11.4.4) is required |
 | Hosted managed platform (e.g. cloud ML pipelines and registry) | Less self-hosted infrastructure | Cost, account dependency, less transparency for a syllabus deliverable, no access to the local RTX 4500 Ada scheduling | Local DVC + MLflow + Prefect run on the laptop and the GPU machine alike |
@@ -119,11 +119,11 @@ flowchart LR
 
 **Change.** The project has no Anthropic or OpenAI API keys. All LLM work (casualisation, candidate
 generation, target outputs, judging, shadow judging, RL audits) uses local open-source models behind
-OpenAI-compatible servers, called through `terser.llm` provider `local` (CONTRIBUTING.md § Compute
-Allocation). The stage structure, gates and checkpoint targets of this ADR are unchanged; the body above
+OpenAI-compatible servers, called through `terser.llm` provider `local` (see
+[hardware.md](../hardware.md)). The stage structure, gates and checkpoint targets of this ADR are unchanged; the body above
 has been updated where it referred to hosted APIs.
 
-**Models (planning choices from CONTRIBUTING.md; VRAM figures are estimates verified in Phase 7).**
+**Models (planning choices; VRAM figures are estimates verified in Phase 7).**
 
 | Role | Model | Serving |
 | :--- | :--- | :--- |

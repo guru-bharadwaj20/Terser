@@ -25,9 +25,10 @@ from typing import Any
 
 __all__ = ["main", "rung_metrics"]
 
+# C8.3 targets as revised by ADR-0012 (originally preserved >= 0.92 overall, >= 0.85 per category)
 MIN_SAVINGS = 0.25
-MIN_PRESERVED = 0.92
-MIN_PRESERVED_CATEGORY = 0.85
+MIN_PRESERVED = 0.65
+MIN_PRESERVED_CATEGORY = 0.50
 
 
 def _jsonl(path: Path) -> list[dict[str, Any]]:

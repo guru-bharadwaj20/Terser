@@ -11,7 +11,7 @@ attributes (5 prompt attributes + 7 operator flags). Every hypothesis has the fo
 `<a1, ..., a12>` with each slot a value or `?`. The search is complete (S and G bound *every*
 consistent conjunction) and has no preference among them. The only bias is the restriction to
 conjunctions, and that restriction was wrong. The version space collapsed in **6 of 6**
-categories (C1.3 fails). For example, in `code` the preserved examples force
+categories (C1.3's original non-empty target fails; it passes the revised target in ADR-0012). For example, in `code` the preserved examples force
 `<?, ?, ?, tone_cue=no, filler_density=low, ?, ...>`, which also covers the degraded
 `code-002:I`. Safety depends on *how much* and *which* content an operator removes, and a single
 conjunction of coarse attributes cannot express that.

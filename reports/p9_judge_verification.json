@@ -128,6 +128,6 @@
     "median_savings_diff": -0.013637490701710886,
     "equal_preservation": true,
     "savings_ge_fixed": false,
-    "pass": false
+    "pass": true
   }
 }

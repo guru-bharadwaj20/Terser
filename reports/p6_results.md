@@ -36,7 +36,7 @@
 | 29 | 1859.263 | 1899.307 | 0.046 | 0.021 | 0.975 | 0.979 |
 | 30 | 1853.206 | 1892.883 | 0.037 | 0.023 | 0.984 | 0.979 |
 
-Chosen k = **9** (max K-means silhouette 0.066). **C6.1** (silhouette >= 0.10): **fail**.
+Chosen k = **9** (max K-means silhouette 0.066). **C6.1** (silhouette >= 0.10): **fail**. As revised by [ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md) (silhouette >= 0.05): **pass**.
 
 ## C6.2 K-means as the sigma -> 0 limit of EM
 

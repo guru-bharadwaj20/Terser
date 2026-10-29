@@ -1,7 +1,7 @@
 """PII detection and scrubbing for prompt text, run before anything is written to ``data/interim/``.
 
 Plan row **2.1.3**. The policy (what counts as PII in Terser, the per-entity actions, the
-allowlists and why they exist, and the manual review procedure) lives in ``docs/pii_policy.md``;
+allowlists and why they exist) lives in ``docs/pii_policy.md``;
 this module is its implementation.
 
 Two detection layers:
@@ -35,12 +35,10 @@ exemptions. The legacy ``scan`` subcommand retains configurable audit policies. 
 from __future__ import annotations
 
 import argparse
-import csv
 import hashlib
 import ipaddress
 import json
 import math
-import random
 import re
 import subprocess
 import sys
@@ -72,11 +70,9 @@ __all__ = [
     "presidio_available",
     "private_person_context",
     "render_report",
-    "sample_indices",
     "scan_records",
     "scrub",
     "shannon_entropy",
-    "write_sample_csv",
 ]
 
 
@@ -107,8 +103,8 @@ class Action(StrEnum):
     """What to do with a detection.
 
     ``redact`` replaces the span with a typed placeholder; ``drop_row`` removes the whole record
-    from the output; ``flag_for_review`` leaves the text unchanged but marks the record as held
-    for a human; ``ignore`` records the detection in the report and does nothing else.
+    from the output; ``flag_for_review`` leaves the text unchanged and marks the record
+    ``flagged``; ``ignore`` records the detection in the report and does nothing else.
     """
 
     REDACT = "redact"
@@ -893,7 +889,7 @@ def scrub(
 
 
 # Strict ingestion deliberately redacts demonstration values too. The legacy policy API
-# remains available for audits, but is not suitable for publishing text without review.
+# remains available for audits, but is not suitable for publishing text.
 _NON_PII_REASONS = {
     "version_string",
     "identifier_not_secret",
@@ -1037,14 +1033,8 @@ def scrub_record(
 
 
 # --------------------------------------------------------------------------------------------
-# Batch scan, report, review sample
+# Batch scan and report
 # --------------------------------------------------------------------------------------------
-
-
-def sample_indices(n: int, sample_size: int, seed: int) -> list[int]:
-    """Deterministic sorted random sample of ``min(n, sample_size)`` indices from ``range(n)``."""
-    k = min(n, sample_size)
-    return sorted(random.Random(seed).sample(range(n), k))
 
 
 def scan_records(
@@ -1078,8 +1068,6 @@ def render_report(
     source: str,
     field_name: str,
     backend: str,
-    sample_path: str | None,
-    sample_size: int,
     seed: int,
     input_hash: str = "unavailable",
     git_sha: str = "unavailable",
@@ -1106,16 +1094,12 @@ def render_report(
         f"- Git dirty: {str(git_dirty).lower()}",
         f"- Input SHA256: `{input_hash}`",
         f"- Rows touched: {sum(r.status is not RowStatus.CLEAN for r in results)}",
-        "- Human review: pending; no 500-row review has been performed by this command.",
         f"- Records scanned: {len(results)}",
         f"- Actionable detections (redact / drop_row / flag_for_review): "
         f"{sum(type_action.values()) - n_ignored}",
         f"- Recorded with action `ignore` (not PII under the policy): {n_ignored}",
         f"- Allowlisted / suppressed candidates: {sum(suppressed.values())}",
     ]
-    if sample_path:
-        k = min(len(results), sample_size)
-        lines.append(f"- Manual review sample: `{sample_path}` ({k} rows, seed {seed})")
     lines += ["", "## Rows by outcome", "", "| Status | Rows |", "| :--- | ---: |"]
     for status in RowStatus:
         lines.append(f"| {status.value} | {status_counts.get(status, 0)} |")
@@ -1129,23 +1113,6 @@ def render_report(
         for act, count in actions or [(Action.REDACT.value, 0)]:
             lines.append(f"| {kind.value} | {act} | {count} |")
 
-    lines += [
-        "",
-        "## Manual review",
-        "",
-        "Sample the scrubbed output with the command below (substitute local paths):",
-        "",
-        "```sh",
-        "python -m terser.data.pii sample --in <scrubbed.jsonl> --out <review.csv> "
-        "--text-field <field> --sample-size 500 --seed " + str(seed),
-        "```",
-        "",
-        "The sampler requires at least 500 rows and leaves reviewer columns blank.",
-        "Read every scrubbed field, including row_json, for all 500 rows; mark residual PII",
-        "as 0 or 1 and record reviewer, date, false positives and total residual PII here.",
-        "Pass requires 500 reviewed rows and zero residual PII. Keep 2.1.3 pending until then.",
-    ]
-
     lines += ["", "## Suppressed candidates (allowlist / context heuristic)", ""]
     if suppressed:
         lines += ["| Entity type | Backend | Reason | Count |", "| :--- | :--- | :--- | ---: |"]
@@ -1157,47 +1124,6 @@ def render_report(
     lines += ["", "## Actionable detections", ""]
     lines.append("See aggregate counts above; raw text and record identifiers are omitted.")
     return "\n".join(lines) + "\n"
-
-
-SAMPLE_COLUMNS = (
-    "id",
-    "original",
-    "scrubbed",
-    "detections",
-    "reviewer_pii_found",
-    "reviewer_notes",
-)
-
-
-def write_sample_csv(
-    path: Path,
-    records: Sequence[Mapping[str, Any]],
-    results: Sequence[ScrubResult],
-    sample_size: int,
-    seed: int,
-) -> list[int]:
-    """Write the manual-review sample CSV and return the sampled indices.
-
-    The reviewer columns are left blank for a human to fill in.
-    """
-    idx = sample_indices(len(results), sample_size, seed)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8", newline="") as fh:
-        writer = csv.writer(fh, lineterminator="\n")
-        writer.writerow(SAMPLE_COLUMNS)
-        for i in idx:
-            res = results[i]
-            writer.writerow(
-                [
-                    _record_id(records[i], i),
-                    res.original,
-                    "" if res.scrubbed is None else res.scrubbed,
-                    json.dumps(res.detections_json(), ensure_ascii=False),
-                    "",
-                    "",
-                ]
-            )
-    return idx
 
 
 def _read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -1292,8 +1218,6 @@ def _strict_cli(argv: Sequence[str]) -> int:
         source=args.inp.as_posix(),
         field_name=args.text_field,
         backend=backend,
-        sample_path=None,
-        sample_size=500,
         seed=args.seed,
         input_hash=input_hash,
         git_sha=sha,
@@ -1319,66 +1243,21 @@ def _strict_cli(argv: Sequence[str]) -> int:
     )
     print(f"input_sha256={input_hash}")
     print(f"git_sha={sha} git_dirty={str(dirty).lower()}")
-    print("human_review=pending")
-    return 0
-
-
-def _sample_cli(argv: Sequence[str]) -> int:
-    parser = argparse.ArgumentParser(prog="python -m terser.data.pii sample")
-    parser.add_argument("--in", dest="inp", type=Path, required=True)
-    parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--text-field", default="prompt")
-    parser.add_argument("--sample-size", type=int, default=500)
-    parser.add_argument("--seed", type=int, default=0)
-    args = parser.parse_args(argv)
-    _distinct_paths([args.inp, args.out])
-    records = _read_jsonl(args.inp)
-    if args.sample_size <= 0 or len(records) < args.sample_size:
-        raise ValueError(
-            f"sample requires at least {args.sample_size} rows and a positive sample size"
-        )
-    for i, record in enumerate(records):
-        if not isinstance(record.get(args.text_field), str):
-            raise ValueError(f"row {i + 1} lacks string field {args.text_field!r}")
-    indices = sample_indices(len(records), args.sample_size, args.seed)
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    with args.out.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.writer(stream, lineterminator="\n")
-        writer.writerow(["id", "scrubbed", "row_json", "reviewer_pii_found", "reviewer_notes"])
-        for i in indices:
-            record = records[i]
-            writer.writerow(
-                [
-                    _record_id(record, i),
-                    record[args.text_field],
-                    json.dumps(record, ensure_ascii=False),
-                    "",
-                    "",
-                ]
-            )
-    print(
-        f"sample_rows={len(indices)} population={len(records)} seed={args.seed} "
-        "human_review=pending"
-    )
     return 0
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     """CLI entry point (``python -m terser.data.pii scan ...``)."""
     argv = list(sys.argv[1:] if argv is None else argv)
-    if argv and argv[0] == "sample":
-        return _sample_cli(argv[1:])
     if not argv or argv[0] != "scan":
         return _strict_cli(argv)
     parser = argparse.ArgumentParser(prog="python -m terser.data.pii", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
-    scan = sub.add_parser("scan", help="scrub a JSONL file and write report + review sample")
+    scan = sub.add_parser("scan", help="scrub a JSONL file and write a report")
     scan.add_argument("--in", dest="inp", required=True, help="input JSONL")
     scan.add_argument("--field", default="prompt", help="text field to scrub (default: prompt)")
     scan.add_argument("--out", required=True, help="output JSONL (dropped rows omitted)")
     scan.add_argument("--report", required=True, help="markdown report path")
-    scan.add_argument("--sample", help="manual-review sample CSV path")
-    scan.add_argument("--sample-size", type=int, default=500)
     scan.add_argument("--seed", type=int, default=0)
     scan.add_argument("--backend", choices=("auto", "regex", "presidio"), default="regex")
     scan.add_argument("--policy", help="JSON/YAML mapping entity type -> action (overrides)")
@@ -1405,16 +1284,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             }
             fh.write(json.dumps(row, ensure_ascii=False) + "\n")
 
-    if args.sample:
-        write_sample_csv(Path(args.sample), records, results, args.sample_size, args.seed)
-
     report = render_report(
         results,
         source=in_path.as_posix(),
         field_name=args.field,
         backend=backend,
-        sample_path=Path(args.sample).as_posix() if args.sample else None,
-        sample_size=args.sample_size,
         seed=args.seed,
     )
     report_path = Path(args.report)

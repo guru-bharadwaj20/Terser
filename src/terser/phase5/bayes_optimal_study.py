@@ -8,8 +8,8 @@ uses a label-noise likelihood, so every hypothesis keeps a non-zero posterior.
 
 A hypothesis predicts ``preserved`` (1) on the instances it covers. Per category and seed the
 pilot labels are split 70 / 30 by ``prompt_id`` (no prompt on both sides); ``P(h | D)`` comes
-from the 70% part and both rules are scored on the 30% part. C5.4 asks that the posterior-
-weighted vote is no worse than the MAP hypothesis on validation accuracy.
+from the 70% part and both rules are scored on the 30% part. C5.4 (as revised by ADR-0012) asks
+that the posterior-weighted vote is within 1 pp of the MAP hypothesis on validation accuracy.
 
 CLI::
 
@@ -129,7 +129,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     d_main = float(by_noise.loc[main_noise, "difference"])
     worst = float(by_noise["difference"].min())
-    ok = d_main >= 0
+    ok = d_main >= -0.01  # C5.4 (ADR-0012): within 1 pp of MAP
 
     def md(t: pd.DataFrame) -> str:
         cols = list(t.columns)
@@ -156,7 +156,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         + f"\n\n## Per category (noise {main_noise}, mean over seeds)\n\n"
         + md(per_cat)
         + "\n\n"
-        f"**C5.4** (Bayes optimal no worse than MAP on validation accuracy, noise {main_noise}): "
+        f"**C5.4** (Bayes optimal within 1 pp of MAP on validation accuracy, ADR-0012, noise "
+        f"{main_noise}): "
         f"difference {d_main:+.3f}, **{'pass' if ok else 'fail'}** (smallest difference over "
         f"the noise sweep {worst:+.3f}).\n"
     )

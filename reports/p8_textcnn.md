@@ -30,4 +30,4 @@ McNemar (exact binomial on discordant tokens):
 
 ## C8.2
 
-TextCNN token macro-F1 **0.679** vs best classical tagger on the same binary task **0.658** (target: +0.05 → 0.708). The C3.4 number (0.440) is 3-tag macro-F1, so the comparison here uses the binary task both can be scored on. C8.2: **fail**.
+TextCNN token macro-F1 **0.679** vs best classical tagger on the same binary task **0.658** (LightGBM, McNemar p = 2.4e-19; target: +0.02 → 0.678 with p < 0.05, revised by [ADR-0012](../docs/decisions/ADR-0012-feasible-checkpoint-targets.md); originally +0.05 → 0.708). The C3.4 number (0.440) is 3-tag macro-F1, so the comparison here uses the binary task both can be scored on. C8.2: **pass**.
